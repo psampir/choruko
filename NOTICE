@@ -1,0 +1,31 @@
+Choruko - Household Management Application
+Copyright (C) 2025 Choruko Contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+================================================================================
+
+IMPORTANT NOTICE FOR NETWORK USE:
+
+This software is licensed under the GNU Affero General Public License v3.0 
+(AGPL-3.0). If you modify this software and make it available to users over 
+a network (including as a web service or SaaS application), you MUST:
+
+1. Provide prominent notice that the service uses modified AGPL-licensed software
+2. Make the complete source code of your modifications available to your users
+3. License your modifications under AGPL-3.0 or a compatible license
+4. Include installation instructions for your modified version
+
+For questions about licensing or commercial use, please contact the project 
+maintainers.
