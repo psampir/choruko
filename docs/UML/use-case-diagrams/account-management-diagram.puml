@@ -1,0 +1,36 @@
+@startuml account-management
+
+title Choruko System - Account Management
+skinparam usecaseBorderColor #000000
+skinparam usecaseBackgroundColor #EEEEEE
+skinparam packageStyle rectangle
+skinparam linetype polyline
+left to right direction
+
+:Unlogged User: as u_user
+:Logged User: as l_user
+:System: as system
+
+rectangle "Choruko System" {
+  usecase "Login" as UC1
+  usecase "Register Account" as UC2
+  usecase "Delete Account" as UC3
+  usecase "Manage account" as UC5
+  usecase "Reset password" as UC6
+  usecase "Send password reset Email" as UC7
+  usecase "Remove account from the database" as UC8
+}
+
+u_user --> UC1
+u_user --> UC2
+u_user --> UC6
+l_user --> UC5
+UC5 <.. UC3 : <<extend>>
+UC5 <.. UC6 : <<extend>>
+UC6 ..> UC7 : <<include>>
+UC3 ..> UC8 : <<include>>
+system --> UC1
+system --> UC7
+system --> UC8
+
+@enduml

@@ -1,0 +1,41 @@
+@startuml task-management
+
+title Choruko System - Task Management
+skinparam usecaseBorderColor #000000
+skinparam usecaseBackgroundColor #EEEEEE
+skinparam packageStyle rectangle
+skinparam linetype ortho
+left to right direction
+
+:Logged User: as l_user
+:System: as system
+
+rectangle "Choruko System" {
+  package "Task Management" {
+    usecase "Create Task Type" as UC14
+    usecase "Edit Task Type" as UC15
+    usecase "Delete Task Type" as UC16
+    usecase "Create Task" as UC17
+    usecase "Delete Task" as UC18
+    usecase "Assign Task" as UC19
+    usecase "Edit Task" as UC20
+    usecase "Mark Task as Completed" as UC21
+    usecase "Unmark Task as Completed" as UC22
+  }
+  
+  package "System Actions" {
+    usecase "Add Points for Task" as UC34
+    usecase "Send Task Notification" as UC35
+  }
+}
+
+l_user --> UC14
+l_user --> UC17
+l_user --> UC21
+system --> UC34
+system --> UC35
+
+UC21 ..> UC34 : <<include>>
+UC21 ..> UC35 : <<include>>
+
+@enduml
