@@ -1,0 +1,23 @@
+@startuml system-actions
+
+title Choruko System - System Actions
+
+left to right direction
+
+:System: as system
+
+rectangle "Choruko System" {
+  package "System Actions" {
+    usecase "Send Password Reset Email" as UC33
+    usecase "Add Points for Task" as UC34
+    usecase "Send Task Notification" as UC35
+    usecase "Send Settlement Notification" as UC36
+  }
+}
+
+system --> UC33
+system --> UC34
+system --> UC35
+system --> UC36
+
+@enduml
