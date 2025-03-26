@@ -30,12 +30,21 @@ rectangle "Choruko System" {
 }
 
 l_user --> UC14
+l_user --> UC15
+l_user --> UC16
 l_user --> UC17
+l_user --> UC18
+l_user --> UC19
+l_user --> UC20
 l_user --> UC21
-system --> UC34
-system --> UC35
+l_user --> UC22
 
-UC21 ..> UC34 : <<include>>
-UC21 ..> UC35 : <<include>>
+UC34 <-- system
+UC35 <-- system
+
+UC21 ...> UC34 : <<include>>
+UC21 ...> UC35 : <<include>>
+UC19 ...> UC35 : <<include>>
+UC22 ...> UC35 : <<include>>
 
 @enduml

@@ -1,7 +1,7 @@
 @startuml system-actions
 
 title Choruko System - System Actions
-
+skinparam linetype polyline
 left to right direction
 
 :System: as system
