@@ -29,8 +29,7 @@ UC5 <.. UC3 : <<extend>>
 UC5 <.. UC6 : <<extend>>
 UC6 ..> UC7 : <<include>>
 UC3 ..> UC8 : <<include>>
-system --> UC1
-system --> UC7
-system --> UC8
+UC7 <-- system 
+UC8 <-- system
 
 @enduml
