@@ -14,10 +14,10 @@ rectangle "Choruko System" {
   usecase "View Settlements Panel" as UC23
 
   usecase "View Settlement Details" as UC24
-  usecase "Edit Transaction" as UC26
-  usecase "Delete Transaction" as UC27
+  usecase "Edit Settlement" as UC26
+  usecase "Delete Settlement" as UC27
 
-  usecase "Add Transaction" as UC25
+  usecase "Add Settlement" as UC25
   
   usecase "Mark Settlement as Completed" as UC28
   usecase "Unmark Settlement as Completed" as UC29
@@ -35,6 +35,7 @@ UC23 <.. UC25 : <<extend>>
 UC28 ..> UC36 : <<include>>
 UC24 <.. UC26 : <<extend>>
 UC24 <.. UC27 : <<extend>>
+UC26 ..> UC36 : <<include>>
 UC25 ..> UC36 : <<include>>
 
 @enduml
