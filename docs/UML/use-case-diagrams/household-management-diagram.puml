@@ -14,7 +14,7 @@ rectangle "Choruko System" {
   usecase "Create Household" as UC4
   usecase "Delete Household" as UC5
   usecase "Leave Household" as UC12
-  usecase "Transfer Admin Rights" as UC6
+  usecase "Transfer Household Admin Rights" as UC6
   usecase "Remove Participant" as UC8
 
   usecase "View Invitations Panel" as UC9
@@ -30,6 +30,7 @@ UC3 <.. UC5 : <<extend>>
 UC3 <.. UC12 : <<extend>>
 UC3 <.. UC6 : <<extend>>
 UC3 <.. UC8 : <<extend>>
+UC12 <.. UC6 : <<extend>>
 
 UC3 <.. UC9 : <<extend>>
 UC9 <.. UC7 : <<extend>>
