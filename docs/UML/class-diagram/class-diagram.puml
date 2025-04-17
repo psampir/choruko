@@ -1,0 +1,180 @@
+@startuml Choruko_Class_Diagram
+
+title Choruko System - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' --- Enums ---
+enum InvitationStatus {
+  Pending
+  Accpted
+  Declined
+}
+
+enum TaskStatus {
+  PENDING
+  ASSIGNED
+  COMPLETED
+}
+
+enum SettlementStatus {
+  PENDING
+  COMPLETED
+}
+
+enum UserRole {
+    None
+    Participant
+    HouseholdAdmin
+}
+
+' --- Core Classes ---
+
+class User {
+  -userUUID: string
+  -email: string
+  -firstName: string
+  -lastName: string
+  -password: string
+  -salt: string
+  -hashedPassword: string
+  -profilePicturePath: string
+  -role: UserRole
+  -householdUUID: string
+  +register(firstName, lastName, email, password): boolean
+  +login(email, password) : bool
+  +deleteAccount(): void
+  +resetPasswordRequest(email): void
+  +changePassword(oldPassword, newPassword): boolean
+  +changeMail(newMail) : boolean
+  +setProfilePicture(url): void
+  +editProfile(firstName, lastName): void
+  }
+
+class Points {
+    -userUUID : string
+    -householdUUID : string
+    -points: int
+}
+
+class Household {
+  -householdUUID: string
+  -name: string
+  -adminUserUUID: string
+  +createHousehold(User.email, User.role) : boolean
+  +deleteHousehold(adminUserUUID) : void
+  +leaveHousehold(User.email, User.role) : void
+  +removeParticipant(adminUserUUID, email): void
+  +transferAdminRights(adminUserUUID, email): void
+  +viewHouseholdInvitations(User.role) : List<Invitation>
+  +sendHouseholdInvitation(role, newUserRole, email) : boolean
+  +acceptHouseholdInvitation(role, householdUUID) : void
+  +declineHouseholdInvitation(role) : void
+}
+' --- To do 
+class Invitation {
+  -invitationUUID: string
+  -senderUUID: UUID         // User who sent the invitation
+  -receiverEmail: string    // Email of the person being invited
+  -householdUUID: UUID      // Household the invite is for
+  -role: UserRole           // Role to assign if accepted
+  -status: InvitationStatus // e.g., PENDING, ACCEPTED, DECLINED
+  -sentAt: datetime
+}
+
+class Notification {
+  -notificationId: string
+  -message: string
+  -timestamp: DateTime
+  -isRead: boolean
+  +markAsRead(): void
+  +delete(): void
+  +getRecipient(): User
+}
+
+class Activity {
+  -activityId: string
+  -name: string
+  -description: string
+  -defaultPoints: int
+  +defineActivity(name, description, points): Activity
+  +editActivity(newName, newDescription, newPoints): void
+  +deleteActivity(): void
+}
+
+class Task {
+  -taskId: string
+  -dueDate: Date
+  -status: TaskStatus ' Replaces isCompleted
+  -pointsAwarded: int
+  +createTask(activity, household, dueDate): Task
+  +editTask(newActivity, newDueDate, newAssignee): void
+  +deleteTask(): void
+  +assignTask(user: User): void
+  +markCompleted(): void
+  +unmarkCompleted(): void ' Or toggleStatus()
+  +getAssignee(): User
+  +getActivity(): Activity
+  +getHousehold(): Household
+}
+
+class Settlement {
+   -settlementId: string
+   -description: string
+   -amount: float
+   -dueDate: Date
+   -status: SettlementStatus ' Replaces isCompleted
+   +addSettlement(description, amount, payer, participants, household): Settlement
+   +editSettlement(newDescription, newAmount, newParticipants): void
+   +deleteSettlement(): void
+   +markCompleted(): void
+   +unmarkCompleted(): void ' Or toggleStatus()
+   +getPayer(): User
+   +getParticipantsInvolved(): List<User>
+   +getHousehold(): Household
+}
+
+' --- Relationships ---
+
+
+' User <-> Household
+' Household "1" o-- "*" User : participants
+' User "*" --o "1..*" Household : member of >
+' Household "1" *--> "1" User : admin
+
+' User <-> Invitation
+' User "1" -- "*" Invitation : sent >
+' User "1" -- "*" Invitation : received <
+' Invitation "1" --> "1" Household : concerns >
+
+' User <-> Notification
+' User "1" *-- "*" Notification : receives >
+
+' User <-> Task
+' User "0..1" <-- "*" Task : assigned to
+' Note: A user might create tasks, but the direct link is usually assignment.
+
+' User <-> Settlement
+' User "1" -- "*" Settlement : paid by >
+' User "*" -- "*" Settlement : involved in
+
+' Household <-> Activity
+' Household "1" o-- "*" Activity : defines >
+
+' Household <-> Task
+' Household "1" *-- "*" Task : contains >
+
+' Household <-> Settlement
+' Household "1" *-- "*" Settlement : contains >
+
+' Task <-> Activity
+' Task "*" --> "1" Activity : instance of >
+
+' --- System Interaction (Conceptual - Often handled by Services not shown explicitly here) ---
+' System actions like sending emails, notifications, handling points
+' are usually triggered by method calls on the core classes or dedicated service classes.
+' For instance, marking a task complete might trigger a PointService and NotificationService.
+
+
+@enduml
