@@ -25,7 +25,7 @@ rectangle "Choruko System" {
   usecase "Mark Task as Completed" as UC21
   usecase "Unmark Task as Completed" as UC22
 
-  usecase "Add Points for Task" as UC34
+  usecase "Handle Points for Task" as UC34
   usecase "Send Task Notification" as UC35
 }
 
@@ -46,8 +46,10 @@ UC12 <.. UC21 : <<extend>>
 UC12 <.. UC22 : <<extend>>
 
 UC21 ..> UC34 : <<include>>
+UC22 ..> UC34 : <<include>>
 UC21 ..> UC35 : <<include>>
 UC19 ..> UC35 : <<include>>
+UC20 ..> UC35 : <<include>>
 UC22 ..> UC35 : <<include>>
 
 @enduml
