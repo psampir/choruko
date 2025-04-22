@@ -23,7 +23,6 @@ rectangle "Choruko System" {
   usecase "Send Household Invitation" as UC7  
   usecase "Accept Invitation" as UC10
   usecase "Decline Invitation" as UC11
-  
 }
 
 l_user --> UC3
