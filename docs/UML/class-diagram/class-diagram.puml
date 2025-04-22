@@ -143,7 +143,7 @@ User "1" *-- "0..*" Notification : receives
 User "1" -- "0..*" Invitation : receives
 User "1" -- "0..*" Points : earns
 User "1" -- "0..*" Task : assigned >
-User "0..1" -- "1" Household : member of
+User "0..*" -- "1" Household : member of
 Household "1" *-- "0..*" Invitation : contains
 Household "1" *-- "0..*" Activity : contains
 Household "1" *-- "0..*" Task : contains
@@ -154,7 +154,8 @@ Invitation "1" -- "1" User : sent to
 Task "1" -- "0..*" User : assigned to
 Task "1" -- "1" Activity : belongs to
 Settlement "1" -- "1" User : created by
-Activity "1" -- "0..*" Task : generates
+Settlement "1" -- "0..*" User : assigned to
+Activity "1" -- "0..*" Task : assigned to
 Points "1" -- "1" Household : for
 Notification "1" -- "1" Invitation : about
 Notification "1" -- "1" Task : about
