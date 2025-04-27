@@ -8,7 +8,7 @@ skinparam linetype ortho
 ' --- Enums ---
 enum InvitationStatus {
   Pending
-  Accpted
+  Accepted
   Declined
 }
 
@@ -24,9 +24,9 @@ enum SettlementStatus {
 }
 
 enum UserRole {
-    None
-    Participant
-    HouseholdAdmin
+  None
+  Participant
+  HouseholdAdmin
 }
 
 ' --- Core Classes ---
@@ -97,7 +97,6 @@ class Settlement {
   -creatorUUID: string
   -description: string
   -amount: float
-  -dueDate: DateTime
   -status: SettlementStatus
   +addSettlement(description, amount, List<User>, househoUUID, creatorUUID): Settlement
   +editSettlement(newDescription, newAmount, newParticipants): void
@@ -110,6 +109,7 @@ class Activity {
   -activityUUID: string
   -householdUUID: string
   -name: string
+  -pointsAwarded: int
   +defineActivity(name, User.Role): Activity
   +editActivity(newName): void
   +deleteActivity(): void
@@ -123,11 +123,11 @@ class Task {
   -timestamp: DateTime
   -dueDate: DateTime
   -status: TaskStatus
-  -pointsAwarded: int
   -userAmount: int
   -name: string
   -description: string
   -assignees: List<User>
+  -assignor: User
   +createTask(activity, householdUUID, dueDate, name, description): Task
   +editTask(newActivity, newDueDate, newAssignees, newName, newDescription): void
   +deleteTask(): void
