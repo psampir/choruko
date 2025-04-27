@@ -15,13 +15,13 @@ rectangle "Choruko System" {
   usecase "Login" as UC1
   usecase "Register Account" as UC2
   usecase "Delete Account" as UC3
-  usecase "Manage Account" as UC5
-  usecase "Reset Password" as UC6
-  usecase "Change Password" as UC10
-  usecase "Set Profile Picture" as UC4
-  usecase "Edit Profile Name" as UC9
-  usecase "Send Password Reset E-mail" as UC7
-  usecase "Remove Account from the Database" as UC8
+  usecase "Manage account" as UC5
+  usecase "Reset password" as UC6
+  usecase "Change password" as UC10
+  usecase "Set profile picture" as UC4
+  usecase "Edit name" as UC9
+  usecase "Send password reset Email" as UC7
+  usecase "Remove account from the database" as UC8
 }
 
 u_user --> UC1
@@ -33,7 +33,7 @@ UC5 <.. UC10 : <<extend>>
 UC5 <.. UC4 : <<extend>>
 UC5 <.. UC9 : <<extend>>
 UC6 ..> UC7 : <<include>>
-UC3 ....> UC8 : <<include>>
+UC3 ...> UC8 : <<include>>
 UC7 <-- system 
 UC8 <-- system
 
