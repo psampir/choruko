@@ -46,7 +46,7 @@ class User {
   +register(firstName, lastName, email, password): boolean
   +login(email, password) : bool
   +deleteAccount(): void
-  +resetPasswordRequest(email): void
+  +resetPassword(email): void
   +changePassword(oldPassword, newPassword): boolean
   +changeMail(newMail) : boolean
   +setProfilePicture(url): void
