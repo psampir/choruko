@@ -76,9 +76,9 @@ class Household {
 
 class Invitation {
   -invitationUUID: string
-  -senderUUID: UUID        
+  -senderUUID: string       
   -receiverEmail: string   
-  -householdUUID: UUID      
+  -householdUUID: string  
   -status: InvitationStatus 
   -sentAt: datetime
 }
