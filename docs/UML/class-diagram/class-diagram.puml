@@ -64,7 +64,7 @@ class Household {
   -name: string
   -adminUserUUID: string
   +createHousehold(User.email, User.role) : boolean
-  +deleteHousehold(adminUserUUID) : void
+  +deleteHousehold(adminUserUUID, householdUUID) : void
   +leaveHousehold(User.email, User.role) : void
   +removeParticipant(adminUserUUID, email): void
   +transferAdminRights(adminUserUUID, email): void
@@ -100,9 +100,9 @@ class Settlement {
   -status: SettlementStatus
   +addSettlement(description, amount, List<User>, househoUUID, creatorUUID): Settlement
   +editSettlement(newDescription, newAmount, newParticipants): void
-  +markCompleted(): void
-  +unmarkCompleted(): void
-  +deleteSettlement(): void
+  +markCompleted(settlementUUID): void
+  +unmarkCompleted(settlementUUID): void
+  +deleteSettlement(settlementUUID): void
 }
 
 class Activity {
@@ -112,7 +112,7 @@ class Activity {
   -pointsAwarded: int
   +defineActivity(name, User.Role): Activity
   +editActivity(newName): void
-  +deleteActivity(): void
+  +deleteActivity(activityUUID): void
 }
 
 class Task {
@@ -130,10 +130,10 @@ class Task {
   -assignor: User
   +createTask(activity, householdUUID, dueDate, name, description): Task
   +editTask(newActivity, newDueDate, newAssignees, newName, newDescription): void
-  +deleteTask(): void
+  +deleteTask(taskUUID): void
   +assignTask(user: User): void
-  +markAsCompleted(): void
-  +unmarkAsCompleted(): void
+  +markAsCompleted(taskUUID): void
+  +unmarkAsCompleted(taskUUID): void
 }
 
 
