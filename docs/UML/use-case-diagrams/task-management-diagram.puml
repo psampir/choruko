@@ -4,7 +4,6 @@ title Choruko System - Task Management
 skinparam usecaseBorderColor #000000
 skinparam usecaseBackgroundColor #EEEEEE
 skinparam packageStyle rectangle
-skinparam linetype polyline
 left to right direction
 
 :Logged User: as l_user
