@@ -54,9 +54,10 @@ class User {
   }
 
 class Points {
-    -userUUID : string
-    -householdUUID : string
-    -points: int
+  -userUUID : string
+  -householdUUID : string
+  -points: int
+  -date: DateTime
 }
 
 class Household {
