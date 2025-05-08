@@ -99,7 +99,7 @@ class Settlement {
   -description: string
   -amount: float
   -status: SettlementStatus
-  +addSettlement(description, amount, List<User>, househoUUID, creatorUUID): Settlement
+  +addSettlement(description, amount, List<User>, householdUUID, creatorUUID): Settlement
   +editSettlement(newDescription, newAmount, newParticipants): void
   +markCompleted(settlementUUID): void
   +unmarkCompleted(settlementUUID): void
