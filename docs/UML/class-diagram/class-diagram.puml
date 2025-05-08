@@ -42,7 +42,7 @@ class User {
   -profilePicturePath: string
   -role: UserRole
   -householdUUID: string
-  -asignedTasks: List<Task>
+  -assignedTasks: List<Task>
   +register(firstName, lastName, email, password): boolean
   +login(email, password) : bool
   +deleteAccount(): void
