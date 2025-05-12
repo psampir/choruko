@@ -98,6 +98,7 @@ class Settlement {
   -creatorUUID: string
   -description: string
   -amount: float
+  -timestamp: DateTime
   -status: SettlementStatus
   +addSettlement(description, amount, List<User>, householdUUID, creatorUUID): Settlement
   +editSettlement(newDescription, newAmount, newParticipants): void
