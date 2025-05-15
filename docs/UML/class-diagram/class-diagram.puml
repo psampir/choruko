@@ -151,7 +151,7 @@ Household "1" *-- "0..*" Activity : contains
 Household "1" *-- "0..*" Task : contains
 Household "1" *-- "0..*" Settlement : contains
 Household "1" -- "1" User : admin >
-Invitation "1" -- "1" User : sent by
+Invitation "1" --- "1" User : sent by
 Invitation "1" -- "1" User : sent to
 Task "1" -- "1..*" User : assigned to
 Task "1" -- "1" Activity : belongs to
