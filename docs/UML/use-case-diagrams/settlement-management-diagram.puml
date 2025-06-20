@@ -1,6 +1,6 @@
-@startuml settlements-finances
+@startuml settlements-management
 
-title Choruko System - Settlements & Finances
+title Choruko System - Settlement Management
 skinparam usecaseBorderColor #000000
 skinparam usecaseBackgroundColor #EEEEEE
 skinparam packageStyle rectangle
