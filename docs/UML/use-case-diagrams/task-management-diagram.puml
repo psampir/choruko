@@ -28,7 +28,7 @@ rectangle "Choruko System" {
   usecase "Handle Points for Task" as UC34
   usecase "Send Task Notification" as UC35
 
-  usecase "Manage Household" as UC3
+  usecase "View Household Management Panel" as UC3
 }
 
 l_user --> UC12
