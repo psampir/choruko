@@ -4,6 +4,7 @@ title Choruko System - Task Management
 skinparam usecaseBorderColor #000000
 skinparam usecaseBackgroundColor #EEEEEE
 skinparam packageStyle rectangle
+skinparam linetype polyline
 left to right direction
 
 :Logged User: as l_user
@@ -26,14 +27,17 @@ rectangle "Choruko System" {
 
   usecase "Handle Points for Task" as UC34
   usecase "Send Task Notification" as UC35
+
+  usecase "Manage Household" as UC3
 }
 
 l_user --> UC12
-l_user --> UC13
+l_user --> UC3
 
 UC34 <-- system
 UC35 <-- system
 
+UC3 <.. UC13 : <<extend>>
 UC13 <.. UC14 : <<extend>>
 UC13 <.. UC15 : <<extend>>
 UC13 <.. UC16 : <<extend>>
