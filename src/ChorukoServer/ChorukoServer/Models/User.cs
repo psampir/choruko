@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChorukoServer.Models;
 
@@ -13,11 +14,13 @@ public class User : IdentityUser
     [StringLength(256)]
     public string LastName { get; set; }
 
+    [Required]
+    [Column(TypeName = "uuid")]
     public string? HouseholdId { get; set; }
+    [ForeignKey("HouseholdId")]
     public virtual Household? Household { get; set; } 
 
     public string? ProfilePicturePath { get; set; }
 
     public virtual List<HouseholdTask>? assignedTasks { get; set; }
-
 }
