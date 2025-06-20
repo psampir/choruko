@@ -1,0 +1,41 @@
+@startuml settlements-finances
+
+title Choruko System - Settlements & Finances
+skinparam usecaseBorderColor #000000
+skinparam usecaseBackgroundColor #EEEEEE
+skinparam packageStyle rectangle
+skinparam linetype polyline
+top to bottom direction
+
+:Logged User: as l_user
+:System: as system
+
+rectangle "Choruko System" {
+  usecase "View Settlements Panel" as UC23
+
+  usecase "View Settlement Details" as UC24
+  usecase "Edit Settlement" as UC26
+  usecase "Delete Settlement" as UC27
+
+  usecase "Add Settlement" as UC25
+  
+  usecase "Mark Settlement as Completed" as UC28
+  usecase "Unmark Settlement as Completed" as UC29
+
+  usecase "Send Settlement Notification" as UC36
+}
+
+l_user --> UC23
+system --> UC36
+
+UC23 <.. UC24 : <<extend>>
+UC24 <.. UC28 : <<extend>>
+UC24 <.. UC29 : <<extend>>
+UC23 <.. UC25 : <<extend>>
+UC28 ..> UC36 : <<include>>
+UC24 <.. UC26 : <<extend>>
+UC24 <.. UC27 : <<extend>>
+UC26 ..> UC36 : <<include>>
+UC25 ..> UC36 : <<include>>
+
+@enduml
