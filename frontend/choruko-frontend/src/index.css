@@ -28,7 +28,7 @@ body {
   min-height: 100vh;
   background-color: #f1f8e8;
   color: #021207;
-  
+
 }
 
 h1 {
@@ -37,7 +37,7 @@ h1 {
 }
 
 
-.standart-input{
+.standard-input {
   width: 288px;
   height: 42px;
   border: 2px solid #55ad9b;
@@ -46,14 +46,14 @@ h1 {
   cursor: text;
 }
 
-.standart-input::placeholder {
+.standard-input::placeholder {
   padding-left: 10px;
   color: #55ad9b;
   font-size: 1rem;
   opacity: 1;
 }
 
-.standart-button{
+.standard-button {
   background-color: #55ad9b;
   color: #f1f8e8;
   text-align: center;
@@ -65,7 +65,7 @@ h1 {
   font-size: 1.25rem;
 }
 
-.standart-additional-button{
+.standard-additional-button {
   width: 135px;
   height: 30px;
   background-color: #95d2b3;
@@ -83,12 +83,12 @@ h1 {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
 }
-
-
