@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ChorukoServer.Models;
+namespace ChorukoAPI.Models;
 
 public class Invitation
 {

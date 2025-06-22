@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ChorukoServer.Models;
+namespace ChorukoAPI.Models;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum InvitationStatus : byte

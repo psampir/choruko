@@ -1,10 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ChorukoServer.Models;
+namespace ChorukoAPI.Models;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum SettlementStatus : byte
+public enum TaskStatus : byte
 {
     Pending = 0,
-    Completed = 1
+    Assigned = 1,
+    Completed = 2
 }
