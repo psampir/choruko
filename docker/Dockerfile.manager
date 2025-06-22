@@ -1,0 +1,8 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0
+WORKDIR /admin
+COPY ./backend ./backend
+COPY ./choruko-admin .
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+# copy migration bundle or scripts here
+ENTRYPOINT ["bash"]
