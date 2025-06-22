@@ -1,0 +1,94 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* overflow: hidden; */
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f1f8e8;
+  color: #021207;
+  
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+
+.standart-input{
+  width: 288px;
+  height: 42px;
+  border: 2px solid #55ad9b;
+  background-color: #d8efd3;
+  border-radius: 10px;
+  cursor: text;
+}
+
+.standart-input::placeholder {
+  padding-left: 10px;
+  color: #55ad9b;
+  font-size: 1rem;
+  opacity: 1;
+}
+
+.standart-button{
+  background-color: #55ad9b;
+  color: #f1f8e8;
+  text-align: center;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 50px;
+  width: 100px;
+  font-size: 1.25rem;
+}
+
+.standart-additional-button{
+  width: 135px;
+  height: 30px;
+  background-color: #95d2b3;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  color: #021207;
+  font-size: 0.875rem;
+}
+
+
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+
