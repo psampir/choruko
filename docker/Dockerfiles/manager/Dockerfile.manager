@@ -1,0 +1,56 @@
+## Build s
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# Determine target architecture
+ARG TARGETARCH
+RUN case ${TARGETARCH} in \
+  "amd64")  ARCH=x64 ;; \
+  "arm64")  ARCH=arm64 ;; \
+  "arm")    ARCH=arm ;; \
+  *)        ARCH=x64 ;; \
+  esac && \
+  echo "Building for architecture: linux-${ARCH}" && \
+  echo "linux-${ARCH}" > /tmp/target-arch
+
+COPY backend/ChorukoAPI/ChorukoAPI.csproj ./
+RUN dotnet restore
+
+COPY backend/ChorukoAPI/ ./
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+RUN TARGET_ARCH=$(cat /tmp/target-arch) && \
+  dotnet ef migrations bundle --self-contained -r ${TARGET_ARCH} -o /app/efbundle
+
+# Stage 2: .NET runtime with Python
+FROM mcr.microsoft.com/dotnet/runtime:9.0
+
+# Add architecture labels for better tracking
+ARG TARGETARCH
+LABEL architecture=${TARGETARCH}
+
+# Install Python and pip
+RUN apt-get update && \
+  apt-get install -y python3 python3-pip python3-venv && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/* && \
+  ln -s /usr/bin/python3 /usr/bin/python
+
+# Install Python dependencies
+# COPY requirements.txt /tmp/
+# RUN pip3 install -r /tmp/requirements.txt
+
+# Copy EF bundle from build stage
+COPY --from=build /app/efbundle /app/efbundle
+
+# Copy admin scripts
+# COPY /scripts/admin-scripts/ /app/admin-scripts/
+COPY docker/Dockerfiles/manager/run-manager.sh /app/
+
+# Set permissions
+RUN chmod +x /app/admin-scripts/*.py /app/efbundle /app/run-manager.sh
+
+WORKDIR /app
+
+# Entry point script to run migrations and keep container alive
+CMD ["./run-manager.sh"]

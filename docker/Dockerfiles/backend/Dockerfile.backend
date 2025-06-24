@@ -1,0 +1,18 @@
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+COPY backend/ChorukoAPI/ChorukoAPI.csproj .
+RUN dotnet restore
+COPY backend/ChorukoAPI/ .
+RUN dotnet publish -c Release -o out
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+WORKDIR /app
+# Install ICU libraries for globalization support
+RUN apk add --no-cache icu-libs
+COPY --from=build /src/out .
+# Enable ICU for globalization support
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "ChorukoAPI.dll"]
