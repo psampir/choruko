@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: choruko
+      POSTGRES_PASSWORD: choruko_pass
+      POSTGRES_DB: choruko_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=choruko_test;Username=choruko;Password=choruko_pass"
+    ports:
+      - "5001:80"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      REACT_APP_API_URL: "http://localhost:5001"
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+
+  admin:
+    build:
+      context: ./choruko-admin
+    environment:
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=choruko_test;Username=choruko;Password=choruko_pass"
+    depends_on:
+      - db
+    # Command to run migrations or admin scripts
+    command: ["dotnet", "ef", "database", "update", "--project", "./backend/Choruko.Backend.csproj"]
+
+volumes:
+  pg

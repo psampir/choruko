@@ -1,8 +1,24 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0
-WORKDIR /admin
-COPY ./backend ./backend
-COPY ./choruko-admin .
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="$PATH:/root/.dotnet/tools"
-# copy migration bundle or scripts here
-ENTRYPOINT ["bash"]
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+
+# Install Python only
+RUN apt-get update && apt-get install -y \
+  python3 \
+  python3-pip \
+  python3-venv \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN python -m venv /opt/admin-env
+ENV PATH="/opt/admin-env/bin:$PATH"
+
+COPY requirements.txt /tmp/
+RUN pip install -r /tmp/requirements.txt
+
+# Copy pre-built bundle and scripts
+COPY efbundle /app/efbundle
+COPY admin-scripts/ /app/admin-scripts/
+COPY run-manager.sh /app/
+RUN chmod +x /app/efbundle /app/admin-scripts/*.py /app/run-manager.sh
+
+WORKDIR /app
+CMD ["./run-manager.sh"]
