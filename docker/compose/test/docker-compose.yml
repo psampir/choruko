@@ -1,46 +1,62 @@
-version: '3.8'
+name: choruko_test
+
 services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: choruko
-      POSTGRES_PASSWORD: choruko_pass
-      POSTGRES_DB: choruko_test
-    ports:
-      - "5433:5432"
-    volumes:
-      - pg/var/lib/postgresql/data
-
-  backend:
-    build:
-      context: ./backend
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__Default: "Host=db;Port=5432;Database=choruko_test;Username=choruko;Password=choruko_pass"
-    ports:
-      - "5001:80"
-    depends_on:
-      - db
-
   frontend:
     build:
-      context: ./frontend
-    environment:
-      REACT_APP_API_URL: "http://localhost:5001"
+      context: ../../../
+      dockerfile: docker/Dockerfiles/frontend/Dockerfile.frontend
+    container_name: choruko_test_frontend
+    restart: unless-stopped
+    env_file:
+      - .env
     ports:
-      - "3001:80"
-    depends_on:
-      - backend
-
-  admin:
+      - "${CHORUKO_PORT:-2467}:80"
+  backend:
     build:
-      context: ./choruko-admin
-    environment:
-      ConnectionStrings__Default: "Host=db;Port=5432;Database=choruko_test;Username=choruko;Password=choruko_pass"
+      context: ../../../
+      dockerfile: docker/Dockerfiles/backend/Dockerfile.backend
+    container_name: choruko_test_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ${APP_DATA_LOCATION}:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
-      - db
-    # Command to run migrations or admin scripts
-    command: ["dotnet", "ef", "database", "update", "--project", "./backend/Choruko.Backend.csproj"]
-
-volumes:
-  pg
+      database:
+        condition: service_healthy
+  # manager:
+  #   condition: service_healthy
+  # manager:
+  #   build:
+  #     context: ../../../
+  #     dockerfile: docker/Dockerfiles/manager/Dockerfile.manager
+  #   container_name: choruko_test_mgr
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   healthcheck:
+  #     test: ["CMD", "test", "-f", "/tmp/migrations-complete"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 10
+  #     start_period: 30s
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  database:
+    image: postgres:17.5-alpine3.22
+    container_name: choruko_test_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+    volumes:
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
