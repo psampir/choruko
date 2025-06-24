@@ -1,0 +1,47 @@
+name: choruko
+
+services:
+  frontend:
+    image: ghcr.io/psampir/choruko-frontend:${CHORUKO_VERSION:-release}
+    container_name: choruko_frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${CHORUKO_PORT:-2467}:3000"
+    depends_on:
+      database:
+        condition: service_healthy
+  backend:
+    image: ghcr.io/psampir/choruko-backend:${CHORUKO_VERSION:-release}
+    container_name: choruko_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ${APP_DATA_LOCATION}:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      manager:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+  manager:
+    image: ghcr.io/psampir/choruko-manager:${CHORUKO_VERSION:-release}
+    container_name: choruko_mgr
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: postgres:17.5-alpine3.22
+    container_name: choruko_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+    volumes:
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
