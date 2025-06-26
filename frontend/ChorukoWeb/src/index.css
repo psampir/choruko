@@ -59,6 +59,11 @@ h1 {
   padding-left: 10px;
 }
 
+
+.standard__input:focus {
+  outline: none;
+}
+
 .standard__input::placeholder {
   color: #55ad9b;
   font-size: 1rem;
