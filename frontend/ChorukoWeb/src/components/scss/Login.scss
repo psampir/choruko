@@ -4,87 +4,95 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-
-    &__logo-container {
-    position: relative;
-    width: 158px;
-    height: 158px;
-    background-color: #95d2b3;
-    border-radius: 50%;
-    overflow: visible; 
-    display: flex;
-    justify-content: center;
+  
+  .login__top-container{
+    display:flex;
+    flex-direction: column;
     align-items: center;
 
-    .login__raccoon {
-      position: absolute;
-      left: 47.5%;
-      top: 17%; 
-      transform: translateX(-50%) scale(2);
-      width: 100%;
-      height: auto;
-      object-fit: contain;
-      z-index: 2;
-      background: none;
-      pointer-events: none;
+    .login__logo-container {
+      position: relative;
+      width: 158px;
+      height: 158px;
+      background-color: #95d2b3;
+      border-radius: 50%;
+      overflow: visible; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .login__raccoon {
+        position: absolute;
+        left: 47.5%;
+        top: 17%; 
+        transform: translateX(-50%) scale(2);
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        z-index: 2;
+        background: none;
+        pointer-events: none;
+      }
+    }
+
+    .login__title {
+      margin-top: 10px;
+    }
+
+    .login__form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      margin-top: 40px;
+    }
+
+    .login__input-wrapper {
+      position: relative;
+      display: inline-block;
+
+      .login__input-eye {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        background: url('../../assets/svg/eye.svg') no-repeat center/contain;
+        cursor: pointer;
+      }
+
+      .login__input--password.active + .login__input-eye {
+        background: url('../../assets/svg/close-eye.svg') no-repeat center/contain;
+      }
+    }
+    
+    .login__button--login {
+      margin-top: 35px;
+      width: 170px;
+      height: 46px;
+    }
+
+    .login__button--reset {
+      margin-top: 27px;
     }
   }
 
-  &__title {
-    margin-top: 10px;
-  }
-
-  &__form {
+  .login__bottom-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 22px;
-    margin-top: 40px;
-  }
 
-  &__input-wrapper {
-    position: relative;
-    display: inline-block;
-
-    .login__input-eye {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 24px;
-      height: 24px;
-      background: url('../../assets/svg/eye.svg') no-repeat center/contain;
-      cursor: pointer;
+    .login__without-account {
+      margin-top: 75px;
+      font-size: 0.875rem;
     }
 
-    .login__input--password.active + .login__input-eye {
-      background: url('../../assets/svg/close-eye.svg') no-repeat center/contain;
+    .login__button--signup {
+      margin-top: 20px;
+      width: 170px;
+      height: 46px;
     }
-  }
-
-  &__without-account {
-    margin-top: 75px;
-    font-size: 0.875rem;
-  }
-
-  &__button--login {
-    margin-top: 35px;
-    width: 170px;
-    height: 46px;
-  }
-
-  &__button--reset {
-    margin-top: 27px;
-  }
-
-  &__button--signup {
-    margin-top: 20px;
-    width: 170px;
-    height: 46px;
   }
 }
 
-/* Standalone or global styles */
-.standard__input:focus {
-  outline: none;
-}
