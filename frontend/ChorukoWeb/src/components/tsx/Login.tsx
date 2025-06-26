@@ -47,7 +47,7 @@ const resetPasswordView = () => {setResetPassword(!resetPaassword);}
       </div>
 
       <div className="login__bottom-container">
-        <p className="login__without-account">Don't have an account?</p>
+        <p className="login__without-account" style={{marginTop: resetPaassword ? '152px' : '75px'}}>Don't have an account?</p>
         <button className="standard__button login__button--signup">Sign Up</button>
       </div>
       
