@@ -10,7 +10,7 @@ left to right direction
 :Logged User: as l_user
 
 rectangle "Choruko System" {
-  usecase "Manage Household" as UC3
+  usecase "View Household Management Panel" as UC3
   usecase "Create Household" as UC4
   usecase "Delete Household" as UC5
   usecase "Edit Household Name" as UC1
@@ -18,7 +18,6 @@ rectangle "Choruko System" {
   usecase "Leave Household" as UC12
   usecase "Transfer Household Admin Rights" as UC6
   usecase "Remove Participant" as UC8
-
   usecase "View Invitations Panel" as UC9
   usecase "Send Household Invitation" as UC7  
   usecase "Accept Invitation" as UC10
@@ -27,6 +26,7 @@ rectangle "Choruko System" {
 
 l_user --> UC3
 l_user --> UC4
+l_user --> UC9
 l_user --> UC12
 UC3 <.. UC1 : <<extend>>
 UC3 <.. UC2 : <<extend>>
@@ -34,9 +34,7 @@ UC3 <.. UC5 : <<extend>>
 UC3 <.. UC6 : <<extend>>
 UC3 <.. UC8 : <<extend>>
 UC12 <.. UC6 : <<extend>>
-
-UC3 <.. UC9 : <<extend>>
-UC9 <.. UC7 : <<extend>>
+UC3 <.. UC7 : <<extend>>
 UC9 <.. UC10 : <<extend>>
 UC9 <.. UC11 : <<extend>>
 
