@@ -7,6 +7,7 @@ public class TaskReward
 {
     [Key]
     [Column(TypeName = "uuid")]
+    public int Id { get; set; }
 
     public string UserId { get; set; }
     [ForeignKey("UserId")]

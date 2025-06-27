@@ -22,5 +22,5 @@ public class User : IdentityUser
 
     public string? ProfilePicturePath { get; set; }
 
-    public virtual List<HouseholdTask>? assignedTasks { get; set; }
+    public virtual List<HouseholdTask>? AssignedTasks { get; set; }
 }
