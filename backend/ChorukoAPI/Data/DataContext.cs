@@ -43,6 +43,12 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
             .HasForeignKey(t => t.HouseholdId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Entity<HouseholdTask>()
+            .HasOne(t => t.Creator)
+            .WithMany()
+            .HasForeignKey(t => t.CreatorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Entity<Settlement>()
             .HasOne(s => s.Household)
             .WithMany(h => h.Settlements)
