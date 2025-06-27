@@ -6,11 +6,11 @@ namespace ChorukoAPI.Models;
 public class Activity
 {
     [Key]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string Id { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string HouseholdId { get; set; }
     [ForeignKey("HouseholdId")]
     public virtual Household Household { get; set; }
