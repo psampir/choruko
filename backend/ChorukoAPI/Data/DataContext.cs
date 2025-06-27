@@ -4,8 +4,14 @@ using ChorukoAPI.Models;
 
 namespace ChorukoAPI.Data;
 
-public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<User>(options)
+public class DataContext(DbContextOptions<DataContext> options, IConfiguration Configuration) : IdentityDbContext<User>(options)
 {
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    {
+        // connect to postgres with connection string from app settings
+        options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
+    }
+
     public override DbSet<User> Users { get; set; }
     public DbSet<Activity> Activities { get; set; }
     public DbSet<Household> Households { get; set; }
