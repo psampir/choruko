@@ -7,22 +7,22 @@ namespace ChorukoAPI.Models;
 public class HouseholdTask
 {
     [Key]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string Id { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string HouseholdId { get; set; }
     [ForeignKey("HouseholdId")]
     public virtual Household Household { get; set; }
 
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string ActivityId { get; set; }
     [ForeignKey("ActivityId")]
     public virtual Activity Activity { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string CreatorId { get; set; }
     [ForeignKey("CreatorId")]
     public virtual User Creator { get; set; }

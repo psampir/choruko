@@ -15,7 +15,7 @@ public class User : IdentityUser
     public string LastName { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string? HouseholdId { get; set; }
     [ForeignKey("HouseholdId")]
     public virtual Household? Household { get; set; } 

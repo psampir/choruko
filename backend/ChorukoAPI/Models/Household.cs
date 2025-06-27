@@ -6,7 +6,7 @@ namespace ChorukoAPI.Models;
 public class Household
 {
     [Key]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string Id { get; set; }
 
     [Required]
@@ -15,7 +15,7 @@ public class Household
     public string Name { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string AdminId { get; set; }
     [ForeignKey("AdminId")]
     public virtual User Admin { get; set; }
