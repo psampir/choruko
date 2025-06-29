@@ -9,18 +9,24 @@ function Login() {
   const [resetPassword, setResetPassword] = useState(false);
   const [signIn, setSignIn] = useState(false);
 
-  const toggleShowPassword = () => {
+  const toggleShowPassword: () => void = () => {
     setShowPassword(!showPassword);
   };
-  const toggleShowPasswordConf = () => {
+  const toggleShowPasswordConf: () => void = () => {
     setShowPasswordConf(!showPasswordConf);
   };
-  const resetPasswordView = () => {
+  const resetPasswordView: () => void = () => {
     setResetPassword(!resetPassword);
   };
-  const signInView = () => {
+  const signInView: () => void = () => {
     setSignIn(!signIn);
   };
+
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const toggleLoginInBtnName = () => {
     if (resetPassword) {
       return "Reset Password";
@@ -30,17 +36,48 @@ function Login() {
       return "Login In";
     }
   };
-  const loginBtnHandler = () => {};
+
+  const cleanInputs = () => {
+    const emailInput = document.querySelector<HTMLInputElement>(".login__input--email");
+    console.log(emailInput?.value.trim())
+    if (emailInput && emailInput.value.trim() !== "") {
+      if (isValidEmail(emailInput.value.trim())) {
+        emailInput.value = "";
+        document.querySelector(".login__popup-container")?.classList.add("active");
+        setResetPassword(false);
+      }
+   } else {
+      // Handle invalid email format
+      alert("Please enter a valid email address");
+    }
+  };
+
+  const loginBtnHandler = () => {
+    if (resetPassword) {
+        cleanInputs();
+  
+    } else if (signIn) {
+      // Handle sign up logic here
+      console.log("Signing up...");
+    } else {
+      // Handle login logic here
+      console.log("Logging in...");
+    }
+  };
+
+  const closePopup = () => {
+    document.querySelector(".login__popup-container")?.classList.remove("active");
+  };
 
   return (
     <div className="login active">
-      <div className="login__popup-container active">
+      <div className="login__popup-container">
         <div className="login__popup">
-          <i className="login__close-icon"></i>
+          <i className="login__close-icon" onClick={closePopup}></i>
           <h4 className="login__popup-message">
             A temporary password has been sent to your email.
           </h4>
-          <button className="standard__button login__button--ok">OK</button>
+          <button className="standard__button login__button--ok" onClick={closePopup}>OK</button>
         </div>
       </div>
 
@@ -59,7 +96,7 @@ function Login() {
         </div>
         <h1 className="login__title">Choruko</h1>
         <form className="login__form" style={{ gap: signIn ? "16px" : "22px" }}>
-          <input className="standard__input" type="text" placeholder="Email" />
+          <input className="standard__input login__input--email" type="text" placeholder="Email" />
 
           <div className="login__input-wrapper">
             <input
