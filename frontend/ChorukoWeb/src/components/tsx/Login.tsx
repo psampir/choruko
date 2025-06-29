@@ -1,6 +1,8 @@
 import "../scss/Login.scss";
-import raccoon from "../../assets/svg/raccoon-waving.svg";
+import raccoonSvgUrl from "../../assets/svg/raccoon-waving.svg";
 import { useState } from "react";
+import RaccoonAnimation from '../../waving-loop';
+
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,15 +40,19 @@ function Login() {
   };
 
   const cleanInputs = () => {
-    const emailInput = document.querySelector<HTMLInputElement>(".login__input--email");
-    console.log(emailInput?.value.trim())
+    const emailInput = document.querySelector<HTMLInputElement>(
+      ".login__input--email"
+    );
+    console.log(emailInput?.value.trim());
     if (emailInput && emailInput.value.trim() !== "") {
       if (isValidEmail(emailInput.value.trim())) {
         emailInput.value = "";
-        document.querySelector(".login__popup-container")?.classList.add("active");
+        document
+          .querySelector(".login__popup-container")
+          ?.classList.add("active");
         setResetPassword(false);
       }
-   } else {
+    } else {
       // Handle invalid email format
       alert("Please enter a valid email address");
     }
@@ -54,8 +60,7 @@ function Login() {
 
   const loginBtnHandler = () => {
     if (resetPassword) {
-        cleanInputs();
-  
+      cleanInputs();
     } else if (signIn) {
       // Handle sign up logic here
       console.log("Signing up...");
@@ -66,7 +71,9 @@ function Login() {
   };
 
   const closePopup = () => {
-    document.querySelector(".login__popup-container")?.classList.remove("active");
+    document
+      .querySelector(".login__popup-container")
+      ?.classList.remove("active");
   };
 
   return (
@@ -77,7 +84,12 @@ function Login() {
           <h4 className="login__popup-message">
             A temporary password has been sent to your email.
           </h4>
-          <button className="standard__button login__button--ok" onClick={closePopup}>OK</button>
+          <button
+            className="standard__button login__button--ok"
+            onClick={closePopup}
+          >
+            OK
+          </button>
         </div>
       </div>
 
@@ -88,15 +100,19 @@ function Login() {
             <source srcSet="/images/logo2.webp" type="image/webp" media='(max-width: 768px)'/>
             <img className='login__logo' src="/images/logo.png" alt="Choruko Logo" />
           </picture> */}
-          <img
-            src={raccoon}
-            alt="Racoon Animated Image"
+          <RaccoonAnimation
+            svgPath={raccoonSvgUrl}
+            restartInterval={8000}
             className="login__raccoon"
           />
         </div>
         <h1 className="login__title">Choruko</h1>
         <form className="login__form" style={{ gap: signIn ? "16px" : "22px" }}>
-          <input className="standard__input login__input--email" type="text" placeholder="Email" />
+          <input
+            className="standard__input login__input--email"
+            type="text"
+            placeholder="Email"
+          />
 
           <div className="login__input-wrapper">
             <input
