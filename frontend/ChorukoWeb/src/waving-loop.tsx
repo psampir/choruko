@@ -57,15 +57,10 @@ class RaccoonAnimationController {
         throw new Error(`Failed to reload SVG: ${response.statusText}`);
       }
 
+      // Extract the SVG text and replace the container's content
       const svgText = await response.text();
       this.container.innerHTML = svgText;
 
-      this.svg = this.container.querySelector('svg');
-      if (this.svg) {
-        this.svg.id = 'raccoonSvg';
-        // (Removed unused this.animations assignment)
-        this.svg.querySelectorAll('animate, animateTransform');
-      }
     } catch (error) {
       console.error('Failed to reload SVG:', error);
     }
