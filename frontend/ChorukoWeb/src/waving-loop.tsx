@@ -124,11 +124,11 @@ const RaccoonAnimation: React.FC<RaccoonAnimationControllerProps> = ({
           containerRef.current,
           restartInterval
         );
-        
+
         controllerRef.current = controller;
 
         // Make controller available globally for debugging
-        (window as any).raccoonController = controller;
+        (window as Window & { raccoonController?: RaccoonAnimationController }).raccoonController = controller;
 
         await controller.loadSVG(svgPath);
         setIsLoading(false);
