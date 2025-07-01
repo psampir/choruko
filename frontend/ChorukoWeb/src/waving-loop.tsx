@@ -24,6 +24,7 @@ class RaccoonAnimationController {
         throw new Error(`Failed to load SVG: ${response.statusText}`);
       }
 
+      // Extract the SVG text and replace the container's content
       const svgText = await response.text();
       this.container.innerHTML = svgText;
 
@@ -32,13 +33,6 @@ class RaccoonAnimationController {
         throw new Error('SVG element not found in loaded content');
       }
 
-      // Give the SVG an ID for easier reference
-      this.svg.id = 'raccoonSvg';
-
-      // Get all animation elements
-      // Get all animation elements
-      // (Removed unused this.animations assignment)
-      this.svg.querySelectorAll('animate, animateTransform');
       // Start the infinite animation loop
       this.startInfiniteLoop(this.restartInterval, svgPath);
 
@@ -57,7 +51,6 @@ class RaccoonAnimationController {
         throw new Error(`Failed to reload SVG: ${response.statusText}`);
       }
 
-      // Extract the SVG text and replace the container's content
       const svgText = await response.text();
       this.container.innerHTML = svgText;
 
