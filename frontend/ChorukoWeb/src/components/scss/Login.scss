@@ -11,13 +11,13 @@
 
   &__popup-container.active {
     display: flex;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 3;
+    z-index: 1000;
 
     .login__popup{
       position: absolute;
@@ -46,6 +46,7 @@
       .login__popup-message {
         width: 70%;
         margin-bottom: 10%;
+        text-align: center;
         
       }
       .login__button--ok {
@@ -67,15 +68,15 @@
       height: 158px;
       background-color: #95d2b3;
       border-radius: 50%;
-      overflow: visible;
       display: flex;
       justify-content: center;
       align-items: center;
 
       .login__raccoon {
         position: absolute;
-        top: 21%;
-        transform: scale(1.37);
+        top: 55%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(1.37);
         width: 100%;
         height: auto;
         object-fit: contain;
@@ -151,3 +152,4 @@
     }
   }
 }
+
