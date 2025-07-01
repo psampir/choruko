@@ -151,5 +151,32 @@
       height: 46px;
     }
   }
+  .login__input--email,
+  .login__input--password,
+  .login__input--password-conf {
+    // WebKit browsers (Chrome, Safari)
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px #d8efd3 inset !important;
+      -webkit-text-fill-color: #021207 !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    // Firefox
+    &:-moz-autofill {
+      background-color: #d8efd3 !important;
+      border: 2px solid #55ad9b !important;
+      color: #021207 !important;
+    }
+
+    // Generic autofill (fallback)
+    &:autofill {
+      background-color: #d8efd3 !important;
+      border: 2px solid #55ad9b !important;
+      color: #021207 !important;
+    }
+  }
 }
 
