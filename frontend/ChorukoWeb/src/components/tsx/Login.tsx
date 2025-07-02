@@ -35,7 +35,7 @@ function Login() {
     } else if (signIn) {
       return "Sign Up";
     } else {
-      return "Login In";
+      return "Log In";
     }
   };
 
@@ -116,9 +116,8 @@ function Login() {
 
           <div className="login__input-wrapper">
             <input
-              className={`standard__input login__input--password ${
-                showPassword ? " active" : ""
-              }`}
+              className={`standard__input login__input--password ${showPassword ? " active" : ""
+                }`}
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               style={{ display: resetPassword ? "none" : "block" }}
@@ -138,9 +137,8 @@ function Login() {
             style={{ display: signIn ? "block" : "none" }}
           >
             <input
-              className={`standard__input login__input--password ${
-                showPasswordConf ? " active" : ""
-              }`}
+              className={`standard__input login__input--password ${showPasswordConf ? " active" : ""
+                }`}
               type={showPasswordConf ? "text" : "password"}
               placeholder="Confirm Password"
               style={{ display: resetPassword ? "none" : "block" }}
