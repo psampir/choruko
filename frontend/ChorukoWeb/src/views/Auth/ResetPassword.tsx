@@ -46,7 +46,7 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
               A temporary password has been sent to your email.
             </h4>
             <Button
-              variant="primary"
+              variant="primary-popup"
               className="login__button--ok"
               onClick={closePopup}
             >

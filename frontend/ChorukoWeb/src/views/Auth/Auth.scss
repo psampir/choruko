@@ -56,8 +56,6 @@
 
       .login__button--ok {
         margin-bottom: 5%;
-        width: 145px;
-        height: 48px;
       }
     }
   }
@@ -122,16 +120,10 @@
       .login__input--password.active+.login__input-eye {
         background: url("../../assets/svg/close-eye.svg") no-repeat center/contain;
       }
-
-      .login__input--password-conf.active+.login__input-eye {
-        background: url("../../assets/svg/close-eye.svg") no-repeat center/contain;
-      }
     }
 
     .login__button--login {
       margin-top: 35px;
-      width: 170px;
-      height: 46px;
     }
 
     .login__button--reset {
@@ -151,8 +143,6 @@
 
     .login__button--signup {
       margin-top: 20px;
-      width: 170px;
-      height: 46px;
     }
   }
 }
