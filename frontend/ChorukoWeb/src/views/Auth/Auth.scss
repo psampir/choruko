@@ -3,9 +3,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  height: 100%;
+  width: 100%;
+  touch-action: pan-y;
 
-  &__popup-container{
+  &__popup-container {
     display: none;
   }
 
@@ -19,7 +23,7 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
 
-    .login__popup{
+    .login__popup {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -47,8 +51,9 @@
         width: 70%;
         margin-bottom: 10%;
         text-align: center;
-        
+
       }
+
       .login__button--ok {
         margin-bottom: 5%;
         width: 145px;
@@ -114,13 +119,12 @@
         cursor: pointer;
       }
 
-      .login__input--password.active + .login__input-eye {
-        background: url("../../assets/svg/close-eye.svg") no-repeat
-          center/contain;
+      .login__input--password.active+.login__input-eye {
+        background: url("../../assets/svg/close-eye.svg") no-repeat center/contain;
       }
-      .login__input--password-conf.active + .login__input-eye {
-        background: url("../../assets/svg/close-eye.svg") no-repeat
-          center/contain;
+
+      .login__input--password-conf.active+.login__input-eye {
+        background: url("../../assets/svg/close-eye.svg") no-repeat center/contain;
       }
     }
 
@@ -152,4 +156,3 @@
     }
   }
 }
-
