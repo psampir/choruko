@@ -10,9 +10,16 @@
   &--primary {
     background-color: #55ad9b;
     color: #f1f8e8;
-    height: 50px;
-    width: 100px;
+    width: 170px;
+    height: 46px;
     font-size: 1.25rem;
+  }
+
+  // Primary popup button variant
+  &--primary-popup {
+    @extend .button--primary;
+    width: 145px;
+    height: 48px;
   }
 
   // Additional button variant
