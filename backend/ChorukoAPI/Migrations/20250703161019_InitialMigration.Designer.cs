@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChorukoAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250627164730_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250703161019_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
