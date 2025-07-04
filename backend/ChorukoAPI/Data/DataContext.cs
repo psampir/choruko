@@ -54,12 +54,30 @@ public class DataContext(DbContextOptions<DataContext> options, IConfiguration C
             .WithMany()
             .HasForeignKey(t => t.CreatorId)
             .OnDelete(DeleteBehavior.Restrict);
-
+        
         builder.Entity<Settlement>()
-            .HasOne(s => s.Household)
-            .WithMany(h => h.Settlements)
-            .HasForeignKey(s => s.HouseholdId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasOne(s => s.Creator)
+            .WithMany()
+            .HasForeignKey(s => s.CreatorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Many-to-Many для SettledUsers
+        builder.Entity<Settlement>()
+            .HasMany(s => s.SettledUsers)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "SettlementSettledUsers",
+                j => j.HasOne<User>().WithMany().HasForeignKey("UserId"),
+                j => j.HasOne<Settlement>().WithMany().HasForeignKey("SettlementId"));
+
+        // Many-to-Many для UnsettledUsers
+        builder.Entity<Settlement>()
+            .HasMany(s => s.UnsettledUsers)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "SettlementUnsettledUsers",
+                j => j.HasOne<User>().WithMany().HasForeignKey("UserId"),
+                j => j.HasOne<Settlement>().WithMany().HasForeignKey("SettlementId"));
 
         builder.Entity<Invitation>()
             .HasOne(i => i.Household)
