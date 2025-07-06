@@ -1,0 +1,136 @@
+@import url(https://fonts.bunny.net/css?family=cabin:400,400i,500,500i,600,600i,700,700i);
+
+:root {
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: #021207;
+  font-family: 'Asap', sans-serif;
+  line-height: 1.2;
+  font-weight: 400;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: fit-content;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f1f8e8;
+  color: #021207;
+  -webkit-overflow-scrolling: touch;
+  /* Enable momentum scrolling on iOS */
+  overscroll-behavior: none;
+  /* Prevent bounce effect */
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-size: 1.625rem;
+    font-weight: 500;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  h4 {
+    font-size: 1.375rem;
+    font-weight: 400;
+  }
+
+  h5 {
+    font-size: 1.25rem;
+    font-weight: 400;
+  }
+
+  h6 {
+    font-size: 1.125rem;
+    font-weight: 400;
+  }
+
+  .standard {
+    &__input {
+      width: 288px;
+      height: 42px;
+      border: 2px solid #55ad9b;
+      background-color: #d8efd3;
+      border-radius: 10px;
+      cursor: text;
+      padding-left: 10px;
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: #55ad9b;
+        font-size: 1rem;
+        opacity: 1;
+      }
+
+      // Chrome, Safari, Edge
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px #d8efd3 inset !important;
+        -webkit-text-fill-color: #021207 !important;
+        transition: background-color 5000s ease-in-out 0s;
+      }
+
+      // Firefox
+      &:-moz-autofill {
+        background-color: #d8efd3 !important;
+        border: 2px solid #55ad9b !important;
+        color: #021207 !important;
+      }
+
+      // Generic autofill (fallback)
+      &:autofill {
+        background-color: #d8efd3 !important;
+        border: 2px solid #55ad9b !important;
+        color: #021207 !important;
+      }
+    }
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+
+  a:hover {
+    color: #747bff;
+  }
+}

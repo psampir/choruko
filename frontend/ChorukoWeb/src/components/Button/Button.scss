@@ -1,0 +1,40 @@
+// Button styles for the reusable Button component
+// Base button styles - shared by all button variants
+.button {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+
+  // Primary button variant
+  &--primary {
+    background-color: #55ad9b;
+    color: #f1f8e8;
+    width: 170px;
+    height: 46px;
+    font-size: 1.25rem;
+  }
+
+  // Primary popup button variant
+  &--primary-popup {
+    @extend .button--primary;
+    width: 145px;
+    height: 48px;
+  }
+
+  // Additional button variant
+  &--additional {
+    width: 135px;
+    height: 30px;
+    background-color: #95d2b3;
+    color: #021207;
+    font-size: 0.875rem;
+  }
+}
+
+// Media query for light theme
+@media (prefers-color-scheme: light) {
+  button {
+    background-color: #f9f9f9;
+  }
+}
