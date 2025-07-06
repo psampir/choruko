@@ -6,11 +6,11 @@ namespace ChorukoAPI.Models;
 public class Invitation
 {
     [Key]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string Id { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string SenderId { get; set; }
     [ForeignKey("SenderId")]
     public virtual User Sender { get; set; }
@@ -22,7 +22,7 @@ public class Invitation
     public string RecieverEmail { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string HouseholdId { get; set; }
     [ForeignKey("HouseholdId")]
     public virtual Household Household { get; set; }

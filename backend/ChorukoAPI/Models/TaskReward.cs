@@ -6,7 +6,8 @@ namespace ChorukoAPI.Models;
 public class TaskReward
 {
     [Key]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
+    public int Id { get; set; }
 
     public string UserId { get; set; }
     [ForeignKey("UserId")]

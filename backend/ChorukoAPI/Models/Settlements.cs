@@ -6,17 +6,17 @@ namespace ChorukoAPI.Models;
 public class Settlement
 {
     [Key]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string Id { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string HouseholdId { get; set; }
     [ForeignKey("HouseholdId")]
     public virtual Household Household { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string CreatorId{ get; set; }
     [ForeignKey("CreatorId")]
     public virtual User Creator { get; set; }

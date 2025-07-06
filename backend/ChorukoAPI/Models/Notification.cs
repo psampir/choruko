@@ -7,11 +7,11 @@ namespace ChorukoAPI.Models;
 public class Notification
 {
     [Key]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string Id { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string ReceiverId { get; set; }
     [ForeignKey("ReceiverId")]
     public virtual User Receiver { get; set; }
@@ -29,17 +29,17 @@ public class Notification
     [Column(TypeName = "timestamp")]
     public DateTime SentAt { get; set; }
 
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string? SettlementId { get; set; }
     [ForeignKey("SettlementId")]
     public virtual Settlement? Settlement { get; set; }
 
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string? HouseholdTaskId { get; set; }
     [ForeignKey("HouseholdTaskId")]
     public virtual HouseholdTask? HouseholdTask { get; set; }
 
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string? InvitationId { get; set; }
     [ForeignKey("InvitationId")]
     public virtual Invitation? Invitation { get; set; }

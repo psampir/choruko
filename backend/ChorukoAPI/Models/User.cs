@@ -15,12 +15,12 @@ public class User : IdentityUser
     public string LastName { get; set; }
 
     [Required]
-    [Column(TypeName = "uuid")]
+    [Column(TypeName = "varchar(36)")]
     public string? HouseholdId { get; set; }
     [ForeignKey("HouseholdId")]
     public virtual Household? Household { get; set; } 
 
     public string? ProfilePicturePath { get; set; }
 
-    public virtual List<HouseholdTask>? assignedTasks { get; set; }
+    public virtual List<HouseholdTask>? AssignedTasks { get; set; }
 }
