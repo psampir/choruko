@@ -25,25 +25,25 @@ services:
     depends_on:
       database:
         condition: service_healthy
-  # manager:
-  #   condition: service_healthy
-  # manager:
-  #   build:
-  #     context: ../../../
-  #     dockerfile: docker/Dockerfiles/manager/Dockerfile.manager
-  #   container_name: choruko_test_mgr
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   healthcheck:
-  #     test: ["CMD", "test", "-f", "/tmp/migrations-complete"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 10
-  #     start_period: 30s
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
+      manager:
+        condition: service_healthy
+  manager:
+    build:
+      context: ../../../
+      dockerfile: docker/Dockerfiles/manager/Dockerfile.manager
+    container_name: choruko_test_mgr
+    restart: unless-stopped
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/migrations-complete"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      database:
+        condition: service_healthy
   database:
     image: postgres:17.5-alpine3.22
     container_name: choruko_test_db
