@@ -117,8 +117,6 @@ namespace ChorukoAPI.Migrations
                     LastName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     HouseholdId = table.Column<string>(type: "varchar(36)", nullable: false),
                     ProfilePicturePath = table.Column<string>(type: "text", nullable: true),
-                    SettlementId = table.Column<string>(type: "varchar(36)", nullable: true),
-                    SettlementId1 = table.Column<string>(type: "varchar(36)", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -285,7 +283,7 @@ namespace ChorukoAPI.Migrations
                         column: x => x.CreatorId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Settlements_Households_HouseholdId",
                         column: x => x.HouseholdId,
@@ -357,6 +355,54 @@ namespace ChorukoAPI.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "SettlementSettledUsers",
+                columns: table => new
+                {
+                    SettlementId = table.Column<string>(type: "varchar(36)", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SettlementSettledUsers", x => new { x.SettlementId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_SettlementSettledUsers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SettlementSettledUsers_Settlements_SettlementId",
+                        column: x => x.SettlementId,
+                        principalTable: "Settlements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SettlementUnsettledUsers",
+                columns: table => new
+                {
+                    SettlementId = table.Column<string>(type: "varchar(36)", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SettlementUnsettledUsers", x => new { x.SettlementId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_SettlementUnsettledUsers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SettlementUnsettledUsers_Settlements_SettlementId",
+                        column: x => x.SettlementId,
+                        principalTable: "Settlements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Activities_HouseholdId",
                 table: "Activities",
@@ -397,16 +443,6 @@ namespace ChorukoAPI.Migrations
                 name: "IX_AspNetUsers_HouseholdId",
                 table: "AspNetUsers",
                 column: "HouseholdId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_SettlementId",
-                table: "AspNetUsers",
-                column: "SettlementId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_SettlementId1",
-                table: "AspNetUsers",
-                column: "SettlementId1");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -481,6 +517,16 @@ namespace ChorukoAPI.Migrations
                 columns: new[] { "HouseholdId", "Status" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_SettlementSettledUsers_UserId",
+                table: "SettlementSettledUsers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SettlementUnsettledUsers_UserId",
+                table: "SettlementUnsettledUsers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TaskRewards_UserId",
                 table: "TaskRewards",
                 column: "UserId");
@@ -524,20 +570,6 @@ namespace ChorukoAPI.Migrations
                 principalTable: "Households",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.SetNull);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_AspNetUsers_Settlements_SettlementId",
-                table: "AspNetUsers",
-                column: "SettlementId",
-                principalTable: "Settlements",
-                principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_AspNetUsers_Settlements_SettlementId1",
-                table: "AspNetUsers",
-                column: "SettlementId1",
-                principalTable: "Settlements",
-                principalColumn: "Id");
         }
 
         /// <inheritdoc />
@@ -546,14 +578,6 @@ namespace ChorukoAPI.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUsers_Households_HouseholdId",
                 table: "AspNetUsers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Settlements_Households_HouseholdId",
-                table: "Settlements");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Settlements_AspNetUsers_CreatorId",
-                table: "Settlements");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -577,6 +601,12 @@ namespace ChorukoAPI.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
+                name: "SettlementSettledUsers");
+
+            migrationBuilder.DropTable(
+                name: "SettlementUnsettledUsers");
+
+            migrationBuilder.DropTable(
                 name: "TaskRewards");
 
             migrationBuilder.DropTable(
@@ -589,6 +619,9 @@ namespace ChorukoAPI.Migrations
                 name: "Invitations");
 
             migrationBuilder.DropTable(
+                name: "Settlements");
+
+            migrationBuilder.DropTable(
                 name: "Activities");
 
             migrationBuilder.DropTable(
@@ -596,9 +629,6 @@ namespace ChorukoAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "Settlements");
         }
     }
 }

@@ -320,12 +320,6 @@ namespace ChorukoAPI.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
-                    b.Property<string>("SettlementId")
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<string>("SettlementId1")
-                        .HasColumnType("varchar(36)");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
@@ -343,10 +337,6 @@ namespace ChorukoAPI.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
-
-                    b.HasIndex("SettlementId");
-
-                    b.HasIndex("SettlementId1");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -498,6 +488,36 @@ namespace ChorukoAPI.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SettlementSettledUsers", b =>
+                {
+                    b.Property<string>("SettlementId")
+                        .HasColumnType("varchar(36)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("SettlementId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SettlementSettledUsers");
+                });
+
+            modelBuilder.Entity("SettlementUnsettledUsers", b =>
+                {
+                    b.Property<string>("SettlementId")
+                        .HasColumnType("varchar(36)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("SettlementId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SettlementUnsettledUsers");
+                });
+
             modelBuilder.Entity("ChorukoAPI.Models.Activity", b =>
                 {
                     b.HasOne("ChorukoAPI.Models.Household", "Household")
@@ -600,7 +620,7 @@ namespace ChorukoAPI.Migrations
                     b.HasOne("ChorukoAPI.Models.User", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ChorukoAPI.Models.Household", "Household")
@@ -632,14 +652,6 @@ namespace ChorukoAPI.Migrations
                         .HasForeignKey("HouseholdId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
-
-                    b.HasOne("ChorukoAPI.Models.Settlement", null)
-                        .WithMany("SettledUsers")
-                        .HasForeignKey("SettlementId");
-
-                    b.HasOne("ChorukoAPI.Models.Settlement", null)
-                        .WithMany("UnsettledUsers")
-                        .HasForeignKey("SettlementId1");
 
                     b.Navigation("Household");
                 });
@@ -710,6 +722,36 @@ namespace ChorukoAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SettlementSettledUsers", b =>
+                {
+                    b.HasOne("ChorukoAPI.Models.Settlement", null)
+                        .WithMany()
+                        .HasForeignKey("SettlementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ChorukoAPI.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SettlementUnsettledUsers", b =>
+                {
+                    b.HasOne("ChorukoAPI.Models.Settlement", null)
+                        .WithMany()
+                        .HasForeignKey("SettlementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ChorukoAPI.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ChorukoAPI.Models.Activity", b =>
                 {
                     b.Navigation("Tasks");
@@ -726,13 +768,6 @@ namespace ChorukoAPI.Migrations
                     b.Navigation("Settlements");
 
                     b.Navigation("Tasks");
-                });
-
-            modelBuilder.Entity("ChorukoAPI.Models.Settlement", b =>
-                {
-                    b.Navigation("SettledUsers");
-
-                    b.Navigation("UnsettledUsers");
                 });
 #pragma warning restore 612, 618
         }
