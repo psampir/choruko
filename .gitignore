@@ -588,3 +588,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# App and DB files
+app_data/
+db_data/

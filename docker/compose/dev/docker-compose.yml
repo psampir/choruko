@@ -1,0 +1,20 @@
+# In development environment, just the database is run in a container. Rest of the services are run locally to allow for easier debugging and faster development cycles.
+
+name: choruko_dev
+
+services:
+  database:
+    image: postgres:17.5-alpine3.22
+    container_name: choruko_dev_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: developer
+      POSTGRES_PASSWORD: developer
+      POSTGRES_DB: choruko_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg:/var/lib/postgresql/data
+
+volumes:
+  pg:
