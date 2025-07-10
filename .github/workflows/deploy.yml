@@ -22,6 +22,5 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Test SSH connection
-        uses: ./.github/actions/ssh_execute
-        with:
-          command: "echo 'SSH connection successful!'"
+        run: |
+          ssh github-actions@choruko "echo 'SSH connection successful!'"
