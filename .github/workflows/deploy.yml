@@ -1,11 +1,6 @@
 name: Deploy App
 
 on:
-  pull_request:
-    branches:
-      - actions_test
-    paths:
-      - .github/workflows/deploy.yml
   workflow_dispatch:
 
 jobs:
