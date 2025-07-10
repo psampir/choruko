@@ -1,0 +1,84 @@
+name: Build App
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch or tag to build from'
+        type: string
+        required: true
+        default: 'main'
+      push_to_ghcr:
+        description: 'Push built images to GHCR'
+        type: boolean
+        required: true
+        default: false
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        required: true
+        default: 'main'
+      push_to_ghcr:
+        type: boolean
+        required: true
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - name: choruko-frontend
+            dockerfile: ./docker/Dockerfiles/frontend/Dockerfile
+          - name: choruko-backend
+            dockerfile: ./docker/Dockerfiles/backend/Dockerfile
+          - name: choruko-manager
+            dockerfile: ./docker/Dockerfiles/manager/Dockerfile
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || inputs.branch }}
+
+      - name: Set Docker image name prefixes
+        id: prefix
+        run: |
+          if [ "${{ github.event.inputs.branch }}" != "main" ]; then
+            echo "BRANCH_PREFIX=-${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
+          else
+            echo "BRANCH_PREFIX=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: ${{ github.event.inputs.push_to_ghcr || inputs.push_to_ghcr }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build ${{ matrix.image.name }} image
+        if: ${{ !github.event.inputs.push_to_ghcr && !inputs.push_to_ghcr }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.image.dockerfile }}
+          platforms: linux/amd64,linux/arm64,linux/arm,linux/386
+          tags: ${{ matrix.image.name }}${{ steps.prefix.outputs.BRANCH_PREFIX }}
+
+      - name: Build and push ${{ matrix.image.name }} image
+        if: ${{ github.event.inputs.push_to_ghcr || inputs.push_to_ghcr }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.image.dockerfile }}
+          platforms: linux/amd64,linux/arm64,linux/arm,linux/386
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}${{ steps.prefix.outputs.BRANCH_PREFIX }}
+          push: true
