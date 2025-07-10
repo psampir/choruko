@@ -4,7 +4,7 @@ services:
   frontend:
     build:
       context: ../../../
-      dockerfile: docker/Dockerfiles/frontend/Dockerfile.frontend
+      dockerfile: docker/Dockerfiles/frontend/Dockerfile
     container_name: choruko_test_frontend
     restart: unless-stopped
     env_file:
@@ -14,7 +14,7 @@ services:
   backend:
     build:
       context: ../../../
-      dockerfile: docker/Dockerfiles/backend/Dockerfile.backend
+      dockerfile: docker/Dockerfiles/backend/Dockerfile
     container_name: choruko_test_backend
     restart: unless-stopped
     env_file:
@@ -30,7 +30,7 @@ services:
   manager:
     build:
       context: ../../../
-      dockerfile: docker/Dockerfiles/manager/Dockerfile.manager
+      dockerfile: docker/Dockerfiles/manager/Dockerfile
     container_name: choruko_test_mgr
     restart: unless-stopped
     env_file:
