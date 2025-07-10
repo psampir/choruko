@@ -1,0 +1,38 @@
+name: SSH Setup
+description: Setup SSH for GitHub Actions
+
+inputs:
+  server-ip-address:
+    description: 'IP address of the server to connect to'
+    required: true
+  ssh-private-key:
+    description: 'SSH private key to use for authentication'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure SSH directory exists
+      shell: bash
+      run: mkdir -p ~/.ssh
+    
+    - name: Add SSH private key
+      shell: bash
+      run: echo "${{ inputs.ssh-private-key }}" > ~/.ssh/id_rsa
+    
+    - name: Set permissions for SSH private key
+      shell: bash
+      run: chmod 600 ~/.ssh/id_rsa
+    
+    - name: Add the server to known hosts
+      shell: bash
+      run: ssh-keyscan -H "${{ inputs.server-ip-address }}" >> ~/.ssh/known_hosts
+
+    - name: Add SSH config
+      shell: bash
+      run: |
+        echo "Host choruko" >> ~/.ssh/config
+        echo "  Hostname ${{ inputs.server-ip-address }}" >> ~/.ssh/config
+        echo "  User github-actions" >> ~/.ssh/config
+        echo "  Port 22" >> ~/.ssh/config
+        echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
