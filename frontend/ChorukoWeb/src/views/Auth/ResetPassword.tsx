@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from '../../components/Button';
+import Input from '../../components/Input';
 
 interface ResetPasswordProps {
   onLoginClick: () => void;
@@ -57,8 +58,9 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
       )}
 
       <form className="login__form" style={{ gap: "22px" }}>
-        <input
-          className="standard__input login__input--email"
+        <Input
+          variant="email"
+          className="login__input--email"
           type="text"
           placeholder="Email"
         />
