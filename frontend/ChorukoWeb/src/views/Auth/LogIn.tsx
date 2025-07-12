@@ -1,5 +1,5 @@
-import { useState } from "react";
-import Button from '../../components/Button';
+import Button from "../../components/Button";
+import Input from "../../components/Input";
 
 interface LoginProps {
   onSignUpClick: () => void;
@@ -7,12 +7,6 @@ interface LoginProps {
 }
 
 function LogIn({ onSignUpClick, onResetPasswordClick }: LoginProps) {
-  const [showPassword, setShowPassword] = useState(false);
-
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
-
   const handleLogin = () => {
     // Handle login logic here
     console.log("Logging in...");
@@ -21,26 +15,17 @@ function LogIn({ onSignUpClick, onResetPasswordClick }: LoginProps) {
   return (
     <>
       <form className="login__form" style={{ gap: "22px" }}>
-        <input
-          className="standard__input login__input--email"
+        <Input
+          variant="email"
+          className="login__input--email"
           type="text"
           placeholder="Email"
         />
-
-        <div className="login__input-wrapper">
-          <input
-            className={`standard__input login__input--password ${showPassword ? " active" : ""}`}
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-          />
-          <span
-            className="login__input-eye"
-            onClick={toggleShowPassword}
-            aria-label="Show/Hide password"
-            tabIndex={0}
-            role="button"
-          />
-        </div>
+        <Input
+          variant="password"
+          className={`input--password`}
+          placeholder="Password"
+        />
       </form>
 
       <Button
@@ -59,9 +44,7 @@ function LogIn({ onSignUpClick, onResetPasswordClick }: LoginProps) {
       </Button>
 
       <div className="login__bottom-container">
-        <p className="login__without-account">
-          Don't have an account?
-        </p>
+        <p className="login__without-account">Don't have an account?</p>
         <Button
           variant="primary"
           className="login__button--signup"
