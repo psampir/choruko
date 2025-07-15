@@ -110,6 +110,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: "${{ matrix.image.name }}:${{ steps.prefix.outputs.BRANCH_PREFIX }}"
           outputs: type=oci,dest=/tmp/${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push ${{ matrix.image.name }} image
         if: ${{ steps.vars.outputs.BRANCH == 'main' }}
@@ -122,6 +124,8 @@ jobs:
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest"
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}"
           push: true
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache,mode=max
 
       - name: Compress Docker image
         if: ${{ steps.vars.outputs.BRANCH != 'main' }}
@@ -135,6 +139,7 @@ jobs:
         with:
           name: ${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}
           path: /tmp/${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar.gz
+          retention-days: 1
           
   # deploy:
   #   needs: build
