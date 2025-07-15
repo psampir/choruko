@@ -3,7 +3,7 @@ name: Build App
 on:
   pull_request:
     branches:
-      - actions-test
+      - actions_test
     paths:
       - .github/workflows/build.yml
   workflow_dispatch:
