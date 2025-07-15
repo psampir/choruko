@@ -4,25 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch or tag to build from'
+        description: 'Branch to build from'
         type: string
         required: true
-        default: 'main'
-      push_to_ghcr:
-        description: 'Push built images to GHCR'
-        type: boolean
-        required: true
-        default: false
+        default: 'dev'
   workflow_call:
     inputs:
       branch:
+        description: 'Branch to build from'
         type: string
         required: true
-        default: 'main'
-      push_to_ghcr:
-        type: boolean
-        required: true
-        default: false
+        default: 'dev'
+  release:
+    types: [published]
 
 jobs:
   deploy:
@@ -37,25 +31,36 @@ jobs:
           - name: choruko-manager
             dockerfile: ./docker/Dockerfiles/manager/Dockerfile
     steps:
+
+      - name: Get input variables
+        id: vars
+        run: |
+          if [ "${{ github.event.name }}" == 'workflow_dispatch' ]; then
+            echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == 'workflow_call' ]; then
+            echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_OUTPUT
+          else
+            echo "BRANCH=main" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch || inputs.branch }}
+          ref: ${{ github.event.inputs.branch }}
 
-      - name: Set Docker image name prefixes
-        id: prefix
+      - name: Check if branch exists in the repository
+        if: ${{ steps.vars.outputs.BRANCH != 'main' }}
         run: |
-          if [ "${{ github.event.inputs.branch }}" != "main" ]; then
-            echo "BRANCH_PREFIX=-${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
-          else
-            echo "BRANCH_PREFIX=" >> $GITHUB_OUTPUT
+          if ! git show-ref --verify --quiet refs/heads/${{ steps.vars.outputs.BRANCH }}; then
+            echo "Branch ${{ steps.vars.outputs.BRANCH }} does not exist in the repository."
+            exit 1
           fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GitHub Container Registry
-        if: ${{ github.event.inputs.push_to_ghcr || inputs.push_to_ghcr }}
+      - name: Log into GitHub Container Registry
+        if: ${{ steps.vars.outputs.BRANCH == 'main' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -63,16 +68,16 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build ${{ matrix.image.name }} image
-        if: ${{ !github.event.inputs.push_to_ghcr && !inputs.push_to_ghcr }}
+        if: ${{ steps.vars.outputs.BRANCH != 'main' }}
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ${{ matrix.image.dockerfile }}
           platforms: linux/amd64,linux/arm64,linux/arm,linux/386
-          tags: ${{ matrix.image.name }}${{ steps.prefix.outputs.BRANCH_PREFIX }}
+          tags: "${{ matrix.image.name }}:${{ steps.vars.outputs.BRANCH }}"
 
       - name: Build and push ${{ matrix.image.name }} image
-        if: ${{ github.event.inputs.push_to_ghcr || inputs.push_to_ghcr }}
+        if: ${{ steps.vars.outputs.BRANCH == 'main' }}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -80,5 +85,5 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm,linux/386
           tags: |
             ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}${{ steps.prefix.outputs.BRANCH_PREFIX }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:
           push: true
