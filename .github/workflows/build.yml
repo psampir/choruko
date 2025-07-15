@@ -112,6 +112,6 @@ jobs:
           file: ${{ matrix.image.dockerfile }}
           platforms: linux/amd64,linux/arm64,linux/arm,linux/386
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:
+            "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest"
+            "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}"
           push: true
