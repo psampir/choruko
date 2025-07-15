@@ -109,7 +109,7 @@ jobs:
           file: ${{ matrix.image.dockerfile }}
           platforms: linux/amd64,linux/arm64
           tags: "${{ matrix.image.name }}:${{ steps.prefix.outputs.BRANCH_PREFIX }}"
-          outputs: type=docker,dest=/tmp/${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar
+          outputs: type=oci,dest=/tmp/${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar
 
       - name: Build and push ${{ matrix.image.name }} image
         if: ${{ steps.vars.outputs.BRANCH == 'main' }}
