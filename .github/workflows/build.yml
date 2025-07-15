@@ -107,7 +107,7 @@ jobs:
         with:
           context: .
           file: ${{ matrix.image.dockerfile }}
-          platforms: linux/amd64,linux/arm64,linux/arm
+          platforms: linux/amd64,linux/arm64
           tags: "${{ matrix.image.name }}:${{ steps.prefix.outputs.BRANCH_PREFIX }}"
 
       - name: Build and push ${{ matrix.image.name }} image
@@ -116,7 +116,7 @@ jobs:
         with:
           context: .
           file: ${{ matrix.image.dockerfile }}
-          platforms: linux/amd64,linux/arm64,linux/arm
+          platforms: linux/amd64,linux/arm64
           tags: |
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest"
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}"
