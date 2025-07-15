@@ -109,6 +109,7 @@ jobs:
           file: ${{ matrix.image.dockerfile }}
           platforms: linux/amd64,linux/arm64
           tags: "${{ matrix.image.name }}:${{ steps.prefix.outputs.BRANCH_PREFIX }}"
+          outputs: type=docker,dest=/tmp/${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar
 
       - name: Build and push ${{ matrix.image.name }} image
         if: ${{ steps.vars.outputs.BRANCH == 'main' }}
@@ -122,13 +123,19 @@ jobs:
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}"
           push: true
 
+      - name: Compress Docker image
+        if: ${{ steps.vars.outputs.BRANCH != 'main' }}
+        run: |
+          gzip -9 /tmp/${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar
+          echo "Compressed image size: $(du -h /tmp/${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar.gz | cut -f1)"
+
       - name: Upload Docker image as artifact
         if: ${{ steps.vars.outputs.BRANCH != 'main' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}
-          path: ${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar.gz
-
+          path: /tmp/${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar.gz
+          
   # deploy:
   #   needs: build
   #   uses: ./.github/workflows/deploy.yml
