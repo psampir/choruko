@@ -50,7 +50,7 @@ jobs:
       - name: Get input variables
         id: vars
         run: |
-          if [ "${{ github.event.name }}" == 'workflow_dispatch' ]; then
+          if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
             echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
             echo "RELEASE_TAG=${{ github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
           elif [ "${{ github.event_name }}" == 'workflow_call' ]; then
