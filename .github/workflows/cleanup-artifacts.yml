@@ -1,0 +1,55 @@
+name: Cleanup Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Workflow run ID containing artifacts to delete'
+        required: true
+      artifact_name:
+        description: 'Specific artifact name pattern to delete (optional)'
+        required: false
+  workflow_call:
+    inputs:
+      run_id:
+        description: 'Workflow run ID containing artifacts to delete'
+        type: string
+        required: true
+      artifact_name:
+        description: 'Specific artifact name pattern to delete (optional)'
+        type: string
+        required: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete artifacts
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const runId = '${{ inputs.run_id }}';
+            const artifactNamePattern = '${{ inputs.artifact_name }}' || '.*';
+            
+            console.log(`Fetching artifacts for run ID: ${runId}`);
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId
+            });
+            
+            const matchingArtifacts = artifacts.data.artifacts.filter(
+              artifact => new RegExp(artifactNamePattern).test(artifact.name)
+            );
+            
+            console.log(`Found ${matchingArtifacts.length} artifacts to delete`);
+            
+            for (const artifact of matchingArtifacts) {
+              console.log(`Deleting artifact: ${artifact.name} (ID: ${artifact.id})`);
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id
+              });
+            }

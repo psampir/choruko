@@ -141,6 +141,14 @@ jobs:
           path: /tmp/${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar.gz
           retention-days: 1
           
+  # After you've used the artifacts in a deployment workflow, call the cleanup:
+  # cleanup:
+  #   needs: [build, deploy]
+  #   uses: ./.github/workflows/cleanup-artifacts.yml
+  #   with:
+  #     run_id: ${{ github.run_id }}
+  #     artifact_name: "choruko-.*"
+          
   # deploy:
   #   needs: build
   #   uses: ./.github/workflows/deploy.yml
