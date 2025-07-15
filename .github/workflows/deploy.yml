@@ -20,3 +20,14 @@ jobs:
         uses: ./.github/actions/ssh_execute
         with:
           command: "echo 'SSH connection successful!'"
+
+      - name: check cache
+        run: |
+          echo "Checking cache usage..."
+          curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository_owner }}/choruko/actions/cache/usage" | \
+            jq '{
+              total_active_caches: .active_caches_count,
+              active_cache_size_mb: (.active_caches_size_in_bytes / 1024 / 1024 | round),
+              total_cache_entries: .total_count
+            }'
