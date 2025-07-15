@@ -1,6 +1,11 @@
 name: Build App
 
 on:
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - .github/workflows/build.yml
   workflow_dispatch:
     inputs:
       branch:
@@ -29,7 +34,7 @@ on:
     types: [published]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -115,3 +120,15 @@ jobs:
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest"
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}"
           push: true
+
+      - name: Upload Docker image as artifact
+        if: ${{ steps.vars.outputs.BRANCH != 'main' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.image.name }}-${{ steps.prefix.outputs.BRANCH_PREFIX }}
+          path: ${{ steps.prefix.outputs.BRANCH_PREFIX }}.tar.gz
+
+  # deploy:
+  #   needs: build
+  #   uses: ./.github/workflows/deploy.yml
+  #   with:
