@@ -25,24 +25,19 @@ public class AuthService
             FirstName = registrationDto.FirstName,
             LastName = registrationDto.LastName,
         };
-
-        // Attempt to create the user with the provided password
+        
         var result = await _userManager.CreateAsync(user, registrationDto.Password);
 
         if (result.Succeeded)
         {
-            // Ensure the "None" role exists
             if (!await _roleManager.RoleExistsAsync("None"))
             {
                 await _roleManager.CreateAsync(new IdentityRole("None"));
             }
-
-            // Assign the "None" role to the newly registered user
+            
             var roleResult = await _userManager.AddToRoleAsync(user, "None");
             if (!roleResult.Succeeded)
             {
-                // If role assignment fails, you might want to log this or handle it
-                // For now, we'll add the errors to the main result, though CreateAsync already succeeded.
                 foreach (var error in roleResult.Errors)
                 {
                     result.Errors.Append(error);
