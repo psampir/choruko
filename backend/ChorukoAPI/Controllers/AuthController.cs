@@ -1,4 +1,5 @@
 using ChorukoAPI.DTOs.User;
+using ChorukoAPI.Services.Abstraction;
 using ChorukoAPI.Services.Implementation;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -7,15 +8,8 @@ namespace ChorukoAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
-{
-    private readonly AuthService _authService;
-
-    public AuthController(AuthService authService)
-    {
-        _authService = authService;
-    }
-    
+public class AuthController(IAuthService _authService) : ControllerBase
+{    
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] UserRegistrationDto registrationDto)
     {
