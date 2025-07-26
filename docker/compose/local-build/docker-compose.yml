@@ -1,11 +1,11 @@
-name: choruko_test
+name: choruko
 
 services:
   frontend:
     build:
       context: ../../../
       dockerfile: docker/Dockerfiles/frontend/Dockerfile
-    container_name: choruko_test_frontend
+    container_name: choruko_frontend
     restart: unless-stopped
     env_file:
       - .env
@@ -15,7 +15,7 @@ services:
     build:
       context: ../../../
       dockerfile: docker/Dockerfiles/backend/Dockerfile
-    container_name: choruko_test_backend
+    container_name: choruko_backend
     restart: unless-stopped
     env_file:
       - .env
@@ -31,7 +31,7 @@ services:
     build:
       context: ../../../
       dockerfile: docker/Dockerfiles/manager/Dockerfile
-    container_name: choruko_test_mgr
+    container_name: choruko_mgr
     restart: unless-stopped
     env_file:
       - .env
