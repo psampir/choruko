@@ -1,6 +1,7 @@
 using ChorukoAPI.Data;
 using ChorukoAPI.Models;
-using ChorukoAPI.Services;
+using ChorukoAPI.Services.Abstraction;
+using ChorukoAPI.Services.Implementation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -40,7 +41,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<DataContext>().AddDefaultTokenProviders();
 
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
 

@@ -1,21 +1,13 @@
-using ChorukoAPI.DTOs;
+using ChorukoAPI.DTOs.User;
 using ChorukoAPI.Models;
+using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
-namespace ChorukoAPI.Services;
+namespace ChorukoAPI.Services.Implementation;
 
-public class AuthService
+public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRole> _roleManager) : IAuthService
 {
-    private readonly UserManager<User> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-
-    public AuthService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
-    {
-        _userManager = userManager;
-        _roleManager = roleManager;
-    }
-    
     public async Task<IdentityResult> RegisterUserAsync(UserRegistrationDto registrationDto)
     {
         var user = new User
@@ -25,7 +17,7 @@ public class AuthService
             FirstName = registrationDto.FirstName,
             LastName = registrationDto.LastName,
         };
-        
+
         var result = await _userManager.CreateAsync(user, registrationDto.Password);
 
         if (result.Succeeded)
@@ -34,7 +26,7 @@ public class AuthService
             {
                 await _roleManager.CreateAsync(new IdentityRole("None"));
             }
-            
+
             var roleResult = await _userManager.AddToRoleAsync(user, "None");
             if (!roleResult.Succeeded)
             {
