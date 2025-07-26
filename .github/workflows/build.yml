@@ -84,7 +84,7 @@ jobs:
         if: ${{ steps.vars.outputs.BRANCH != 'main' }}
         id: prefix
         run: |
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          TIMESTAMP=$(date +%Y%m%d%H%M)
           echo "BRANCH_PREFIX=${{ steps.vars.outputs.BRANCH }}-${TIMESTAMP}" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
