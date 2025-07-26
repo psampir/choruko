@@ -1,5 +1,5 @@
-using ChorukoAPI.DTOs;
-using ChorukoAPI.Services;
+using ChorukoAPI.DTOs.User;
+using ChorukoAPI.Services.Implementation;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
