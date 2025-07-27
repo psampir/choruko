@@ -92,8 +92,8 @@ jobs:
           export BACKEND_IMAGE="${{ steps.vars.outputs.BACKEND_IMAGE }}"
           export MANAGER_IMAGE="${{ steps.vars.outputs.MANAGER_IMAGE }}"
           
-          # Create docker-compose.yml from template using envsubst
-          envsubst < ./.github/files/docker-compose.template.yml > ./.github/files/docker-compose.yml
+          # Create docker-compose.yml from template using envsubst with only specific variables
+          envsubst '${FRONTEND_IMAGE},${BACKEND_IMAGE},${MANAGER_IMAGE}' < ./.github/files/docker-compose.template.yml > ./.github/files/docker-compose.yml
 
           # Display the generated file (for debugging, can remove in production)
           cat ./.github/files/docker-compose.yml
@@ -115,6 +115,6 @@ jobs:
         with:
           command: |
             cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d
+            docker compose down
+            docker compose pull
+            docker compose up -d
