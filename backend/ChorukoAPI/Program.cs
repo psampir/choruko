@@ -1,6 +1,8 @@
 using ChorukoAPI.Data;
 using ChorukoAPI.Models;
-using ChorukoAPI.Services;
+using ChorukoAPI.Services.Abstraction;
+using ChorukoAPI.Services.Implementation;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -9,11 +11,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddOpenApi();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("oauth2", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey
+    });
+    options.OperationFilter<Swashbuckle.AspNetCore.Filters.SecurityRequirementsOperationFilter>();
+});
 
 
 builder.Services.AddDbContext<DataContext>(options => options
 .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseLazyLoadingProxies());
+
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
@@ -40,7 +53,21 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<DataContext>().AddDefaultTokenProviders();
 
-builder.Services.AddScoped<AuthService>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "ChorukoCookie";
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+    options.LoginPath = "/api/Auth/login";
+    //options.LogoutPath = "/api/Auth/logout";
+    //options.AccessDeniedPath = "api/Auth/accessDenied";
+    options.SlidingExpiration = true;
+});
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
 
@@ -59,7 +86,13 @@ using (var scope = app.Services.CreateScope())
             Console.WriteLine($"Role '{roleName}' created.");
         }
     }
-} 
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 
