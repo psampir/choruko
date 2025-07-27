@@ -1,5 +1,9 @@
 name: Test Env Pipeline
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   pull_request:
     branches:
