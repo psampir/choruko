@@ -1,5 +1,5 @@
 name: SSH File Send
-description: Send files to a remote server via SSH
+description: Send a file to a remote server using SCP
 
 inputs:
   source:
@@ -12,9 +12,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Create destination directory if it doesn't exist
+    - name: Send a file via SCP
       shell: bash
-      run: ssh github-actions@choruko "mkdir -p '${{ inputs.destination }}'"
-    - name: Send files via SSH
-      shell: bash
-      run: scp -r ${{ inputs.source }} github-actions@choruko:${{ inputs.destination }}
+      run: scp ${{ inputs.source }} github-actions@choruko:${{ inputs.destination }}
