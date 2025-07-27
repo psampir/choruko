@@ -1,0 +1,20 @@
+name: SSH File Send
+description: Send files to a remote server via SSH
+
+inputs:
+  source:
+    description: 'Path to the file or directory to send'
+    required: true
+  destination:
+    description: 'Path on the remote server where the file or directory should be sent'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create destination directory if it doesn't exist
+      shell: bash
+      run: ssh github-actions@choruko "mkdir -p '${{ inputs.destination }}'"
+    - name: Send files via SSH
+      shell: bash
+      run: scp -r ${{ inputs.source }} github-actions@choruko:${{ inputs.destination }}
