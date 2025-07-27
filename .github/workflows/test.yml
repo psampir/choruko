@@ -5,7 +5,7 @@ on:
     branches:
       - actions_test
     paths:
-      - .github/workflows/dev.yml
+      - .github/workflows/test.yml
   push:
     branches:
       - dev
