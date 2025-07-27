@@ -9,7 +9,11 @@
   width: 100%;
   touch-action: pan-y;
 
-  .join-or-create-household__buttons{
+  &__title {
+      margin-top: 10px;
+    }
+
+  &__buttons{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -23,4 +27,7 @@
 .join-or-create-household button {
   width: 200px;
   height: 48px;
+  :hover{
+    outline: none;
+  }
 }
