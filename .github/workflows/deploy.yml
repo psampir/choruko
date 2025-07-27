@@ -37,6 +37,13 @@ on:
         description: 'Environment to deploy to'
         type: string
         required: true
+    secrets:
+      SSH_PRIVATE_KEY:
+        required: true
+      SERVER_IP_ADDRESS:
+        required: true
+      CR_PAT:
+        required: true
 
 jobs:
   deploy:
@@ -83,8 +90,8 @@ jobs:
           command: |
             echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      # - name: Deploy application
-      #   uses: ./.github/actions/ssh_file_send
-      #   with:
-      #     source: ./docker-compose.yml
-      #     destination: /srv/docker-compose/choruko
+      - name: Access secrets example
+        run: |
+          # Example of how to use the secrets (don't echo secrets in production)
+          echo "Deploying to ${{ inputs.environment }} environment"
+          echo "Using secrets to authenticate and connect to server ${{ secrets.SERVER_IP_ADDRESS }}"
