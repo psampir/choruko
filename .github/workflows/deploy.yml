@@ -1,3 +1,4 @@
+# Deploys the Choruko app to a server using Docker Compose.
 name: Deploy App
 
 on:
@@ -74,11 +75,6 @@ jobs:
           server-ip-address: ${{ secrets.SERVER_IP_ADDRESS }}
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Test SSH connection
-        uses: ./.github/actions/ssh_execute
-        with:
-          command: "echo 'SSH connection successful!'"
-
       - name: Login to GitHub Container Registry
         uses: ./.github/actions/ssh_execute
         with:
@@ -111,11 +107,30 @@ jobs:
           source: "./.github/files/${{ steps.vars.outputs.ENVIRONMENT }}.env"
           destination: "/srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}/.env"
 
-      - name: Deploy with docker-compose
+      - name: Stop and remove existing containers
         uses: ./.github/actions/ssh_execute
         with:
           command: |
             cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
             docker compose down
+
+      - name: Pull latest images
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
             docker compose pull
+
+      - name: Start containers
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
             docker compose up -d
+
+      - name: Clean up unused images
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
+            docker image prune -a -f
