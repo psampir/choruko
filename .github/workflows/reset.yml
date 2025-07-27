@@ -28,21 +28,14 @@ jobs:
           server-ip-address: ${{ secrets.SERVER_IP_ADDRESS }}
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Stop and remove existing containers
+      - name: Stop and remove existing containers with volumes
         uses: ./.github/actions/ssh_execute
         with:
           command: |
             cd /srv/docker-compose/choruko-${{ github.event.inputs.environment }}
-            docker compose down
+            docker compose down -v
 
-      - name: Remove database and app data
-        uses: ./.github/actions/ssh_execute
-        with:
-          command: |
-            rm -rf /srv/storage/choruko-${{ github.event.inputs.environment }}/app_data
-            rm -rf /srv/storage/choruko-${{ github.event.inputs.environment }}/db_data
-
-      - name: Start containers
+      - name: Create and start containers
         uses: ./.github/actions/ssh_execute
         with:
           command: |
