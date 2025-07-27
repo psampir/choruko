@@ -95,13 +95,6 @@ jobs:
           # Display the generated file (for debugging, can remove in production)
           cat ./.github/files/docker-compose.yml
 
-      - name: Stop and remove existing containers
-        uses: ./.github/actions/ssh_execute
-        with:
-          command: |
-            cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
-            docker compose down || return 0
-
       - name: Copy docker-compose.yml to the server
         uses: ./.github/actions/ssh_file_send
         with:
@@ -113,6 +106,13 @@ jobs:
         with:
           source: "./.github/files/${{ steps.vars.outputs.ENVIRONMENT }}.env"
           destination: "/srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}/.env"
+
+      - name: Stop and remove existing containers
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
+            docker compose down
 
       - name: Pull latest images
         uses: ./.github/actions/ssh_execute
