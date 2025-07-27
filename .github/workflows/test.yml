@@ -19,7 +19,7 @@ jobs:
   build:
     uses: ./.github/workflows/build.yml
     with:
-      branch: dev
+      branch: 48-add-app-deployment-pipeline
   deploy:
     needs: build
     uses: ./.github/workflows/deploy.yml
