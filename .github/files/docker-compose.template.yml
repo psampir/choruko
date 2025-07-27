@@ -17,7 +17,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ${APP_DATA_LOCATION}:/usr/src/app/upload
+      - app_data:/usr/src/app/upload
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       database:
@@ -48,7 +48,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_DATABASE_NAME}
     volumes:
-      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE_NAME}"]
       interval: 5s
