@@ -23,3 +23,7 @@ jobs:
       backend_image: ${{ needs.build.outputs.backend_image }}
       manager_image: ${{ needs.build.outputs.manager_image }}
       environment: test
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SERVER_IP_ADDRESS: ${{ secrets.SERVER_IP_ADDRESS }}
+      CR_PAT: ${{ secrets.CR_PAT }}
