@@ -36,3 +36,9 @@ runs:
         echo "  User github-actions" >> ~/.ssh/config
         echo "  Port 22" >> ~/.ssh/config
         echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
+
+    - name: Test SSH connection (fail if connection fails)
+      shell: bash
+      run: |
+        ssh github-actions@${{ inputs.server-ip-address }} "echo 'SSH connection successful!'"
+      continue-on-error: false
