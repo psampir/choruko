@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRole> _roleManager) : IAuthService
+public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRole> _roleManager,
+    SignInManager<User> _signInManager, IHttpContextAccessor _contextAccessor) : IAuthService
 {
     public async Task<IdentityResult> RegisterUserAsync(UserRegistrationDto registrationDto)
     {
@@ -38,5 +39,31 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         }
 
         return result;
+    }
+
+    public async Task<SignInResult> LoginUserAsync(UserLoginDto loginDto)
+    {
+        var user = await _userManager.FindByEmailAsync(loginDto.Email);
+        if (user == null) 
+        {
+            return SignInResult.Failed; 
+        }
+
+        var result = await _signInManager.PasswordSignInAsync(
+            user, loginDto.Password, isPersistent: false, lockoutOnFailure: false);
+
+        return result;
+    }
+
+    public async Task<UserInfoDto> GetUserInfoAsync()
+    {
+        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext.User);
+
+        if (user == null)
+        {
+            throw new Exception("User is not authenticated.");
+        }
+
+        return new UserInfoDto(user.FirstName, user.LastName, user.Email);
     }
 }
