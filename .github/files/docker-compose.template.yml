@@ -5,6 +5,11 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    depends_on:
+      - backend
+    networks:
+      - reverse_proxy
+      - default
   backend:
     image: ${BACKEND_IMAGE}
     container_name: choruko_${ENVIRONMENT}_backend
