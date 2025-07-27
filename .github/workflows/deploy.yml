@@ -3,8 +3,16 @@ name: Deploy App
 on:
   workflow_dispatch:
     inputs:
-      image_tag:
-        description: 'Image tag to deploy'
+      frontend_image:
+        description: 'Frontend image tag to deploy'
+        type: string
+        required: true
+      backend_image:
+        description: 'Backend image tag to deploy'
+        type: string
+        required: true
+      manager_image:
+        description: 'Manager image tag to deploy'
         type: string
         required: true
       environment:
@@ -13,8 +21,16 @@ on:
         required: true
   workflow_call:
     inputs:
-      image_tag:
-        description: 'Image tag to deploy'
+      frontend_image:
+        description: 'Frontend image tag to deploy'
+        type: string
+        required: true
+      backend_image:
+        description: 'Backend image tag to deploy'
+        type: string
+        required: true
+      manager_image:
+        description: 'Manager image tag to deploy'
         type: string
         required: true
       environment:
@@ -30,11 +46,15 @@ jobs:
       - name: Get input variables
         id: vars
         run: |
-          if [ -n "${{ inputs.image_tag }}" ]; then
-            echo "IMAGE_TAG=${{ inputs.image_tag }}" >> $GITHUB_OUTPUT
+          if [ -n "${{ inputs.environment }}" ]; then
+            echo "FRONTEND_IMAGE=${{ inputs.frontend_image }}" >> $GITHUB_OUTPUT
+            echo "BACKEND_IMAGE=${{ inputs.backend_image }}" >> $GITHUB_OUTPUT
+            echo "MANAGER_IMAGE=${{ inputs.manager_image }}" >> $GITHUB_OUTPUT
             echo "ENVIRONMENT=${{ inputs.environment }}" >> $GITHUB_OUTPUT
           else
-            echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_OUTPUT
+            echo "FRONTEND_IMAGE=${{ github.event.inputs.frontend_image }}" >> $GITHUB_OUTPUT
+            echo "BACKEND_IMAGE=${{ github.event.inputs.backend_image }}" >> $GITHUB_OUTPUT
+            echo "MANAGER_IMAGE=${{ github.event.inputs.manager_image }}" >> $GITHUB_OUTPUT
             echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
           fi
 
@@ -57,10 +77,6 @@ jobs:
         with:
           command: |
             echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-
-      - name: Debug image tag
-        run: |
-          echo "Image tag: ${{ steps.vars.outputs.IMAGE_TAG }}"
 
       # - name: Deploy application
       #   uses: ./.github/actions/ssh_file_send
