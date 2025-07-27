@@ -5,8 +5,6 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    ports:
-      - "${CHORUKO_PORT:-2467}:80"
   backend:
     image: ${BACKEND_IMAGE}
     container_name: choruko_${ENVIRONMENT}_backend
