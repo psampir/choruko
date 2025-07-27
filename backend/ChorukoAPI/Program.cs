@@ -27,6 +27,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<DataContext>(options => options
 .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseLazyLoadingProxies());
 
+
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     // Password settings (you can customize these further based on your security requirements)
@@ -51,6 +52,20 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.SignIn.RequireConfirmedPhoneNumber = false;
 })
 .AddEntityFrameworkStores<DataContext>().AddDefaultTokenProviders();
+
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "ChorukoCookie";
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+    options.LoginPath = "/api/Auth/login";
+    //options.LogoutPath = "/api/Auth/logout";
+    //options.AccessDeniedPath = "api/Auth/accessDenied";
+    options.SlidingExpiration = true;
+});
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 
