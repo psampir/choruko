@@ -33,6 +33,8 @@ on:
 
 jobs:
   build:
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.IMAGE_TAG }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -123,3 +125,12 @@ jobs:
           push: true
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache,mode=max
+          
+      - name: Return image tag
+        id: image_tag
+        run: |
+          if [ "${{ steps.vars.outputs.BRANCH }}" == "main" ]; then
+            echo "IMAGE_TAG=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}" >> $GITHUB_OUTPUT
+          else
+            echo "IMAGE_TAG=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.prefix.outputs.BRANCH_PREFIX }}" >> $GITHUB_OUTPUT
+          fi
