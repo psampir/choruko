@@ -9,6 +9,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    depends_on:
+      - backend
     ports:
       - "${CHORUKO_PORT:-2467}:80"
   backend:
