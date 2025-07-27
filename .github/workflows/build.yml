@@ -167,5 +167,3 @@ jobs:
       frontend_image: ${{ steps.set_outputs.outputs.frontend_image }}
       backend_image: ${{ steps.set_outputs.outputs.backend_image }}
       manager_image: ${{ steps.set_outputs.outputs.manager_image }}
-
-
