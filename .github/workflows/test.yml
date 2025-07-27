@@ -1,0 +1,23 @@
+name: Test Env Pipeline
+
+on:
+  pull_request:
+    branches:
+      - actions_test
+    paths:
+      - .github/workflows/dev.yml
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      branch: dev
+  deploy:
+    needs: build
+    uses: ./.github/workflows/deploy.yml
+    with:
+      image_tag: ${{ needs.build.outputs.image_tag }}
+      environment: test
