@@ -30,12 +30,24 @@ on:
         type: string
         required: false
         default: ''
+    outputs:
+      frontend_image:
+        description: 'Frontend image tag'
+        value: ${{ jobs.summary.outputs.frontend_image }}
+      backend_image:
+        description: 'Backend image tag'
+        value: ${{ jobs.summary.outputs.backend_image }}
+      manager_image:
+        description: 'Manager image tag'
+        value: ${{ jobs.summary.outputs.manager_image }}
 
 jobs:
   build:
-    outputs:
-      image_tag: ${{ steps.image_tag.outputs.IMAGE_TAG }}
     runs-on: ubuntu-latest
+    outputs:
+      frontend_tag: ${{ steps.image_tag.outputs.frontend_tag }}
+      backend_tag: ${{ steps.image_tag.outputs.backend_tag }}
+      manager_tag: ${{ steps.image_tag.outputs.manager_tag }}
     strategy:
       matrix:
         image:
@@ -119,15 +131,41 @@ jobs:
           tags: |
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest"
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}"
-          push: true
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache,mode=max
-          
       - name: Return image tag
         id: image_tag
         run: |
           if [ "${{ steps.vars.outputs.BRANCH }}" == "main" ]; then
-            echo "IMAGE_TAG=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}" >> $GITHUB_OUTPUT
+            IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}"
           else
-            echo "IMAGE_TAG=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.prefix.outputs.BRANCH_PREFIX }}" >> $GITHUB_OUTPUT
+            IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.prefix.outputs.BRANCH_PREFIX }}"
           fi
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          
+          # Set specific output variables based on which image is being built
+          if [[ "${{ matrix.image.name }}" == "choruko-frontend" ]]; then
+            echo "frontend_tag=${IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
+            echo "frontend_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          elif [[ "${{ matrix.image.name }}" == "choruko-backend" ]]; then
+            echo "backend_tag=${IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
+            echo "backend_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          elif [[ "${{ matrix.image.name }}" == "choruko-manager" ]]; then
+            echo "manager_tag=${IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
+            echo "manager_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          fi
+  
+  summary:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set outputs
+        id: set_outputs
+        run: |
+          echo "frontend_image=${{ needs.build.outputs.frontend_tag }}" >> $GITHUB_OUTPUT
+          echo "backend_image=${{ needs.build.outputs.backend_tag }}" >> $GITHUB_OUTPUT
+          echo "manager_image=${{ needs.build.outputs.manager_tag }}" >> $GITHUB_OUTPUT
+    outputs:
+      frontend_image: ${{ steps.set_outputs.outputs.frontend_image }}
+      backend_image: ${{ steps.set_outputs.outputs.backend_image }}
+      manager_image: ${{ steps.set_outputs.outputs.manager_image }}
+
+
