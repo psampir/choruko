@@ -24,5 +24,7 @@ jobs:
     needs: build
     uses: ./.github/workflows/deploy.yml
     with:
-      image_tag: ${{ needs.build.outputs.image_tag }}
+      frontend_image: ${{ needs.build.outputs.frontend_image }}
+      backend_image: ${{ needs.build.outputs.backend_image }}
+      manager_image: ${{ needs.build.outputs.manager_image }}
       environment: test
