@@ -61,6 +61,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Debug server-ip-address and ssh-private-key
+        run: |
+          echo "Server IP: ${{ secrets.SERVER_IP_ADDRESS != '' && 'set' || 'empty' }}"
+          echo "SSH Private Key: ${{ secrets.SSH_PRIVATE_KEY != '' && 'set' || 'empty' }}"
+
       - name: Set up SSH
         uses: ./.github/actions/ssh_setup
         with:
