@@ -30,15 +30,12 @@ jobs:
       - name: Get input variables
         id: vars
         run: |
-          if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
-            echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_OUTPUT
-            echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" == 'workflow_call' ]; then
+          if [ -n "${{ inputs.image_tag }}" ]; then
             echo "IMAGE_TAG=${{ inputs.image_tag }}" >> $GITHUB_OUTPUT
             echo "ENVIRONMENT=${{ inputs.environment }}" >> $GITHUB_OUTPUT
           else
-            echo "Unknown event type: ${GITHUB_EVENT_NAME}"
-            exit 1
+            echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_OUTPUT
+            echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Checkout code

@@ -50,15 +50,12 @@ jobs:
       - name: Get input variables
         id: vars
         run: |
-          if [ "${{ github.event_name }}" == 'workflow_dispatch' ]; then
-            echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
-            echo "RELEASE_TAG=${{ github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" == 'workflow_call' ]; then
+          if [ -n "${{ inputs.branch }}" ]; then
             echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_OUTPUT
             echo "RELEASE_TAG=${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "Unknown event type: ${GITHUB_EVENT_NAME}"
-            exit 1
+            echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
+            echo "RELEASE_TAG=${{ github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Fail if release tag not provided
