@@ -5,6 +5,11 @@ permissions:
   packages: write
 
 on:
+  pull_request:
+    branches:
+      - actions_test
+    paths:
+      - .github/workflows/env-test.yml
   workflow_dispatch:
   push:
     branches:
