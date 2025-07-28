@@ -92,7 +92,7 @@ jobs:
           # Create docker-compose.yml from template using envsubst with only specific variables
           envsubst '${FRONTEND_IMAGE},${BACKEND_IMAGE},${MANAGER_IMAGE},${ENVIRONMENT}' < ./.github/files/docker-compose.template.yml > ./.github/files/docker-compose.yml
 
-          # Display the generated file (for debugging, can remove in production)
+          # Display the generated file
           cat ./.github/files/docker-compose.yml
 
       - name: Copy docker-compose.yml to the server
