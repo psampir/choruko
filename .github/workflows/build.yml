@@ -134,6 +134,9 @@ jobs:
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest"
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:release"
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.BRANCH }}"
+          push: true
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache,mode
       
       - name: Return image tag
         id: image_tag
