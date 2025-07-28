@@ -5,6 +5,11 @@ permissions:
   packages: write
 
 on:
+  pull_request:
+    branches:
+      - actions_prod
+    paths:
+      - .github/workflows/env-prod.yml
   workflow_dispatch:
     inputs:
       release_tag:
