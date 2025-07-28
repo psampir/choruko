@@ -1,12 +1,7 @@
-# Resets the Choruko app to a clean state
+# Resets the Choruko app to a clean state on the specified environment.
 name: Reset App
 
 on:
-  pull_request:
-    branches:
-      - actions_test
-    paths:
-      - .github/workflows/reset.yml
   workflow_dispatch:
     inputs:
       environment:
