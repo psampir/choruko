@@ -25,6 +25,7 @@ jobs:
     outputs:
       RELEASE_TAG: ${{ steps.vars.outputs.RELEASE_TAG }}
     steps:
+      
       - name: Get input variables
         id: vars
         run: |
@@ -33,12 +34,22 @@ jobs:
           else
             echo "RELEASE_TAG=${{ github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
           fi
+      
+      - name: Validate release tag
+        run: |
+          # if RELEASE_TAG not set, fail the job
+          if [ -z "${{ steps.vars.outputs.RELEASE_TAG }}" ]; then
+            echo "RELEASE_TAG is not set. Please provide a valid release tag."
+            exit 1
+          fi
+  
   build:
     needs: prepare
     uses: ./.github/workflows/build.yml
     with:
       branch: ${{ needs.prepare.outputs.RELEASE_TAG }}
       release: true
+  
   deploy:
     needs: build
     uses: ./.github/workflows/deploy.yml
@@ -51,6 +62,7 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       SERVER_IP_ADDRESS: ${{ secrets.SERVER_IP_ADDRESS }}
       CR_PAT: ${{ secrets.CR_PAT }}
+  
   ghcr_cleanup:
     needs: deploy
     uses: ./.github/workflows/ghcr-cleanup.yml

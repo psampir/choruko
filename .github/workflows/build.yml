@@ -42,6 +42,7 @@ on:
         value: ${{ jobs.summary.outputs.manager_image }}
 
 jobs:
+  
   build:
     runs-on: ubuntu-latest
     outputs:
