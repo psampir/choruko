@@ -9,15 +9,15 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to build from'
+        description: 'Branch or tag to build from'
         type: string
         required: true
         default: 'dev'
-      release_tag:
-        description: 'Release tag for the build'
-        type: string
-        required: false
-        default: ''
+      release:
+        description: 'Is this a release build?'
+        type: boolean
+        required: true
+        default: false
   workflow_call:
     inputs:
       branch:
@@ -25,11 +25,11 @@ on:
         type: string
         required: true
         default: 'dev'
-      release_tag:
-        description: 'Release tag for the build'
-        type: string
-        required: false
-        default: ''
+      release:
+        description: 'Is this a release build?'
+        type: boolean
+        required: true
+        default: false
     outputs:
       frontend_image:
         description: 'Frontend image tag'
@@ -64,35 +64,35 @@ jobs:
         run: |
           if [ -n "${{ inputs.branch }}" ]; then
             echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_OUTPUT
-            echo "RELEASE_TAG=${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
+            echo "RELEASE=${{ inputs.release }}" >> $GITHUB_OUTPUT
           else
             echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
-            echo "RELEASE_TAG=${{ github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Fail if release tag not provided
-        if: ${{ steps.vars.outputs.BRANCH == 'main' }}
-        run: |
-          if [ -z "${{ steps.vars.outputs.RELEASE_TAG }}" ]; then
-            echo "Release tag is required for main branch."
-            exit 1
+            echo "RELEASE=${{ github.event.inputs.release }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ steps.vars.outputs.BRANCH }}
+
+      - name: Check if tag exists in the repository
+        if: ${{ steps.vars.outputs.RELEASE == 'true' }}
+        run: |
+          if ! git show-ref --verify --quiet refs/tags/${{ steps.vars.outputs.BRANCH }}; then
+            echo "Tag ${{ steps.vars.outputs.BRANCH }} does not exist in the repository."
+            exit 1
+          fi
 
       - name: Check if branch exists in the repository
-        if: ${{ steps.vars.outputs.BRANCH != 'main' }}
+        if: ${{ steps.vars.outputs.RELEASE == 'false' }}
         run: |
           if ! git show-ref --verify --quiet refs/heads/${{ steps.vars.outputs.BRANCH }}; then
             echo "Branch ${{ steps.vars.outputs.BRANCH }} does not exist in the repository."
             exit 1
           fi
 
-      - name: Set Docker image tag for branch
-        if: ${{ steps.vars.outputs.BRANCH != 'main' }}
+      - name: Set Docker image tag for non-release builds
+        if: ${{ steps.vars.outputs.RELEASE == 'false' }}
         id: prefix
         run: |
           TIMESTAMP=$(date +%Y%m%d%H%M)
@@ -108,8 +108,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push ${{ matrix.image.name }} image (non-main branch)
-        if: ${{ steps.vars.outputs.BRANCH != 'main' }}
+      - name: Build and push ${{ matrix.image.name }} image (non-release)
+        if: ${{ steps.vars.outputs.RELEASE == 'false' }}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -122,8 +122,8 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache,mode=max
 
-      - name: Build and push ${{ matrix.image.name }} image (main branch)
-        if: ${{ steps.vars.outputs.BRANCH == 'main' }}
+      - name: Build and push ${{ matrix.image.name }} image (release)
+        if: ${{ steps.vars.outputs.RELEASE == 'true' }}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -132,12 +132,13 @@ jobs:
           tags: |
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:latest"
             "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:release"
-            "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}"
+            "ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.BRANCH }}"
+      
       - name: Return image tag
         id: image_tag
         run: |
-          if [ "${{ steps.vars.outputs.BRANCH }}" == "main" ]; then
-            IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.RELEASE_TAG }}"
+          if [ "${{ steps.vars.outputs.RELEASE }}" == "true" ]; then
+            IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.vars.outputs.BRANCH }}"
           else
             IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:${{ steps.prefix.outputs.BRANCH_PREFIX }}"
           fi
