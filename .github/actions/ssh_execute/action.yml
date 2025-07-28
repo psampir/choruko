@@ -1,0 +1,14 @@
+name: SSH Execute
+description: Execute commands on a remote server via SSH
+
+inputs:
+  command:
+    description: 'Command to execute on the remote server'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Execute command
+      shell: bash
+      run: ssh github-actions@choruko "${{ inputs.command }}"
