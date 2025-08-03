@@ -1,0 +1,112 @@
+.navbar-mobile {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &-container {
+    display: flex;
+    position: fixed;
+    top: 0;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+    padding: 10px 20px;
+    background-color: #95d2b3;
+    width: 100%;
+    z-index: 1001;
+
+    .theme-toggle,
+    .profile-icon {
+      cursor: pointer;
+
+      img {
+        width: 46px;
+        height: 46px;
+      }
+    }
+  }
+
+  .theme-dropdown {
+    position: fixed;
+    top: 70px;
+    left: 43px;
+    background-color: #95d2b3;
+    border-radius: 0 0 15px 15px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000;
+    transform: translate(-50%, 0%) translateY(-200px);
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.7s ease;
+
+  &.open {
+      transform: translate(-50%, 0%) translateY(0);
+      opacity: 1;
+    }
+
+    .dark-theme-icon, .default-theme-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      cursor: pointer;
+
+      .letter-icon {
+        font-size: 18px;
+        font-weight: bold;
+        color: #55ad9b;
+      }
+    }
+  }
+
+  .profile-popup{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    background-color: #95d2b3;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    z-index: 1000;
+
+    img {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    h5, p {
+      margin: 0;
+      color: #55ad9b;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+
+      li {
+        cursor: pointer;
+        color: #55ad9b;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+      &.open {
+      opacity: 1;
+    }
+  }
+
+}
