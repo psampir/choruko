@@ -42,12 +42,13 @@
     opacity: 0;
     transition: opacity 0.5s ease, transform 0.7s ease;
 
-  &.open {
+    &.open {
       transform: translate(-50%, 0%) translateY(0);
       opacity: 1;
     }
 
-    .dark-theme-icon, .default-theme-icon {
+    .dark-theme-icon,
+    .default-theme-icon {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -63,50 +64,74 @@
       }
     }
   }
-
-  .profile-popup{
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    background-color: #95d2b3;
-    border-radius: 15px;
-    padding: 20px;
+  .profile__popup-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    transform: translate(-50%, -50%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
     opacity: 0;
-    z-index: 1000;
+    transition: all 0.2s ease;
 
-    img {
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      cursor: pointer;
+    &.active {
+      opacity: 1;
+      z-index: 1002;
     }
 
-    h5, p {
-      margin: 0;
-      color: #55ad9b;
-    }
+    .profile-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 95%;
+      background-color: #e0f3db;
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 1003;
+      transform: translate(-50%, -50%);
 
-    ul {
-      list-style-type: none;
-      padding: 0;
+      .profile-popup__icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+      }
 
-      li {
-        cursor: pointer;
-        color: #55ad9b;
+      h5,
+      p {
+        margin: 0;
+      }
+      p {
+        font-weight: 600;
+      }
 
-        &:hover {
-          text-decoration: underline;
+      ul {
+        list-style-type: none;
+        padding: 0;
+        li {
+          
+          button {
+            margin-top: 10px;
+            width: 235px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding-right: 5px;
+            text-align: center;
+            img {
+              width: 28px;
+              height: 28px;
+              margin: 0 5px;
+
+            }
+          }
         }
       }
     }
-      &.open {
-      opacity: 1;
-    }
   }
-
 }
