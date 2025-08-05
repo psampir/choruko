@@ -46,6 +46,7 @@ const NavbarMobile = () => {
         onClick={profileClickHandler}
       >
         <div className="profile-popup">
+          <i className="profile-popup__close-icon" onClick={profileClickHandler}></i>
           <img src="/src/assets/svg/profile-icon.svg" alt="Profile" className="profile-popup__icon" />
           <h5>Username</h5>
           <p>Household Name</p>
