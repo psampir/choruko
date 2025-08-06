@@ -3,9 +3,10 @@ using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
-using ChorukoAPI.DTOs;
 using ChorukoAPI.Extensions;
 using System.Net;
+using ChorukoAPI.Contracts.DTOs.User;
+using ChorukoAPI.Contracts.DTOs;
 
 namespace ChorukoAPI.Services.Implementation;
 

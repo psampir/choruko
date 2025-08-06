@@ -1,8 +1,8 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace ChorukoAPI.DTOs.User;
+namespace ChorukoAPI.Contracts.Requests.User;
 
-public record UserRegistrationDto
+public record UserRegistrationRequest
 {
     [Required(ErrorMessage = "First name is required.")]
     [StringLength(256, ErrorMessage = "First name too long")]
