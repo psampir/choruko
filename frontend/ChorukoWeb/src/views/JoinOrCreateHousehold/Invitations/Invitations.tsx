@@ -8,17 +8,22 @@ interface Invitation {
   image: string;
 }
 
+
 function Invitations() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
 
   // Function outside return that adds a new invitation
   const newInvitation = () => {
-    const invitation : Invitation = {
+    const invitation = {
       id: Date.now(), // Simple ID for now
       name: "New Invitation",
       image: householdDefault,
     };
     setInvitations((prev) => [...prev, invitation]);
+  };
+
+  const declineInvitation = (id: number) => {
+    setInvitations((prev) => prev.filter((invitation) => invitation.id !== id));
   };
 
   // Add one invitation when component mounts
@@ -35,7 +40,7 @@ function Invitations() {
             <img src={invitation.image} alt={invitation.name} />
             <h6>{invitation.name}</h6>
             <span className="accept"></span>
-            <span className="decline"></span>
+            <span onClick={() => declineInvitation(invitation.id)} className="decline"></span>
           </li>
         ))}
       </ul>
