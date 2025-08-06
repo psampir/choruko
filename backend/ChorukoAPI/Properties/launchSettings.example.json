@@ -1,0 +1,27 @@
+﻿{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5180",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DB_HOST": "localhost",
+        "DB_PORT": "5432",
+        "DB_USERNAME": "developer",
+        "DB_PASSWORD": "developer",
+        "DB_DATABASE_NAME": "choruko_dev",
+        "APP_DATA_LOCATION": "./app_data",
+        "CURRENCY": "USD",
+        "ENABLE_EMAILS": "true",
+        "SMTP_HOST": "smtp.example.com",
+        "SMTP_PORT": "587",
+        "SMTP_USERNAME": "your@email.com",
+        "SMTP_PASSWORD": "your_password",
+        "SMTP_FROM": "Choruko App <no-reply@example.com>"
+      }
+    }
+  }
+}

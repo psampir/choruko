@@ -1,21 +1,23 @@
-name: choruko_test
+name: choruko
 
 services:
   frontend:
     build:
       context: ../../../
-      dockerfile: docker/Dockerfiles/frontend/Dockerfile.frontend
-    container_name: choruko_test_frontend
+      dockerfile: docker/Dockerfiles/frontend/Dockerfile
+    container_name: choruko_frontend
     restart: unless-stopped
     env_file:
       - .env
+    depends_on:
+      - backend
     ports:
       - "${CHORUKO_PORT:-2467}:80"
   backend:
     build:
       context: ../../../
-      dockerfile: docker/Dockerfiles/backend/Dockerfile.backend
-    container_name: choruko_test_backend
+      dockerfile: docker/Dockerfiles/backend/Dockerfile
+    container_name: choruko_backend
     restart: unless-stopped
     env_file:
       - .env
@@ -30,8 +32,8 @@ services:
   manager:
     build:
       context: ../../../
-      dockerfile: docker/Dockerfiles/manager/Dockerfile.manager
-    container_name: choruko_test_mgr
+      dockerfile: docker/Dockerfiles/manager/Dockerfile
+    container_name: choruko_mgr
     restart: unless-stopped
     env_file:
       - .env

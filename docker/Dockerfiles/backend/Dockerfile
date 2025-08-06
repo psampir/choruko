@@ -7,13 +7,13 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 WORKDIR /src
 
 # Copy the csproj file
-COPY backend/ChorukoAPI/ChorukoAPI.csproj .
+COPY backend/ChorukoAPI/ChorukoAPI.csproj ./ChorukoAPI.csproj
 
 # Install dependencies
-RUN dotnet restore
+RUN dotnet restore ./ChorukoAPI.csproj
 
 # Copy the source code
-COPY backend/ChorukoAPI/ .
+COPY backend/ChorukoAPI/ ./
 
 # Build the app
 RUN dotnet publish -c Release -o out
