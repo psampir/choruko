@@ -2,8 +2,15 @@ import { useState, useEffect } from "react";
 import "./Invitations.scss";
 import householdDefault from "/src/assets/svg/householdDefault.svg";
 
+interface Invitation {
+  id: number;
+  name: string;
+  image: string;
+}
+
+
 function Invitations() {
-  const [invitations, setInvitations] = useState<any[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
 
   // Function outside return that adds a new invitation
   const newInvitation = () => {
@@ -13,6 +20,10 @@ function Invitations() {
       image: householdDefault,
     };
     setInvitations((prev) => [...prev, invitation]);
+  };
+
+  const declineInvitation = (id: number) => {
+    setInvitations((prev) => prev.filter((invitation) => invitation.id !== id));
   };
 
   // Add one invitation when component mounts
@@ -29,7 +40,7 @@ function Invitations() {
             <img src={invitation.image} alt={invitation.name} />
             <h6>{invitation.name}</h6>
             <span className="accept"></span>
-            <span className="decline"></span>
+            <span onClick={() => declineInvitation(invitation.id)} className="decline"></span>
           </li>
         ))}
       </ul>
