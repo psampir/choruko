@@ -1,4 +1,4 @@
-﻿namespace ChorukoAPI.DTOs;
+﻿namespace ChorukoAPI.Contracts.DTOs;
 
 public record ApiResponse<T> where T : class?
 {

@@ -1,4 +1,5 @@
-﻿using ChorukoAPI.DTOs;
+﻿using ChorukoAPI.Contracts.DTOs;
+using ChorukoAPI.Contracts.DTOs.User;
 using ChorukoAPI.DTOs.User;
 using Microsoft.AspNetCore.Identity;
 
