@@ -33,11 +33,13 @@ const NavbarMobile = () => {
           src="/src/assets/svg/dark-theme.svg"
           alt="Dark Theme"
           className=" nav-theme-icon dark-theme-icon"
+          onClick={dropdownToggle}
         />
         <img
           src="/src/assets/svg/default-theme.svg"
           alt="Default Theme"
           className="theme-icon default-theme-icon"
+          onClick={dropdownToggle}
         />
       </div>
 
