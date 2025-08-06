@@ -2,12 +2,18 @@ import { useState, useEffect } from "react";
 import "./Invitations.scss";
 import householdDefault from "/src/assets/svg/householdDefault.svg";
 
+interface Invitation {
+  id: number;
+  name: string;
+  image: string;
+}
+
 function Invitations() {
-  const [invitations, setInvitations] = useState<any[]>([]);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
 
   // Function outside return that adds a new invitation
   const newInvitation = () => {
-    const invitation = {
+    const invitation : Invitation = {
       id: Date.now(), // Simple ID for now
       name: "New Invitation",
       image: householdDefault,
