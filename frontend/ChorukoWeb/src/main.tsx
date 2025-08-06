@@ -1,12 +1,16 @@
-import "./boot/detectNotch";
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.scss";
-import App from "./App";
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.scss'
+// import AuthContainer from './views/Auth/AuthContainer'
+// import JoinOrCreateHousehold from './views/JoinOrCreateHousehold/JoinOrCreateHouseholdOptions'
+import Invitations from './views/JoinOrCreateHousehold/Invitations/Invitations'
+// import CreateHousehold from './views/JoinOrCreateHousehold/CreateHousehold/CreateHousehold'
 
-
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
-  </StrictMode>
-);
+    {/* <AuthContainer />, */}
+    {/* <JoinOrCreateHousehold onJoinHousehold={() => {}} onCreateHousehold={() => {}} /> */}
+    <Invitations />
+    {/* <CreateHousehold /> */}
+  </StrictMode>,
+)
