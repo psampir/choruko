@@ -1,0 +1,17 @@
+name: SSH File Send
+description: Send a file to a remote server using SCP
+
+inputs:
+  source:
+    description: 'Path to the file or directory to send'
+    required: true
+  destination:
+    description: 'Path on the remote server where the file or directory should be sent'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Send a file via SCP
+      shell: bash
+      run: scp ${{ inputs.source }} github-actions@choruko:${{ inputs.destination }}

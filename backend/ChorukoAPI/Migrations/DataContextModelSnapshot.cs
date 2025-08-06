@@ -264,18 +264,23 @@ namespace ChorukoAPI.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -283,7 +288,6 @@ namespace ChorukoAPI.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("HouseholdId")
-                        .IsRequired()
                         .HasColumnType("varchar(36)");
 
                     b.Property<string>("LastName")
@@ -292,7 +296,9 @@ namespace ChorukoAPI.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
@@ -312,7 +318,9 @@ namespace ChorukoAPI.Migrations
                         .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("ProfilePicturePath")
                         .HasColumnType("text");
@@ -321,7 +329,9 @@ namespace ChorukoAPI.Migrations
                         .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -650,8 +660,7 @@ namespace ChorukoAPI.Migrations
                     b.HasOne("ChorukoAPI.Models.Household", "Household")
                         .WithMany("Participants")
                         .HasForeignKey("HouseholdId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Household");
                 });

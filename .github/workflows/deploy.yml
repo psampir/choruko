@@ -1,0 +1,137 @@
+# Deploys the Choruko app to a server using Docker Compose.
+name: Deploy App
+
+on:
+  workflow_dispatch:
+    inputs:
+      frontend_image:
+        description: 'Frontend image tag to deploy'
+        type: string
+        required: true
+      backend_image:
+        description: 'Backend image tag to deploy'
+        type: string
+        required: true
+      manager_image:
+        description: 'Manager image tag to deploy'
+        type: string
+        required: true
+      environment:
+        description: 'Environment to deploy to'
+        type: string
+        required: true
+  workflow_call:
+    inputs:
+      frontend_image:
+        description: 'Frontend image tag to deploy'
+        type: string
+        required: true
+      backend_image:
+        description: 'Backend image tag to deploy'
+        type: string
+        required: true
+      manager_image:
+        description: 'Manager image tag to deploy'
+        type: string
+        required: true
+      environment:
+        description: 'Environment to deploy to'
+        type: string
+        required: true
+    secrets:
+      SSH_PRIVATE_KEY:
+        required: true
+      SERVER_IP_ADDRESS:
+        required: true
+      CR_PAT:
+        required: true
+
+jobs:
+  
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Get input variables
+        id: vars
+        run: |
+          if [ -n "${{ inputs.environment }}" ]; then
+            echo "FRONTEND_IMAGE=${{ inputs.frontend_image }}" >> $GITHUB_OUTPUT
+            echo "BACKEND_IMAGE=${{ inputs.backend_image }}" >> $GITHUB_OUTPUT
+            echo "MANAGER_IMAGE=${{ inputs.manager_image }}" >> $GITHUB_OUTPUT
+            echo "ENVIRONMENT=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+          else
+            echo "FRONTEND_IMAGE=${{ github.event.inputs.frontend_image }}" >> $GITHUB_OUTPUT
+            echo "BACKEND_IMAGE=${{ github.event.inputs.backend_image }}" >> $GITHUB_OUTPUT
+            echo "MANAGER_IMAGE=${{ github.event.inputs.manager_image }}" >> $GITHUB_OUTPUT
+            echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up SSH
+        uses: ./.github/actions/ssh_setup
+        with:
+          server-ip-address: ${{ secrets.SERVER_IP_ADDRESS }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Login to GitHub Container Registry
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+
+      - name: Generate docker-compose.yml from template
+        run: |
+          # Export the variables for envsubst
+          export FRONTEND_IMAGE="${{ steps.vars.outputs.FRONTEND_IMAGE }}"
+          export BACKEND_IMAGE="${{ steps.vars.outputs.BACKEND_IMAGE }}"
+          export MANAGER_IMAGE="${{ steps.vars.outputs.MANAGER_IMAGE }}"
+          export ENVIRONMENT="${{ steps.vars.outputs.ENVIRONMENT }}"
+
+          # Create docker-compose.yml from template using envsubst with only specific variables
+          envsubst '${FRONTEND_IMAGE},${BACKEND_IMAGE},${MANAGER_IMAGE},${ENVIRONMENT}' < ./.github/files/docker-compose.template.yml > ./.github/files/docker-compose.yml
+
+          # Display the generated file
+          cat ./.github/files/docker-compose.yml
+
+      - name: Copy docker-compose.yml to the server
+        uses: ./.github/actions/ssh_file_send
+        with:
+          source: "./.github/files/docker-compose.yml"
+          destination: "/srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}/docker-compose.yml"
+
+      - name: Copy .env file to the server
+        uses: ./.github/actions/ssh_file_send
+        with:
+          source: "./.github/files/${{ steps.vars.outputs.ENVIRONMENT }}.env"
+          destination: "/srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}/.env"
+
+      - name: Stop and remove existing containers
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
+            docker compose down
+
+      - name: Pull latest images
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
+            docker compose pull
+
+      - name: Start containers
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
+            docker compose up -d
+
+      - name: Clean up unused images
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}
+            docker image prune -a -f

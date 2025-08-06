@@ -6,11 +6,14 @@ FROM node:24.2-alpine AS build
 # Set the working directory in the container
 WORKDIR /src
 
-# Copy the source code
-COPY frontend/ChorukoWeb/ ./
+# Copy package files first for better caching
+COPY frontend/ChorukoWeb/package.json frontend/ChorukoWeb/package-lock.json ./
 
-# Install dependencies
+# Install dependencies - this will be cached unless package files change
 RUN npm install
+
+# Copy the rest of the source code - changes here won't invalidate npm install cache
+COPY frontend/ChorukoWeb/ ./
 
 # Build the app
 RUN npm run build
