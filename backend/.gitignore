@@ -9,6 +9,9 @@
 # launch settings
 launchSettings.json
 
+# app data
+app_data/
+
 # User-specific files
 *.rsuser
 *.suo
