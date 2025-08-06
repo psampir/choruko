@@ -13,8 +13,7 @@ public class User : IdentityUser
     [Required]
     [StringLength(256)]
     public string LastName { get; set; }
-
-    [Required]
+    
     [Column(TypeName = "varchar(36)")]
     public string? HouseholdId { get; set; }
     [ForeignKey("HouseholdId")]

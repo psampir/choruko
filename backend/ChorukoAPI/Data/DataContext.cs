@@ -6,12 +6,6 @@ namespace ChorukoAPI.Data;
 
 public class DataContext(DbContextOptions<DataContext> options, IConfiguration Configuration) : IdentityDbContext<User>(options)
 {
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-    {
-        // connect to postgres with connection string from app settings
-        options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
-    }
-
     public override DbSet<User> Users { get; set; }
     public DbSet<Activity> Activities { get; set; }
     public DbSet<Household> Households { get; set; }
@@ -25,6 +19,16 @@ public class DataContext(DbContextOptions<DataContext> options, IConfiguration C
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<User>(entity =>
+        {
+            entity.Property(e => e.Email).IsRequired(true);
+            entity.Property(e => e.PhoneNumberConfirmed).HasDefaultValue(false);
+            entity.Property(e => e.TwoFactorEnabled).HasDefaultValue(false);
+            entity.Property(e => e.LockoutEnabled).HasDefaultValue(false);
+            entity.Property(e => e.AccessFailedCount).HasDefaultValue(0);
+            entity.Property(e => e.EmailConfirmed).HasDefaultValue(false);
+        });
+        
         builder.Entity<User>()
             .HasOne(u => u.Household)
             .WithMany(h => h.Participants)
