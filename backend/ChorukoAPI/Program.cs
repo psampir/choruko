@@ -11,7 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("oauth2", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -23,10 +22,21 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<Swashbuckle.AspNetCore.Filters.SecurityRequirementsOperationFilter>();
 });
 
+// Add environment variables to configuration
+builder.Configuration.AddEnvironmentVariables();
 
+// Generate the connection string from environment variables
+var config = builder.Configuration;
+var dbHost = config["DB_HOST"] ?? "database"; // Default to 'database' if not set
+var dbPort = config["DB_PORT"] ?? "5432"; // Default to '5432' if not set
+var dbName = config["DB_DATABASE_NAME"];
+var dbUser = config["DB_USERNAME"];
+var dbPassword = config["DB_PASSWORD"];
+var connectionString = $"Host={dbHost};Port={dbPort};Username={dbUser};Password={dbPassword};Database={dbName}";
+
+// Use the connection string to configure the DbContext
 builder.Services.AddDbContext<DataContext>(options => options
-.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).UseLazyLoadingProxies());
-
+.UseNpgsql(connectionString).UseLazyLoadingProxies());
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
@@ -93,8 +103,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
