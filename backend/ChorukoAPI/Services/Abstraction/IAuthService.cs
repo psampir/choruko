@@ -7,7 +7,7 @@ namespace ChorukoAPI.Services.Abstraction;
 
 public interface IAuthService
 {
-    Task<ServiceResponse<IdentityResult>> RegisterUserAsync(UserRegistrationRequest registrationDto);
-    Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginRequest loginDto);
+    Task<ServiceResponse<IdentityResult>> RegisterUserAsync(UserRegistrationRequest request);
+    Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginRequest request);
     Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync();
 }

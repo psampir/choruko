@@ -13,17 +13,17 @@ namespace ChorukoAPI.Services.Implementation;
 public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRole> _roleManager,
     SignInManager<User> _signInManager, IHttpContextAccessor _contextAccessor) : IAuthService
 {
-    public async Task<ServiceResponse<IdentityResult>> RegisterUserAsync(UserRegistrationRequest registrationDto)
+    public async Task<ServiceResponse<IdentityResult>> RegisterUserAsync(UserRegistrationRequest request)
     {
         var user = new User
         {
-            UserName = registrationDto.Email,
-            Email = registrationDto.Email,
-            FirstName = registrationDto.FirstName,
-            LastName = registrationDto.LastName,
+            UserName = request.Email,
+            Email = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
         };
 
-        var result = await _userManager.CreateAsync(user, registrationDto.Password);
+        var result = await _userManager.CreateAsync(user, request.Password);
 
         if (result.Succeeded)
         {
@@ -49,16 +49,16 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         return ServiceResponseFactory.Error(result, result.ToString());
     }
 
-    public async Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginRequest loginDto)
+    public async Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginRequest request)
     {
-        var user = await _userManager.FindByEmailAsync(loginDto.Email);
+        var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null) 
         {
             return ServiceResponseFactory.Error(SignInResult.Failed, "User not found", HttpStatusCode.NotFound);
         }
 
         var result = await _signInManager.PasswordSignInAsync(
-            user, loginDto.Password, isPersistent: false, lockoutOnFailure: false);
+            user, request.Password, isPersistent: false, lockoutOnFailure: false);
 
         return ServiceResponseFactory.Success(result, result.ToString());
     }
