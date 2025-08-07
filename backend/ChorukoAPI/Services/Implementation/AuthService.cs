@@ -1,4 +1,3 @@
-using ChorukoAPI.DTOs.User;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Identity;
@@ -7,13 +6,14 @@ using ChorukoAPI.Extensions;
 using System.Net;
 using ChorukoAPI.Contracts.DTOs.User;
 using ChorukoAPI.Contracts.DTOs;
+using ChorukoAPI.Contracts.Requests.User;
 
 namespace ChorukoAPI.Services.Implementation;
 
 public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRole> _roleManager,
     SignInManager<User> _signInManager, IHttpContextAccessor _contextAccessor) : IAuthService
 {
-    public async Task<ServiceResponse<IdentityResult>> RegisterUserAsync(UserRegistrationDto registrationDto)
+    public async Task<ServiceResponse<IdentityResult>> RegisterUserAsync(UserRegistrationRequest registrationDto)
     {
         var user = new User
         {
@@ -49,7 +49,7 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         return ServiceResponseFactory.Error(result, result.ToString());
     }
 
-    public async Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginDto loginDto)
+    public async Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginRequest loginDto)
     {
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user == null) 
