@@ -11,7 +11,7 @@ public static class ResponseMapper
         return new ObjectResult(new ApiResponse<T>
         {
             Result = serviceResponse.Result,
-            Message = serviceResponse.ErrorMessage
+            Message = serviceResponse.Message
         })
         {
             StatusCode = (int)serviceResponse.StatusCode
@@ -28,14 +28,14 @@ public static class ResponseMapper
             return new CreatedResult(location, new ApiResponse<T>
             {
                 Result = serviceResponse.Result,
-                Message = serviceResponse.ErrorMessage
+                Message = serviceResponse.Message
             });
         }
 
         return new ObjectResult(new ApiResponse<T>
         {
             Result = serviceResponse.Result,
-            Message = serviceResponse.ErrorMessage
+            Message = serviceResponse.Message
         })
         {
             StatusCode = (int)serviceResponse.StatusCode
