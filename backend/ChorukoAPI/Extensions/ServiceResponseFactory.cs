@@ -1,4 +1,4 @@
-﻿using ChorukoAPI.Contracts.DTOs;
+﻿using ChorukoAPI.Contracts.Responses;
 using System.Net;
 
 namespace ChorukoAPI.Extensions;

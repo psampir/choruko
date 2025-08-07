@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using ChorukoAPI.Extensions;
 using System.Net;
-using ChorukoAPI.Contracts.DTOs.User;
-using ChorukoAPI.Contracts.DTOs;
+using ChorukoAPI.Contracts.Responses.User;
+using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Requests.User;
 
 namespace ChorukoAPI.Services.Implementation;
@@ -63,15 +63,15 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         return ServiceResponseFactory.Success(result, result.ToString());
     }
 
-    public async Task<ServiceResponse<UserInfoDto>> GetUserInfoAsync()
+    public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
     {
         var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext.User);
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new UserInfoDto("", "", ""), "User not found");
+            return ServiceResponseFactory.Error(new UserInfoResponse("", "", ""), "User not found");
         }
 
-        return ServiceResponseFactory.Success(new UserInfoDto(user.FirstName, user.LastName, user.Email));
+        return ServiceResponseFactory.Success(new UserInfoResponse(user.FirstName, user.LastName, user.Email));
     }
 }
