@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes } from 'react';
 import './Button.scss';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'primary-popup' | 'additional';
+  variant?: 'primary' | 'primary-popup' | 'additional' | 'red';
   className?: string;
   children: React.ReactNode;
 }
