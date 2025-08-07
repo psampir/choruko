@@ -1,0 +1,47 @@
+.popup-container {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+
+  &.active {
+    z-index: 1002;
+  }
+
+  .popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #021207;
+    border-radius: 8px;
+    width: 90%;
+    height: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    // Primary popup variant
+    &--primary {
+      background-color: #e0f3db;
+    }
+    &--red {
+      background-color: #ffb9b9;
+    }
+
+    .close-icon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 24px;
+        height: 24px;
+        background: url("../../assets/svg/close-icon.svg") no-repeat center/contain;
+                cursor: pointer;
+      }
+  }
+}
