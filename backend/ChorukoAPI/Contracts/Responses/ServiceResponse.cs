@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace ChorukoAPI.Contracts.DTOs;
+namespace ChorukoAPI.Contracts.Responses;
 
 public class ServiceResponse<T>
 {

@@ -1,5 +1,5 @@
-using ChorukoAPI.Contracts.DTOs;
-using ChorukoAPI.Contracts.DTOs.User;
+using ChorukoAPI.Contracts.Responses;
+using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Contracts.Requests.User;
 using ChorukoAPI.Mappers;
 using ChorukoAPI.Services.Abstraction;
@@ -43,7 +43,7 @@ public class AuthController(IAuthService _authService) : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
-    public async Task<ActionResult<ApiResponse<UserInfoDto>>> GetUserInfo()
+    public async Task<ActionResult<ApiResponse<UserInfoResponse>>> GetUserInfo()
     {
         var result = await _authService.GetUserInfoAsync();
 

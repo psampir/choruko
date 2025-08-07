@@ -1,4 +1,4 @@
-﻿using ChorukoAPI.Contracts.DTOs;
+﻿using ChorukoAPI.Contracts.Responses;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 

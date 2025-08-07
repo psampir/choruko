@@ -1,5 +1,5 @@
-﻿using ChorukoAPI.Contracts.DTOs;
-using ChorukoAPI.Contracts.DTOs.User;
+﻿using ChorukoAPI.Contracts.Responses;
+using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Contracts.Requests.User;
 using Microsoft.AspNetCore.Identity;
 
@@ -9,5 +9,5 @@ public interface IAuthService
 {
     Task<ServiceResponse<IdentityResult>> RegisterUserAsync(UserRegistrationRequest registrationDto);
     Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginRequest loginDto);
-    Task<ServiceResponse<UserInfoDto>> GetUserInfoAsync();
+    Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync();
 }
