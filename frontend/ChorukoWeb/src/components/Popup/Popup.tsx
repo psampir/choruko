@@ -20,12 +20,27 @@ const Popup: React.FC<PopupProps> = ({
   const closePopup = () => {
     setIsOpen(false);
   };
+
+  // Handler to prevent popup content clicks from bubbling up
+  const handlePopupClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className={`popup-container ${isOpen ? "active" : ""}`}>
-      <div className={`popup ${variantClass} ${className}`} {...props}>
+    <div
+      className={`popup-container ${isOpen ? "active" : ""}`}
+      onClick={closePopup}
+    >
+      <div
+        className={`popup ${variantClass} ${className}`}
+        onClick={handlePopupClick}
+        {...props}
+      >
         <i className="close-icon" onClick={closePopup}></i>
         <h2 className="popup-title">Popup Title</h2>
-        <Button variant="primary" onClick={closePopup}>Close</Button>
+        <Button variant="primary" onClick={closePopup}>
+          Close
+        </Button>
       </div>
     </div>
   );
