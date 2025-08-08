@@ -1,0 +1,74 @@
+.invitations {
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  h2 {
+    margin: 85px 0 55px;
+  }
+
+  &-list {
+    list-style-type: none;
+    padding: 0;
+    background-color: #d8efd3;
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    border: 2px solid #55ad9b;
+    border-radius: 10px;
+
+    li {
+      padding: 8px 12px 11px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      border-bottom: none; // Remove the original border
+      position: relative; // Add this for positioning the pseudo-element
+
+      // Add the centered border with ::after
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        height: 3px;
+        background-color: #56ae9c80;
+      }
+
+      &:last-child::after {
+        display: none;
+      }
+
+      img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+
+      h6 {
+        margin-right: 10px;
+        flex-grow: 1;
+      }
+
+      span {
+        display: flex;
+        width: 30px;
+        height: 30px;
+      }
+
+      .accept {
+        background: url("src/assets/svg/accept.svg") no-repeat center center;
+        margin-right: 10px;
+      }
+
+      .decline {
+        background: url("src/assets/svg/decline.svg") no-repeat center center;
+      }
+    }
+  }
+}
