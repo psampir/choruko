@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using ChorukoAPI.Contracts;
 
 namespace ChorukoAPI.Controllers;
 
@@ -43,11 +44,11 @@ public class AuthController(IAuthService _authService) : ControllerBase
 
     [HttpPost("logOut")]
     [Authorize]
-    public async Task<ActionResult<ApiResponse<ServiceResponse<bool>>>> LogOut()
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> LogOut()
     {
         var result = await _authService.LogoutUserAsync();
 
-        return StatusCode((int)result.StatusCode, result);
+        return result.ToApiResponse();
     }
 
     [HttpGet("userInfo")]
