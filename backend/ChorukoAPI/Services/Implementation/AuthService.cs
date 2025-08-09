@@ -63,6 +63,42 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         return ServiceResponseFactory.Success(result, result.ToString());
     }
 
+    public async Task<ServiceResponse<bool>> LogoutUserAsync()
+    {
+        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+        
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<bool>(
+                false,
+                "User is not authenticated",
+                HttpStatusCode.Unauthorized
+                );
+        }
+        
+        await _signInManager.SignOutAsync();
+        
+        var context = _contextAccessor.HttpContext;
+        if (context != null)
+        {
+            foreach (var cookie in context.Request.Cookies)
+            {
+                if (cookie.Key.StartsWith(".AspNetCore") ||
+                    cookie.Key.Contains("Auth") ||
+                    cookie.Key.Contains("Identity"))
+                {
+                    context.Response.Cookies.Delete(cookie.Key);
+                }
+            }
+        }
+        
+        return ServiceResponseFactory.Success<bool>(
+            true,
+            "User has been successfully logged out",
+            HttpStatusCode.OK
+            );
+    }
+
     public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
     {
         var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext.User);
