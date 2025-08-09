@@ -7,6 +7,7 @@ using System.Net;
 using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Requests.User;
+using ChorukoAPI.Contracts;
 
 namespace ChorukoAPI.Services.Implementation;
 
@@ -63,40 +64,36 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         return ServiceResponseFactory.Success(result, result.ToString());
     }
 
-    public async Task<ServiceResponse<bool>> LogoutUserAsync()
+    public async Task<ServiceResponse<OperationResultDto>> LogoutUserAsync()
     {
         var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
-        
+
         if (user == null)
         {
-            return ServiceResponseFactory.Error<bool>(
-                false,
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null,
                 "User is not authenticated",
                 HttpStatusCode.Unauthorized
-                );
+            );
         }
-        
+
         await _signInManager.SignOutAsync();
-        
-        var context = _contextAccessor.HttpContext;
-        if (context != null)
+
+        var result = new OperationResultDto
         {
-            foreach (var cookie in context.Request.Cookies)
+            Operation = "Logout",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
             {
-                if (cookie.Key.StartsWith(".AspNetCore") ||
-                    cookie.Key.Contains("Auth") ||
-                    cookie.Key.Contains("Identity"))
-                {
-                    context.Response.Cookies.Delete(cookie.Key);
-                }
+                { "UserEmail", user.Email ?? "N/A" }
             }
-        }
-        
-        return ServiceResponseFactory.Success<bool>(
-            true,
+        };
+
+        return ServiceResponseFactory.Success(
+            result,
             "User has been successfully logged out",
             HttpStatusCode.OK
-            );
+        );
     }
 
     public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
