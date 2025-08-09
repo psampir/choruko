@@ -87,6 +87,8 @@ class RaccoonAnimationController {
   }
 }
 
+import raccoonWavingSvg from '../../assets/svg/raccoon-waving.svg';
+
 const RaccoonAnimation: React.FC<RaccoonAnimationControllerProps> = ({
   svgPath = raccoonWavingSvg,
   restartInterval = 5000,
