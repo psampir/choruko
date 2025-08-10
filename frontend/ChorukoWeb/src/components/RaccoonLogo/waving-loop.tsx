@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import raccoonWavingSvg from "../../assets/svg/raccoon-waving.svg"; 
 
 interface RaccoonAnimationControllerProps {
   svgPath?: string;
