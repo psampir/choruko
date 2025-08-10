@@ -1,0 +1,63 @@
+# Docker Commands for Choruko Application
+# Execute these commands from the project root directory (d:\VSC Programs\choruko)
+# 
+# IMPORTANT: Containers communicate by container names, NOT localhost!
+# Frontend nginx proxy routes /api/ requests to http://backend:8080
+# This is why authService.ts uses "/api/Auth" (relative path)
+
+# 1. Navigate to the docker compose directory
+cd docker/compose/local-build
+
+# 2. Stop all running containers
+docker compose stop
+
+# 3. Remove all containers (clean rebuild recommended after frontend changes)
+docker compose rm -f
+
+# 4. Remove frontend image to force rebuild (REQUIRED after frontend changes)
+docker image rm choruko-frontend
+
+# 5. Remove backend image if needed (optional)
+# docker image rm choruko-backend
+
+# 6. Build all containers from scratch with no cache
+docker compose build --no-cache
+
+# 7. Start the containers in detached mode
+docker compose up -d
+
+# 8. Check container status and health
+docker compose ps
+
+# 9. View logs if needed (useful for debugging)
+docker compose logs frontend
+docker compose logs backend
+docker compose logs database
+
+# MANAGER CONTAINER ISSUE:
+# The manager container may fail with "exec ./run-manager.sh: no such file or directory"
+# This is a known issue with file permissions or line endings in the shell script.
+# 
+# WORKAROUND: The manager dependency has been commented out in docker-compose.yml
+# The frontend and backend work fine without the manager for authentication testing.
+# 
+# To fix manager issues:
+# docker compose logs manager  # Check manager logs
+# docker compose stop manager  # Stop manager if problematic
+
+# 10. Access the application
+# Frontend: http://localhost:2467
+# Backend API: Available through nginx proxy at /api/
+# Direct backend port 8080 is NOT exposed to host
+
+# NETWORKING NOTES:
+# - Frontend container runs nginx on port 80 (mapped to host 2467)
+# - Backend container runs on port 8080 (internal Docker network only)
+# - Database container runs on port 5432 (internal Docker network only)
+# - nginx.conf proxies /api/ requests to http://backend:8080
+
+# Alternative commands:
+# Quick rebuild and start: docker compose up --build --force-recreate -d
+# Stop everything: docker compose down
+# Complete reset (removes volumes): docker compose down -v
+# View all logs: docker compose logs -f
