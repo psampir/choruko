@@ -63,6 +63,10 @@ namespace ChorukoAPI.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
+                    b.Property<string>("ProfilePicturePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AdminId")
