@@ -15,9 +15,22 @@
     font-size: 1.25rem;
   }
 
+  // Red button variant
+  &--red {
+    @extend .button--primary;
+    background-color: #ff7285;
+  }
+
   // Primary popup button variant
   &--primary-popup {
     @extend .button--primary;
+    width: 145px;
+    height: 48px;
+  }
+
+  // Red popup button variant
+  &--red-popup {
+    @extend .button--red;
     width: 145px;
     height: 48px;
   }
