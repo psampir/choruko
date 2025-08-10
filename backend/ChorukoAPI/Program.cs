@@ -77,7 +77,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("HouseholdAdminPolicy", policy => policy.RequireRole("HouseholdAdmin"));
+    options.AddPolicy("NoneRolePolicy", policy => policy.RequireRole("None"));
+});
+
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 
 builder.Services.AddControllers();
 
@@ -121,6 +129,8 @@ if (app.Environment.IsDevelopment())
 
 // CORS must be applied before Authentication/Authorization
 app.UseCors(myAllowSpecificOrigins);
+
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
