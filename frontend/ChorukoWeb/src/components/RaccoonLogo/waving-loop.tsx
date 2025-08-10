@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import raccoonWavingSvg from "../../assets/svg/raccoon-waving.svg"; 
+import raccoonWavingSvg from "../../assets/svg/raccoon-waving.svg";
+
 
 interface RaccoonAnimationControllerProps {
   svgPath?: string;
@@ -88,9 +89,7 @@ class RaccoonAnimationController {
   }
 }
 
-import raccoonWavingSvg from '../../assets/svg/raccoon-waving.svg';
-
-const RaccoonAnimation: React.FC<RaccoonAnimationControllerProps> = (
+const RaccoonAnimation: React.FC<RaccoonAnimationControllerProps> = ({
   svgPath = raccoonWavingSvg,
   restartInterval = 5000,
   className = "",
