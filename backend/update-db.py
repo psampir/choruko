@@ -25,14 +25,17 @@ def main():
     # --- Main Script ---
     print(f"Reading environment variables from {launch_settings_path}...")
 
+    # Read the JSON file while being tolerant of an optional UTF-8 BOM.
     try:
-        with open(launch_settings_path) as f:
+        # The 'utf-8-sig' codec transparently strips a BOM if present, otherwise behaves like 'utf-8'.
+        with open(launch_settings_path, encoding="utf-8-sig") as f:
             settings = json.load(f)
-        
+
         # Extract the environment variables from the 'http' profile
         env_vars = settings['profiles']['http']['environmentVariables']
     except (json.JSONDecodeError, KeyError) as e:
         print(f"Error parsing launchSettings.json: {e}")
+        print("Hint: Ensure the file contains valid JSON and the expected profiles.http.environmentVariables structure.")
         sys.exit(1)
 
     # Get a copy of the current environment and update it with variables from the file
