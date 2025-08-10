@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace ChorukoAPI.Contracts.Requests.Activity;
-public class ChangeActivityRequest
+public class UpdateActivityRequest
 {
     [Required]
     [StringLength(100)]
