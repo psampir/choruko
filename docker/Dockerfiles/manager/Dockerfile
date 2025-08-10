@@ -26,8 +26,8 @@ RUN dotnet restore
 # Copy the source code
 COPY backend/ChorukoAPI/ ./
 
-# Install the Entity Framework Core tools globally
-RUN dotnet tool install --global dotnet-ef
+# Install the Entity Framework Core tools
+RUN dotnet tool restore
 
 # Ensure the .NET tools are in the PATH
 ENV PATH="$PATH:/root/.dotnet/tools"
