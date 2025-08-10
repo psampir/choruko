@@ -1,25 +1,30 @@
-using ChorukoAPI.DTOs.User;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
+using ChorukoAPI.Extensions;
+using System.Net;
+using ChorukoAPI.Contracts.Responses.User;
+using ChorukoAPI.Contracts.Responses;
+using ChorukoAPI.Contracts.Requests.User;
+using ChorukoAPI.Contracts;
 
 namespace ChorukoAPI.Services.Implementation;
 
 public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRole> _roleManager,
     SignInManager<User> _signInManager, IHttpContextAccessor _contextAccessor) : IAuthService
 {
-    public async Task<IdentityResult> RegisterUserAsync(UserRegistrationDto registrationDto)
+    public async Task<ServiceResponse<IdentityResult>> RegisterUserAsync(UserRegistrationRequest request)
     {
         var user = new User
         {
-            UserName = registrationDto.Email,
-            Email = registrationDto.Email,
-            FirstName = registrationDto.FirstName,
-            LastName = registrationDto.LastName,
+            UserName = request.Email,
+            Email = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
         };
 
-        var result = await _userManager.CreateAsync(user, registrationDto.Password);
+        var result = await _userManager.CreateAsync(user, request.Password);
 
         if (result.Succeeded)
         {
@@ -35,35 +40,71 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
                 {
                     result.Errors.Append(error);
                 }
+
+                return ServiceResponseFactory.Error(result, result.ToString());
             }
+
+            return ServiceResponseFactory.Success(result, result.ToString());
         }
 
-        return result;
+        return ServiceResponseFactory.Error(result, result.ToString());
     }
 
-    public async Task<SignInResult> LoginUserAsync(UserLoginDto loginDto)
+    public async Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginRequest request)
     {
-        var user = await _userManager.FindByEmailAsync(loginDto.Email);
+        var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null) 
         {
-            return SignInResult.Failed; 
+            return ServiceResponseFactory.Error(SignInResult.Failed, "User not found", HttpStatusCode.NotFound);
         }
 
         var result = await _signInManager.PasswordSignInAsync(
-            user, loginDto.Password, isPersistent: false, lockoutOnFailure: false);
+            user, request.Password, isPersistent: false, lockoutOnFailure: false);
 
-        return result;
+        return ServiceResponseFactory.Success(result, result.ToString());
     }
 
-    public async Task<UserInfoDto> GetUserInfoAsync()
+    public async Task<ServiceResponse<OperationResultDto>> LogoutUserAsync()
+    {
+        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null,
+                "User is not authenticated",
+                HttpStatusCode.Unauthorized
+            );
+        }
+
+        await _signInManager.SignOutAsync();
+
+        var result = new OperationResultDto
+        {
+            Operation = "Logout",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "UserEmail", user.Email ?? "N/A" }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            result,
+            "User has been successfully logged out",
+            HttpStatusCode.OK
+        );
+    }
+
+    public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
     {
         var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext.User);
 
         if (user == null)
         {
-            throw new Exception("User is not authenticated.");
+            return ServiceResponseFactory.Error(new UserInfoResponse("", "", ""), "User not found");
         }
 
-        return new UserInfoDto(user.FirstName, user.LastName, user.Email);
+        return ServiceResponseFactory.Success(new UserInfoResponse(user.FirstName, user.LastName, user.Email));
     }
 }

@@ -81,6 +81,21 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
 
+const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+        policy  =>
+        {
+            // Allow the Vite dev server
+            policy.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials(); // Required for cookies
+        });
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -103,6 +118,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// CORS must be applied before Authentication/Authorization
+app.UseCors(myAllowSpecificOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();

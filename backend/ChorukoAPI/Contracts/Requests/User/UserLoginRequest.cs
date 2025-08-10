@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ChorukoAPI.DTOs.User;
+namespace ChorukoAPI.Contracts.Requests.User;
 
-public record UserLoginDto
+public record UserLoginRequest
 {
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress(ErrorMessage = "Invalid email address format.")]
