@@ -17,13 +17,13 @@ public class Settlement
 
     [Required]
     [Column(TypeName = "varchar(36)")]
-    public string CreatorId{ get; set; }
+    public string CreatorId { get; set; }
     [ForeignKey("CreatorId")]
     public virtual User Creator { get; set; }
 
     [Required]
     [Column(TypeName = "timestamp")]
-    public DateTime DateOfCreation{ get; set; }
+    public DateTime DateOfCreation { get; set; }
 
     [Required]
     [StringLength(500, MinimumLength = 2)]
