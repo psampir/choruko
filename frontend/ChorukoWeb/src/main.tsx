@@ -1,16 +1,19 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.scss'
-// import AuthContainer from './views/Auth/AuthContainer'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.scss";
+import AuthContainer from "./views/Auth/AuthContainer";
+import { AuthProvider } from "./contexts/AuthContext";
 // import JoinOrCreateHousehold from './views/JoinOrCreateHousehold/JoinOrCreateHouseholdOptions'
 // import Invitations from './views/JoinOrCreateHousehold/Invitations/Invitations'
-import NavbarMobile from './components/NavbarMobile/NavbarMobile'
+// import NavbarMobile from './components/NavbarMobile/NavbarMobile'
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* <AuthContainer />, */}
+    <AuthProvider>
+      <AuthContainer />
+    </AuthProvider>
     {/* <JoinOrCreateHousehold onJoinHousehold={() => {}} onCreateHousehold={() => {}} /> */}
     {/* <Invitations /> */}
-    <NavbarMobile />
-  </StrictMode>,
-)
+    {/* <NavbarMobile /> */}
+  </StrictMode>
+);
