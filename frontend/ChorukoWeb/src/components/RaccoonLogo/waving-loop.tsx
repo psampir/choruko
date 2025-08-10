@@ -90,7 +90,7 @@ class RaccoonAnimationController {
 }
 
 const RaccoonAnimation: React.FC<RaccoonAnimationControllerProps> = ({
-  svgPath = "/src/assets/svg/raccoon-waving.svg",
+  svgPath = raccoonWavingSvg,
   restartInterval = 5000,
   className = "",
 }) => {
