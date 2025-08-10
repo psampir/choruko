@@ -118,25 +118,19 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
 
-// Add CORS
+const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:3001") // Support both ports
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-
-    // ORIGINAL CORS POLICY (commented out):
-    // options.AddPolicy("AllowFrontend", policy =>
-    // {
-    //     policy.WithOrigins("http://localhost:3000") // Only port 3000
-    //           .AllowAnyHeader()
-    //           .AllowAnyMethod()
-    //           .AllowCredentials();
-    // });
+    options.AddPolicy(name: myAllowSpecificOrigins,
+        policy  =>
+        {
+            // Allow the Vite dev server
+            policy.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials(); // Required for cookies
+        });
 });
 
 var app = builder.Build();
@@ -162,7 +156,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowFrontend");
+// CORS must be applied before Authentication/Authorization
+app.UseCors(myAllowSpecificOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();

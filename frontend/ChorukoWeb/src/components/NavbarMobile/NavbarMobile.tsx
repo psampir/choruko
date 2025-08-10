@@ -2,6 +2,16 @@ import "./NavbarMobile.scss";
 import { useState } from "react";
 import Button from "../Button/Button";
 
+// Import SVGs as modules
+import lightThemeIcon from "../../assets/svg/light-theme.svg";
+import profileIcon from "../../assets/svg/profile-icon.svg";
+import darkThemeIcon from "../../assets/svg/dark-theme.svg";
+import defaultThemeIcon from "../../assets/svg/default-theme.svg";
+import profileIconLight from "../../assets/svg/profile-icon-light.svg";
+import houseIcon from "../../assets/svg/house.svg";
+import leaveIcon from "../../assets/svg/leave.svg";
+import closeIconLight from "../../assets/svg/close-icon-light.svg";
+
 const NavbarMobile = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
@@ -24,14 +34,14 @@ const NavbarMobile = () => {
       <nav className="navbar-mobile-container">
         <span className="theme-toggle" onClick={dropdownToggle}>
           <img
-            src="/src/assets/svg/light-theme.svg"
+            src={lightThemeIcon}
             alt="Light Theme"
             className="nav-theme-icon light-theme-icon"
           />
         </span>
         <span className="profile-icon">
           <img
-            src="/src/assets/svg/profile-icon.svg"
+            src={profileIcon}
             alt="Profile"
             className="nav-profile-icon"
             onClick={profileClickHandler}
@@ -41,13 +51,13 @@ const NavbarMobile = () => {
 
       <div className={`theme-dropdown${isDropdownOpen ? " open" : ""}`}>
         <img
-          src="/src/assets/svg/dark-theme.svg"
+          src={darkThemeIcon}
           alt="Dark Theme"
           className=" nav-theme-icon dark-theme-icon"
           onClick={dropdownToggle}
         />
         <img
-          src="/src/assets/svg/default-theme.svg"
+          src={defaultThemeIcon}
           alt="Default Theme"
           className="theme-icon default-theme-icon"
           onClick={dropdownToggle}
@@ -65,7 +75,7 @@ const NavbarMobile = () => {
             onClick={profileClickHandler}
           ></i>
           <img
-            src="/src/assets/svg/profile-icon.svg"
+            src={profileIcon}
             alt="Profile"
             className="profile-popup__icon"
           />
@@ -75,7 +85,7 @@ const NavbarMobile = () => {
             <li>
               <Button variant="primary">
                 <img
-                  src="/src/assets/svg/profile-icon-light.svg"
+                  src={profileIconLight}
                   alt="Profile Management"
                   className="profile-management__icon"
                 />
@@ -85,7 +95,7 @@ const NavbarMobile = () => {
             <li>
               <Button variant="primary">
                 <img
-                  src="/src/assets/svg/house.svg"
+                  src={houseIcon}
                   alt="Household Management"
                 />
                 Manage Household
@@ -93,13 +103,13 @@ const NavbarMobile = () => {
             </li>
             <li>
               <Button variant="red">
-                <img src="/src/assets/svg/leave.svg" alt="" />
+                <img src={leaveIcon} alt="" />
                 Leave Household
               </Button>
             </li>
             <li>
               <Button variant="red">
-                <img src="/src/assets/svg/close-icon-light.svg" alt="" />
+                <img src={closeIconLight} alt="" />
                 Log Out
               </Button>
             </li>
