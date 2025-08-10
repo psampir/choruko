@@ -48,6 +48,19 @@ The backend is an ASP.NET Core application.
     python3 backend/update-db.py
     ```
 
+    > Keeping migrations up to date:
+    > - After any change to your EF Core models (entities/DbContext), you must create a new migration and apply it.
+    > - Create a migration (replace DescriptiveName):
+    >   ```bash
+    >   dotnet ef migrations add DescriptiveName --project backend/ChorukoAPI --startup-project backend/ChorukoAPI
+    >   ```
+    > - Then apply it:
+    >   ```bash
+    >   python3 backend/update-db.py
+    >   ```
+    > - If you only edited a migration file that has NOT yet been applied to your dev DB, just rerun `python3 backend/update-db.py`.
+    > - If a migration was already applied and needs changes, add a new migration instead of editing the old one.
+
 ## Frontend Setup
 The frontend is a React application built with Vite.
 
