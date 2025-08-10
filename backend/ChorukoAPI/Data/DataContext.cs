@@ -28,7 +28,7 @@ public class DataContext(DbContextOptions<DataContext> options, IConfiguration C
             entity.Property(e => e.AccessFailedCount).HasDefaultValue(0);
             entity.Property(e => e.EmailConfirmed).HasDefaultValue(false);
         });
-        
+
         builder.Entity<User>()
             .HasOne(u => u.Household)
             .WithMany(h => h.Participants)
@@ -58,7 +58,7 @@ public class DataContext(DbContextOptions<DataContext> options, IConfiguration C
             .WithMany()
             .HasForeignKey(t => t.CreatorId)
             .OnDelete(DeleteBehavior.Restrict);
-        
+
         builder.Entity<Settlement>()
             .HasOne(s => s.Creator)
             .WithMany()

@@ -24,7 +24,7 @@ public static class ResponseMapper
         if (string.IsNullOrEmpty(route))
         {
             var location = $"{route}";
-            
+
             return new CreatedResult(location, new ApiResponse<T>
             {
                 Result = serviceResponse.Result,

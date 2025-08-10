@@ -15,7 +15,7 @@ namespace ChorukoAPI.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController(IAuthService _authService) : ControllerBase
-{    
+{
     [HttpPost("register")]
     public async Task<ActionResult<ApiResponse<IdentityResult>>> Register([FromBody] UserRegistrationRequest registrationRequest)
     {
