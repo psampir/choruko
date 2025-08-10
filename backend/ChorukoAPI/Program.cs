@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
+// Load .env file if it exists
+DotNetEnv.Env.TraversePath().Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -40,13 +43,21 @@ builder.Services.AddDbContext<DataContext>(options => options
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
-    // Password settings (you can customize these further based on your security requirements)
+    // Password settings - reasonable for development
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireNonAlphanumeric = false; // Relaxed for development
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
+
+    // ORIGINAL PASSWORD SETTINGS (commented out):
+    // options.Password.RequireDigit = true;
+    // options.Password.RequireLowercase = true;
+    // options.Password.RequireNonAlphanumeric = true;
+    // options.Password.RequireUppercase = true;
+    // options.Password.RequiredLength = 6;
+    // options.Password.RequiredUniqueChars = 1;
 
     // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
@@ -68,11 +79,37 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "ChorukoCookie";
     options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax; // Changed from None to Lax for development
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Allow HTTP in development
     options.ExpireTimeSpan = TimeSpan.FromHours(1);
-    options.LoginPath = "/api/Auth/login";
-    //options.LogoutPath = "/api/Auth/logout";
-    //options.AccessDeniedPath = "api/Auth/accessDenied";
     options.SlidingExpiration = true;
+
+    // ORIGINAL COOKIE SETTINGS (commented out):
+    // options.Cookie.SameSite = SameSiteMode.None; // Required HTTPS
+    // options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Required HTTPS
+    
+    // Disable redirects for API - return status codes instead
+    options.LoginPath = null;
+    options.LogoutPath = null;
+    options.AccessDeniedPath = null;
+    
+    // ORIGINAL REDIRECT SETTINGS (commented out):
+    // options.LoginPath = "/api/Auth/Login";
+    // options.LogoutPath = "/api/Auth/Logout";
+    // options.AccessDeniedPath = "/api/Auth/AccessDenied";
+    
+    // Configure events to return proper status codes
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+    
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 403;
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -80,6 +117,27 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001") // Support both ports
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+
+    // ORIGINAL CORS POLICY (commented out):
+    // options.AddPolicy("AllowFrontend", policy =>
+    // {
+    //     policy.WithOrigins("http://localhost:3000") // Only port 3000
+    //           .AllowAnyHeader()
+    //           .AllowAnyMethod()
+    //           .AllowCredentials();
+    // });
+});
 
 var app = builder.Build();
 
@@ -103,6 +161,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
