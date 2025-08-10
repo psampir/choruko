@@ -36,8 +36,14 @@ The backend is an ASP.NET Core application.
     docker-compose -f docker/compose/dev/docker-compose.yml up -d
     ```
 
-    Then, apply the migrations:
-      
+    Then, install `dotnet-ef` tools:
+
+    ```bash
+    dotnet tool restore --tool-manifest backend/ChorukoAPI/.config/dotnet-tools.json
+    ```
+
+    Finally, apply the migrations:
+
     ```bash
     python3 backend/update-db.py
     ```
