@@ -7,9 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-// Load .env file if it exists
-DotNetEnv.Env.TraversePath().Load();
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -43,21 +40,13 @@ builder.Services.AddDbContext<DataContext>(options => options
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
-    // Password settings - reasonable for development
+
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = false; // Relaxed for development
+    options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
-
-    // ORIGINAL PASSWORD SETTINGS (commented out):
-    // options.Password.RequireDigit = true;
-    // options.Password.RequireLowercase = true;
-    // options.Password.RequireNonAlphanumeric = true;
-    // options.Password.RequireUppercase = true;
-    // options.Password.RequiredLength = 6;
-    // options.Password.RequiredUniqueChars = 1;
 
     // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
@@ -88,12 +77,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     // options.Cookie.SameSite = SameSiteMode.None; // Required HTTPS
     // options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Required HTTPS
     
-    // Disable redirects for API - return status codes instead
-    options.LoginPath = null;
-    options.LogoutPath = null;
-    options.AccessDeniedPath = null;
-    
-    // ORIGINAL REDIRECT SETTINGS (commented out):
     // options.LoginPath = "/api/Auth/Login";
     // options.LogoutPath = "/api/Auth/Logout";
     // options.AccessDeniedPath = "/api/Auth/AccessDenied";
