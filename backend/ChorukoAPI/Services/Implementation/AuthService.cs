@@ -100,9 +100,6 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
     {
         var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
 
-        // NULL CHECK ADDED (original code without null check commented out):
-        // var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext.User); // This could throw null reference
-
         if (user == null)
         {
             return ServiceResponseFactory.Error(new UserInfoResponse("", "", ""), "User not found");
