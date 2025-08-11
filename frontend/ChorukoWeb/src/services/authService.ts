@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5000/api/Auth";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface UserData {
   firstName: string;
@@ -12,7 +12,7 @@ class AuthService {
   // Register a new user
   async register(userData: UserData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/register`, {
+      const response = await fetch(`${apiBaseUrl}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,7 +42,7 @@ class AuthService {
   // Login user
   async login(email: string, password: string) {
     try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
+      const response = await fetch(`${apiBaseUrl}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,7 +66,7 @@ class AuthService {
   // Check authentication status
   async checkStatus() {
     try {
-      const response = await fetch(`${API_BASE_URL}/userInfo`, {
+      const response = await fetch(`${apiBaseUrl}/userInfo`, {
         method: "GET",
         credentials: "include",
       });
@@ -85,7 +85,7 @@ class AuthService {
   // Logout user
   async logout() {
     try {
-      const response = await fetch(`${API_BASE_URL}/logOut`, {
+      const response = await fetch(`${apiBaseUrl}/logOut`, {
         method: "POST",
         credentials: "include",
       });
@@ -103,7 +103,7 @@ class AuthService {
   // Reset password (if you have this endpoint)
   async resetPassword(email: string) {
     try {
-      const response = await fetch(`${API_BASE_URL}/reset-password`, {
+      const response = await fetch(`${apiBaseUrl}/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
