@@ -37,9 +37,6 @@ public class AuthController(IAuthService _authService) : ControllerBase
             return BadRequest(ModelState);
         }
 
-        // DEBUGGING STATEMENT (commented out):
-        // Console.WriteLine($"Login attempt for user: {loginRequest.Email}");
-
         var result = await _authService.LoginUserAsync(loginRequest);
 
         return result.ToCreatedApiResponse();
@@ -58,8 +55,6 @@ public class AuthController(IAuthService _authService) : ControllerBase
     [Authorize]
     public async Task<ActionResult<ApiResponse<UserInfoResponse>>> GetUserInfo()
     {
-        // DEBUGGING STATEMENT (commented out):
-        // Console.WriteLine("GetUserInfo endpoint called");
 
         var result = await _authService.GetUserInfoAsync();
 
