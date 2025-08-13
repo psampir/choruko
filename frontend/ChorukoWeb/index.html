@@ -19,6 +19,20 @@
       overscroll-behavior: none;
     }
   </style>
+  <script>
+    // Detect iOS devices with a notch
+    (function () {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (!isIOS) return;
+      const probe = document.createElement('div');
+      probe.style.cssText = 'position:fixed;top:0;height:env(safe-area-inset-top);pointer-events:none;opacity:0;';
+      document.documentElement.appendChild(probe);
+      const hasInset = parseInt(getComputedStyle(probe).height, 10) > 0;
+      probe.remove();
+      if (hasInset) document.documentElement.classList.add('is-ios-notch');
+    })();
+  </script>
 </head>
 
 <body>
