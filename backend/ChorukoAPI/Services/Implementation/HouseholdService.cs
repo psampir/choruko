@@ -1,17 +1,10 @@
 using ChorukoAPI.Contracts;
 using ChorukoAPI.Contracts.Requests.Household;
-using ChorukoAPI.Contracts.Responses.Household;
 using ChorukoAPI.Data;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Net; 
-using Microsoft.AspNetCore.Hosting; 
-using System.IO; 
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Contracts.Responses;
 
@@ -29,7 +22,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         }
         
         var validationResponse = await ValidateUser(user);
-        if (!validationResponse.IsSuccessful)
+        if (validationResponse.IsSuccessful)
         {
             return validationResponse;
         }
