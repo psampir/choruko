@@ -97,11 +97,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("HouseholdAdminPolicy", policy => policy.RequireRole("HouseholdAdmin"));
-    options.AddPolicy("NoneRolePolicy", policy => policy.RequireRole("None"));
-});
+builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 

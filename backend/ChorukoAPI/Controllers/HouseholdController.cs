@@ -16,8 +16,7 @@ namespace ChorukoAPI.Controllers;
 public class HouseholdController(IHouseholdService _householdService) : ControllerBase
 {
     [HttpPost("create")] 
-    [Authorize] 
-    [Authorize(Policy = "NoneRolePolicy")]
+    [Authorize(Roles="None")]
     public async Task<ActionResult<ApiResponse<HouseholdResponse>>> CreateHousehold([FromForm] CreateHouseholdRequest request)
     {
 
