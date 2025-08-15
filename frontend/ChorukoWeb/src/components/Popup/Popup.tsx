@@ -6,6 +6,8 @@ interface PopupProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "primary" | "red";
   title?: string;
   className?: string;
+  open?: boolean;
+  onClose?: () => void; // notify parent to close
 }
 
 const Popup: React.FC<PopupProps> = ({
@@ -13,13 +15,23 @@ const Popup: React.FC<PopupProps> = ({
   title = "Popup Title",
   className = "",
   children,
+  open,
+  onClose,
   ...props
 }) => {
   const variantClass = variant ? `popup--${variant}` : "";
-  const [isOpen, setIsOpen] = useState(true);
+  const [internalOpen, setInternalOpen] = useState(open ?? true);
+
+  // keep internal state in sync when controlled
+  React.useEffect(() => {
+    if (open !== undefined) setInternalOpen(open);
+  }, [open]);
+
+  const isOpen = open !== undefined ? open : internalOpen;
 
   const closePopup = () => {
-    setIsOpen(false);
+    if (onClose) onClose();
+    else setInternalOpen(false);
   };
 
   const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>) => {
