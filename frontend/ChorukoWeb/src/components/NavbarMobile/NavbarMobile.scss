@@ -154,7 +154,7 @@
 }
 
 // Styles for iOS devices with a notch
-:root.is-ios-notch .navbar-mobile {
+:root.is-notch .navbar-mobile {
 
   &-container {
     padding-top: calc(env(safe-area-inset-top) + 20px);
