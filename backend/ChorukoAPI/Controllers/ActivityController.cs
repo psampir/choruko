@@ -16,5 +16,11 @@ namespace ChorukoAPI.Controllers;
 [Authorize]
 public class ActivityController(IActivityService _activityService) : ControllerBase
 {
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> CreateActivity([FromBody] CreateActivityRequest createActivityRequest)
+    {
+        var result = await _activityService.CreateActivityAsync(createActivityRequest);
+        return result.ToCreatedApiResponse();
+    }
 }
 
