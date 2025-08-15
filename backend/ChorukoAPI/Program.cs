@@ -73,21 +73,13 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromHours(1);
     options.SlidingExpiration = true;
 
-    // ORIGINAL COOKIE SETTINGS (commented out):
-    // options.Cookie.SameSite = SameSiteMode.None; // Required HTTPS
-    // options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Required HTTPS
-    
-    // options.LoginPath = "/api/Auth/Login";
-    // options.LogoutPath = "/api/Auth/Logout";
-    // options.AccessDeniedPath = "/api/Auth/AccessDenied";
-    
     // Configure events to return proper status codes
     options.Events.OnRedirectToLogin = context =>
     {
         context.Response.StatusCode = 401;
         return Task.CompletedTask;
     };
-    
+
     options.Events.OnRedirectToAccessDenied = context =>
     {
         context.Response.StatusCode = 403;
