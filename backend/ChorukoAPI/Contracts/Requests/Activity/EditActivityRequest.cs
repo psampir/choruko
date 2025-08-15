@@ -2,7 +2,7 @@
 
 namespace ChorukoAPI.Contracts.Requests.Activity;
 
-public class UpdateActivityRequest
+public class EditActivityRequest
 {
     [Required(ErrorMessage = "Activity name is required")]
     [StringLength(100, MinimumLength = 3, ErrorMessage = "Activity name must be at least {2} characters long.")]
