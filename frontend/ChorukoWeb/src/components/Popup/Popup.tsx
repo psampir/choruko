@@ -1,7 +1,6 @@
 import React from "react";
 import "./Popup.scss";
 import { useState } from "react";
-import Button from "../Button";
 
 interface PopupProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "primary" | "red";
@@ -29,15 +28,12 @@ const Popup: React.FC<PopupProps> = ({
     }
   };
 
-  const buttonVariant = variant === "red" ? "red-popup" : "primary-popup";
-
   return (
     <div className={`popup-container ${isOpen ? "active" : ""}`} onClick={handleOutsideClick}>
       <div className={`popup ${variantClass} ${className}`} {...props}>
         <i className="close-icon" onClick={closePopup}></i>
         <h2 className="popup-title">{title}</h2>
         {children}
-        <Button variant={buttonVariant} onClick={closePopup}>Close</Button>
       </div>
     </div>
   );
