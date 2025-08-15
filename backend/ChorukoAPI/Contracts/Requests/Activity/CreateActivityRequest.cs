@@ -9,8 +9,7 @@ public class CreateActivityRequest
     public string Name { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Household ID is required")]
-    [Range(1, int.MaxValue, ErrorMessage = "Household ID is required")]
-    public int HouseholdId { get; set; }
+    public string HouseholdId { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Points awarded is required")]
     [Range(1, 1000, ErrorMessage = "Points awarded must be at least {2} characters long.")]
