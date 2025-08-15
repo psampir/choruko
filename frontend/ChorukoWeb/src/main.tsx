@@ -1,19 +1,33 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.scss";
-import AuthContainer from "./views/Auth/AuthContainer";
-import { AuthProvider } from "./contexts/AuthContext";
-// import JoinOrCreateHousehold from './views/JoinOrCreateHousehold/JoinOrCreateHouseholdOptions'
-// import Invitations from './views/JoinOrCreateHousehold/Invitations/Invitations'
-// import NavbarMobile from './components/NavbarMobile/NavbarMobile'
+import './boot/detectNotch';
+import { StrictMode, useState } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.scss'
+import NavbarMobile from './components/NavbarMobile/NavbarMobile'
+import Popup from './components/Popup'
+import Input from './components/Input'
+import Button from './components/Button'
 
-createRoot(document.getElementById("root")!).render(
+function App() {
+  const [isPopupOpen, setPopupOpen] = useState(true);
+
+  return (
+    <>
+      <NavbarMobile />
+      <Popup variant="red" title="Error" open={isPopupOpen} onClose={() => setPopupOpen(false)}>
+        <Input
+          variant="email"
+          className="login__input--email"
+          type="text"
+          placeholder="Email"
+        />
+        <Button variant="red" onClick={() => setPopupOpen(false)}>Submit</Button>
+      </Popup>
+    </>
+  );
+}
+
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <AuthContainer />
-    </AuthProvider>
-    {/* <JoinOrCreateHousehold onJoinHousehold={() => {}} onCreateHousehold={() => {}} /> */}
-    {/* <Invitations /> */}
-    {/* <NavbarMobile /> */}
-  </StrictMode>
-);
+    <App />
+  </StrictMode>,
+)
