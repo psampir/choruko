@@ -98,7 +98,7 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
 
     public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
     {
-        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext.User);
+        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
 
         if (user == null)
         {

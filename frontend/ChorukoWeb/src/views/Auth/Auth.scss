@@ -44,13 +44,14 @@
         right: 10px;
         width: 24px;
         height: 24px;
-        background: url("../../assets/svg/close-icon.svg") no-repeat center/contain;
+        background: url("../../assets/svg/close-icon.svg") no-repeat
+          center/contain;
         cursor: pointer;
       }
 
       .login__popup-message {
         width: 70%;
-        margin: auto 0;  
+        margin: auto 0;
         text-align: center;
         line-height: 1.4;
       }
@@ -65,6 +66,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    // margin-top: 30px;
 
     .login__logo-container {
       position: relative;
@@ -99,12 +101,16 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 22px;
       margin-top: 40px;
-    }
 
-    .login__button--login {
-      margin-top: 35px;
+      .login__input-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        gap: 16px;
+        margin-bottom: 30px;
+      }
     }
 
     .login__button--reset {
@@ -118,12 +124,8 @@
     align-items: center;
 
     .login__without-account {
-      margin-top: 75px;
+      margin: 75px 0 16px;
       font-size: 0.875rem;
-    }
-
-    .login__button--signup {
-      margin-top: 20px;
     }
   }
 }

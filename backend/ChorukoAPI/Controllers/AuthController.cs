@@ -55,6 +55,7 @@ public class AuthController(IAuthService _authService) : ControllerBase
     [Authorize]
     public async Task<ActionResult<ApiResponse<UserInfoResponse>>> GetUserInfo()
     {
+
         var result = await _authService.GetUserInfoAsync();
 
         return result.ToApiResponse();

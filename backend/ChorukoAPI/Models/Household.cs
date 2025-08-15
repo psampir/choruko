@@ -19,7 +19,10 @@ public class Household
     public string AdminId { get; set; }
     [ForeignKey("AdminId")]
     public virtual User Admin { get; set; }
-
+    
+    [StringLength(500)]
+    [Column(TypeName = "varchar(500)")]
+    public string? ProfilePicturePath { get; set; }
     public virtual List<Activity>? Activities { get; set; }
     public virtual List<User> Participants { get; set; }
     public virtual List<HouseholdTask>? Tasks { get; set; }
