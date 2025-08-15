@@ -95,6 +95,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 
+builder.Services.AddScoped<IActivityService, ActivityService>();
+
 builder.Services.AddControllers();
 
 const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
