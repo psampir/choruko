@@ -70,7 +70,7 @@ namespace ChorukoAPI.Services.Implementation
             throw new NotImplementedException();
         }
 
-        public Task<ServiceResponse<OperationResultDto>> UpdateActivityAsync(int activityId, UpdateActivityRequest request)
+        public Task<ServiceResponse<OperationResultDto>> UpdateActivityAsync(int activityId, EditActivityRequest request)
         {
             throw new NotImplementedException();
         }
