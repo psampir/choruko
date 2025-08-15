@@ -1,0 +1,238 @@
+import React, { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import authService from "../services/authService";
+
+// Define the User interface based on your backend
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userName: string;
+  role?: string;
+  // Add other user properties from your backend as needed
+}
+
+// Define the context interface
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; message?: string }>;
+  register: (
+    userData: RegisterData
+  ) => Promise<{ success: boolean; message?: string }>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
+  error: string | null;
+  clearError: () => void;
+}
+
+interface RegisterData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+// Create the context
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Custom hook to use the auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
+// AuthProvider component props
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+// AuthProvider component
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Derived state
+  const isAuthenticated = user !== null;
+
+  // Clear error function
+  const clearError = () => {
+    setError(null);
+  };
+
+  // Check authentication status
+  const checkAuth = async () => {
+    try {
+      setLoading(true);
+      const result = await authService.checkStatus();
+
+      if (result.authenticated && result.user) {
+        setUser(result.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Auth check failed:", error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Login function
+  const login = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await authService.login(email, password);
+
+      if (result.success) {
+        // After successful login, get user data
+        await checkAuth();
+        return { success: true, message: result.message };
+      } else {
+        setError(result.message || "Login failed");
+        return { success: false, message: result.message };
+      }
+    } catch (error) {
+      const errorMessage = "An unexpected error occurred during login";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Register function
+  const register = async (userData: RegisterData) => {
+    console.log("🔄 AuthContext register called with:");
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log("📡 Calling authService.register...");
+      const result = await authService.register(userData);
+      console.log("📨 AuthService response:", result);
+
+      if (result.success) {
+        console.log("✅ Registration successful in AuthContext");
+        // Optionally auto-login after registration
+        await login(userData.email, userData.password);
+        return { success: true, message: result.message };
+      } else {
+        console.log("❌ Registration failed:", result.message);
+        setError(result.message || "Registration failed");
+        return { success: false, message: result.message };
+      }
+    } catch (error) {
+      console.error("💥 AuthContext register error:", error);
+      const errorMessage = "An unexpected error occurred during registration";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logout function
+  const logout = async () => {
+    try {
+      setLoading(true);
+      await authService.logout();
+      setUser(null);
+      setError(null);
+
+      // Optionally redirect to login page
+      // window.location.href = '/';
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if logout fails on server, clear local state
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Check auth on component mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  // Context value
+  const value: AuthContextType = {
+    user,
+    loading,
+    isAuthenticated,
+    login,
+    register,
+    logout,
+    checkAuth,
+    error,
+    clearError,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// Optional: Protected Route component
+interface ProtectedRouteProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  fallback = <div>Please log in to access this page.</div>,
+}) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <>{children}</> : <>{fallback}</>;
+};
+
+// Optional: User role checker component
+interface RoleProtectedProps {
+  children: ReactNode;
+  allowedRoles: string[];
+  fallback?: ReactNode;
+}
+
+export const RoleProtected: React.FC<RoleProtectedProps> = ({
+  children,
+  allowedRoles,
+  fallback = <div>You don't have permission to access this page.</div>,
+}) => {
+  const { user, isAuthenticated } = useAuth();
+
+  if (!isAuthenticated || !user?.role) {
+    return <>{fallback}</>;
+  }
+
+  const hasPermission = allowedRoles.includes(user.role);
+  return hasPermission ? <>{children}</> : <>{fallback}</>;
+};

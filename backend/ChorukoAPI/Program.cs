@@ -40,7 +40,7 @@ builder.Services.AddDbContext<DataContext>(options => options
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
-    // Password settings (you can customize these further based on your security requirements)
+
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -68,11 +68,23 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "ChorukoCookie";
     options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax; // Changed from None to Lax for development
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Allow HTTP in development
     options.ExpireTimeSpan = TimeSpan.FromHours(1);
-    options.LoginPath = "/api/Auth/login";
-    //options.LogoutPath = "/api/Auth/logout";
-    //options.AccessDeniedPath = "api/Auth/accessDenied";
     options.SlidingExpiration = true;
+
+    // Configure events to return proper status codes
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 403;
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services.AddHttpContextAccessor();
