@@ -7,6 +7,7 @@ using ChorukoAPI.Extensions;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Net;
 
 namespace ChorukoAPI.Services.Implementation
@@ -57,7 +58,34 @@ namespace ChorukoAPI.Services.Implementation
 
         public async Task<ServiceResponse<OperationResultDto>> EditActivityAsync(string activityId, EditActivityRequest request)
         {
-            throw new NotImplementedException();
+            var activity = await _context.Activities.FirstOrDefaultAsync(a => a.Id == activityId);
+            if (activity == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity not found.", HttpStatusCode.NotFound);
+            }
+
+            activity.Name = request.Name;
+            activity.PointsAwarded = request.PointsAwarded;
+
+            var validationResponse = ValidateActivityData(activity);
+            if (!validationResponse.IsSuccessful)
+            {
+                return validationResponse;
+            }
+
+            await _context.SaveChangesAsync();
+
+            var response = new OperationResultDto
+            {
+                Operation = "EditActivity",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "ActivityName", activity.Name}
+                }
+            };
+
+            return ServiceResponseFactory.Success(response);
         }
 
         public async Task<ServiceResponse<List<ActivityResponse>>> GetActivitiesAsync(string? householdId)
