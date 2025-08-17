@@ -18,9 +18,9 @@ public class ActivityController(IActivityService _activityService) : ControllerB
 {
     [HttpPost("create/{householdId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> CreateActivity([FromBody] CreateActivityRequest createActivityRequest)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> CreateActivity([FromRoute] string householdId, [FromBody] CreateActivityRequest createActivityRequest)
     {
-        var result = await _activityService.CreateActivityAsync(createActivityRequest);
+        var result = await _activityService.CreateActivityAsync(householdId, createActivityRequest);
         return result.ToCreatedApiResponse();
     }
 
@@ -40,7 +40,7 @@ public class ActivityController(IActivityService _activityService) : ControllerB
         return result.ToCreatedApiResponse();
     }
 
-    [HttpGet("all/{householdId}")]
+    [HttpGet("{householdId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
     public async Task<ActionResult<ApiResponse<List<ActivityResponse>>>> GetActivities([FromRoute] string householdId)
     {
@@ -48,9 +48,9 @@ public class ActivityController(IActivityService _activityService) : ControllerB
         return result.ToApiResponse();
     }
 
-    [HttpGet("{activityId}")]
+    [HttpGet("{householdId}/{activityId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<ActivityResponse>>> GetActivity([FromRoute] string activityId)
+    public async Task<ActionResult<ApiResponse<ActivityResponse>>> GetActivity([FromRoute] string householdId, [FromRoute] string activityId)
     {
         var result = await _activityService.GetActivityByIdAsync(activityId);
         return result.ToApiResponse();

@@ -14,9 +14,9 @@ namespace ChorukoAPI.Services.Implementation
 {
     public class ActivityService(DataContext _context) : IActivityService
     {
-        public async Task<ServiceResponse<OperationResultDto>> CreateActivityAsync(CreateActivityRequest request)
+        public async Task<ServiceResponse<OperationResultDto>> CreateActivityAsync(string householdId, CreateActivityRequest request)
         {
-            var household = await _context.Households.FirstOrDefaultAsync(h => h.Id == request.HouseholdId);
+            var household = await _context.Households.FirstOrDefaultAsync(h => h.Id == householdId);
 
             if (household == null)
             {
