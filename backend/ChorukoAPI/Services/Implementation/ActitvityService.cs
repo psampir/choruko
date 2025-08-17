@@ -90,7 +90,25 @@ namespace ChorukoAPI.Services.Implementation
 
         public async Task<ServiceResponse<List<ActivityResponse>>> GetActivitiesAsync(string? householdId)
         {
-            throw new NotImplementedException();
+            var householdActivities = await _context.Activities.Where(a => a.HouseholdId == householdId).ToListAsync();
+            if (householdActivities.Count == 0)
+            {
+                return ServiceResponseFactory.Error<List<ActivityResponse>>(null, "No activities found in specified household.", HttpStatusCode.NotFound);
+            }
+
+            var response = new List<ActivityResponse>();
+
+            foreach(var activity in householdActivities)
+            {
+                response.Add(new ActivityResponse
+                {
+                    Id = activity.Id,
+                    Name = activity.Name,
+                    PointsAwarded = activity.PointsAwarded,
+                });
+            }
+
+            return ServiceResponseFactory.Success(response, "Successful extraction of household activities");
         }
 
         public async Task<ServiceResponse<ActivityResponse>> GetActivityByIdAsync(string activityId)
