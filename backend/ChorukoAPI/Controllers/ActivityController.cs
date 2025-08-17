@@ -16,7 +16,7 @@ namespace ChorukoAPI.Controllers;
 [Authorize]
 public class ActivityController(IActivityService _activityService) : ControllerBase
 {
-    [HttpPost("create")]
+    [HttpPost("create/{householdId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> CreateActivity([FromBody] CreateActivityRequest createActivityRequest)
     {
@@ -24,9 +24,9 @@ public class ActivityController(IActivityService _activityService) : ControllerB
         return result.ToCreatedApiResponse();
     }
 
-    [HttpPut("edit/{activityId}")]
+    [HttpPut("edit/{householdId}/{activityId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> EditActivity([FromRoute] string activityId, [FromBody] EditActivityRequest updateActivityRequest)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> EditActivity([FromRoute] string householdId, [FromRoute] string activityId, [FromBody] EditActivityRequest updateActivityRequest)
     {
         var result = await _activityService.EditActivityAsync(activityId, updateActivityRequest);
         return result.ToCreatedApiResponse();
@@ -48,7 +48,7 @@ public class ActivityController(IActivityService _activityService) : ControllerB
         return result.ToApiResponse();
     }
 
-    [HttpGet("byId/{activityId}")]
+    [HttpGet("{activityId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
     public async Task<ActionResult<ApiResponse<ActivityResponse>>> GetActivity([FromRoute] string activityId)
     {
