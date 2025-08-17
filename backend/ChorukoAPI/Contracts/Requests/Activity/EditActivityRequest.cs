@@ -8,9 +8,6 @@ public class EditActivityRequest
     [StringLength(100, MinimumLength = 3, ErrorMessage = "Activity name must be at least {2} characters long.")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Household ID is required")]
-    public string HouseholdId { get; set; } = string.Empty;
-
     [Required(ErrorMessage = "Points awarded is required")]
     [Range(1, 1000, ErrorMessage = "Points awarded must be at least {2} characters long.")]
     public int PointsAwarded { get; set; }
