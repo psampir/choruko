@@ -131,7 +131,26 @@ namespace ChorukoAPI.Services.Implementation
 
         public async Task<ServiceResponse<OperationResultDto>> DeleteActivityAsync(string activityId)
         {
-            throw new NotImplementedException();
+            var householdActivity = await _context.Activities.FirstOrDefaultAsync(a => a.Id == activityId);
+            if (householdActivity == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No activity found in household.", HttpStatusCode.NotFound);
+            }
+
+            _context.Activities.Remove(householdActivity);
+            await _context.SaveChangesAsync();
+
+            var response = new OperationResultDto
+            {
+                Operation = "DeleteActivity",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "ActivityName", householdActivity.Name}
+                }
+            };
+
+            return ServiceResponseFactory.Success(response, "Activity was succesfully created");
         }
 
         private ServiceResponse<OperationResultDto> ValidateActivityData(Activity activity)
