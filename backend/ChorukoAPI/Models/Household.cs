@@ -24,8 +24,8 @@ public class Household
     [Column(TypeName = "varchar(500)")]
     public string? ProfilePicturePath { get; set; }
     public virtual List<Activity>? Activities { get; set; }
-    public virtual List<User> Participants{ get; set; }
-    public virtual List<HouseholdTask>? Tasks{ get; set; }
+    public virtual List<User> Participants { get; set; }
+    public virtual List<HouseholdTask>? Tasks { get; set; }
     public virtual List<Settlement>? Settlements { get; set; }
     public virtual List<Invitation>? Invitations { get; set; }
 }

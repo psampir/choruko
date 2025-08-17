@@ -53,7 +53,7 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
     public async Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginRequest request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user == null) 
+        if (user == null)
         {
             return ServiceResponseFactory.Error(SignInResult.Failed, "User not found", HttpStatusCode.NotFound);
         }
