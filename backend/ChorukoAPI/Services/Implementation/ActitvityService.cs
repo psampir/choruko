@@ -55,22 +55,22 @@ namespace ChorukoAPI.Services.Implementation
             return ServiceResponseFactory.Success(response, "Activity was succesfully created");
         }
 
-        public Task<ServiceResponse<OperationResultDto>> DeleteActivityAsync(int activityId)
+        public async Task<ServiceResponse<OperationResultDto>> EditActivityAsync(string activityId, EditActivityRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ServiceResponse<List<ActivityResponse>>> GetActivitiesAsync(string? householdId)
+        public async Task<ServiceResponse<List<ActivityResponse>>> GetActivitiesAsync(string? householdId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ServiceResponse<ActivityResponse>> GetActivityByIdAsync(string activityId)
+        public async Task<ServiceResponse<ActivityResponse>> GetActivityByIdAsync(string activityId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ServiceResponse<OperationResultDto>> UpdateActivityAsync(int activityId, EditActivityRequest request)
+        public async Task<ServiceResponse<OperationResultDto>> DeleteActivityAsync(string activityId)
         {
             throw new NotImplementedException();
         }
