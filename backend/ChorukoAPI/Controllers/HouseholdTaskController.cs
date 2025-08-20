@@ -2,11 +2,13 @@
 using ChorukoAPI.Contracts.Requests.Task;
 using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Responses.Household;
+using ChorukoAPI.Extensions;
 using ChorukoAPI.Mappers;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ChorukoAPI.Controllers
 {
@@ -18,7 +20,14 @@ namespace ChorukoAPI.Controllers
         [Authorize(Roles = "HouseholdAdmin,Participant")]
         public async Task<ActionResult<ApiResponse<OperationResultDto>>> CreateHouseholdTaskAsync([FromRoute] string householdId, CreateHouseholdTaskRequest request)
         {
-            var result = await householdTaskService.CreateHouseholdTaskAsync(householdId, request);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
+            }
+
+            var result = await householdTaskService.CreateHouseholdTaskAsync(householdId, request, userId);
 
             return result.ToCreatedApiResponse();
         }
