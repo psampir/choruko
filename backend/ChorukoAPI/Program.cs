@@ -97,6 +97,8 @@ builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 
 builder.Services.AddScoped<IActivityService, ActivityService>();
 
+builder.Services.AddScoped<IHouseholdTaskService, HouseholdTaskService>();
+
 builder.Services.AddControllers();
 
 const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
