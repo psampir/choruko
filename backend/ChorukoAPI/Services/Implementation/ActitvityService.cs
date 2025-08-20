@@ -53,7 +53,7 @@ namespace ChorukoAPI.Services.Implementation
                 }
             };
 
-            return ServiceResponseFactory.Success(response, "Activity was succesfully created");
+            return ServiceResponseFactory.Success(response, "Activity was successfully created");
         }
 
         public async Task<ServiceResponse<OperationResultDto>> EditActivityAsync(string activityId, EditActivityRequest request)
@@ -150,7 +150,7 @@ namespace ChorukoAPI.Services.Implementation
                 }
             };
 
-            return ServiceResponseFactory.Success(response, "Activity was succesfully created");
+            return ServiceResponseFactory.Success(response, "Activity was successfully created");
         }
 
         private ServiceResponse<OperationResultDto> ValidateActivityData(Activity activity)
@@ -159,7 +159,7 @@ namespace ChorukoAPI.Services.Implementation
 
             if (isActivityExist)
             {
-                return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist", HttpStatusCode.NotFound);
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist", HttpStatusCode.BadRequest);
             }
 
             return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household");
