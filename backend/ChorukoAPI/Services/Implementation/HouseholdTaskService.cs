@@ -118,7 +118,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     public async Task<ServiceResponse<List<HouseholdTaskResponse>>> GetAllHouseholdTaskAsync(string householdId)
     {
-        var householdTasks = await _context.HouseholdTasks.Where(h => householdId == householdId).ToListAsync();
+        var householdTasks = await _context.HouseholdTasks.Where(t => t.HouseholdId == householdId).ToListAsync();
 
         if (householdTasks.Count == 0)
         {
@@ -135,7 +135,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         return ServiceResponseFactory.Success(response, "Success");
     }
 
-    public Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string activityId)
+    public async Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string householdId)
     {
         throw new NotImplementedException();
     }
