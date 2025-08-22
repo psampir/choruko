@@ -31,8 +31,8 @@ public class HouseholdTaskService(DataContext _context) : IHouseholdTaskService
                 Household = household,
                 ActivityId = request.ActivityId,
                 CreatorId = userId,
-                CreationDate = DateTime.UtcNow,
-                DeadLine = request.DeadLine,
+                CreationDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
                 Status = Models.TaskStatus.Unassigned,
                 ParticipantsAmount = request.ParticipantsAmount,
                 Reward = request.Reward,
@@ -65,7 +65,7 @@ public class HouseholdTaskService(DataContext _context) : IHouseholdTaskService
         }
         catch(Exception ex)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed to upload profile picture: {ex.Message}", HttpStatusCode.InternalServerError);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while creating task: {ex.Message}", HttpStatusCode.InternalServerError);
         }
     }
 
