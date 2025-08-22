@@ -137,7 +137,16 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     public async Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string householdId)
     {
-        throw new NotImplementedException();
+        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(t => t.Id == householdId);
+
+        if (householdTask == null)
+        {
+            return ServiceResponseFactory.Error<HouseholdTaskResponse>(null, $"No task were found", HttpStatusCode.NotFound);
+        }
+
+        var response = await _mapper.Map(householdTask);
+
+        return ServiceResponseFactory.Success(response, "Success");
     }
 
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
