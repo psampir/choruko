@@ -51,7 +51,7 @@ public class HouseholdTaskService(DataContext _context) : IHouseholdTaskService
 
             var response = new OperationResultDto
             {
-                Operation = "CreateActivity",
+                Operation = "CreateHouseholdTask",
                 Timestamp = DateTime.UtcNow,
                 Metadata = new Dictionary<string, object>
                 {
@@ -69,9 +69,48 @@ public class HouseholdTaskService(DataContext _context) : IHouseholdTaskService
         }
     }
 
-    public Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request)
+    public async Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (householdTask == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+            }
+
+            householdTask.ActivityId = request.ActivityId;
+            householdTask.DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified);
+            householdTask.ParticipantsAmount = request.ParticipantsAmount;
+            householdTask.Reward = request.Reward;
+            householdTask.Name = request.Name;
+            householdTask.Description = request.Description;
+
+            var validationResult = await ValidateHouseholdTaskData(householdTask);
+            if (validationResult.IsSuccessful == false)
+            {
+                return validationResult;
+            }
+
+            _context.SaveChanges();
+
+            var response = new OperationResultDto
+            {
+                Operation = "EditHouseholdTask",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "TaskName", householdTask.Name}
+                }
+            };
+
+            return ServiceResponseFactory.Success(response, "Task for household was successfully edited");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while editing task: {ex.Message}", HttpStatusCode.InternalServerError);
+        }
     }
 
     public Task<ServiceResponse<List<HouseholdResponse>>> GetAllHouseholdTaskAsync()
