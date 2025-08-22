@@ -19,7 +19,7 @@ namespace ChorukoAPI.Contracts.Responses.Task
 
         public DateTime DeadLine { get; set; }
 
-        public TaskStatus Status { get; set; }
+        public Models.TaskStatus Status { get; set; }
 
         public int ParticipantsAmount { get; set; }
 
