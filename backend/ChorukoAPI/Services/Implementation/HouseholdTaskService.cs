@@ -3,18 +3,21 @@ using ChorukoAPI.Contracts.Requests.Household;
 using ChorukoAPI.Contracts.Requests.Task;
 using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Responses.Household;
+using ChorukoAPI.Contracts.Responses.Task;
 using ChorukoAPI.Data;
 using ChorukoAPI.Extensions;
+using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Security.Claims;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class HouseholdTaskService(DataContext _context) : IHouseholdTaskService
+public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, HouseholdTaskResponse> _mapper) : IHouseholdTaskService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdTaskAsync(string householdId, CreateHouseholdTaskRequest request, string userId)
     {
@@ -115,7 +118,21 @@ public class HouseholdTaskService(DataContext _context) : IHouseholdTaskService
 
     public async Task<ServiceResponse<List<HouseholdTaskResponse>>> GetAllHouseholdTaskAsync(string householdId)
     {
-        throw new NotImplementedException();
+        var householdTasks = await _context.HouseholdTasks.Where(h => householdId == householdId).ToListAsync();
+
+        if (householdTasks.Count == 0)
+        {
+            return ServiceResponseFactory.Error<List<HouseholdTaskResponse>>(null, $"No tasks were found", HttpStatusCode.NotFound);
+        }
+
+        var response = new List<HouseholdTaskResponse>();
+
+        foreach (var householdTask in householdTasks)
+        {
+            response.Add(await _mapper.Map(householdTask));
+        }
+
+        return ServiceResponseFactory.Success(response, "Success");
     }
 
     public Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string activityId)
