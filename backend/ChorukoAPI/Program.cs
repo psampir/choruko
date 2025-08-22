@@ -1,4 +1,7 @@
+using ChorukoAPI.Contracts.Responses.Task;
+using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Data;
+using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using ChorukoAPI.Services.Implementation;
@@ -98,6 +101,8 @@ builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 
 builder.Services.AddScoped<IHouseholdTaskService, HouseholdTaskService>();
+
+builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
 
 builder.Services.AddControllers();
 
