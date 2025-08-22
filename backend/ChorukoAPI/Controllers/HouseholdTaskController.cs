@@ -2,6 +2,7 @@
 using ChorukoAPI.Contracts.Requests.Task;
 using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Responses.Household;
+using ChorukoAPI.Contracts.Responses.Task;
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Mappers;
 using ChorukoAPI.Services.Abstraction;
@@ -43,16 +44,16 @@ namespace ChorukoAPI.Controllers
 
         [HttpGet("{householdId}")]
         [Authorize(Roles = "HouseholdAdmin,Participant")]
-        public async Task<ActionResult<ApiResponse<List<HouseholdResponse>>>> GetAllHouseholdTaskAsync()
+        public async Task<ActionResult<ApiResponse<List<HouseholdTaskResponse>>>> GetAllHouseholdTaskAsync([FromRoute] string householdId)
         {
-            var result = await householdTaskService.GetAllHouseholdTaskAsync();
+            var result = await householdTaskService.GetAllHouseholdTaskAsync(householdId);
 
             return result.ToApiResponse();
         }
 
         [HttpGet("{householdId}/{taskId}")]
         [Authorize(Roles = "HouseholdAdmin,Participant")]
-        public async Task<ActionResult<ApiResponse<HouseholdResponse>>> GetHouseholdTaskByIdAsync([FromRoute] string activityId)
+        public async Task<ActionResult<ApiResponse<HouseholdTaskResponse>>> GetHouseholdTaskByIdAsync([FromRoute] string activityId)
         {
             var result = await householdTaskService.GetHouseholdTaskByIdAsync(activityId);
 

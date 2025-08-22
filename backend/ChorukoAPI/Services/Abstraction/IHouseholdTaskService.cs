@@ -2,6 +2,7 @@
 using ChorukoAPI.Contracts.Requests.Task;
 using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Responses.Household;
+using ChorukoAPI.Contracts.Responses.Task;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -11,6 +12,6 @@ public interface IHouseholdTaskService
 {
     Task<ServiceResponse<OperationResultDto>> CreateHouseholdTaskAsync(string householdId, CreateHouseholdTaskRequest request, string userId);
     Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request);
-    Task<ServiceResponse<List<HouseholdResponse>>> GetAllHouseholdTaskAsync();
-    Task<ServiceResponse<HouseholdResponse>> GetHouseholdTaskByIdAsync(string activityId);
+    Task<ServiceResponse<List<HouseholdTaskResponse>>> GetAllHouseholdTaskAsync(string householdId);
+    Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string activityId);
 }

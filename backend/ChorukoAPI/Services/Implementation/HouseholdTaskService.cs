@@ -113,12 +113,12 @@ public class HouseholdTaskService(DataContext _context) : IHouseholdTaskService
         }
     }
 
-    public Task<ServiceResponse<List<HouseholdResponse>>> GetAllHouseholdTaskAsync()
+    public async Task<ServiceResponse<List<HouseholdTaskResponse>>> GetAllHouseholdTaskAsync(string householdId)
     {
         throw new NotImplementedException();
     }
 
-    public Task<ServiceResponse<HouseholdResponse>> GetHouseholdTaskByIdAsync(string activityId)
+    public Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string activityId)
     {
         throw new NotImplementedException();
     }
