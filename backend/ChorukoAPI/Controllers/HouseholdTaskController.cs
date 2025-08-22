@@ -53,9 +53,9 @@ namespace ChorukoAPI.Controllers
 
         [HttpGet("{householdId}/{taskId}")]
         [Authorize(Roles = "HouseholdAdmin,Participant")]
-        public async Task<ActionResult<ApiResponse<HouseholdTaskResponse>>> GetHouseholdTaskByIdAsync([FromRoute] string activityId)
+        public async Task<ActionResult<ApiResponse<HouseholdTaskResponse>>> GetHouseholdTaskByIdAsync([FromRoute] string householdId)
         {
-            var result = await householdTaskService.GetHouseholdTaskByIdAsync(activityId);
+            var result = await householdTaskService.GetHouseholdTaskByIdAsync(householdId);
 
             return result.ToApiResponse();
         }
