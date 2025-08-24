@@ -1,5 +1,6 @@
 // Controllers/HouseholdController.cs
 using ChorukoAPI.Extensions;
+using ChorukoAPI.Contracts;
 using ChorukoAPI.Contracts.Requests.Household;
 using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Responses.Household;
@@ -35,5 +36,21 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         var result = await _householdService.CreateHouseholdAsync(request, userId);
         
         return result.ToCreatedApiResponse();
+    }
+    
+    [HttpDelete("{userIdToDelete}/remove")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteUserFromHousehold(string userIdToDelete)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "Current user not authenticated.").ToApiResponse());
+        }
+        
+        var result = await _householdService.DeleteUserFromHouseholdAsync(userIdToDelete, currentUserId);
+        
+        return result.ToApiResponse();
     }
 }

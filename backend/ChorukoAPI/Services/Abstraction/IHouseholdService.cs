@@ -9,5 +9,6 @@ public interface IHouseholdService
 {
     Task<ServiceResponse<OperationResultDto>> CreateHouseholdAsync(CreateHouseholdRequest request, string userId);
     
-    //Task<ServiceResponse<HouseholdResponse>> GetHouseholdDetailsAsync(string householdId);
+    Task<ServiceResponse<OperationResultDto>> DeleteUserFromHouseholdAsync(string userIdToDelete, string currentUserId);
+
 }
