@@ -61,7 +61,24 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         var result = await _signInManager.PasswordSignInAsync(
             user, request.Password, isPersistent: false, lockoutOnFailure: false);
 
-        return ServiceResponseFactory.Success(result, result.ToString());
+        if (result.Succeeded)
+        {
+            return ServiceResponseFactory.Success(result, "Login successful");
+        }
+        else
+        {
+            string errorMessage = "Login failed";
+            if (result.IsLockedOut)
+                errorMessage = "Account is locked out";
+            else if (result.IsNotAllowed)
+                errorMessage = "Login not allowed";
+            else if (result.RequiresTwoFactor)
+                errorMessage = "Two-factor authentication required";
+            else
+                errorMessage = "Invalid email or password";
+
+            return ServiceResponseFactory.Error(result, errorMessage, HttpStatusCode.Unauthorized);
+        }
     }
 
     public async Task<ServiceResponse<OperationResultDto>> LogoutUserAsync()
