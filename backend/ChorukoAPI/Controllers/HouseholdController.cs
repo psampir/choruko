@@ -39,7 +39,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
     }
     
     [HttpDelete("{userIdToDelete}/remove")]
-    [Authorize(Roles = "HouseholdAdmin")]
+    [Authorize(Roles="HouseholdAdmin")]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteUserFromHousehold(string userIdToDelete)
     {
         var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -51,6 +51,22 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         
         var result = await _householdService.DeleteUserFromHouseholdAsync(userIdToDelete, currentUserId);
         
+        return result.ToApiResponse();
+    }
+    
+    [HttpPost("{userIdToAdd}/add")]
+    [Authorize(Roles="HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> AddUserToHousehold(string userIdToAdd)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "Current user not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.AddUserToHouseholdAsync(userIdToAdd, currentUserId);
+
         return result.ToApiResponse();
     }
 }
