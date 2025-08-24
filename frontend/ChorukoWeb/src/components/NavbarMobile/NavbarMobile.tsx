@@ -94,10 +94,7 @@ const NavbarMobile = () => {
             </li>
             <li>
               <Button variant="primary">
-                <img
-                  src={houseIcon}
-                  alt="Household Management"
-                />
+                <img src={houseIcon} alt="Household Management" />
                 Manage Household
               </Button>
             </li>

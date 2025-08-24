@@ -42,6 +42,7 @@ class AuthService {
   // Login user
   async login(email: string, password: string) {
     try {
+      console.log("📡 Sending login request...");
       const response = await fetch(`${apiBaseUrl}/login`, {
         method: "POST",
         headers: {
@@ -51,14 +52,38 @@ class AuthService {
         body: JSON.stringify({ email, password }),
       });
 
-      const message = await response.text();
+      console.log("📨 Login response status:", response.status);
+      console.log("📨 Login response headers:", Object.fromEntries(response.headers.entries()));
+
+      const responseText = await response.text();
+      console.log("📨 Login response body:", responseText);
 
       if (response.ok) {
-        return { success: true, message };
+        try {
+          const data = JSON.parse(responseText);
+          console.log("📨 Parsed login response:", data);
+          
+          // Check if the actual login succeeded
+          if (data.result && data.result.succeeded) {
+            console.log("✅ Login successful!");
+            return { success: true, message: "Login successful" };
+          } else {
+            console.log("❌ Login failed - invalid credentials");
+            return { 
+              success: false, 
+              message: data.message || "Invalid email or password" 
+            };
+          }
+        } catch (parseError) {
+          console.error("💥 Failed to parse login response:", parseError);
+          return { success: false, message: "Failed to parse server response" };
+        }
       } else {
-        return { success: false, message };
+        console.log("❌ Login request failed with status:", response.status);
+        return { success: false, message: responseText };
       }
     } catch (error) {
+      console.error("💥 Login request error:", error);
       return { success: false, message: "Network error occurred" };
     }
   }
