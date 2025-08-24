@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Net; 
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Contracts.Responses;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace ChorukoAPI.Services.Implementation;
 
@@ -157,5 +157,79 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         }
 
         return ServiceResponseFactory.Success<OperationResultDto>(null, "User is valid for household creation.", HttpStatusCode.OK);
+    }
+    
+    public async Task<ServiceResponse<OperationResultDto>> DeleteUserFromHouseholdAsync(string userIdToDelete, string currentUserId)
+    {
+        var userToDelete = await _userManager.FindByIdAsync(userIdToDelete);
+        if (userToDelete == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User to delete not found.", HttpStatusCode.NotFound);
+        }
+
+        var currentUser = await _userManager.FindByIdAsync(currentUserId);
+        if (currentUser == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user not found.", HttpStatusCode.NotFound);
+        }
+        
+        var household = await _context.Households
+            .Include(h => h.Participants)
+            .FirstOrDefaultAsync(h => h.Id == userToDelete.HouseholdId);
+
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
+        }
+        
+        if (household.AdminId != currentUserId)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Only the household admin can delete users.", HttpStatusCode.Forbidden);
+        }
+        
+        if (userToDelete.HouseholdId != household.Id)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a participant of this household.", HttpStatusCode.BadRequest);
+        }
+        
+        var userRoles = await _userManager.GetRolesAsync(userToDelete);
+        if (userRoles.Contains("HouseholdAdmin"))
+        {
+            var adminCount = household.Participants
+                .Where(p => _userManager.GetRolesAsync(p).Result.Contains("HouseholdAdmin"))
+                .Count();
+
+            if (adminCount <= 1)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot delete the last household admin. A household must have at least one admin.", HttpStatusCode.Forbidden);
+            }
+        }
+        
+        userToDelete.HouseholdId = null;
+        userToDelete.Household = null;
+        
+        await _userManager.RemoveFromRolesAsync(userToDelete, await _userManager.GetRolesAsync(userToDelete));
+        await _userManager.AddToRoleAsync(userToDelete, "None");
+        
+        _context.Users.Update(userToDelete);
+        await _context.SaveChangesAsync();
+
+        var response = new OperationResultDto
+        {
+            Operation = "DeleteUserFromHousehold",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "HouseholdId", household.Id },
+                { "UserId", userToDelete.Id },
+                { "UserName", userToDelete.FirstName + " " + userToDelete.LastName }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            response,
+            "User was successfully removed from the household.",
+            HttpStatusCode.OK
+        );
     }
 }
