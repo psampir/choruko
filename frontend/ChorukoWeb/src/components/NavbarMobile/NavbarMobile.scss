@@ -150,3 +150,15 @@
     }
   }
 }
+
+// Styles for iOS devices with a notch
+:root.is-notch .navbar-mobile {
+  &-container {
+    padding-top: calc(env(safe-area-inset-top) + 20px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .theme-dropdown {
+    top: calc(88px + env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}

@@ -1,11 +1,15 @@
-﻿using ChorukoAPI.DTOs.User;
+﻿using ChorukoAPI.Contracts.Responses;
+using ChorukoAPI.Contracts.Responses.User;
+using ChorukoAPI.Contracts.Requests.User;
 using Microsoft.AspNetCore.Identity;
+using ChorukoAPI.Contracts;
 
 namespace ChorukoAPI.Services.Abstraction;
 
 public interface IAuthService
 {
-    Task<IdentityResult> RegisterUserAsync(UserRegistrationDto registrationDto);
-    Task<SignInResult> LoginUserAsync(UserLoginDto loginDto);
-    Task<UserInfoDto> GetUserInfoAsync();
+    Task<ServiceResponse<IdentityResult>> RegisterUserAsync(UserRegistrationRequest request);
+    Task<ServiceResponse<SignInResult>> LoginUserAsync(UserLoginRequest request);
+    Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync();
+    Task<ServiceResponse<OperationResultDto>> LogoutUserAsync();
 }
