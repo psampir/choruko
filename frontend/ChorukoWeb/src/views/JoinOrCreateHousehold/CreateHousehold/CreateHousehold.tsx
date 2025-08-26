@@ -22,26 +22,9 @@ function CreateHousehold() {
         Select an Image
       </Button>
       <Input variant="edit" placeholder="Household Name" />
-      <Button variant="primary">Change Name</Button>
-      <div className="create-household__actions">
-        <Button variant="primary">
-          <img
-            src="/src/assets/svg/activities.svg"
-            alt="Define Activities"
-            className="activity-icon"
-          />
-          <p>Define Activities</p>
-        </Button>
-        <Button variant="primary">
-          <img
-            src="/src/assets/svg/profile-light.svg"
-            alt="Add Participants"
-            className="profile-icon"
-          />
-          <p>Add Participants</p>
-        </Button>
-      </div>
-      <Button variant="primary">Create</Button>
+      <Button variant="primary" className="create-btn">
+        Create
+      </Button>
     </div>
   );
 }
