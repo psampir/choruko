@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
+import raccoonWavingSvg from "../../assets/svg/raccoon-waving.svg";
+
 
 interface RaccoonAnimationControllerProps {
   svgPath?: string;
@@ -28,18 +30,17 @@ class RaccoonAnimationController {
       const svgText = await response.text();
       this.container.innerHTML = svgText;
 
-      this.svg = this.container.querySelector('svg');
+      this.svg = this.container.querySelector("svg");
       if (!this.svg) {
-        throw new Error('SVG element not found in loaded content');
+        throw new Error("SVG element not found in loaded content");
       }
 
       // Start the infinite animation loop
       this.startInfiniteLoop(this.restartInterval, svgPath);
-
-      console.log('Raccoon SVG loaded successfully with infinite animation');
     } catch (error) {
-      console.error('Failed to load raccoon SVG:', error);
-      this.container.innerHTML = '<p>Failed to load animation. Please check the console for details.</p>';
+      console.error("Failed to load raccoon SVG:", error);
+      this.container.innerHTML =
+        "<p>Failed to load animation. Please check the console for details.</p>";
     }
   }
 
@@ -53,13 +54,15 @@ class RaccoonAnimationController {
 
       const svgText = await response.text();
       this.container.innerHTML = svgText;
-
     } catch (error) {
-      console.error('Failed to reload SVG:', error);
+      console.error("Failed to reload SVG:", error);
     }
   }
 
-  startInfiniteLoop(interval: number = this.restartInterval, svgPath: string): void {
+  startInfiniteLoop(
+    interval: number = this.restartInterval,
+    svgPath: string
+  ): void {
     // Clear existing interval if any
     if (this.loopInterval) {
       clearInterval(this.loopInterval);
@@ -68,32 +71,28 @@ class RaccoonAnimationController {
     // Set up interval to reload the SVG with the specified interval
     this.loopInterval = setInterval(async () => {
       await this.reloadSVG(svgPath);
-      console.log(`Animation restarted by reloading SVG (interval: ${interval}ms)`);
     }, interval);
-
-    console.log(`Infinite animation loop started with ${interval}ms interval`);
   }
 
   stopAnimation(): void {
     if (this.loopInterval) {
       clearInterval(this.loopInterval);
       this.loopInterval = null;
-      console.log('Animation loop stopped');
     }
   }
 
   destroy(): void {
     this.stopAnimation();
     if (this.container) {
-      this.container.innerHTML = '';
+      this.container.innerHTML = "";
     }
   }
 }
 
 const RaccoonAnimation: React.FC<RaccoonAnimationControllerProps> = ({
-  svgPath = '/src/assets/svg/raccoon-waving.svg',
+  svgPath = raccoonWavingSvg,
   restartInterval = 5000,
-  className = ''
+  className = "",
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<RaccoonAnimationController | null>(null);
@@ -116,13 +115,18 @@ const RaccoonAnimation: React.FC<RaccoonAnimationControllerProps> = ({
         controllerRef.current = controller;
 
         // Make controller available globally for debugging
-        (window as Window & { raccoonController?: RaccoonAnimationController }).raccoonController = controller;
+        (
+          window as Window & { raccoonController?: RaccoonAnimationController }
+        ).raccoonController = controller;
 
         await controller.loadSVG(svgPath);
         setIsLoading(false);
       } catch (err) {
-        console.error('Failed to initialize raccoon animation controller:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error occurred');
+        console.error(
+          "Failed to initialize raccoon animation controller:",
+          err
+        );
+        setError(err instanceof Error ? err.message : "Unknown error occurred");
         setIsLoading(false);
       }
     };
@@ -142,11 +146,7 @@ const RaccoonAnimation: React.FC<RaccoonAnimationControllerProps> = ({
     <div className={`raccoon-animation-container ${className}`}>
       {isLoading && <div className="loading">Loading animation...</div>}
       {error && <div className="error">Error: {error}</div>}
-      <div
-        ref={containerRef}
-        id="svgContainer"
-        className="svg-container"
-      />
+      <div ref={containerRef} id="svgContainer" className="svg-container" />
     </div>
   );
 };

@@ -46,7 +46,7 @@ public class HouseholdTask
     [Required]
     [Range(1, 100)]
     [Column(TypeName = "integer")]
-    public int Reward{ get; set; }
+    public int Reward { get; set; }
 
     [Required]
     [StringLength(200)]
