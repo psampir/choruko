@@ -60,8 +60,13 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
 
         var result = await _signInManager.PasswordSignInAsync(
             user, request.Password, isPersistent: false, lockoutOnFailure: false);
+        
+        if (!result.Succeeded)
+        {
+            return ServiceResponseFactory.Error(result, "Login unsuccessful");
+        }
 
-        return ServiceResponseFactory.Success(result, result.ToString());
+        return ServiceResponseFactory.Success(result, "Login successful");
     }
 
     public async Task<ServiceResponse<OperationResultDto>> LogoutUserAsync()
