@@ -1,0 +1,69 @@
+body{
+  align-items: flex-start;
+}
+
+.create-household {
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  // padding: 0 2rem;
+  background-color: #f1f8e8;
+  margin-top: 155px;
+
+  // Fix the selector - target images with both classes
+  .back-arrow {
+    position: absolute;
+    top: -60px;
+    left: 20px;
+    width: 46px;
+    height: 46px;
+    cursor: pointer;
+  }
+  h2 {
+    position: absolute;
+    top: 175px;
+  }
+
+  &__icon {
+    max-width: 100%;
+    height: auto;
+    margin: 20px 0;
+
+    // Override for back arrow specifically
+  }
+
+  .create-household__select-image{
+    margin-top: 10px;
+  }
+
+  .input__wrapper {
+    margin-top:30px ;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: space-between;
+    width: 350px;
+    height: 100px;
+    gap: 10px;
+    margin: 60px 0;
+
+    button {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+
+      p {
+        color: #f1f8e8;
+      }
+    }
+  }
+  .create-btn {
+    margin-top: 50px;
+  }
+}
+
