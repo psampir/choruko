@@ -59,12 +59,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> AddUserToHousehold(string userIdToAdd)
     {
         var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(currentUserId))
-        {
-            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "Current user not authenticated.").ToApiResponse());
-        }
-
+        
         var result = await _householdService.AddUserToHouseholdAsync(userIdToAdd, currentUserId);
 
         return result.ToApiResponse();

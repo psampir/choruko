@@ -248,11 +248,6 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         }
         
         var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
-        if (!currentUserRoles.Contains("HouseholdAdmin"))
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Only household admins can add new users.", HttpStatusCode.Forbidden);
-        }
-
         if (currentUser.HouseholdId == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user does not belong to a household.", HttpStatusCode.BadRequest);
