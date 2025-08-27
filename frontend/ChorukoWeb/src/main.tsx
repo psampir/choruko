@@ -2,6 +2,7 @@ import './boot/detectNotch';
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.scss'
+
 import NavbarMobile from './components/NavbarMobile/NavbarMobile'
 import Popup from './components/Popup'
 import Input from './components/Input'
