@@ -22,7 +22,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         }
         
         var validationResponse = await ValidateUser(user);
-        if (validationResponse.IsSuccessful)
+        if (!validationResponse.IsSuccessful)
         {
             return validationResponse;
         }
@@ -229,6 +229,84 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         return ServiceResponseFactory.Success(
             response,
             "User was successfully removed from the household.",
+            HttpStatusCode.OK
+        );
+    }
+    
+    public async Task<ServiceResponse<OperationResultDto>> AddUserToHouseholdAsync(string userIdToAdd, string currentUserId)
+    {
+        var currentUser = await _userManager.FindByIdAsync(currentUserId);
+        if (currentUser == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user not found.", HttpStatusCode.NotFound);
+        }
+
+        var userToAdd = await _userManager.FindByIdAsync(userIdToAdd);
+        if (userToAdd == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User to add not found.", HttpStatusCode.NotFound);
+        }
+        
+        var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
+        if (currentUser.HouseholdId == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user does not belong to a household.", HttpStatusCode.BadRequest);
+        }
+        
+        var household = await _context.Households
+            .Include(h => h.Participants)
+            .FirstOrDefaultAsync(h => h.Id == currentUser.HouseholdId);
+            
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
+        }
+        
+        if (userToAdd.HouseholdId != null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User to add already belongs to a household.", HttpStatusCode.Conflict);
+        }
+        
+        var userToAddRoles = await _userManager.GetRolesAsync(userToAdd);
+        if (!userToAddRoles.Contains("None"))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Only users with the 'None' role can be added to a household.", HttpStatusCode.Forbidden);
+        }
+        
+        userToAdd.HouseholdId = household.Id;
+        household.Participants.Add(userToAdd);
+        
+        var removeRoleResult = await _userManager.RemoveFromRoleAsync(userToAdd, "None");
+        if (!removeRoleResult.Succeeded)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to remove 'None' role from user.", HttpStatusCode.InternalServerError);
+        }
+
+        var addRoleResult = await _userManager.AddToRoleAsync(userToAdd, "Participant");
+        if (!addRoleResult.Succeeded)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to assign 'Participant' role to user.", HttpStatusCode.InternalServerError);
+        }
+
+        _context.Users.Update(userToAdd);
+        
+        await _context.SaveChangesAsync();
+        
+        var response = new OperationResultDto
+        {
+            Operation = "AddUserToHousehold",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "HouseholdId", household.Id },
+                { "UserId", userToAdd.Id },
+                { "UserName", userToAdd.FirstName + " " + userToAdd.LastName }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            response,
+            "User was successfully added to the household.",
             HttpStatusCode.OK
         );
     }
