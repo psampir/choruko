@@ -46,6 +46,10 @@ on:
       CR_PAT:
         required: true
 
+concurrency:
+  group: deploy-${{ inputs.environment || github.event.inputs.environment || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   
   deploy:
