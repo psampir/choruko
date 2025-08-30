@@ -13,8 +13,8 @@ This guide will help you set up your development environment for Choruko.
 - [Git](https://git-scm.com/downloads)
 
 ## Getting Started
-1. Clone the repository to your local machine:
-    
+1. Clone the repository to your local machine and navigate into the project directory:
+
     ```bash
     git clone https://github.com/psampir/choruko.git
     cd choruko
@@ -33,7 +33,7 @@ The backend is an ASP.NET Core application.
     First, start the database container:
       
     ```bash
-    docker-compose -f docker/compose/dev/docker-compose.yml up -d
+    docker compose -f docker/compose/dev/docker-compose.yml up -d
     ```
 
     Then, install `dotnet-ef` tools:
@@ -79,6 +79,7 @@ Once you have completed the backend and frontend setup, you can run the applicat
   Run the following command to start the backend server:
 
     ```bash
+    cd backend/ChorukoAPI
     dotnet run
     ```
     
@@ -89,6 +90,7 @@ Once you have completed the backend and frontend setup, you can run the applicat
   Run the following command to start the frontend development server:
   
     ```bash
+    cd frontend/ChorukoWeb
     npm run dev
     ```
   
