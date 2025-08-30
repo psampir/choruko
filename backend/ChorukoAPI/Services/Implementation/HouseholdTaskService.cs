@@ -149,6 +149,41 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         return ServiceResponseFactory.Success(response, "Success");
     }
 
+    public async Task<ServiceResponse<OperationResultDto>> AssignUserToTask(string taskId, string userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
+        if (householdTask == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+        }
+
+        if (householdTask.Status == Models.TaskStatus.Assigned)
+        {
+            user.AssignedTasks.Add(householdTask);
+            _context.SaveChanges();
+        }
+
+        householdTask.Status = Models.TaskStatus.Assigned;
+
+        user.AssignedTasks.Add(householdTask);
+        _context.SaveChanges();
+
+        var response = new OperationResultDto
+        {
+            Operation = "EditHouseholdTask",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+                {
+                    { "TaskName", householdTask.Name},
+                    { "UserName", user.FirstName + " " + user.LastName },
+                    { "Assigned", true }
+                }
+        };
+
+        return ServiceResponseFactory.Success(response, "User successfully assigned to household task");
+    }
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
     {
         var isActivityExist = _context.Activities.Any(a => a.HouseholdId == householdTask.HouseholdId && a.Name == householdTask.Name);
