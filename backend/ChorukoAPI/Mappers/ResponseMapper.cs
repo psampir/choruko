@@ -19,14 +19,12 @@ public static class ResponseMapper
         };
     }
 
-    public static ObjectResult ToCreatedApiResponse<T>(this ServiceResponse<T> serviceResponse, string route = "")
+    public static ObjectResult ToCreatedApiResponse<T>(this ServiceResponse<T> serviceResponse)
         where T : class?
     {
-        if (string.IsNullOrEmpty(route))
+        if (serviceResponse.IsSuccessful)
         {
-            var location = $"{route}";
-
-            return new CreatedResult(location, new ApiResponse<T>
+            return new CreatedResult(string.Empty, new ApiResponse<T>
             {
                 Result = serviceResponse.Result,
                 Message = serviceResponse.Message,

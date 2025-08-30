@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useAuth } from "../../contexts/AuthContext"; // Use AuthContext
+import { useNavigate } from "react-router-dom";
 
 interface SignUpProps {
   onModeChange: (mode: string) => void;
@@ -9,6 +10,7 @@ interface SignUpProps {
 
 export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
   const { register, loading: authLoading, error: authError } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -40,13 +42,13 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
 
     console.log("✅ Validation passed, calling register...");
     try {
-      const success = await register(formData);
-      console.log("📡 Register response:", success);
+      const result = await register(formData);
+      console.log("📡 Register response:", result);
 
-      if (success) {
-        // Registration successful - redirect to login
+      if (result.success) {
+        // Registration successful - navigate to dashboard
         console.log("Registration successful!");
-        onModeChange("login");
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error("Registration error:", error);

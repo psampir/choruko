@@ -2,6 +2,7 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface LogInProps {
   onModeChange: (mode: string) => void;
@@ -9,6 +10,7 @@ interface LogInProps {
 
 export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
   const { login, loading: authLoading, error: authError } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState("");
@@ -18,12 +20,12 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
     setLocalError("");
 
     try {
-      const success = await login(email, password);
+      const result = await login(email, password);
 
-      if (success) {
+      if (result.success) {
         console.log("Login successful!");
-        // The AuthContext will handle the state update
-        // You can redirect here or let the parent component handle it
+        // Navigate to profile after successful login
+        navigate("/profile");
       }
     } catch (error) {
       console.error("Login error:", error);

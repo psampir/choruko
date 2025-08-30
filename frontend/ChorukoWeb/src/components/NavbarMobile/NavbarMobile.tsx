@@ -2,7 +2,7 @@ import "./NavbarMobile.scss";
 import { useState } from "react";
 import Button from "../Button/Button";
 
-// Import SVGs as modules
+// Import all SVG assets
 import lightThemeIcon from "../../assets/svg/light-theme.svg";
 import profileIcon from "../../assets/svg/profile-icon.svg";
 import darkThemeIcon from "../../assets/svg/dark-theme.svg";
@@ -94,10 +94,7 @@ const NavbarMobile = () => {
             </li>
             <li>
               <Button variant="primary">
-                <img
-                  src={houseIcon}
-                  alt="Household Management"
-                />
+                <img src={houseIcon} alt="Household Management" />
                 Manage Household
               </Button>
             </li>

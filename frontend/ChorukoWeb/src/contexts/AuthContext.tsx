@@ -95,10 +95,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
+      console.log("🔐 Starting login process...");
       const result = await authService.login(email, password);
+      console.log("📨 Login response:", result);
 
       if (result.success) {
-        // After successful login, get user data
+        console.log("✅ Login successful, waiting before checking auth...");
+        // Wait a moment for the cookie to be set properly
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        console.log("🔍 Now checking authentication status...");
         await checkAuth();
         return { success: true, message: result.message };
       } else {
