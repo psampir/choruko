@@ -135,9 +135,9 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         return ServiceResponseFactory.Success(response, "Success");
     }
 
-    public async Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string householdId)
+    public async Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string taskId)
     {
-        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(t => t.Id == householdId);
+        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(t => t.Id == taskId);
 
         if (householdTask == null)
         {

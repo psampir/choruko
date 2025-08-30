@@ -33,7 +33,7 @@ namespace ChorukoAPI.Controllers
             return result.ToCreatedApiResponse();
         }
 
-        [HttpPut("edit/{householdId}/{taskId}")]
+        [HttpPut("edit/{taskId}")]
         [Authorize(Roles = "HouseholdAdmin,Participant")]
         public async Task<ActionResult<ApiResponse<OperationResultDto>>> EditHouseholdTaskAsync([FromRoute] string taskId, EditHouseholdTaskRequest request)
         {
@@ -42,7 +42,7 @@ namespace ChorukoAPI.Controllers
             return result.ToCreatedApiResponse();
         }
 
-        [HttpGet("{householdId}")]
+        [HttpGet("all/{householdId}")]
         [Authorize(Roles = "HouseholdAdmin,Participant")]
         public async Task<ActionResult<ApiResponse<List<HouseholdTaskResponse>>>> GetAllHouseholdTaskAsync([FromRoute] string householdId)
         {
@@ -51,11 +51,11 @@ namespace ChorukoAPI.Controllers
             return result.ToApiResponse();
         }
 
-        [HttpGet("{householdId}/{taskId}")]
+        [HttpGet("{taskId}")]
         [Authorize(Roles = "HouseholdAdmin,Participant")]
-        public async Task<ActionResult<ApiResponse<HouseholdTaskResponse>>> GetHouseholdTaskByIdAsync([FromRoute] string householdId)
+        public async Task<ActionResult<ApiResponse<HouseholdTaskResponse>>> GetHouseholdTaskByIdAsync([FromRoute] string taskId)
         {
-            var result = await householdTaskService.GetHouseholdTaskByIdAsync(householdId);
+            var result = await householdTaskService.GetHouseholdTaskByIdAsync(taskId);
 
             return result.ToApiResponse();
         }

@@ -13,5 +13,5 @@ public interface IHouseholdTaskService
     Task<ServiceResponse<OperationResultDto>> CreateHouseholdTaskAsync(string householdId, CreateHouseholdTaskRequest request, string userId);
     Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request);
     Task<ServiceResponse<List<HouseholdTaskResponse>>> GetAllHouseholdTaskAsync(string householdId);
-    Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string householdId);
+    Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string taskId);
 }
