@@ -59,5 +59,21 @@ namespace ChorukoAPI.Controllers
 
             return result.ToApiResponse();
         }
+
+        [HttpPut("assign/{taskId}")]
+        [Authorize(Roles = "HouseholdAdmin,Participant")]
+        public async Task<ActionResult<ApiResponse<OperationResultDto>>> AssignToTask( [FromRoute] string taskId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
+            }
+
+            var result = await householdTaskService.AssignUserToTask(taskId, userId);
+
+            return result.ToCreatedApiResponse();
+        }
     }
 }
