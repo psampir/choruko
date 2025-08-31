@@ -1,0 +1,71 @@
+// Color Variables
+:root {
+  // Primary Colors
+  --color-primary: #95d2b3;
+  --color-secondary: #55ad9b;
+  --color-secondary-half-tr: #56ae9c80;
+  --color-background: #f1f8e8;
+  --color-background-secondary: #d8efd3;
+  --color-text-primary: #021207;
+  --color-text-secondary: #666;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  
+  // UI Colors
+  --color-border: #e0e0e0;
+  --color-border-light: #f0f0f0;
+  --color-hover: #f5f5f5;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+  --color-overlay: rgba(255, 255, 255, 0.9);
+  --color-overlay-dark: rgba(255, 255, 255, 0.2);
+  
+  // Font Sizes
+  --font-size-h1: 32px; // 2rem
+  --font-size-h2: 26px; // 1.625rem  
+  --font-size-h3: 24px; // 1.5rem
+  --font-size-h4: 22px; // 1.375rem
+  --font-size-h5: 20px; // 1.25rem
+  --font-size-h6: 18px; // 1.125rem
+  --font-size-body: 16px; // 1rem
+  --font-size-body2: 14px; // 0.875rem
+  --font-size-body3: 12px; // 0.75rem
+  
+  // Font Weights
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  // Font Family
+  --font-family-base: "Asap", sans-serif;
+  
+  // Spacing
+  --spacing-xs: 5px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 15px;
+  --spacing-xl: 16px;
+  --spacing-2xl: 20px;
+  --spacing-3xl: 24px;
+  --spacing-4xl: 30px;
+  
+  // Layout
+  --navbar-height: 70px;
+  --border-radius-sm: 8px;
+  --border-radius-standart: 10px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 15px;
+  --border-radius-xl: 20px;
+  --border-radius-full: 50%;
+  
+  // Z-index
+  --z-dropdown: 10;
+  --z-navbar: 1000;
+  --z-modal: 1001;
+  
+  // Transitions
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  --transition-transform: 0.7s ease;
+}
