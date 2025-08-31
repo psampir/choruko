@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class HouseholdService(DataContext _context, UserManager<User> _userManager, IWebHostEnvironment _webHostEnvironment) : IHouseholdService
+public class HouseholdService(DataContext _context, UserManager<User> _userManager, IWebHostEnvironment _webHostEnvironment, SignInManager<User> _signInManager) : IHouseholdService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdAsync(CreateHouseholdRequest request, string userId)
     {
@@ -59,6 +59,8 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         }
         
         await _context.SaveChangesAsync(); 
+        
+        await _signInManager.RefreshSignInAsync(user);
         
         var response = new OperationResultDto
         {
@@ -309,5 +311,78 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
             "User was successfully added to the household.",
             HttpStatusCode.OK
         );
+    }
+    
+    public async Task<ServiceResponse<OperationResultDto>> DeleteHouseholdAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        
+        var userRoles = await _userManager.GetRolesAsync(user);
+        if (!userRoles.Contains("HouseholdAdmin"))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Only household admins can delete a household.", HttpStatusCode.Forbidden);
+        }
+        
+        var householdId = user.HouseholdId;
+
+        var household = await _context.Households
+            .Include(h => h.Participants)
+            .FirstOrDefaultAsync(h => h.Id == householdId);
+        
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
+        }
+
+        if (!string.IsNullOrEmpty(household.ProfilePicturePath))
+        {
+            DeleteProfilePicture(household.ProfilePicturePath);
+        }
+
+        var participantsToUpdate = household.Participants.ToList();
+        foreach (var participant in participantsToUpdate)
+        {
+            participant.HouseholdId = null;
+            await _userManager.RemoveFromRolesAsync(participant, await _userManager.GetRolesAsync(participant));
+            await _userManager.AddToRoleAsync(participant, "None");
+        }
+
+        _context.Households.Remove(household);
+        
+        await _signInManager.RefreshSignInAsync(user);
+
+        await _context.SaveChangesAsync();
+        var response = new OperationResultDto
+        {
+            Operation = "DeleteHousehold",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "HouseholdId", household.Id },
+                { "HouseholdName", household.Name }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            response,
+            "Household was successfully deleted.",
+            HttpStatusCode.OK
+        );
+    }
+     
+    private void DeleteProfilePicture(string filePath)
+    {
+        try
+        {
+            string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, filePath);
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't fail the primary operation
+        }
     }
 }
