@@ -7,19 +7,32 @@ import {
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
-// import Dashboard from "./views/Dashboard/Dashboard";
-import Profile from "./views/Profile/Profile";
 import Tasks from "./views/Tasks/Tasks";
 import Expenses from "./views/Expenses/Expenses";
-// import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
+import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
+import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
+import JoinOrCreateHousehold from "./views/JoinOrCreateHousehold/JoinOrCreateHousehold";
+import Invitations from "./views/JoinOrCreateHousehold/Invitations/Invitations";
+import Leaderboard from "./views/Household/Leaderboard/Leaderboard";
 
-// Layout component for protected pages
+// Layout component for protected pages with top navbar
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app">
       <main className="main-content">{children}</main>
-      {/* <NavbarMobile /> */}
+      <NavbarMobile />
+    </div>
+  );
+}
+
+// Layout component for main app pages with bottom navigation
+function MainAppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="app">
+      <main className="main-content">{children}</main>
+      <NavbarMobile />
+      <BottomNav />
     </div>
   );
 }
@@ -43,23 +56,37 @@ function AppRoutes() {
       <Route path="/signup" element={<AuthContainer />} />
 
       {/* Protected routes with layout */}
-      {/* <Route
-        path="/dashboard"
+      <Route
+        path="/joinOrCreateHousehold"
         element={
           <ProtectedRoute>
             <AppLayout>
-              <Dashboard />
+              <JoinOrCreateHousehold
+                onJoinHousehold={() => {}}
+                onCreateHousehold={() => {}}
+              />
             </AppLayout>
           </ProtectedRoute>
         }
-      /> */}
+      />
 
       <Route
         path="/tasks"
         element={
           <ProtectedRoute>
-            <AppLayout>
+            <MainAppLayout>
               <Tasks />
+            </MainAppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/invitations"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Invitations />
             </AppLayout>
           </ProtectedRoute>
         }
@@ -69,20 +96,20 @@ function AppRoutes() {
         path="/expenses"
         element={
           <ProtectedRoute>
-            <AppLayout>
+            <MainAppLayout>
               <Expenses />
-            </AppLayout>
+            </MainAppLayout>
           </ProtectedRoute>
         }
       />
 
       <Route
-        path="/profile"
+        path="/leaderboard"
         element={
           <ProtectedRoute>
-            <AppLayout>
-              <Profile />
-            </AppLayout>
+            <MainAppLayout>
+              <Leaderboard />
+            </MainAppLayout>
           </ProtectedRoute>
         }
       />

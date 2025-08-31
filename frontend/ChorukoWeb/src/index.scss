@@ -1,9 +1,10 @@
+@use "./styles/variables";
 @import url(https://fonts.bunny.net/css?family=asap:400,400i,500,500i,600,600i,700,700i);
 
-:root {
+#root {
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: var(--color-background);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,10 +16,10 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  color: #021207;
-  font-family: 'Asap', sans-serif;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
   line-height: 1.2;
-  font-weight: 400;
+  font-weight: var(--font-weight-normal);
 
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -27,10 +28,15 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
+  /* Hide page scrollbar completely */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+
+  &::-webkit-scrollbar {
+    display: none; /* WebKit browsers (Chrome, Safari, Edge) */
+  }
 }
-
-
-
 
 #root {
   display: flex;
@@ -44,50 +50,71 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.app {
+  width: 100vw;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  padding-top: var(--navbar-height); /* Space for top navbar - always present */
+}
+
+/* Additional bottom padding for pages with bottom nav */
+.app:has(.bottom-nav) .main-content {
+  padding-bottom: var(--navbar-height); /* Space for bottom navbar */
+}
+
 body {
   display: flex;
   justify-content: center;
   align-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f1f8e8;
-  color: #021207;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
   -webkit-overflow-scrolling: touch;
   /* Enable momentum scrolling on iOS */
   overscroll-behavior: none;
   /* Prevent bounce effect */
 
   h1 {
-    font-size: 2rem;
-    font-weight: 500;
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-medium);
   }
 
   h2 {
-    font-size: 1.625rem;
-    font-weight: 500;
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-medium);
   }
 
   h3 {
     font-size: 1.5rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
   }
 
   h4 {
     font-size: 1.375rem;
-    font-weight: 400;
+    font-weight: var(--font-weight-normal);
   }
 
   h5 {
     font-size: 1.25rem;
-    font-weight: 400;
+    font-weight: var(--font-weight-normal);
   }
 
   h6 {
     font-size: 1.125rem;
-    font-weight: 400;
+    font-weight: var(--font-weight-normal);
   }
-
-
 }
 
 @media (prefers-color-scheme: light) {

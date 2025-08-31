@@ -1,21 +1,25 @@
+@use "../../styles/variables";
+
 // Basic styles for Expenses page - using your existing style patterns
 .expenses-container {
-  padding: 20px;
-  min-height: calc(100vh - 80px); // Account for navbar
+  padding: var(--spacing-2xl);
+  min-height: calc(
+    100vh - calc(var(--navbar-height) * 2)
+  ); // Account for both top and bottom navbar
 }
 
 .page-header {
-  margin-bottom: 24px;
-  
+  margin-bottom: var(--spacing-3xl);
+
   h1 {
-    font-size: 24px;
-    margin-bottom: 8px;
+    font-size: var(--font-size-h3);
+    margin-bottom: var(--spacing-sm);
     color: #333;
   }
-  
+
   p {
-    color: #666;
-    font-size: 14px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-body2);
   }
 }
 
@@ -23,22 +27,22 @@
   .expenses-summary {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
-    
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-3xl);
+
     .summary-card {
       padding: 16px;
       background: #f8f9fa;
       border-radius: 8px;
       border: 1px solid #e9ecef;
       text-align: center;
-      
+
       h3 {
         font-size: 14px;
         color: #666;
         margin: 0 0 8px 0;
       }
-      
+
       .amount {
         font-size: 20px;
         font-weight: 600;
@@ -47,7 +51,7 @@
       }
     }
   }
-  
+
   .expenses-section {
     h2 {
       font-size: 18px;
@@ -70,28 +74,28 @@
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
-  
+
   .expense-icon {
     font-size: 24px;
     margin-right: 12px;
   }
-  
+
   .expense-info {
     flex: 1;
-    
+
     h3 {
       font-size: 16px;
       margin: 0 0 4px 0;
       color: #333;
     }
-    
+
     p {
       font-size: 14px;
       color: #666;
       margin: 0;
     }
   }
-  
+
   .expense-amount {
     font-size: 16px;
     font-weight: 600;
