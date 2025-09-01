@@ -185,7 +185,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         return ServiceResponseFactory.Success(response, "User successfully assigned to household task");
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> UnAssignUserToTask(string taskId, string userId)
+    public async Task<ServiceResponse<OperationResultDto>> UnAssignUserFromTask(string taskId, string userId)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
@@ -201,10 +201,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             user.AssignedTasks.Remove(householdTask);
             _context.SaveChanges();
         }
-
-        user.AssignedTasks.Remove(householdTask);
-        _context.SaveChanges();
-
+        else
+        {
+            user.AssignedTasks.Remove(householdTask);
+            _context.SaveChanges();
+        }
 
         var response = new OperationResultDto
         {
@@ -219,6 +220,64 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         };
 
         return ServiceResponseFactory.Success(response, "User successfully unassigned from household task");
+    }
+
+    public async Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId)
+    {
+        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
+        if (householdTask == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+        }
+
+        householdTask.Status = Models.TaskStatus.Completed;
+        _context.SaveChanges();
+
+        var response = new OperationResultDto
+        {
+            Operation = "EditHouseholdTask",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+                {
+                    { "TaskName", householdTask.Name},
+                    { "Completed", true }
+                }
+        };
+
+        return ServiceResponseFactory.Success(response, "Task successfully completed");
+    }
+
+    public async Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId)
+    {
+        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
+        if (householdTask == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+        }
+
+        if (householdTask.Assignees.Count == 0)
+        {
+            householdTask.Status = Models.TaskStatus.Unassigned;
+            _context.SaveChanges();
+        }
+        else
+        {
+            householdTask.Status = Models.TaskStatus.Assigned;
+            _context.SaveChanges();
+        }
+
+        var response = new OperationResultDto
+        {
+            Operation = "EditHouseholdTask",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+                {
+                    { "TaskName", householdTask.Name},
+                    { "Completed", false }
+                }
+        };
+
+        return ServiceResponseFactory.Success(response, "Task successfully uncompleted");
     }
 
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
