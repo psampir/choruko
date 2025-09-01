@@ -109,5 +109,14 @@ namespace ChorukoAPI.Controllers
 
             return result.ToApiResponse();
         }
+
+        [HttpDelete("delete/{taskId}")]
+        [Authorize(Roles = "HouseholdAdmin,Participant")]
+        public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteTask([FromRoute] string taskId)
+        {
+            var result = await householdTaskService.DeleteHouseholdTask(taskId);
+
+            return result.ToApiResponse();
+        }
     }
 }

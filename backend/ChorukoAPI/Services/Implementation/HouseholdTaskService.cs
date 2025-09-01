@@ -280,6 +280,30 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         return ServiceResponseFactory.Success(response, "Task successfully uncompleted");
     }
 
+    public async Task<ServiceResponse<OperationResultDto>> DeleteHouseholdTask(string taskId)
+    {
+        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
+        if (householdTask == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+        }
+
+        _context.HouseholdTasks.Remove(householdTask);
+        _context.SaveChanges();
+
+        var response = new OperationResultDto
+        {
+            Operation = "DeleteHouseholdTask",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+                {
+                    { "TaskName", householdTask.Name}
+                }
+        };
+
+        return ServiceResponseFactory.Success(response, "Activity was successfully created");
+    }
+
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
     {
         var isActivityExist = _context.Activities.Any(a => a.HouseholdId == householdTask.HouseholdId && a.Name == householdTask.Name);
