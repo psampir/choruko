@@ -11,9 +11,11 @@ namespace ChorukoAPI.Services.Abstraction;
 public interface IHouseholdTaskService
 {
     Task<ServiceResponse<OperationResultDto>> AssignUserToTask(string taskId, string userId);
-    Task<ServiceResponse<OperationResultDto>> UnAssignUserToTask(string taskId, string userId);
+    Task<ServiceResponse<OperationResultDto>> UnAssignUserFromTask(string taskId, string userId);
     Task<ServiceResponse<OperationResultDto>> CreateHouseholdTaskAsync(string householdId, CreateHouseholdTaskRequest request, string userId);
     Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request);
     Task<ServiceResponse<List<HouseholdTaskResponse>>> GetAllHouseholdTaskAsync(string householdId);
     Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string taskId);
+    Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId);
+    Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId);
 }
