@@ -2,12 +2,21 @@ import React from "react";
 import "./Popup.scss";
 import { useState } from "react";
 
+interface PopupAction {
+  label: string;
+  onClick: () => void;
+  variant?: "primary" | "secondary" | "danger";
+  disabled?: boolean;
+}
+
 interface PopupProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "primary" | "red";
   title?: string;
   className?: string;
   open?: boolean;
-  onClose?: () => void; // notify parent to close
+  onClose?: () => void;
+  actions?: PopupAction[];
+  showCloseButton?: boolean;
 }
 
 const Popup: React.FC<PopupProps> = ({
@@ -17,6 +26,8 @@ const Popup: React.FC<PopupProps> = ({
   children,
   open,
   onClose,
+  actions,
+  showCloseButton = true,
   ...props
 }) => {
   const variantClass = variant ? `popup--${variant}` : "";
@@ -41,11 +52,32 @@ const Popup: React.FC<PopupProps> = ({
   };
 
   return (
-    <div className={`popup-container ${isOpen ? "active" : ""}`} onClick={handleOutsideClick}>
+    <div
+      className={`popup-container ${isOpen ? "active" : ""}`}
+      onClick={handleOutsideClick}
+    >
       <div className={`popup ${variantClass} ${className}`} {...props}>
-        <i className="close-icon" onClick={closePopup}></i>
+        {showCloseButton && <i className="close-icon" onClick={closePopup}></i>}
         <h2 className="popup-title">{title}</h2>
-        {children}
+
+        {children && <div className="popup-content">{children}</div>}
+
+        {actions && actions.length > 0 && (
+          <div className="popup-actions">
+            {actions.map((action, index) => (
+              <button
+                key={index}
+                className={`popup-button popup-button--${
+                  action.variant || "primary"
+                }`}
+                onClick={action.onClick}
+                disabled={action.disabled}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

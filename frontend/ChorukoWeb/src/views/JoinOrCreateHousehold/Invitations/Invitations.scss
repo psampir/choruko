@@ -1,3 +1,5 @@
+@use "../../styles/variables";
+
 .invitations {
   width: 100vw;
   height: 100vh;
@@ -79,6 +81,98 @@
       .decline {
         background: url("src/assets/svg/decline.svg") no-repeat center center;
       }
+    }
+  }
+}
+
+// Invitation popup specific styling
+.invitation-popup-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+
+  .invitation-popup-message {
+    text-align: center;
+    line-height: 1.5;
+    margin: 0;
+    font-size: 16px;
+    color: #021207;
+
+    strong {
+      color: #55ad9b;
+      font-weight: 600;
+    }
+  }
+
+  .invitation-popup-buttons {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .invitation-popup-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+
+    &--accept {
+      background-color: #55ad9b;
+      color: white;
+
+      &:hover {
+        background-color: #4a9d8e;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(85, 173, 155, 0.3);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(85, 173, 155, 0.3);
+      }
+    }
+
+    &--cancel {
+      background-color: transparent;
+      color: #55ad9b;
+      border: 2px solid #55ad9b;
+
+      &:hover {
+        background-color: #55ad9b;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(85, 173, 155, 0.2);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(85, 173, 155, 0.2);
+      }
+    }
+  }
+}
+
+// Responsive design for smaller screens
+@media (max-width: 480px) {
+  .invitation-popup-content {
+    .invitation-popup-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .invitation-popup-button {
+      width: 100%;
+      max-width: 200px;
     }
   }
 }

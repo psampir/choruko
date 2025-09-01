@@ -7,7 +7,7 @@ interface ErrorMessageProps {
   variant?: "overlay" | "inline";
   className?: string;
   autoDismiss?: boolean;
-  dismissTime?: number; // in milliseconds
+  dismissTime?: number;
 }
 
 const ErrorMessage: React.FC<ErrorMessageProps> = ({
@@ -16,7 +16,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
   variant = "inline",
   className = "",
   autoDismiss = true,
-  dismissTime = 5000, // 5 seconds default
+  dismissTime = 5000, 
 }) => {
   useEffect(() => {
     if (message && autoDismiss && onClose) {
