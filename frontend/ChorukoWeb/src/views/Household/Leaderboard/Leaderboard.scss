@@ -178,7 +178,8 @@
   background: var(--color-background-secondary);
   margin: 0 var(--spacing-2xl);
   border-radius: var(--border-radius-md);
-  padding: 0 var(--spacing-lg);
+  padding: 0;
+  overflow: hidden;
 
   --dynamic-participant-height: 60px; /* Fallback value */
   --max-visible-participants: 3; /* Fallback value */
@@ -206,83 +207,145 @@
     border-radius: 10px;
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     background-color: #d62929;
+    border-radius: 10px;
   }
 
   &::-webkit-scrollbar-corner {
-    display: none; 
+    display: none;
   }
 
   /* Firefox - hide track */
   scrollbar-width: thin;
   scrollbar-color: var(--color-secondary) transparent;
 
-  .participant {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-md) 0;
-    border-bottom: 1px solid var(--color-overlay-dark);
-    position: relative;
+  .scrollable-content {
+    padding: 0 var(--spacing-2xl);
+    overflow-y: scroll;
 
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      height: 3px;
-      background-color: var(--color-secondary-half-tr);
+    /* Touch scrolling optimizations */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+
+    /* Prevent bounce scrolling */
+    overscroll-behavior: contain;
+
+    /* Better touch responsiveness */
+    touch-action: pan-y;
+
+    /* Enhanced scrollbar styling for touch */
+    &::-webkit-scrollbar {
+      width: 8px;
+      background-color: transparent;
     }
 
-    &:last-child::after {
-      display: none;
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      margin: 4px 0;
     }
 
-    &:last-child {
-      border-bottom: none;
-    }
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--color-secondary);
+      border-radius: 10px; /* Increased for more visible rounded corners */
 
-    &__rank {
-      font-size: var(--font-size-h4);
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-black);
-      min-width: 35px;
-    }
+      /* Remove border that might interfere with rounded corners */
+      border: none;
 
-    &__avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--border-radius-full);
-      margin: 0 var(--spacing-sm);
-      object-fit: cover;
-    }
+      /* Add subtle shadow for depth instead of border */
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 
-    &__name {
-      flex: 1;
-      font-size: var(--font-size-body);
-      font-weight: var(--font-weight-medium);
-      color: var(--color-black);
-    }
+      /* Make thumb more visible during touch */
+      min-height: 20px;
 
-    &__points {
-      display: flex;
-      align-items: center;
-      background: var(--color-secondary);
-      padding: 3px var(--spacing-md);
-      border-radius: var(--spacing-lg);
-      gap: var(--spacing-xs);
-      width: fit-content;
-      margin-top: 5px;
-      
-      .star {
-        width: 16px;
-        height: 16px;
+      /* Smooth transitions */
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--color-secondary);
+        opacity: 0.8;
       }
 
-      .points {
-        font-size: var(--font-size-body);
+      &:active {
+        background-color: var(--color-secondary);
+        opacity: 1;
+      }
+    }
+
+    /* Firefox scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-secondary) rgba(0, 0, 0, 0.1);
+    .participant {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-md) 0;
+      border-bottom: 1px solid var(--color-overlay-dark);
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        height: 3px;
+        background-color: var(--color-secondary-half-tr);
+      }
+
+      &:last-child::after {
+        display: none;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &__rank {
+        font-size: var(--font-size-h4);
         font-weight: var(--font-weight-semibold);
-        color: var(--color-background);
+        color: var(--color-black);
+        min-width: 35px;
+      }
+
+      &__avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--border-radius-full);
+        margin: 0 var(--spacing-sm);
+        object-fit: cover;
+      }
+
+      &__name {
+        flex: 1;
+        font-size: var(--font-size-body);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-black);
+      }
+
+      &__points {
+        display: flex;
+        align-items: center;
+        background: var(--color-secondary);
+        padding: 3px var(--spacing-md);
+        border-radius: var(--spacing-lg);
+        gap: var(--spacing-xs);
+        width: fit-content;
+        margin-top: 5px;
+
+        .star {
+          width: 16px;
+          height: 16px;
+        }
+
+        .points {
+          font-size: var(--font-size-body);
+          font-weight: var(--font-weight-semibold);
+          color: var(--color-background);
+        }
       }
     }
   }

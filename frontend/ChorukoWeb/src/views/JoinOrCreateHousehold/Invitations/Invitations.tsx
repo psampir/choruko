@@ -71,54 +71,56 @@ function Invitations() {
         alt="back-arrow"
       />
       <h2>Invitations</h2>
-      <ul className="invitations-list">
-        {invitations.length ? (
-          invitations.map((invitation) => (
-            <li key={invitation.id}>
-              <img src={invitation.image} alt={invitation.name} />
-              <h6>{invitation.name}</h6>
-              <span
-                onClick={() =>
-                  acceptInvitation({ id: invitation.id, name: invitation.name })
-                }
-                className="accept"
-              ></span>
-              <span
-                onClick={() => declineInvitation(invitation.id)}
-                className="decline"
-              ></span>
-            </li>
-          ))
-        ) : (
-          <li>No invitations here</li>
-        )}
-      </ul>
+      <div className="invitations-list">
+        <ul className="scrollable-content">
+          {invitations.length ? (
+            invitations.map((invitation) => (
+              <li key={invitation.id}>
+                <img src={invitation.image} alt={invitation.name} />
+                <h6>{invitation.name}</h6>
+                <span
+                  onClick={() =>
+                    acceptInvitation({
+                      id: invitation.id,
+                      name: invitation.name,
+                    })
+                  }
+                  className="accept"
+                ></span>
+                <span
+                  onClick={() => declineInvitation(invitation.id)}
+                  className="decline"
+                ></span>
+              </li>
+            ))
+          ) : (
+            <li>No invitations here</li>
+          )}
+        </ul>
+      </div>
       {popup && selectedInvitation && (
         <Popup
           variant="primary"
-          title="Accept Invitation"
+          title="Confirm the invitation"
           onClose={handleCancel}
           actions={[
             {
-              label: "Accept Invitation",
+              label: "Join",
               onClick: handleAccept,
               variant: "primary",
             },
-            {
-              label: "Cancel",
-              onClick: handleCancel,
-              variant: "secondary",
-            },
           ]}
         >
-          <p>
-            Do you want to accept the invitation from{" "}
-            <strong>{selectedInvitation.name}</strong>?
-          </p>
-          <p>
-            Accepting this invitation will add you to the household where you'll
-            be able to participate in tasks, expenses, and activities.
-          </p>
+          <div className="invitation-confirmation">
+            <div className="household-image-container">
+              <img
+                src={householdDefault}
+                alt="Household"
+                className="household-image"
+              />
+            </div>
+            <h3 className="household-name">Home1</h3>
+          </div>
         </Popup>
       )}
     </div>
