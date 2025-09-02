@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import star from "../../../assets/svg/star.svg"
+import star from "../../../assets/svg/star.svg";
 import "./Leaderboard.scss";
 
 // Mock data for the leaderboard
@@ -27,17 +27,38 @@ const mockParticipants = [
   },
   {
     id: 4,
-    name: "Gabbie Mayers",
+    name: "John Smith",
     avatar: "/src/assets/svg/profile-icon.svg",
-    points: 16,
-    rank: 3,
+    points: 12,
+    rank: 4,
   },
   {
     id: 5,
-    name: "Gabbie Mayers",
+    name: "Sarah Wilson",
     avatar: "/src/assets/svg/profile-icon.svg",
-    points: 16,
-    rank: 3,
+    points: 10,
+    rank: 5,
+  },
+  {
+    id: 6,
+    name: "Mike Johnson",
+    avatar: "/src/assets/svg/profile-icon.svg",
+    points: 8,
+    rank: 6,
+  },
+  {
+    id: 7,
+    name: "Lisa Brown",
+    avatar: "/src/assets/svg/profile-icon.svg",
+    points: 6,
+    rank: 7,
+  },
+  {
+    id: 8,
+    name: "David Lee",
+    avatar: "/src/assets/svg/profile-icon.svg",
+    points: 4,
+    rank: 8,
   },
 ];
 
@@ -47,6 +68,7 @@ const Leaderboard: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<TimeFilter>("CURRENT MONTH");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const participantsRef = useRef<HTMLDivElement>(null);
+  const scrollableContentRef = useRef<HTMLDivElement>(null);
   const participantRef = useRef<HTMLDivElement>(null);
 
   const handleFilterChange = (filter: TimeFilter) => {
@@ -57,7 +79,11 @@ const Leaderboard: React.FC = () => {
   // Calculate dynamic height after component mounts
   useEffect(() => {
     const calculateDynamicHeight = () => {
-      if (participantRef.current && participantsRef.current) {
+      if (
+        participantRef.current &&
+        participantsRef.current &&
+        scrollableContentRef.current
+      ) {
         const participantHeight = participantRef.current.offsetHeight;
         const desiredVisibleCount = 3;
         const maxHeight = participantHeight * desiredVisibleCount;
@@ -71,7 +97,10 @@ const Leaderboard: React.FC = () => {
           "--max-visible-participants",
           `${desiredVisibleCount}`
         );
+
+        // Set max height on both containers
         participantsRef.current.style.maxHeight = `${maxHeight}px`;
+        scrollableContentRef.current.style.maxHeight = `${maxHeight}px`;
       }
     };
 
@@ -101,46 +130,51 @@ const Leaderboard: React.FC = () => {
 
       {/* Time Filter Dropdown */}
       <div className="time-filter">
-        <div className={`dropdown__container ${isDropdownOpen ? "dropdown__container--open" : ""}`}>
         <div
-          className={`dropdown ${isDropdownOpen ? "dropdown--open" : ""}`}
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className={`dropdown__container ${
+            isDropdownOpen ? "dropdown__container--open" : ""
+          }`}
         >
-          <div className="dropdown__selected">
-            <span className="dropdown__arrow">▼</span>
-            <span className="dropdown__text">{activeFilter}</span>
-          </div>
-          {isDropdownOpen && (
-            <div className="dropdown__options">
-              {(["CURRENT MONTH", "CURRENT YEAR", "ALL TIME"] as TimeFilter[])
-                .filter((filter) => filter !== activeFilter) // Hide currently selected option
-                .map((filter) => (
-                  <div
-                    key={filter}
-                    className="dropdown__option"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFilterChange(filter);
-                    }}
-                  >
-                    {filter}
-                  </div>
-                ))}
+          <div
+            className={`dropdown ${isDropdownOpen ? "dropdown--open" : ""}`}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          >
+            <div className="dropdown__selected">
+              <span className="dropdown__arrow">▼</span>
+              <span className="dropdown__text">{activeFilter}</span>
             </div>
-          )}
-        </div>
+            {isDropdownOpen && (
+              <div className="dropdown__options">
+                {(["CURRENT MONTH", "CURRENT YEAR", "ALL TIME"] as TimeFilter[])
+                  .filter((filter) => filter !== activeFilter) // Hide currently selected option
+                  .map((filter) => (
+                    <div
+                      key={filter}
+                      className="dropdown__option"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFilterChange(filter);
+                      }}
+                    >
+                      {filter}
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Participants List */}
       <div className="participants" ref={participantsRef}>
-        {mockParticipants.map((participant, index) => (
-          <div
-            key={participant.id}
-            className="participant"
-            ref={index === 0 ? participantRef : null} // Use first participant for measurement
-          >
-            <div className="participant__rank">#{participant.rank}</div>
+        <div className="scrollable-content" ref={scrollableContentRef}>
+          {mockParticipants.map((participant, index) => (
+            <div
+              key={participant.id}
+              className="participant"
+              ref={index === 0 ? participantRef : null} // Use first participant for measurement
+            >
+              <div className="participant__rank">#{participant.rank}</div>
               <img
                 src={participant.avatar}
                 alt={participant.name}
@@ -149,12 +183,13 @@ const Leaderboard: React.FC = () => {
               <div className="participant-profile__container">
                 <span className="participant__name">{participant.name}</span>
                 <div className="participant__points">
-                <img className="star" src={star} alt="star" />
-                <span className="points">{participant.points}</span>
+                  <img className="star" src={star} alt="star" />
+                  <span className="points">{participant.points}</span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
