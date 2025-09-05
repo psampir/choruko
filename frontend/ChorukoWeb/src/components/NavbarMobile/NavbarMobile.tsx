@@ -1,6 +1,8 @@
 import "./NavbarMobile.scss";
 import { useState } from "react";
 import Button from "../Button/Button";
+import Popup from "../Popup";
+import { useNavigate } from "react-router-dom";
 
 // Import all SVG assets
 import lightThemeIcon from "../../assets/svg/light-theme.svg";
@@ -11,10 +13,13 @@ import profileIconLight from "../../assets/svg/profile-icon-light.svg";
 import houseIcon from "../../assets/svg/house.svg";
 import leaveIcon from "../../assets/svg/leave.svg";
 import closeIconLight from "../../assets/svg/close-icon-light.svg";
+import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
 
 const NavbarMobile = () => {
+  const navigate = useNavigate();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
+  const [openPopup, setOpenPopup] = useState<Boolean>(false);
 
   const dropdownToggle = () => {
     setDropdownOpen(!isDropdownOpen);
@@ -83,7 +88,7 @@ const NavbarMobile = () => {
           <p>Household Name</p>
           <ul>
             <li>
-              <Button variant="primary">
+              <Button variant="primary" onClick={() => (navigate("/manageAccount"), setProfileOpen(false))}>
                 <img
                   src={profileIconLight}
                   alt="Profile Management"
@@ -99,7 +104,7 @@ const NavbarMobile = () => {
               </Button>
             </li>
             <li>
-              <Button variant="red">
+              <Button variant="red" onClick={() => setOpenPopup(true)}>
                 <img src={leaveIcon} alt="" />
                 Leave Household
               </Button>
@@ -113,6 +118,15 @@ const NavbarMobile = () => {
           </ul>
         </div>
       </div>
+
+      {openPopup && (
+        <Popup variant="red" onClose={() => setOpenPopup(false)} className="popup__leave-household">
+          <p>Are you sure you want to leave this household?</p>
+          <img src={householdDefaulIcon} alt="Household Image" />
+          <p>Household Name</p>
+          <Button variant="red">Leave</Button>
+        </Popup>
+      )}
     </div>
   );
 };

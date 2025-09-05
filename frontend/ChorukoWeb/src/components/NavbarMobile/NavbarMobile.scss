@@ -1,10 +1,16 @@
 @use "../../styles/variables";
 
+
+
 .navbar-mobile {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  .popup-container.active {
+    z-index: 1111;
+  }
 
   &-container {
     display: flex;
