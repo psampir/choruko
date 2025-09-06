@@ -4,13 +4,14 @@ import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
-import householdDefaulIcon from "../../../assets/svg/householdDefault.svg";
+import ProfileDefaultIcon from "../../../assets/svg/profile-icon-light.svg";
 import arrowLeft from "../../../assets/svg/arrow-left.svg";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
   const [openPopup, setOpenPopup] = useState<Boolean>(false);
   const [nameValue, setNameValue] = useState<string>("Vin Diesel");
+  const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -38,6 +39,23 @@ const ManageAccount: React.FC = () => {
     showNotification("Your password has been changed");
   };
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setProfileImage(result);
+        showNotification("Profile picture updated");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    document.getElementById("profile-image-input")?.click();
+  };
+
   return (
     <div className="manage-account">
       <img
@@ -56,12 +74,17 @@ const ManageAccount: React.FC = () => {
 
       <h1 className="manage-account__template-name">Manage Account</h1>
       <div className="account-header">
-        <img
-          className="account-image"
-          src={householdDefaulIcon}
-          alt="Account"
+        <img className="account-image" src={profileImage} alt="Account" />
+        <Button variant="primary" onClick={triggerFileInput}>
+          Change Picture
+        </Button>
+        <input
+          id="profile-image-input"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          style={{ display: "none" }}
         />
-        <Button variant="primary">Change Picture</Button>
       </div>
       <div className="manage-account__main-section">
         <div className="manage-account__main-section change-name">
@@ -92,7 +115,7 @@ const ManageAccount: React.FC = () => {
       {openPopup && (
         <Popup variant="red" title="" onClose={() => setOpenPopup(false)}>
           <p>Are you sure you want to delete your account?</p>
-          <img src={householdDefaulIcon} alt="Household Image" />
+          <img src={profileImage} alt="Profile Image" />
           <p>Vin Diesel</p>
           <Button variant="red">Delete</Button>
         </Popup>

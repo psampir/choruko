@@ -1,0 +1,268 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./ManageHousehold.scss";
+import Button from "../../../components/Button";
+import Input from "../../../components/Input";
+import Popup from "../../../components/Popup";
+
+import householdDefaulIcon from "../../../assets/svg/householdDefault.svg";
+import arrowLeft from "../../../assets/svg/arrow-left.svg";
+import defineActivity from "../../../assets/svg/activities.svg";
+import delegateAdmin from "../../../assets/svg/star-emty.svg";
+import addParticipants from "../../../assets/svg/profile-icon-light.svg";
+import deleteHousehold from "../../../assets/svg/trash-bin.svg";
+
+const buttonActions = {
+  defineActivity: "define_activity",
+  delegateAdmin: "delegate_admin",
+  addParticipants: "add_participants",
+  deleteHousehold: "delete_household",
+} as const;
+
+type ButtonAction = (typeof buttonActions)[keyof typeof buttonActions];
+
+const mockParticipants = [
+  {
+    id: 1,
+    name: "Andreas Toretto",
+    avatar: "/src/assets/svg/profile-icon.svg",
+  },
+  {
+    id: 2,
+    name: "Ann Huang",
+    avatar: "/src/assets/svg/profile-icon.svg",
+  },
+  {
+    id: 3,
+    name: "Gabbie Mayers",
+    avatar: "/src/assets/svg/profile-icon.svg",
+  },
+  {
+    id: 4,
+    name: "John Smith",
+    avatar: "/src/assets/svg/profile-icon.svg",
+  },
+  {
+    id: 5,
+    name: "Sarah Wilson",
+    avatar: "/src/assets/svg/profile-icon.svg",
+  },
+  {
+    id: 6,
+    name: "Mike Johnson",
+    avatar: "/src/assets/svg/profile-icon.svg",
+  },
+  {
+    id: 7,
+    name: "Lisa Brown",
+    avatar: "/src/assets/svg/profile-icon.svg",
+  },
+  {
+    id: 8,
+    name: "David Lee",
+    avatar: "/src/assets/svg/profile-icon.svg",
+  },
+];
+
+const ManageHousehold: React.FC = () => {
+  const navigate = useNavigate();
+  const [openPopup, setOpenPopup] = useState<Boolean>(false);
+  const [nameValue, setNameValue] = useState<string>("Poznańska");
+  const [profileImage, setProfileImage] = useState<string>(householdDefaulIcon);
+  const [clickedButton, setClickedButton] = useState<ButtonAction | null>(null);
+
+  const [notification, setNotification] = useState<{
+    message: string;
+    isVisible: boolean;
+  }>({
+    message: "",
+    isVisible: false,
+  });
+
+  const showNotification = (message: string) => {
+    setNotification({ message, isVisible: true });
+
+    setTimeout(() => {
+      setNotification({ message: "", isVisible: false });
+    }, 3000);
+  };
+
+  const handleNameChange = () => {
+    if (nameValue.trim()) {
+      showNotification("Your name has been changed");
+    }
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setProfileImage(result);
+        showNotification("Profile picture updated");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    document.getElementById("profile-image-input")?.click();
+  };
+
+  const handleButtonClick = (action: ButtonAction) => {
+    setClickedButton(action);
+    setOpenPopup(true);
+    console.log(
+      "Button clicked:",
+      action,
+      "Current clicked button state:",
+      clickedButton
+    );
+  };
+
+  return (
+    <div className="manage-household">
+      <img
+        className="back-arrow"
+        src={arrowLeft}
+        alt="Back"
+        onClick={() => navigate("/leaderboard")}
+      />
+      <div
+        className={`notification-bar ${
+          notification.isVisible ? "notification-bar--visible" : ""
+        }`}
+      >
+        <span>{notification.message}</span>
+      </div>
+
+      <h1 className="manage-household__title">Manage Household</h1>
+      <div className="household-header">
+        <img className="household-image" src={profileImage} alt="Household" />
+        <Button variant="primary" onClick={triggerFileInput}>
+          Change Picture
+        </Button>
+        <input
+          id="profile-image-input"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          style={{ display: "none" }}
+        />
+      </div>
+      <div className="manage-household__main-section">
+        <div className="manage-household__name-section">
+          <Input
+            variant="edit"
+            value={nameValue}
+            onChange={(e) => setNameValue(e.target.value)}
+          />
+          <Button variant="primary" onClick={handleNameChange}>
+            Change Name
+          </Button>
+        </div>
+        <div className="manage-household__buttons-grid">
+          <Button
+            variant="primary"
+            className="household-action-btn"
+            onClick={() => handleButtonClick(buttonActions.defineActivity)}
+          >
+            <img src={defineActivity} alt="Define Activity" />
+            Define Activity
+          </Button>
+          <Button
+            variant="primary"
+            className="household-action-btn"
+            onClick={() => handleButtonClick(buttonActions.delegateAdmin)}
+          >
+            <img src={delegateAdmin} alt="Delegate Admin" />
+            Delegate Admin
+          </Button>
+          <Button
+            variant="primary"
+            className="household-action-btn"
+            onClick={() => handleButtonClick(buttonActions.addParticipants)}
+          >
+            <img src={addParticipants} alt="Add Participants" />
+            Add Participants
+          </Button>
+          <Button
+            variant="red"
+            className="household-action-btn"
+            onClick={() => handleButtonClick(buttonActions.deleteHousehold)}
+          >
+            <img src={deleteHousehold} alt="Delete household" />
+            Delete Household
+          </Button>
+        </div>
+      </div>
+      {mockParticipants && (
+        <div className="participants-list">
+          <div className="participants-list__header">PARTICIPANTS</div>
+          {mockParticipants.map((participant, index) => (
+            <div
+              className="participant"
+              key={participant.id}
+              id={String(index)}
+            >
+              <img
+                src={participant.avatar ? participant.avatar : profileImage}
+                alt=""
+              />
+              <p>{participant.name}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {openPopup && (
+        <Popup
+          variant={
+            clickedButton === buttonActions.deleteHousehold ? "red" : "primary"
+          }
+          title=""
+          onClose={() => setOpenPopup(false)}
+        >
+          {clickedButton === buttonActions.defineActivity && (
+            <>
+              <p>Do you want to define new activities for this household?</p>
+              <img src={defineActivity} alt="Define Activity" />
+              <p>Create Activity</p>
+              <Button variant="primary">Create</Button>
+            </>
+          )}
+          {clickedButton === buttonActions.delegateAdmin && (
+            <>
+              <p>Are you sure you want to delegate admin privileges?</p>
+              <img src={delegateAdmin} alt="Delegate Admin" />
+              <p>Choose New Admin</p>
+              <Button variant="primary">Delegate</Button>
+            </>
+          )}
+          {clickedButton === buttonActions.addParticipants && (
+            <>
+              <p>Do you want to invite new participants to this household?</p>
+              <Input
+                variant="primary"
+                type="email"
+                style={{ marginBottom: "var(--spacing-lg)" }}
+              />
+              <Button variant="primary">Send Invitations</Button>
+            </>
+          )}
+          {clickedButton === buttonActions.deleteHousehold && (
+            <>
+              <p>Are you sure you want to delete this household?</p>
+              <img src={profileImage} alt="Household Image" />
+              <p>Household Name</p>
+              <Button variant="red">Delete</Button>
+            </>
+          )}
+        </Popup>
+      )}
+    </div>
+  );
+};
+
+export default ManageHousehold;

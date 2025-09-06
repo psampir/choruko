@@ -1,0 +1,215 @@
+@use "../../../styles/variables";
+
+.back-arrow {
+  position: absolute;
+  top: 90px;
+  left: 20px;
+  width: 46px;
+  height: 46px;
+  cursor: pointer;
+  z-index: 100;
+  transition: var(--transition-fast);
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+.notification-bar {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-secondary);
+  color: var(--color-background);
+  text-align: center;
+  padding: var(--spacing-lg);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-body);
+  z-index: 1111;
+  height: 70px;
+
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-in-out;
+
+  &--visible {
+    transform: translateY(0);
+  }
+
+  span {
+    display: block;
+    color: var(--color-background);
+    text-align: center;
+    font-size: var(--font-size-h5);
+  }
+}
+
+.input__wrapper {
+  width: 300px;
+  input {
+    width: 100%;
+  }
+}
+
+.manage-household {
+  background: var(--color-background);
+  padding: var(--spacing-2xl);
+  font-family: var(--font-family-base);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2xl);
+  min-height: 100vh;
+
+  .popup-container .popup .popup-content p {
+    font-size: var(--font-size-h4);
+  }
+
+  & button {
+    width: 200px;
+  }
+
+  &__title {
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-xl) 0;
+    text-align: center;
+    height: 46px;
+    display: flex;
+    align-items: center;
+  }
+
+  &__main-section {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-2xl);
+  }
+
+  &__name-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
+  }
+
+  &__buttons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    width: 100%;
+    max-width: 420px;
+    margin-top: var(--spacing-xl);
+    display: grid;
+    grid-template-columns: repeat(2 1fr);
+    grid-template-rows: repeat(2 auto);
+    gap: 16px;
+
+    .household-action-btn,
+    .household-delete-btn {
+      width: 100%;
+      height: 100%;
+      padding: var(--spacing-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+
+      img {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    .household-delete-btn {
+      grid-column: 1 / -1;
+      margin-top: var(--spacing-lg);
+    }
+  }
+  .participants-list {
+    position: relative;
+    width: 100%;
+    border: 3px solid var(--color-secondary);
+    border-radius: 10px;
+    background: var(--color-background-secondary);
+    max-height: 237px;
+    overflow-y: scroll;
+
+    .participants-list__header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      text-align: center;
+      font-weight: 600;
+      background-color: var(--color-secondary);
+      padding: var(--spacing-xs) 0 var(--spacing-sm);
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+      color: var(--color-background);
+      width: 100%;
+      z-index: var(--z-dropdown);
+    }
+    .participant {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-md) var(--spacing-3xl) var(--spacing-lg);
+      position: relative;
+      font-size: var(--font-size-h6);
+      object-fit: cover;
+
+      img {
+        width: 40px;
+        height: 40px;
+        margin-right: var(--spacing-md);
+      }
+
+      &::before {
+        content: url(../../../assets/svg/decline.svg);
+        position: absolute;
+        right: var(--spacing-3xl);
+        width: 30px;
+        height: 30px;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 1px;
+        left: var(--spacing-3xl);
+        right: var(--spacing-3xl);
+        height: 3px;
+        background-color: var(--color-secondary-half-tr);
+      }
+
+      &:last-child::after {
+        display: none;
+      }
+    }
+  }
+}
+
+.household-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+
+  .household-image {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--border-radius-full);
+    background: var(--color-secondary);
+    object-fit: cover;
+    border: 2px solid var(--color-border);
+  }
+}

@@ -70,9 +70,7 @@
   text-align: center;
   .dropdown__container {
     background: var(--color-background-secondary);
-    /* Use inset box-shadow only on left and right sides */
-    box-shadow: inset 3px 0 0 0 var(--color-secondary),
-      /* Left side */ inset -3px 0 0 0 var(--color-secondary); /* Right side */
+    box-shadow: inset 3px 0 0 0 var(--color-secondary), inset -3px 0 0 0 var(--color-secondary); 
     border-radius: var(--border-radius-standart);
 
     &--open {
