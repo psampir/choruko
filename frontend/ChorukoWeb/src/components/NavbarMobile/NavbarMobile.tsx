@@ -3,6 +3,7 @@ import { useState } from "react";
 import Button from "../Button/Button";
 import Popup from "../Popup";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 // Import all SVG assets
 import lightThemeIcon from "../../assets/svg/light-theme.svg";
@@ -17,6 +18,7 @@ import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
 
 const NavbarMobile = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [openPopup, setOpenPopup] = useState<Boolean>(false);
@@ -32,6 +34,17 @@ const NavbarMobile = () => {
   // Add this function to prevent event bubbling
   const handlePopupClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+  };
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setProfileOpen(false); // Close the profile popup
+      navigate("/auth"); // Navigate to auth page after logout
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -73,7 +86,6 @@ const NavbarMobile = () => {
         className={`profile__popup-container ${isProfileOpen ? "active" : ""}`}
         onClick={profileClickHandler}
       >
-        {/* Add onClick={handlePopupClick} to prevent bubbling */}
         <div className="profile-popup" onClick={handlePopupClick}>
           <i
             className="profile-popup__close-icon"
@@ -88,7 +100,12 @@ const NavbarMobile = () => {
           <p>Household Name</p>
           <ul>
             <li>
-              <Button variant="primary" onClick={() => (navigate("/manageAccount"), setProfileOpen(false))}>
+              <Button
+                variant="primary"
+                onClick={() => (
+                  navigate("/manageAccount"), setProfileOpen(false)
+                )}
+              >
                 <img
                   src={profileIconLight}
                   alt="Profile Management"
@@ -98,7 +115,12 @@ const NavbarMobile = () => {
               </Button>
             </li>
             <li>
-              <Button variant="primary">
+              <Button
+                variant="primary"
+                onClick={() => (
+                  navigate("/manageHousehold"), setProfileOpen(false)
+                )}
+              >
                 <img src={houseIcon} alt="Household Management" />
                 Manage Household
               </Button>
@@ -110,7 +132,7 @@ const NavbarMobile = () => {
               </Button>
             </li>
             <li>
-              <Button variant="red">
+              <Button variant="red" onClick={handleLogout}>
                 <img src={closeIconLight} alt="" />
                 Log Out
               </Button>
@@ -120,7 +142,11 @@ const NavbarMobile = () => {
       </div>
 
       {openPopup && (
-        <Popup variant="red" onClose={() => setOpenPopup(false)} className="popup__leave-household">
+        <Popup
+          variant="red"
+          onClose={() => setOpenPopup(false)}
+          className="popup__leave-household"
+        >
           <p>Are you sure you want to leave this household?</p>
           <img src={householdDefaulIcon} alt="Household Image" />
           <p>Household Name</p>
