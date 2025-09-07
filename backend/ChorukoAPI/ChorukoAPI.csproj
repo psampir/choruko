@@ -34,4 +34,18 @@
       <Folder Include="wwwroot\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Mappers\obj\ChorukoAPI.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\Debug\net9.0\ChorukoAPI.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\Debug\net9.0\rjimswa.dswa.cache.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\Debug\net9.0\rjsmrazor.dswa.cache.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\Debug\net9.0\rpswa.dswa.cache.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\Debug\net9.0\staticwebassets.build.endpoints.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\Debug\net9.0\staticwebassets.build.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\Debug\net9.0\staticwebassets.development.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="Mappers\obj\project.packagespec.json" />
+    </ItemGroup>
+
 </Project>

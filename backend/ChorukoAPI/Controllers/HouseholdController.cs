@@ -80,4 +80,41 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         return result.ToApiResponse();
     }
+    
+    [HttpPatch("rename")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> RenameHousehold([FromBody] RenameHouseholdRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.RenameHouseholdAsync(userId, request.NewName);
+
+        return result.ToApiResponse();
+    }
+    
+    [HttpPost("leave")]
+    [Authorize(Roles = "HouseholdAdmin,Participant")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> LeaveHousehold()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.LeaveHouseholdAsync(userId);
+
+        return result.ToApiResponse();
+    }
 }
