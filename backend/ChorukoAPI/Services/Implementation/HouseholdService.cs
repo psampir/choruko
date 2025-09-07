@@ -372,17 +372,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
      
     private void DeleteProfilePicture(string filePath)
     {
-        try
-        {
-            string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, filePath);
-            if (System.IO.File.Exists(fullPath))
-            {
-                System.IO.File.Delete(fullPath);
-            }
-        }
-        catch (Exception ex)
-        {
-            // Log the error but don't fail the primary operation
-        }
+        string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, filePath);
+        System.IO.File.Delete(fullPath);
     }
 }
