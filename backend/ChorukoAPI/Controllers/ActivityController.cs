@@ -16,41 +16,41 @@ namespace ChorukoAPI.Controllers;
 [Authorize]
 public class ActivityController(IActivityService _activityService) : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("create/{householdId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> CreateActivity([FromBody] CreateActivityRequest createActivityRequest)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> CreateActivity([FromRoute] string householdId, [FromBody] CreateActivityRequest createActivityRequest)
     {
-        var result = await _activityService.CreateActivityAsync(createActivityRequest);
+        var result = await _activityService.CreateActivityAsync(householdId, createActivityRequest);
         return result.ToCreatedApiResponse();
     }
 
-    [HttpPut("{activityId}")]
+    [HttpPut("edit/{householdId}/{activityId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> EditActivity([FromRoute]string activityId, [FromBody] EditActivityRequest updateActivityRequest)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> EditActivity([FromRoute] string householdId, [FromRoute] string activityId, [FromBody] EditActivityRequest updateActivityRequest)
     {
         var result = await _activityService.EditActivityAsync(activityId, updateActivityRequest);
         return result.ToCreatedApiResponse();
     }
 
-    [HttpDelete("{activityId}")]
+    [HttpDelete("delete/{activityId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteActivity(string activityId)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteActivity([FromRoute] string activityId)
     {
         var result = await _activityService.DeleteActivityAsync(activityId);
         return result.ToCreatedApiResponse();
     }
 
-    [HttpGet]
+    [HttpGet("{householdId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<List<ActivityResponse>>>> GetActivities([FromQuery] string? householdId)
+    public async Task<ActionResult<ApiResponse<List<ActivityResponse>>>> GetActivities([FromRoute] string householdId)
     {
         var result = await _activityService.GetActivitiesAsync(householdId);
         return result.ToApiResponse();
     }
 
-    [HttpGet("{activityId}")]
+    [HttpGet("{householdId}/{activityId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<ActivityResponse>>> GetActivity(string activityId)
+    public async Task<ActionResult<ApiResponse<ActivityResponse>>> GetActivity([FromRoute] string householdId, [FromRoute] string activityId)
     {
         var result = await _activityService.GetActivityByIdAsync(activityId);
         return result.ToApiResponse();
