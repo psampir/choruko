@@ -112,13 +112,32 @@ const ManageHousehold: React.FC = () => {
 
   const handleButtonClick = (action: ButtonAction) => {
     setClickedButton(action);
-    setOpenPopup(true);
+    if (action !== "define_activity") {
+      setOpenPopup(true);
+    }
     console.log(
       "Button clicked:",
       action,
       "Current clicked button state:",
       clickedButton
     );
+  };
+
+  const handleDelegateAdmin = (event: React.MouseEvent<HTMLDivElement>) => {
+    console.log("Delegate admin clicked", event.currentTarget.id);
+
+    // Find the participants list that contains this clicked element
+    const participantsListInPopup =
+      event.currentTarget.closest(".participants-list");
+
+    participantsListInPopup
+      ?.querySelectorAll(".participant__delegate-admin")
+      .forEach((element) => {
+        element.classList.remove("admin-choose");
+      });
+
+    // Add admin-choose class to the clicked participant
+    event.currentTarget.classList.add("admin-choose");
   };
 
   return (
@@ -224,19 +243,30 @@ const ManageHousehold: React.FC = () => {
           title=""
           onClose={() => setOpenPopup(false)}
         >
-          {clickedButton === buttonActions.defineActivity && (
-            <>
-              <p>Do you want to define new activities for this household?</p>
-              <img src={defineActivity} alt="Define Activity" />
-              <p>Create Activity</p>
-              <Button variant="primary">Create</Button>
-            </>
-          )}
           {clickedButton === buttonActions.delegateAdmin && (
             <>
-              <p>Are you sure you want to delegate admin privileges?</p>
-              <img src={delegateAdmin} alt="Delegate Admin" />
-              <p>Choose New Admin</p>
+              <p>Selelect a new household admin</p>
+              {mockParticipants && (
+                <div className="participants-list">
+                  <div className="participants-list__header">PARTICIPANTS</div>
+                  {mockParticipants.map((participant, index) => (
+                    <div
+                      className="participant__delegate-admin"
+                      key={participant.id}
+                      id={String(index)}
+                      onClick={handleDelegateAdmin}
+                    >
+                      <img
+                        src={
+                          participant.avatar ? participant.avatar : profileImage
+                        }
+                        alt=""
+                      />
+                      <p>{participant.name}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
               <Button variant="primary">Delegate</Button>
             </>
           )}
