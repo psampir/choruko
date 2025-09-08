@@ -17,6 +17,7 @@ import Invitations from "./views/JoinOrCreateHousehold/Invitations/Invitations";
 import Leaderboard from "./views/Household/Leaderboard/Leaderboard";
 import ManageAccount from "./views/Profile/ManageAccount/ManageAccount";
 import ManageHousehold from "./views/Profile/ManageHousehold/ManageHousehold";
+import Activities from "./views/Profile/ManageHousehold/Activities/Activities";
 
 // Layout component for protected pages with top navbar
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -132,6 +133,17 @@ function AppRoutes() {
           <ProtectedRoute>
             <MainAppLayout>
               <ManageHousehold />
+            </MainAppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+       <Route
+        path="/activities"
+        element={
+          <ProtectedRoute>
+            <MainAppLayout>
+              <Activities />
             </MainAppLayout>
           </ProtectedRoute>
         }

@@ -114,6 +114,8 @@ const ManageHousehold: React.FC = () => {
     setClickedButton(action);
     if (action !== "define_activity") {
       setOpenPopup(true);
+    }else{
+      navigate('/activities')
     }
     console.log(
       "Button clicked:",
@@ -124,9 +126,6 @@ const ManageHousehold: React.FC = () => {
   };
 
   const handleDelegateAdmin = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log("Delegate admin clicked", event.currentTarget.id);
-
-    // Find the participants list that contains this clicked element
     const participantsListInPopup =
       event.currentTarget.closest(".participants-list");
 
@@ -135,8 +134,6 @@ const ManageHousehold: React.FC = () => {
       .forEach((element) => {
         element.classList.remove("admin-choose");
       });
-
-    // Add admin-choose class to the clicked participant
     event.currentTarget.classList.add("admin-choose");
   };
 
