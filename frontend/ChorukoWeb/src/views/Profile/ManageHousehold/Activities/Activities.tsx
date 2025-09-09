@@ -7,54 +7,64 @@ import Popup from "../../../../components/Popup";
 
 import householdDefaulIcon from "../../../../assets/svg/householdDefault.svg";
 import arrowLeft from "../../../../assets/svg/arrow-left.svg";
-import editBox from "../../../../assets/svg/edit-box.svg"
+import editBox from "../../../../assets/svg/edit-box.svg";
+import star from "../../../../assets/svg/star.svg";
 
-
-
-const mockParticipants = [
-  {
-    id: 1,
-    info: "Vacuming the floor",
-    points: "62"
-  },
-  {
-    id: 1,
-    info: "Clean dishes",
-    points: "62"
-  },
-  {
-    id: 1,
-    info: "Make a breackfast",
-    points: "62"
-  },
-  {
-    id: 1,
-    info: "Throw out the trash",
-    points: "62"
-  },
-  {
-    id: 1,
-    info: "Clean the room",
-    points: "62"
-  },
-  {
-    id: 1,
-    info: "Wash clothes",
-    points: "62"
-  },
-  {
-    id: 1,
-    info: "Mow the lawn",
-    points: "62"
-  },
-];
+type Activity = {
+  id: number;
+  info: string;
+  points: string;
+};
 
 const Activities: React.FC = () => {
   const navigate = useNavigate();
+  const [activities, setActivities] = useState<Activity[]>([
+    {
+      id: 1,
+      info: "Vacuming the floor",
+      points: "62",
+    },
+    {
+      id: 2,
+      info: "Clean dishes",
+      points: "45",
+    },
+    {
+      id: 3,
+      info: "Make a breakfast",
+      points: "30",
+    },
+    {
+      id: 4,
+      info: "Throw out the trash",
+      points: "15",
+    },
+    {
+      id: 5,
+      info: "Clean the room",
+      points: "50",
+    },
+    {
+      id: 6,
+      info: "Wash clothes",
+      points: "35",
+    },
+    {
+      id: 7,
+      info: "Mow the lawn",
+      points: "80",
+    },
+  ]);
+
   const [openPopup, setOpenPopup] = useState<Boolean>(false);
   const [nameValue, setNameValue] = useState<string>("Poznańska");
   const [profileImage, setProfileImage] = useState<string>(householdDefaulIcon);
-  const [clickedButton, setClickedButton] = useState()
+  const [clickedButton, setClickedButton] = useState();
+  const [editActivityName, setEditActivityName] = useState("");
+  const [editActivityPoints, setEditActivityPoints] = useState("");
+  const [editingActivityId, setEditingActivityId] = useState<number | null>(
+    null
+  );
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -78,6 +88,13 @@ const Activities: React.FC = () => {
     }
   };
 
+  const handleEditClick = (activity: Activity) => {
+    setEditActivityName(activity.info);
+    setEditActivityPoints(activity.points);
+    setEditingActivityId(activity.id);
+    setOpenPopup(true);
+  };
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -95,7 +112,6 @@ const Activities: React.FC = () => {
     document.getElementById("profile-image-input")?.click();
   };
 
-
   const handleDelegateAdmin = (event: React.MouseEvent<HTMLDivElement>) => {
     const participantsListInPopup =
       event.currentTarget.closest(".participants-list");
@@ -106,6 +122,29 @@ const Activities: React.FC = () => {
         element.classList.remove("admin-choose");
       });
     event.currentTarget.classList.add("admin-choose");
+  };
+
+  const saveActivityData = () => {
+    if (editingActivityId !== null) {
+      // Update the specific activity in the activities array
+      setActivities((prevActivities) =>
+        prevActivities.map((activity) =>
+          activity.id === editingActivityId
+            ? {
+                ...activity,
+                info: editActivityName,
+                points: editActivityPoints,
+              }
+            : activity
+        )
+      );
+
+      showNotification("Activity updated successfully!");
+      setOpenPopup(false);
+      setEditingActivityId(null);
+      setEditActivityName("");
+      setEditActivityPoints("");
+    }
   };
 
   return (
@@ -126,20 +165,27 @@ const Activities: React.FC = () => {
 
       <h1 className="manage-household__title">Activities</h1>
 
-      <div className="manage-household__main-section">
-        
-      </div>
-      {mockParticipants && (
+      <div className="manage-household__main-section"></div>
+      {activities && (
         <div className="participants-list">
-          <div className="participants-list__header">PARTICIPANTS</div>
-          {mockParticipants.map((participant, index) => (
+          <div className="participants-list__header">ACTIVITIES</div>
+          {activities.map((activity) => (
             <div
-              className="participant"
-              key={participant.id}
-              id={String(index)}
+              className="activity"
+              key={activity.id}
+              id={String(activity.id)}
             >
-              <p>{participant.info}</p>
-              <img src={editBox} alt="Edit Box" onClick={()=>{setOpenPopup(true)}}/>
+              <div className="activity-data">
+                <span className="points"><img src={star} alt=""/>{activity.points}</span>
+                <p>{activity.info}</p>
+              </div>
+              <img
+                src={editBox}
+                alt="Edit Box"
+                onClick={() => {
+                  handleEditClick(activity);
+                }}
+              />
             </div>
           ))}
         </div>
@@ -151,6 +197,24 @@ const Activities: React.FC = () => {
           title="Edit Activity"
           onClose={() => setOpenPopup(false)}
         >
+          <Input
+            variant="edit"
+            value={editActivityName}
+            onChange={(e) => setEditActivityName(e.target.value)}
+            placeholder="Activity name"
+          />
+          <Input
+            variant="edit"
+            value={editActivityPoints}
+            onChange={(e) => setEditActivityPoints(e.target.value)}
+            placeholder="Points"
+          />
+          <div className="button__edit-activity">
+            <Button variant="red">Delete</Button>
+            <Button variant="primary" onClick={saveActivityData}>
+              Save
+            </Button>
+          </div>
         </Popup>
       )}
     </div>
