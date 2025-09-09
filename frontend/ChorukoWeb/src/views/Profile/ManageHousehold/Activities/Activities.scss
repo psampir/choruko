@@ -48,7 +48,8 @@
 }
 
 .input__wrapper {
-  width: 300px;
+  width: 280px;
+      margin-bottom: var(--spacing-3xl);
   input {
     width: 100%;
   }
@@ -160,7 +161,7 @@
       z-index: var(--z-dropdown);
     }
 
-    .participant {
+    .activity {
       display: flex;
       align-items: center;
       padding: var(--spacing-md) var(--spacing-3xl) var(--spacing-lg);
@@ -169,15 +170,38 @@
       object-fit: cover;
       justify-content: space-between;
 
+      .activity-data{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+
+
+        .points{
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 2px var(--spacing-sm);
+          color: var(--color-background);
+          gap: 3px;
+          border-radius: 10px;
+          font-size: var(--font-size-body2);
+          background-color: var(--color-secondary);
+
+          img{
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
 
       p {
         margin: 0;
       }
 
       img {
-        width: 40px;
-        height: 40px;
-        margin-right: var(--spacing-md);
+        width: 30px;
+        height: 30px;
       }
 
       &::after {
@@ -195,7 +219,7 @@
       }
     }
 
-    .participant {
+    .activity {
       &::before {
         right: var(--spacing-3xl);
         width: 30px;
@@ -230,4 +254,27 @@
     object-fit: cover;
     border: 2px solid var(--color-border);
   }
+
 }
+
+  .button__edit-activity{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-3xl);
+    max-width: 280px;
+
+    button{
+      max-width: 150px;
+    }
+    input{
+      margin-bottom: var(--spacing-3xl);
+    }
+
+    .popup-container{
+      .popup{
+        width: 90%;
+      }
+    }
+  }

@@ -70,6 +70,10 @@
     }
 
     .popup-content {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+
       flex: 1;
       width: 100%;
       padding: 0 var(--spacing-2xl);
@@ -165,7 +169,6 @@
 // Responsive design for smaller screens
 @media (max-width: 480px) {
   .popup-container .popup {
-    width: 95%;
 
     .popup-actions {
       flex-direction: column;
