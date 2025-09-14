@@ -64,4 +64,20 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         return result.ToApiResponse();
     }
+    
+    [HttpDelete("delete")]
+    [Authorize(Roles="HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteHousehold()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.DeleteHouseholdAsync(userId);
+
+        return result.ToApiResponse();
+    }
 }
