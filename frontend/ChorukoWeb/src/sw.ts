@@ -15,8 +15,8 @@ precacheAndRoute(self.__WB_MANIFEST || []);
 
 self.addEventListener('install', () => {
   // Activate immediately on install to minimize waiting
-  // @ts-ignore
-  self.skipWaiting?.();
+  // Cast self to any to access skipWaiting in a type-safe way
+  (self as any).skipWaiting?.();
 });
 
 self.addEventListener('activate', () => {
