@@ -2,16 +2,20 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'node:fs';
 import { VitePWA } from 'vite-plugin-pwa';
+import type { ManifestOptions } from 'vite-plugin-pwa';
 
 const iconsJsonPath = new URL('./public/icons.json', import.meta.url);
 const iconsJson = JSON.parse(fs.readFileSync(iconsJsonPath, 'utf-8')) as {
   icons: { src: string; sizes: string }[];
 };
+
+type ManifestIcon = NonNullable<ManifestOptions['icons']>[number];
+
 // Transform icons.json entries into PWA manifest icons. We augment common sizes
 // (192,512) with `purpose: any maskable` so Android adaptive icons look good.
-const manifestIcons = iconsJson.icons.map(i => {
+const manifestIcons: ManifestIcon[] = iconsJson.icons.map(i => {
   const src = i.src.startsWith('/') ? i.src : `/${i.src}`;
-  const icon: Record<string, string> = {
+  const icon: ManifestIcon = {
     src,
     sizes: i.sizes,
   };
