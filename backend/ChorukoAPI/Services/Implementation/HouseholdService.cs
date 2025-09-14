@@ -184,11 +184,6 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
         }
         
-        if (household.AdminId != currentUserId)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Only the household admin can delete users.", HttpStatusCode.Forbidden);
-        }
-        
         if (userToDelete.HouseholdId != household.Id)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a participant of this household.", HttpStatusCode.BadRequest);
@@ -197,13 +192,19 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         var userRoles = await _userManager.GetRolesAsync(userToDelete);
         if (userRoles.Contains("HouseholdAdmin"))
         {
-            var adminCount = household.Participants
-                .Where(p => _userManager.GetRolesAsync(p).Result.Contains("HouseholdAdmin"))
-                .Count();
-
+            int adminCount = 0;
+            foreach (var participant in household.Participants)
+            {
+                var roles = await _userManager.GetRolesAsync(participant);
+                if (roles.Contains("HouseholdAdmin"))
+                {
+                    adminCount++;
+                }
+            }
+            
             if (adminCount <= 1)
             {
-                return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot delete the last household admin. A household must have at least one admin.", HttpStatusCode.Forbidden);
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot leave. A household must have at least one admin.", HttpStatusCode.Forbidden);
             }
         }
         
@@ -374,5 +375,122 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
     {
         string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, filePath);
         System.IO.File.Delete(fullPath);
+    }
+    
+    public async Task<ServiceResponse<OperationResultDto>> RenameHouseholdAsync(string userId, string newName)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+        }
+    
+        var userRoles = await _userManager.GetRolesAsync(user);
+        if (!userRoles.Contains("HouseholdAdmin"))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Only household admins can rename a household.", HttpStatusCode.Forbidden);
+        }
+        
+        var householdId = user.HouseholdId;
+        if (string.IsNullOrEmpty(householdId))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User does not belong to a household.", HttpStatusCode.BadRequest);
+        }
+
+        var household = await _context.Households
+            .FirstOrDefaultAsync(h => h.Id == householdId);
+
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
+        }
+        
+        var oldName = household.Name;
+        household.Name = newName;
+        
+        _context.Households.Update(household);
+        await _context.SaveChangesAsync();
+        
+        var response = new OperationResultDto
+        {
+            Operation = "RenameHousehold",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "HouseholdId", household.Id },
+                { "OldHouseholdName", oldName },
+                { "NewHouseholdName", household.Name }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            response,
+            "Household was successfully renamed.",
+            HttpStatusCode.OK
+        );
+    }   
+    public async Task<ServiceResponse<OperationResultDto>> LeaveHouseholdAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+        }
+        
+        if (string.IsNullOrEmpty(user.HouseholdId))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User does not belong to a household.", HttpStatusCode.BadRequest);
+        }
+        
+        var userRoles = await _userManager.GetRolesAsync(user);
+        var household = await _context.Households.Include(h => h.Participants).FirstOrDefaultAsync(h => h.Id == user.HouseholdId);
+
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
+        }
+        
+        if (userRoles.Contains("HouseholdAdmin"))
+        {
+            int adminCount = 0;
+            foreach (var participant in household.Participants)
+            {
+                var roles = await _userManager.GetRolesAsync(participant);
+                if (roles.Contains("HouseholdAdmin"))
+                {
+                    adminCount++;
+                }
+            }
+            
+            if (adminCount <= 1)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot leave. A household must have at least one admin.", HttpStatusCode.Forbidden);
+            }
+        }
+        
+        user.HouseholdId = null;
+        await _userManager.RemoveFromRolesAsync(user, userRoles);
+        await _userManager.AddToRoleAsync(user, "None");
+        
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
+        await _signInManager.RefreshSignInAsync(user);
+        
+        var response = new OperationResultDto
+        {
+            Operation = "LeaveHousehold",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "HouseholdId", household.Id },
+                { "UserId", user.Id }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            response,
+            "User successfully left the household.",
+            HttpStatusCode.OK
+        );
     }
 }
