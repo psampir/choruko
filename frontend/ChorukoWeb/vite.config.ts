@@ -24,7 +24,7 @@ const manifestIcons: ManifestIcon[] = iconsJson.icons.map(i => {
     icon.purpose = 'any maskable';
   }
   return icon;
-}) as any; // cast: vite-plugin-pwa IconResource typing is satisfied at runtime
+});
 
 // https://vite.dev/config/
 export default defineConfig({
