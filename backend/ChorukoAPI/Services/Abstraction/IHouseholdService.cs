@@ -12,4 +12,7 @@ public interface IHouseholdService
     Task<ServiceResponse<OperationResultDto>> DeleteUserFromHouseholdAsync(string userIdToDelete, string currentUserId);
     Task<ServiceResponse<OperationResultDto>> AddUserToHouseholdAsync(string userIdToAdd, string currentUserId);
     Task<ServiceResponse<OperationResultDto>> DeleteHouseholdAsync(string userId);
+    Task<ServiceResponse<OperationResultDto>> RenameHouseholdAsync(string userId, string newName);
+    Task<ServiceResponse<OperationResultDto>> LeaveHouseholdAsync(string userId);
+    
 }
