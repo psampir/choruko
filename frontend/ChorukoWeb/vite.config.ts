@@ -32,6 +32,10 @@ export default defineConfig({
     host: true, // Allow access from other devices on the network
     port: 3000, // Default port for Vite
   },
+  preview: {
+    host: true,
+    port: 3000,
+  },
   plugins: [
     react(),
     VitePWA({
