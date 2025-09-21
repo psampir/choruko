@@ -13,12 +13,13 @@ This guide will help you set up your development environment for Choruko.
 - [Git](https://git-scm.com/downloads)
 
 ## Getting Started
-1. Clone the repository to your local machine and navigate into the project directory:
 
-    ```bash
-    git clone https://github.com/psampir/choruko.git
-    cd choruko
-    ```
+Clone the repository to your local machine and navigate into the project directory:
+
+```bash
+git clone https://github.com/psampir/choruko.git
+cd choruko
+```
 
 ## Backend Setup
 The backend is an ASP.NET Core application.
@@ -64,11 +65,20 @@ The backend is an ASP.NET Core application.
 ## Frontend Setup
 The frontend is a React application built with Vite.
 
+> PWA installability requirements:
+> - The app must be served over HTTPS, or from a local development environment using localhost or 127.0.0.1 — with or without a port number.
+> - The PWA manifest and service worker are generated at build time by vite-plugin-pwa; run a production build before testing installation.
+
 1. **Install dependencies:**
   Install the required npm packages:
 
     ```bash
     npm install --prefix frontend/ChorukoWeb
+    ```
+
+2. **Build (generates PWA manifest and service worker):**
+    ```bash
+    npm run build --prefix frontend/ChorukoWeb
     ```
 
 ## Running the Application
@@ -87,16 +97,31 @@ Once you have completed the backend and frontend setup, you can run the applicat
 
 2. **Frontend:**
   Open another terminal window and navigate to the `frontend/ChorukoWeb` directory.
-  Run the following command to start the frontend development server:
-  
+
     ```bash
     cd frontend/ChorukoWeb
+    ```
+
+    To start the frontend development server, run the following command:
+  
+    ```bash
     npm run dev
     ```
   
     The web application will be available at `http://localhost:3000`.
 
+    ---
+
+    In order to test the PWA features, you need to build the production version and serve it locally (PWA requires manifest and service worker generated at build time):
+
+    ```bash
+    npm run build
+    npm run preview
+    ```
+
+    The PWA will be available at `http://localhost:3000`.
+
 ## What's Next?
 Now that you have your development environment set up, you might want to explore the following:
-- **API documentation:** Once the backend is running, you can access the Swagger UI at `http://localhost:5180/swagger` to explore the API endpoints.
-- **Project architecture:** Learn more about the project's structure and design by reading the documents in the `/docs/UML` directory.
+- **API documentation:** Once the backend is running, you can access the Swagger UI at [http://localhost:5180/swagger](http://localhost:5180/swagger) to explore the API endpoints.
+- **Project architecture:** Learn more about the project's structure and design by reading the documents in the [/docs/UML](../UML/) directory.
