@@ -7,7 +7,7 @@ namespace ChorukoAPI.Services.Abstraction
 {
     public interface IActivityService
     {
-        Task<ServiceResponse<OperationResultDto>> CreateActivityAsync(CreateActivityRequest createActivityDto);
+        Task<ServiceResponse<OperationResultDto>> CreateActivityAsync(string householdId, CreateActivityRequest createActivityDto);
         Task<ServiceResponse<OperationResultDto>> EditActivityAsync(string activityId, EditActivityRequest updateActivityRequest);
         Task<ServiceResponse<OperationResultDto>> DeleteActivityAsync(string activityId);
         Task<ServiceResponse<List<ActivityResponse>>> GetActivitiesAsync(string? householdId);
