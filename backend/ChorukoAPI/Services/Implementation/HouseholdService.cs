@@ -27,7 +27,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
             return validationResponse;
         }
         
-        var uploadResponse = await UploadProfilePicture(request);
+        var uploadResponse = await UploadProfilePicture(request.ProfilePicture);
         if (!uploadResponse.IsSuccessful)
         {
             // If upload failed, return the error response from the upload method
@@ -99,14 +99,14 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         return ServiceResponseFactory.Success<OperationResultDto>(null, "User is valid for household creation.", HttpStatusCode.OK);
     }
     
-    private async Task<ServiceResponse<string>> UploadProfilePicture(CreateHouseholdRequest request)
+    private async Task<ServiceResponse<string>> UploadProfilePicture(IFormFile? file)
     {
         // If no file is provided, it's not an error.
-        if (request.ProfilePicture == null)
+        if (file == null)
         {
             return ServiceResponseFactory.Success<string>(null, "No profile picture provided.", HttpStatusCode.OK);
         }
-    
+
         try
         {
             string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "households");
@@ -114,17 +114,17 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
             {
                 Directory.CreateDirectory(uploadsFolder);
             }
-        
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + request.ProfilePicture.FileName;
+
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
             string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
             using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
-                await request.ProfilePicture.CopyToAsync(fileStream);
+                await file.CopyToAsync(fileStream);
             }
-        
+
             string profilePicturePath = Path.Combine("uploads", "households", uniqueFileName).Replace("\\", "/");
-        
+
             // Return success with the file path
             return ServiceResponseFactory.Success(profilePicturePath, "Profile picture uploaded successfully.", HttpStatusCode.OK);
         }
@@ -490,6 +490,122 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         return ServiceResponseFactory.Success(
             response,
             "User successfully left the household.",
+            HttpStatusCode.OK
+        );
+    }
+    
+    public async Task<ServiceResponse<OperationResultDto>> ChangeHouseholdPictureAsync(ChangeHouseholdPictureRequest request, string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+        }
+    
+        // 1. Get the household associated with the user.
+        var household = await _context.Households
+            .FirstOrDefaultAsync(h => h.Id == user.HouseholdId);
+    
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
+        }
+
+        // 2. Check for existing picture and delete it.
+        if (!string.IsNullOrEmpty(household.ProfilePicturePath))
+        {
+            DeleteProfilePicture(household.ProfilePicturePath);
+        }
+
+        // 3. Upload the new picture.
+        var uploadResponse = await UploadProfilePicture(request.ProfilePicture);
+        if (!uploadResponse.IsSuccessful)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, uploadResponse.Message, uploadResponse.StatusCode);
+        }
+
+        // 4. Update the household's profile picture path in the database.
+        household.ProfilePicturePath = uploadResponse.Result;
+
+        // 5. Save changes to the database.
+        await _context.SaveChangesAsync();
+
+        var response = new OperationResultDto
+        {
+            Operation = "ChangeHouseholdPicture",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "HouseholdId", household.Id },
+                { "NewProfilePicturePath", household.ProfilePicturePath }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            response,
+            "Household picture was successfully changed.",
+            HttpStatusCode.OK
+        );
+    }
+    public async Task<ServiceResponse<OperationResultDto>> SetHouseholdAdminAsync(string userId, string newAdminId)
+    {
+        var currentAdmin = await _userManager.FindByIdAsync(userId);
+        var newAdmin = await _userManager.FindByIdAsync(newAdminId);
+
+        if (currentAdmin == null || newAdmin == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "One or both users not found.", HttpStatusCode.NotFound);
+        }
+
+        if (currentAdmin.HouseholdId != newAdmin.HouseholdId || string.IsNullOrEmpty(currentAdmin.HouseholdId))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Both users must belong to the same household.", HttpStatusCode.BadRequest);
+        }
+
+        var currentAdminRoles = await _userManager.GetRolesAsync(currentAdmin);
+        if (!currentAdminRoles.Contains("HouseholdAdmin"))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user is not a household admin.", HttpStatusCode.Forbidden);
+        }
+
+        var newAdminRoles = await _userManager.GetRolesAsync(newAdmin);
+        if (newAdminRoles.Contains("HouseholdAdmin"))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User is already an admin.", HttpStatusCode.Conflict);
+        }
+        if (!newAdminRoles.Contains("Participant"))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "New admin must have the 'Participant' role.", HttpStatusCode.Forbidden);
+        }
+        
+        await _userManager.AddToRoleAsync(newAdmin, "HouseholdAdmin");
+        await _userManager.RemoveFromRoleAsync(newAdmin, "Participant");
+        
+        var household = await _context.Households.FirstOrDefaultAsync(h => h.Id == currentAdmin.HouseholdId);
+        if (household != null)
+        {
+            household.AdminId = newAdminId;
+            _context.Households.Update(household);
+        }
+        
+        await _context.SaveChangesAsync();
+        await _signInManager.RefreshSignInAsync(currentAdmin);
+
+        var response = new OperationResultDto
+        {
+            Operation = "SetHouseholdAdmin",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "OldAdminId", currentAdmin.Id },
+                { "NewAdminId", newAdmin.Id },
+                { "HouseholdId", household?.Id }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            response,
+            "Household admin was successfully set.",
             HttpStatusCode.OK
         );
     }

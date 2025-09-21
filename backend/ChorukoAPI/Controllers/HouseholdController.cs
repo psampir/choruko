@@ -117,4 +117,41 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         return result.ToApiResponse();
     }
+    
+    [HttpPatch("change-picture")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> ChangeHouseholdPicture([FromForm] ChangeHouseholdPictureRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.ChangeHouseholdPictureAsync(request, userId);
+
+        return result.ToApiResponse();
+    }
+    
+    [HttpPatch("{newAdminId}/set-admin")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> SetHouseholdAdmin(string newAdminId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+        
+        var result = await _householdService.SetHouseholdAdminAsync(userId, newAdminId);
+
+        return result.ToApiResponse();
+    }
 }
