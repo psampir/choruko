@@ -102,6 +102,8 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 
 builder.Services.AddScoped<IHouseholdTaskService, HouseholdTaskService>();
 
+builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
 
 builder.Services.AddControllers();
