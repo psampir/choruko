@@ -64,16 +64,16 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
           type="text"
           placeholder="Email"
         />
+
+        <Button
+          variant="primary"
+          className="login__button--login"
+          onClick={handleResetPassword}
+        >
+          Reset Password
+        </Button>
       </form>
 
-      <Button
-        variant="primary"
-        className="login__button--login"
-        onClick={handleResetPassword}
-      // style={{ marginTop: "0" }}
-      >
-        Reset Password
-      </Button>
       <Button
         variant="additional"
         className="login__button--reset"
@@ -81,11 +81,6 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
       >
         Go back to Login
       </Button>
-
-      <div
-        className="login__bottom-container"
-        style={{ marginTop: "77px" }}
-      ></div>
     </>
   );
 }
