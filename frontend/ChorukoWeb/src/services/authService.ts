@@ -12,7 +12,7 @@ class AuthService {
   // Register a new user
   async register(userData: UserData) {
     try {
-      const response = await fetch(`${apiBaseUrl}/register`, {
+      const response = await fetch(`${apiBaseUrl}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,7 +43,7 @@ class AuthService {
   async login(email: string, password: string) {
     try {
       console.log("📡 Sending login request...");
-      const response = await fetch(`${apiBaseUrl}/login`, {
+      const response = await fetch(`${apiBaseUrl}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,16 +62,16 @@ class AuthService {
         try {
           const data = JSON.parse(responseText);
           console.log("📨 Parsed login response:", data);
-          
+
           // Check if the actual login succeeded
           if (data.result && data.result.succeeded) {
             console.log("✅ Login successful!");
             return { success: true, message: "Login successful" };
           } else {
             console.log("❌ Login failed - invalid credentials");
-            return { 
-              success: false, 
-              message: data.message || "Invalid email or password" 
+            return {
+              success: false,
+              message: data.message || "Invalid email or password"
             };
           }
         } catch (parseError) {
