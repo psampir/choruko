@@ -96,6 +96,15 @@
       margin-top: 10px;
     }
 
+    .login__notice {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.875rem;
+      color: #555555;
+      line-height: 1.4;
+      width: 80%;
+    }
+
     .login__form {
       display: flex;
       flex-direction: column;
