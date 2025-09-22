@@ -11,12 +11,14 @@ import defineActivity from "../../../assets/svg/activities.svg";
 import delegateAdmin from "../../../assets/svg/star-emty.svg";
 import addParticipants from "../../../assets/svg/profile-icon-light.svg";
 import deleteHousehold from "../../../assets/svg/trash-bin.svg";
+import decline from "../../../assets/svg/decline.svg"
 
 const buttonActions = {
   defineActivity: "define_activity",
   delegateAdmin: "delegate_admin",
   addParticipants: "add_participants",
   deleteHousehold: "delete_household",
+  deleteParticipant: "delete_participant",
 } as const;
 
 type ButtonAction = (typeof buttonActions)[keyof typeof buttonActions];
@@ -114,8 +116,8 @@ const ManageHousehold: React.FC = () => {
     setClickedButton(action);
     if (action !== "define_activity") {
       setOpenPopup(true);
-    }else{
-      navigate('/activities')
+    } else {
+      navigate("/activities");
     }
     console.log(
       "Button clicked:",
@@ -136,6 +138,13 @@ const ManageHousehold: React.FC = () => {
       });
     event.currentTarget.classList.add("admin-choose");
   };
+
+  // const handleParticipantClick = (
+  //   e: React.MouseEvent<HTMLDivElement>,
+  //   participant: (typeof mockParticipants)[0]
+  // ) => {
+  //   setOpenPopup(true)
+  // };
 
   return (
     <div className="manage-household">
@@ -221,12 +230,17 @@ const ManageHousehold: React.FC = () => {
               className="participant"
               key={participant.id}
               id={String(index)}
+              // onClick={(e) => handleParticipantClick(e, participant)}
             >
-              <img
-                src={participant.avatar ? participant.avatar : profileImage}
-                alt=""
-              />
-              <p>{participant.name}</p>
+              <span>
+                <img
+                  src={participant.avatar ? participant.avatar : profileImage}
+                  alt="Profile icon"
+                />
+                <p>{participant.name}</p>
+              </span>
+
+              <img src={decline} alt="Delete member" className="delete-member" onClick={()=>{setOpenPopup(true)}}/>
             </div>
           ))}
         </div>
@@ -264,15 +278,16 @@ const ManageHousehold: React.FC = () => {
                   ))}
                 </div>
               )}
-              <Button variant="primary">Delegate</Button>
+              <Button variant="primary" onClick={()=>setOpenPopup(false)}>Delegate</Button>
             </>
           )}
           {clickedButton === buttonActions.addParticipants && (
             <>
-              <p>Do you want to invite new participants to this household?</p>
+              <p>Add Participant</p>
               <Input
                 variant="primary"
                 type="email"
+                placeholder="Email"
                 style={{ marginBottom: "var(--spacing-lg)" }}
               />
               <Button variant="primary">Send Invitations</Button>
