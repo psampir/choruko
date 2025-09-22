@@ -5,7 +5,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   variant?: "primary" | "password" | "email" | "edit";
   className?: string;
   children?: React.ReactNode;
-  onEditClick?: () => void; // Add callback for edit functionality
+  onEditClick?: () => void;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -15,34 +15,37 @@ const Input: React.FC<InputProps> = ({
   onEditClick,
   ...props
 }) => {
-  const variantClass = variant ? `input--${variant}` : "";
+  // Detect password either by variant or incoming type for convenience
+  const isPassword = variant === "password" || props.type === "password";
+
+  // Prevent incoming type from overriding our controlled type
+  const { type: _ignoredType, ...restProps } = props;
+
+  const variantClass = isPassword ? "input--password" : variant ? `input--${variant}` : "";
+
   const [showPassword, setShowPassword] = useState(false);
 
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
+  const toggleShowPassword = () => setShowPassword((v) => !v);
 
   const handleEditClick = () => {
-    if (onEditClick) {
-      onEditClick();
-    }
+    if (onEditClick) onEditClick();
   };
 
   return (
     <>
-      {variant === "password" ? (
+      {isPassword ? (
         <div className="input__wrapper">
           <input
+            {...restProps}
             type={showPassword ? "text" : "password"}
-            className={`input ${variantClass} ${className} ${
-              showPassword ? " active" : ""
-            }`}
-            {...props}
+            className={`input ${variantClass} ${className}${showPassword ? " active" : ""}`}
           />
           <span
             className="input__eye"
             onClick={toggleShowPassword}
-            aria-label="Show/Hide password"
+            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggleShowPassword()}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
             tabIndex={0}
             role="button"
           />
@@ -50,7 +53,7 @@ const Input: React.FC<InputProps> = ({
         </div>
       ) : variant === "edit" ? (
         <div className="input__wrapper">
-          <input className={`input ${variantClass} ${className}`} {...props} />
+          <input className={`input ${variantClass} ${className}`} {...restProps} />
           <span
             className="input__pencil"
             onClick={handleEditClick}
@@ -61,9 +64,10 @@ const Input: React.FC<InputProps> = ({
           {children}
         </div>
       ) : (
-        <input className={`input ${variantClass} ${className}`} {...props}>
+        <>
+          <input className={`input ${variantClass} ${className}`} {...restProps} />
           {children}
-        </input>
+        </>
       )}
     </>
   );
