@@ -54,12 +54,50 @@ const Activities: React.FC = () => {
       info: "Mow the lawn",
       points: "80",
     },
+    {
+      id: 4,
+      info: "Throw out the trash",
+      points: "15",
+    },
+    {
+      id: 5,
+      info: "Clean the room",
+      points: "50",
+    },
+    {
+      id: 6,
+      info: "Wash clothes",
+      points: "35",
+    },
+    {
+      id: 7,
+      info: "Mow the lawn",
+      points: "80",
+    },
+    {
+      id: 4,
+      info: "Throw out the trash",
+      points: "15",
+    },
+    {
+      id: 5,
+      info: "Clean the room",
+      points: "50",
+    },
+    {
+      id: 6,
+      info: "Wash clothes",
+      points: "35",
+    },
+    {
+      id: 7,
+      info: "Mow the lawn",
+      points: "80",
+    },
   ]);
 
   const [openPopup, setOpenPopup] = useState<Boolean>(false);
   const [nameValue, setNameValue] = useState<string>("Poznańska");
-  const [profileImage, setProfileImage] = useState<string>(householdDefaulIcon);
-  const [clickedButton, setClickedButton] = useState();
   const [editActivityName, setEditActivityName] = useState("");
   const [editActivityPoints, setEditActivityPoints] = useState("");
   const [editingActivityId, setEditingActivityId] = useState<number | null>(
@@ -95,35 +133,6 @@ const Activities: React.FC = () => {
     setOpenPopup(true);
   };
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setProfileImage(result);
-        showNotification("Profile picture updated");
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const triggerFileInput = () => {
-    document.getElementById("profile-image-input")?.click();
-  };
-
-  const handleDelegateAdmin = (event: React.MouseEvent<HTMLDivElement>) => {
-    const participantsListInPopup =
-      event.currentTarget.closest(".participants-list");
-
-    participantsListInPopup
-      ?.querySelectorAll(".participant__delegate-admin")
-      .forEach((element) => {
-        element.classList.remove("admin-choose");
-      });
-    event.currentTarget.classList.add("admin-choose");
-  };
-
   const saveActivityData = () => {
     if (editingActivityId !== null) {
       // Update the specific activity in the activities array
@@ -140,6 +149,21 @@ const Activities: React.FC = () => {
       );
 
       showNotification("Activity updated successfully!");
+      setOpenPopup(false);
+      setEditingActivityId(null);
+      setEditActivityName("");
+      setEditActivityPoints("");
+    }
+  };
+
+  const deleteActivityData = () => {
+    if (editingActivityId !== null) {
+      // Remove the activity from the activities array
+      setActivities((prevActivities) =>
+        prevActivities.filter((activity) => activity.id !== editingActivityId)
+      );
+
+      showNotification("Activity deleted successfully!");
       setOpenPopup(false);
       setEditingActivityId(null);
       setEditActivityName("");
@@ -165,7 +189,6 @@ const Activities: React.FC = () => {
 
       <h1 className="manage-household__title">Activities</h1>
 
-      <div className="manage-household__main-section"></div>
       {activities && (
         <div className="participants-list">
           <div className="participants-list__header">ACTIVITIES</div>
@@ -176,7 +199,10 @@ const Activities: React.FC = () => {
               id={String(activity.id)}
             >
               <div className="activity-data">
-                <span className="points"><img src={star} alt=""/>{activity.points}</span>
+                <span className="points">
+                  <img src={star} alt="" />
+                  {activity.points}
+                </span>
                 <p>{activity.info}</p>
               </div>
               <img
@@ -210,7 +236,9 @@ const Activities: React.FC = () => {
             placeholder="Points"
           />
           <div className="button__edit-activity">
-            <Button variant="red">Delete</Button>
+            <Button variant="red" onClick={deleteActivityData}>
+              Delete
+            </Button>
             <Button variant="primary" onClick={saveActivityData}>
               Save
             </Button>
