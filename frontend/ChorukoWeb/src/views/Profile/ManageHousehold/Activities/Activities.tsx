@@ -21,7 +21,7 @@ const Activities: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([
     {
       id: 1,
-      info: "Vacuming the floor",
+      info: "Vacuuming the floor",
       points: "62",
     },
     {
