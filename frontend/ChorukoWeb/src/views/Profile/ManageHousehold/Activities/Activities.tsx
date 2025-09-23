@@ -96,7 +96,7 @@ const Activities: React.FC = () => {
     },
   ]);
 
-  const [openPopup, setOpenPopup] = useState<Boolean>(false);
+  const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("Poznańska");
   const [editActivityName, setEditActivityName] = useState("");
   const [editActivityPoints, setEditActivityPoints] = useState("");
