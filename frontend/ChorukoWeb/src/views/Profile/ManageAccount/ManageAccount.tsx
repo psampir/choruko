@@ -9,7 +9,7 @@ import arrowLeft from "../../../assets/svg/arrow-left.svg";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
-  const [openPopup, setOpenPopup] = useState<Boolean>(false);
+  const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("Vin Diesel");
   const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
 
