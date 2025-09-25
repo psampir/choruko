@@ -146,6 +146,7 @@ const NavbarMobile = () => {
           variant="red"
           onClose={() => setOpenPopup(false)}
           className="popup__leave-household"
+          title=""
         >
           <p>Are you sure you want to leave this household?</p>
           <img src={householdDefaulIcon} alt="Household Image" />

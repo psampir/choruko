@@ -37,7 +37,7 @@ const mockParticipants = [
   {
     id: 3,
     name: "Gabbie Mayers",
-    avatar: "/src/assets/svg/profile-icon.svg",
+    avatar: "/src/assets/svg/profile-icon.svg",  
   },
   {
     id: 4,
@@ -138,13 +138,6 @@ const ManageHousehold: React.FC = () => {
       });
     event.currentTarget.classList.add("admin-choose");
   };
-
-  // const handleParticipantClick = (
-  //   e: React.MouseEvent<HTMLDivElement>,
-  //   participant: (typeof mockParticipants)[0]
-  // ) => {
-  //   setOpenPopup(true)
-  // };
 
   return (
     <div className="manage-household">

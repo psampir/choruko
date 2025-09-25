@@ -7,7 +7,6 @@
   color: var(--color-error, #ff4444);
   background-color: var(--color-error-bg, #fff5f5);
   border: 1px solid var(--color-error, #ff4444);
-  border-radius: 8px;
   font-size: 14px;
   line-height: 1.4;
 
@@ -66,6 +65,7 @@
       align-items: center;
       justify-content: center;
       height: 100%;
+      color: var(--color-background);
     }
 
     .error-message__close {

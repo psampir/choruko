@@ -37,15 +37,6 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
   return (
     <div className={`error-message ${baseClass} ${className}`}>
       <span className="error-message__text">{message}</span>
-      {onClose && (
-        <button
-          className="error-message__close"
-          onClick={onClose}
-          aria-label="Close error message"
-        >
-          ×
-        </button>
-      )}
     </div>
   );
 };
