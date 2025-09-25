@@ -11,15 +11,6 @@
   width: 100%;
   touch-action: pan-y;
 
-  .error-message {
-    color: var(--color-error, #ff4444);
-    background-color: var(--color-error-bg, #fff5f5);
-    border: 1px solid var(--color-error, #ff4444);
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 14px;
-  }
-
   &__popup-container {
     display: none;
   }
@@ -145,7 +136,6 @@
     color: var(--color-error, #ff4444);
     background-color: var(--color-error-bg, #fff5f5);
     border: 1px solid var(--color-error, #ff4444);
-    border-radius: 8px;
     padding: 12px;
     font-size: 14px;
     width: 100%;
