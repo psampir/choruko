@@ -21,7 +21,7 @@ const Activities: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([
     {
       id: 1,
-      info: "Vacuming the floor",
+      info: "Vacuuming the floor",
       points: "62",
     },
     {
@@ -96,7 +96,7 @@ const Activities: React.FC = () => {
     },
   ]);
 
-  const [openPopup, setOpenPopup] = useState<Boolean>(false);
+  const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("Poznańska");
   const [editActivityName, setEditActivityName] = useState("");
   const [editActivityPoints, setEditActivityPoints] = useState("");

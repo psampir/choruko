@@ -21,7 +21,7 @@ const NavbarMobile = () => {
   const { logout } = useAuth();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
-  const [openPopup, setOpenPopup] = useState<Boolean>(false);
+  const [openPopup, setOpenPopup] = useState<boolean>(false);
 
   const dropdownToggle = () => {
     setDropdownOpen(!isDropdownOpen);

@@ -68,7 +68,7 @@ const mockParticipants = [
 
 const ManageHousehold: React.FC = () => {
   const navigate = useNavigate();
-  const [openPopup, setOpenPopup] = useState<Boolean>(false);
+  const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("Poznańska");
   const [profileImage, setProfileImage] = useState<string>(householdDefaulIcon);
   const [clickedButton, setClickedButton] = useState<ButtonAction | null>(null);
