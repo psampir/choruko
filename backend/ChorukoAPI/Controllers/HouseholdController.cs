@@ -64,4 +64,94 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         return result.ToApiResponse();
     }
+    
+    [HttpDelete("delete")]
+    [Authorize(Roles="HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteHousehold()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.DeleteHouseholdAsync(userId);
+
+        return result.ToApiResponse();
+    }
+    
+    [HttpPatch("rename")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> RenameHousehold([FromBody] RenameHouseholdRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.RenameHouseholdAsync(userId, request.NewName);
+
+        return result.ToApiResponse();
+    }
+    
+    [HttpPost("leave")]
+    [Authorize(Roles = "HouseholdAdmin,Participant")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> LeaveHousehold()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.LeaveHouseholdAsync(userId);
+
+        return result.ToApiResponse();
+    }
+    
+    [HttpPatch("change-picture")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> ChangeHouseholdPicture([FromForm] ChangeHouseholdPictureRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.ChangeHouseholdPictureAsync(request, userId);
+
+        return result.ToApiResponse();
+    }
+    
+    [HttpPatch("{newAdminId}/set-admin")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> SetHouseholdAdmin(string newAdminId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+        
+        var result = await _householdService.SetHouseholdAdminAsync(userId, newAdminId);
+
+        return result.ToApiResponse();
+    }
 }
