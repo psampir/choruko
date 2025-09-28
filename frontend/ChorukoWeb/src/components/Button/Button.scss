@@ -1,3 +1,5 @@
+@use "../../styles/variables";
+
 // Button styles for the reusable Button component
 // Base button styles - shared by all button variants
 .button {
@@ -5,14 +7,17 @@
   border-radius: 10px;
   cursor: pointer;
   text-align: center;
+  font-family: var(--font-family-base);
+  transition: var(--transition-fast);
 
   // Primary button variant
   &--primary {
     background-color: #55ad9b;
-    color: #f1f8e8;
+    color: var(--color-background);
     width: 170px;
     height: 46px;
-    font-size: 1.25rem;
+    font-size: var(--font-size-h5);
+    font-weight: var(--font-weight-medium);
   }
 
   // Red button variant

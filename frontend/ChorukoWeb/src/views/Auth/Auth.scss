@@ -1,3 +1,5 @@
+@use "../../styles/variables";
+
 .login {
   display: flex;
   flex-direction: column;
@@ -21,7 +23,7 @@
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: var(--z-navbar);
 
     .login__popup {
       position: absolute;
@@ -29,14 +31,14 @@
       left: 50%;
       transform: translate(-50%, -50%);
       background-color: #e0f3db;
-      border-radius: 8px;
+      border-radius: var(--border-radius-sm);
       width: 90%;
       height: 25%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 0;
+      padding: var(--spacing-2xl) 0;
 
       .login__close-icon {
         position: absolute;
@@ -101,7 +103,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 40px;
+      margin: 40px 0 20px 0;
+      gap: 16px;
 
       .login__input-container {
         display: flex;
@@ -127,5 +130,15 @@
       margin: 75px 0 16px;
       font-size: 0.875rem;
     }
+  }
+
+  &__error {
+    color: var(--color-error, #ff4444);
+    background-color: var(--color-error-bg, #fff5f5);
+    border: 1px solid var(--color-error, #ff4444);
+    padding: 12px;
+    font-size: 14px;
+    width: 100%;
+    text-align: center;
   }
 }

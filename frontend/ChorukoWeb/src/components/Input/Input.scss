@@ -1,6 +1,10 @@
+@use "../../styles/variables";
+
 // Input styles for the reusable Input component
 // Base input styles - shared by all input variants
 .input {
+  font-family: var(--font-family-base);
+
   // Primary input variant
   &--primary {
     width: 288px;
@@ -10,7 +14,9 @@
     border-radius: 10px;
     cursor: text;
     padding-left: 10px;
-    font-size: 1rem;
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+    transition: var(--transition-fast);
 
     &:focus {
       outline: none;
@@ -18,7 +24,7 @@
 
     &::placeholder {
       color: #55ad9b;
-      font-size: 1rem;
+      font-size: var(--font-size-body);
       opacity: 1;
     }
 
@@ -28,7 +34,7 @@
     &:-webkit-autofill:focus,
     &:-webkit-autofill:active {
       -webkit-box-shadow: 0 0 0 30px #d8efd3 inset !important;
-      -webkit-text-fill-color: #021207 !important;
+      -webkit-text-fill-color: var(--color-text-primary) !important;
       transition: background-color 5000s ease-in-out 0s;
     }
 
@@ -36,7 +42,7 @@
     &:-moz-autofill {
       background-color: #d8efd3 !important;
       border: 2px solid #55ad9b !important;
-      color: #021207 !important;
+      color: var(--color-text-primary) !important;
     }
 
     // Generic autofill (fallback)
@@ -65,7 +71,8 @@
     position: relative;
     display: inline-block;
 
-    .input__eye, .input__pencil {
+    .input__eye,
+    .input__pencil {
       position: absolute;
       right: 16px;
       top: 50%;
@@ -105,9 +112,9 @@
       }
     }
 
-     .input__pencil {
-        background: url("/src/assets/svg/pencil.svg") no-repeat center;
-      }
+    .input__pencil {
+      background: url("/src/assets/svg/pencil.svg") no-repeat center;
+    }
 
     // When password is visible, show closed eye
     .input--password.active + .input__eye {
