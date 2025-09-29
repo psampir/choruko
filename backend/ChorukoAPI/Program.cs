@@ -104,6 +104,8 @@ builder.Services.AddScoped<IHouseholdTaskService, HouseholdTaskService>();
 
 builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
 
+builder.Services.AddScoped<ISettlementService, SettlementService>();
+
 builder.Services.AddControllers();
 
 const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
