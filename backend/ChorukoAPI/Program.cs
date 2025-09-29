@@ -115,6 +115,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
 builder.Services.AddScoped<IMapper<UserPasswordResetData, AdminResetPasswordResponse>, AdminResetPasswordMapper>();
 
+builder.Services.AddScoped<ISettlementService, SettlementService>();
+
 builder.Services.AddControllers();
 
 const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
