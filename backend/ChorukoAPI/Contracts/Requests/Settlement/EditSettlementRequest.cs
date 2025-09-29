@@ -7,4 +7,8 @@ public class EditSettlementRequest
     [Required(ErrorMessage = "Settlement description is required.")]
     [StringLength(200, MinimumLength = 2, ErrorMessage = "Description must be between 2 and 200 characters.")]
     public string Description { get; set; }
+
+    public List<string>? UnsettledUsers { get; set; }
+
+    public List<string>? SettledUsers { get; set; }
 }
