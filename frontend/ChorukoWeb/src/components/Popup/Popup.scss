@@ -1,3 +1,5 @@
+@use "../../styles/variables";
+
 // Popup styles for the reusable Popup component
 // Base popup styles - shared by all popup variants
 .popup-container {
@@ -13,7 +15,7 @@
 
   &.active {
     display: flex;
-    z-index: 1002;
+    z-index: var(--z-modal);
   }
 
   .popup {
@@ -21,8 +23,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #021207;
-    border-radius: 8px;
+    color: var(--color-text-primary);
+    border-radius: var(--border-radius-sm);
     width: 90%;
     min-height: 120px;
     max-height: 80vh;
@@ -30,27 +32,157 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 20px 0;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-2xl) 0;
     overflow-y: auto;
+    font-family: var(--font-family-base);
+    box-shadow: 0 4px 20px var(--color-shadow);
 
     // Primary popup variant
     &--primary {
-      background-color: #e0f3db;
+      background-color: var(--color-background-secondary);
     }
 
     &--red {
       background-color: #ffb9b9;
     }
 
+    .popup-title {
+      font-size: var(--font-size-h4);
+      font-weight: var(--font-weight-medium);
+      text-align: center;
+      margin: 0;
+      padding: 0 var(--spacing-2xl);
+      line-height: 1.4;
+    }
+
     .close-icon {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 24px;
-      height: 24px;
-      background: url("../../assets/svg/close-icon.svg") no-repeat center/contain;
+      top: var(--spacing-md);
+      right: var(--spacing-md);
+      width: var(--spacing-3xl);
+      height: var(--spacing-3xl);
+      background: url("../../assets/svg/close-icon.svg") no-repeat
+        center/contain;
       cursor: pointer;
+      transition: var(--transition-fast);
+      border-radius: var(--border-radius-sm);
+    }
+
+    .popup-content {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+
+      flex: 1;
+      width: 100%;
+      padding: 0 var(--spacing-2xl);
+      text-align: center;
+
+      p {
+        margin: 0 0 var(--spacing-lg) 0;
+        line-height: 1.5;
+        font-size: var(--font-size-body);
+        color: var(--color-text-primary);
+      }
+    }
+
+    .popup-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-2xl);
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: var(--spacing-lg);
+    }
+
+    .popup-button {
+      padding: var(--spacing-md) var(--spacing-3xl);
+      border: none;
+      border-radius: var(--border-radius-sm);
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-semibold);
+      font-family: var(--font-family-base);
+      cursor: pointer;
+      transition: var(--transition-normal);
+      min-width: 120px;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      &--primary {
+        background-color: var(--color-secondary);
+        color: var(--color-white);
+
+        &:hover:not(:disabled) {
+          background-color: var(--color-primary);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(85, 173, 155, 0.3);
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(0);
+          box-shadow: 0 2px 6px rgba(85, 173, 155, 0.3);
+        }
+      }
+
+      &--secondary {
+        background-color: transparent;
+        color: var(--color-secondary);
+        border: 2px solid var(--color-secondary);
+
+        &:hover:not(:disabled) {
+          background-color: var(--color-secondary);
+          color: var(--color-white);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(85, 173, 155, 0.2);
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(0);
+          box-shadow: 0 2px 6px rgba(85, 173, 155, 0.2);
+        }
+      }
+
+      &--danger {
+        background-color: #ff4444;
+        color: var(--color-white);
+
+        &:hover:not(:disabled) {
+          background-color: #ff3333;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(0);
+          box-shadow: 0 2px 6px rgba(255, 68, 68, 0.3);
+        }
+      }
+    }
+  }
+}
+
+// Responsive design for smaller screens
+@media (max-width: 480px) {
+  .popup-container .popup {
+
+    .popup-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .popup-button {
+      width: 100%;
+      max-width: 200px;
+    }
+
+    .popup-title {
+      font-size: var(--font-size-h5);
+      padding: 0 var(--spacing-lg);
     }
   }
 }

@@ -7,6 +7,8 @@
   -webkit-overflow-scrolling: touch;
   height: 100%;
   width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
   touch-action: pan-y;
 
   &__title {
@@ -19,15 +21,19 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    max-width: 300px;
     gap: 45px;
     padding-top: 85px;
   }
 }
 
 .join-or-create-household button {
-  width: 200px;
+  width: 100%;
+  max-width: 200px;
+  min-width: 170px;
   height: 48px;
-  :hover {
+  
+  &:hover {
     outline: none;
   }
 }
