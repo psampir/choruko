@@ -55,7 +55,7 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
         {
-            return ServiceResponseFactory.Error(SignInResult.Failed, "User not found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error(SignInResult.Failed, "User not found", HttpStatusCode.NotFound);
         }
 
         var result = await _signInManager.PasswordSignInAsync(
@@ -63,10 +63,10 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         
         if (!result.Succeeded)
         {
-            return ServiceResponseFactory.Error(result, "Login unsuccessful. Please check your password and try again.", HttpStatusCode.Unauthorized);
+            return ServiceResponseFactory.Error(result, "Login unsuccessful");
         }
 
-        return ServiceResponseFactory.Success(result, "Login successful.");
+        return ServiceResponseFactory.Success(result, "Login successful");
     }
 
     public async Task<ServiceResponse<OperationResultDto>> LogoutUserAsync()
@@ -96,8 +96,20 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
 
         return ServiceResponseFactory.Success(
             result,
-            "User has been successfully logged out.",
+            "User has been successfully logged out",
             HttpStatusCode.OK
         );
+    }
+
+    public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
+    {
+        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error(new UserInfoResponse("","", "", ""), "User not found");
+        }
+
+        return ServiceResponseFactory.Success(new UserInfoResponse(user.Id, user.FirstName, user.LastName, user.Email));
     }
 }
