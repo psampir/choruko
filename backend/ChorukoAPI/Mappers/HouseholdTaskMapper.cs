@@ -22,7 +22,7 @@ namespace ChorukoAPI.Mappers
                     PointsAwarded = source.Activity.PointsAwarded,
                 },
                 CreatorId = source.CreatorId,
-                Creator = new UserInfoResponse(source.Creator.FirstName, source.Creator.LastName, source.Creator.Email),
+                Creator = new UserInfoResponse(source.Creator.Id, source.Creator.FirstName, source.Creator.LastName, source.Creator.Email),
                 CreationDate = source.CreationDate,
                 DeadLine = source.DeadLine,
                 Status = source.Status,
@@ -31,6 +31,7 @@ namespace ChorukoAPI.Mappers
                 Name = source.Name,
                 Description = source.Description,
                 Assignees = source.Assignees?.Select(user => new UserInfoResponse(
+                    user.Id,
                     user.FirstName,
                     user.LastName,
                     user.Email

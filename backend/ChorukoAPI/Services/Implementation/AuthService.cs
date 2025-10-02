@@ -107,9 +107,9 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new UserInfoResponse("", "", ""), "User not found");
+            return ServiceResponseFactory.Error(new UserInfoResponse("","", "", ""), "User not found");
         }
 
-        return ServiceResponseFactory.Success(new UserInfoResponse(user.FirstName, user.LastName, user.Email));
+        return ServiceResponseFactory.Success(new UserInfoResponse(user.Id, user.FirstName, user.LastName, user.Email));
     }
 }
