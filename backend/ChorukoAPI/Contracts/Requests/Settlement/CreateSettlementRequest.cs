@@ -8,5 +8,7 @@ public class CreateSettlementRequest
     [StringLength(200, MinimumLength = 2, ErrorMessage = "Description must be between 2 and 200 characters.")]
     public string Description { get; set; }
 
+    public decimal Amount { get; set; }
+
     public List<string>? UnsettledUsers { get; set; }
 }
