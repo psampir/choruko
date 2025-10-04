@@ -26,14 +26,14 @@ function Invitations() {
   } | null>(null);
 
   // Function to add a new invitation (kept for future use)
-  const addInvitation = () => {
-    const invitation = {
-      id: Date.now() + Math.random(), // Better unique ID
-      name: "New Invitation",
-      image: householdDefault,
-    };
-    setInvitations((prev) => [...prev, invitation]);
-  };
+  // const addInvitation = () => {
+  //   const invitation = {
+  //     id: Date.now() + Math.random(), // Better unique ID
+  //     name: "New Invitation",
+  //     image: householdDefault,
+  //   };
+  //   setInvitations((prev) => [...prev, invitation]);
+  // };
 
   const acceptInvitation = (invitation: { id: number; name: string }) => {
     setSelectedInvitation(invitation);
