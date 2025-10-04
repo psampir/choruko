@@ -96,23 +96,34 @@ Once you have completed the backend and frontend setup, you can run the applicat
     The API will be available at `http://localhost:5180`.
 
 2. **Frontend:**
-  Open another terminal window and navigate to the `frontend/ChorukoWeb` directory.
 
-    ```bash
-    cd frontend/ChorukoWeb
-    ```
+    **a)** Without PWA features (development mode):
 
-    To start the frontend development server, run the following command:
-  
-    ```bash
-    npm run dev
-    ```
-  
-    The web application will be available at `http://localhost:3000`.
+    Open another terminal window and navigate to the `frontend/ChorukoWeb` directory.
+
+      ```bash
+      cd frontend/ChorukoWeb
+      ```
+
+      To start the frontend development server, run the following command:
+    
+      ```bash
+      npm run dev
+      ```
+    
+      The web application will be available at `http://localhost:3000`.
 
     ---
 
-    In order to test the PWA features, you need to build the production version and serve it locally (PWA requires manifest and service worker generated at build time):
+    **b)** With PWA features (production mode):
+
+    Open another terminal window and navigate to the `frontend/ChorukoWeb` directory.
+
+      ```bash
+      cd frontend/ChorukoWeb
+      ```
+
+    In order to enable PWA, you need to build the production version and serve it locally (PWA requires manifest and service worker generated at build time):
 
     ```bash
     npm run build
@@ -120,6 +131,8 @@ Once you have completed the backend and frontend setup, you can run the applicat
     ```
 
     The PWA will be available at `http://localhost:3000`.
+
+    To test PWA features locally, follow the guide: [Testing PWA Mobile](test-pwa-mobile.md).
 
 ## What's Next?
 Now that you have your development environment set up, you might want to explore the following:
