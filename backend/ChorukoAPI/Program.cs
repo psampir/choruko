@@ -96,6 +96,8 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 
 builder.Services.AddScoped<IActivityService, ActivityService>();
