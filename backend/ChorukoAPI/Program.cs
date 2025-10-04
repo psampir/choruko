@@ -96,6 +96,10 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
+builder.Services.AddScoped<IPasswordGenerator, PasswordGenerator>();
+
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 
 builder.Services.AddScoped<IActivityService, ActivityService>();
@@ -103,6 +107,7 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<IHouseholdTaskService, HouseholdTaskService>();
 
 builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
+builder.Services.AddScoped<IMapper<UserPasswordResetData, AdminResetPasswordResponse>, AdminResetPasswordMapper>();
 
 builder.Services.AddControllers();
 

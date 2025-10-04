@@ -46,8 +46,7 @@
         right: 10px;
         width: 24px;
         height: 24px;
-        background: url("../../assets/svg/close-icon.svg") no-repeat
-          center/contain;
+        background: url("../../assets/svg/close-icon.svg") no-repeat center/contain;
         cursor: pointer;
       }
 
@@ -97,6 +96,15 @@
 
     .login__title {
       margin-top: 10px;
+    }
+
+    .login__notice {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.875rem;
+      color: #555555;
+      line-height: 1.4;
+      width: 80%;
     }
 
     .login__form {
