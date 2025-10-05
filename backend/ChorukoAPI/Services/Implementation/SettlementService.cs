@@ -111,13 +111,120 @@ public class SettlementService(DataContext _context) : ISettlementService
         }
     }
 
-
-    public Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string householdId)
+    public async Task<ServiceResponse<OperationResultDto>> EditSettlement(
+    string settlementId,
+    EditSettlementRequest request)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var settlement = await _context.Settlements
+                .Include(s => s.UnsettledUsers)
+                .Include(s => s.SettledUsers)
+                .Include(s => s.Household)
+                    .ThenInclude(h => h.Participants)
+                .FirstOrDefaultAsync(s => s.Id == settlementId);
+
+            if (settlement is null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(
+                    null,
+                    "Settlement not found",
+                    HttpStatusCode.NotFound
+                );
+            }
+
+            var participants = settlement.Household?.Participants ?? new List<User>();
+
+            HashSet<string>? reqUnsettled = request.UnsettledUsers?.ToHashSet(StringComparer.Ordinal);
+            HashSet<string>? reqSettled = request.SettledUsers?.ToHashSet(StringComparer.Ordinal);
+
+            if (reqUnsettled is not null && reqSettled is not null)
+            {
+                var overlap = reqUnsettled.Intersect(reqSettled).ToList();
+                if (overlap.Count > 0)
+                {
+                    return ServiceResponseFactory.Error<OperationResultDto>(
+                        null,
+                        $"Users duplicated in both Unsettled and Settled: {string.Join(", ", overlap)}",
+                        HttpStatusCode.BadRequest
+                    );
+                }
+            }
+
+            HashSet<string> targetUnsettled;
+            HashSet<string> targetSettled;
+
+            var participantIds = participants.Select(p => p.Id).ToHashSet(StringComparer.Ordinal);
+
+            if (reqUnsettled is not null && reqSettled is not null)
+            {
+                targetUnsettled = reqUnsettled;
+                targetSettled = reqSettled;
+            }
+            else if (reqUnsettled is not null)
+            {
+                targetUnsettled = reqUnsettled;
+                targetSettled = participantIds.Except(targetUnsettled).ToHashSet(StringComparer.Ordinal);
+            }
+            else if (reqSettled is not null)
+            {
+                targetSettled = reqSettled;
+                targetUnsettled = participantIds.Except(targetSettled).ToHashSet(StringComparer.Ordinal);
+            }
+            else
+            {
+                targetUnsettled = settlement.UnsettledUsers?.Select(u => u.Id).ToHashSet(StringComparer.Ordinal)
+                    ?? new HashSet<string>(StringComparer.Ordinal);
+                targetSettled = settlement.SettledUsers?.Select(u => u.Id).ToHashSet(StringComparer.Ordinal)
+                    ?? new HashSet<string>(StringComparer.Ordinal);
+            }
+
+            var allIds = targetUnsettled.Concat(targetSettled).ToHashSet(StringComparer.Ordinal);
+            var invalid = allIds.Except(participantIds).ToList();
+            if (invalid.Count > 0)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(
+                    null,
+                    $"Some users are not participants of the household: {string.Join(", ", invalid)}",
+                    HttpStatusCode.BadRequest
+                );
+            }
+
+            var newUnsettled = participants.Where(p => targetUnsettled.Contains(p.Id)).ToList();
+            var newSettled = participants.Where(p => targetSettled.Contains(p.Id)).ToList();
+
+            settlement.UnsettledUsers = newUnsettled;
+            settlement.SettledUsers = newSettled;
+
+            settlement.Description = request.Description;
+
+            await _context.SaveChangesAsync();
+
+            var op = new OperationResultDto
+            {
+                Operation = "EditSettlement",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    ["SettlementId"] = settlement.Id,
+                    ["UnsettledCount"] = newUnsettled.Count,
+                    ["SettledCount"] = newSettled.Count
+                }
+            };
+
+            return ServiceResponseFactory.Success(op, "Settlement updated successfully", HttpStatusCode.OK);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null,
+                $"Failed to edit settlement: {ex.Message}",
+                HttpStatusCode.InternalServerError
+            );
+        }
     }
 
-    public Task<ServiceResponse<OperationResultDto>> EditSettlement(string householdId, EditSettlementRequest request)
+    public Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string householdId)
     {
         throw new NotImplementedException();
     }
