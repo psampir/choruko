@@ -23,7 +23,7 @@ public class UserService(UserManager<User> _userManager, IHttpContextAccessor _c
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new UserInfoResponse("", "", ""), "User not found");
+            return ServiceResponseFactory.Error(new UserInfoResponse("", "", ""), "User not found.");
         }
 
         return ServiceResponseFactory.Success(new UserInfoResponse(user.FirstName, user.LastName, user.Email));
@@ -142,7 +142,7 @@ public class UserService(UserManager<User> _userManager, IHttpContextAccessor _c
         }
         catch (Exception ex)
         {
-            return ServiceResponseFactory.Error<string>(null, $"Failed to upload profile picture: {ex.Message}", HttpStatusCode.InternalServerError);
+            return ServiceResponseFactory.Error<string>(null, $"Failed to upload profile picture: {ex.Message}.", HttpStatusCode.InternalServerError);
         }
     }
 
