@@ -63,12 +63,12 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 }
             };
 
-            return ServiceResponseFactory.Success(response, "Task for household was successfully created");
+            return ServiceResponseFactory.Success(response, "Task for household was successfully created.");
 
         }
         catch(Exception ex)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while creating task: {ex.Message}", HttpStatusCode.InternalServerError);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while creating task: {ex.Message}.", HttpStatusCode.InternalServerError);
         }
     }
 
@@ -80,7 +80,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
             if (householdTask == null)
             {
-                return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+                return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
             }
 
             householdTask.ActivityId = request.ActivityId;
@@ -108,11 +108,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 }
             };
 
-            return ServiceResponseFactory.Success(response, "Task for household was successfully edited");
+            return ServiceResponseFactory.Success(response, "Task for household was successfully edited.");
         }
         catch (Exception ex)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while editing task: {ex.Message}", HttpStatusCode.InternalServerError);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while editing task: {ex.Message}.", HttpStatusCode.InternalServerError);
         }
     }
 
@@ -122,7 +122,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         if (householdTasks.Count == 0)
         {
-            return ServiceResponseFactory.Error<List<HouseholdTaskResponse>>(null, $"No tasks were found", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<List<HouseholdTaskResponse>>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
 
         var response = new List<HouseholdTaskResponse>();
@@ -132,7 +132,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             response.Add(await _mapper.Map(householdTask));
         }
 
-        return ServiceResponseFactory.Success(response, "Success");
+        return ServiceResponseFactory.Success(response, "Success.");
     }
 
     public async Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string taskId)
@@ -141,12 +141,12 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         if (householdTask == null)
         {
-            return ServiceResponseFactory.Error<HouseholdTaskResponse>(null, $"No task were found", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<HouseholdTaskResponse>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
 
         var response = await _mapper.Map(householdTask);
 
-        return ServiceResponseFactory.Success(response, "Success");
+        return ServiceResponseFactory.Success(response, "Success.");
     }
 
     public async Task<ServiceResponse<OperationResultDto>> AssignUserToTask(string taskId, string userId)
@@ -156,7 +156,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
         if (householdTask == null)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
 
         if (householdTask.Status == Models.TaskStatus.Assigned)
@@ -182,7 +182,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 }
         };
 
-        return ServiceResponseFactory.Success(response, "User successfully assigned to household task");
+        return ServiceResponseFactory.Success(response, "User successfully assigned to household task.");
     }
 
     public async Task<ServiceResponse<OperationResultDto>> UnAssignUserFromTask(string taskId, string userId)
@@ -192,7 +192,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
         if (householdTask == null)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
 
         if (householdTask.Assignees.Count < 1)
@@ -219,7 +219,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 }
         };
 
-        return ServiceResponseFactory.Success(response, "User successfully unassigned from household task");
+        return ServiceResponseFactory.Success(response, "User successfully unassigned from household task.");
     }
 
     public async Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId)
@@ -227,7 +227,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
         if (householdTask == null)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
 
         householdTask.Status = Models.TaskStatus.Completed;
@@ -244,7 +244,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 }
         };
 
-        return ServiceResponseFactory.Success(response, "Task successfully completed");
+        return ServiceResponseFactory.Success(response, "Task successfully completed.");
     }
 
     public async Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId)
@@ -252,7 +252,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
         if (householdTask == null)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
 
         if (householdTask.Assignees.Count == 0)
@@ -277,7 +277,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 }
         };
 
-        return ServiceResponseFactory.Success(response, "Task successfully uncompleted");
+        return ServiceResponseFactory.Success(response, "Task successfully uncompleted.");
     }
 
     public async Task<ServiceResponse<OperationResultDto>> DeleteHouseholdTask(string taskId)
@@ -285,7 +285,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
         if (householdTask == null)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No task were found", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
 
         _context.HouseholdTasks.Remove(householdTask);
@@ -301,7 +301,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 }
         };
 
-        return ServiceResponseFactory.Success(response, "Activity was successfully created");
+        return ServiceResponseFactory.Success(response, "Activity was successfully created.");
     }
 
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
@@ -310,10 +310,10 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         if (isActivityExist)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist", HttpStatusCode.BadRequest);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist.", HttpStatusCode.BadRequest);
         }
 
-        return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household");
+        return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household.");
     }
 }
 
