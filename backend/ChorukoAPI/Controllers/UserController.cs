@@ -17,6 +17,7 @@ namespace ChorukoAPI.Controllers;
 public class UserController(IUserService _userService) : ControllerBase
 {
     [HttpGet("userInfo")]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<UserInfoResponse>>> GetUserInfo()
     {
         var result = await _userService.GetUserInfoAsync();
@@ -25,6 +26,7 @@ public class UserController(IUserService _userService) : ControllerBase
     }
     
     [HttpPut("change-names")]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> ChangeUserNames([FromBody] ChangeUserNamesRequest request)
     {
         if (!ModelState.IsValid)
@@ -45,6 +47,7 @@ public class UserController(IUserService _userService) : ControllerBase
     
     [HttpPut("change-picture")]
     [Consumes("multipart/form-data")]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> ChangeUserProfilePicture([FromForm] ChangeUserProfilePictureRequest request)
     {
         if (!ModelState.IsValid)
