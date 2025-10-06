@@ -1,8 +1,7 @@
 ﻿using ChorukoAPI.Contracts.Responses.User;
-using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 
-namespace ChorukoAPI.Controllers;
+namespace ChorukoAPI.Mappers;
 
 public class UserInfoMapper : IMapper<User, UserInfoResponse>
 {
