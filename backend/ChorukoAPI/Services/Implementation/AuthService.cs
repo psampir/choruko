@@ -100,16 +100,4 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
             HttpStatusCode.OK
         );
     }
-
-    public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
-    {
-        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
-
-        if (user == null)
-        {
-            return ServiceResponseFactory.Error(new UserInfoResponse("","", "", ""), "User not found");
-        }
-
-        return ServiceResponseFactory.Success(new UserInfoResponse(user.Id, user.FirstName, user.LastName, user.Email));
-    }
 }
