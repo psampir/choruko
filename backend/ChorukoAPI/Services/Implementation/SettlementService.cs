@@ -223,9 +223,28 @@ public class SettlementService(DataContext _context, IMapper<Settlement, Settlem
         }
     }
 
-    public Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string householdId)
+    public async Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string settlementId)
     {
-        throw new NotImplementedException();
+        var settlement = await _context.Settlements.FirstOrDefaultAsync(s => s.Id == settlementId);
+        if (settlement == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "No settlement found", HttpStatusCode.NotFound);
+        }
+
+        _context.Settlements.Remove(settlement);
+        await _context.SaveChangesAsync();
+
+        var response = new OperationResultDto
+        {
+            Operation = "DeleteSettlement",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "Settlement description", settlement.Description}
+            }
+        };
+
+        return ServiceResponseFactory.Success(response, "Settlement was successfully deleted");
     }
 
     public async Task<ServiceResponse<List<SettlementResponse>>> GetAllSettlements(string householdId)
