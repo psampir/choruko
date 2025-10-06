@@ -121,7 +121,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
 
     [HttpDelete("delete/{settlementId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteSettlement([FromRoute] string settlementId, CreateSettlementRequest request)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteSettlement([FromRoute] string settlementId)
     {
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
