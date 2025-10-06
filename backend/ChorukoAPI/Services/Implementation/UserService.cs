@@ -23,10 +23,10 @@ public class UserService(UserManager<User> _userManager, IHttpContextAccessor _c
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new UserInfoResponse("", "", ""), "User not found");
+            return ServiceResponseFactory.Error(new UserInfoResponse("", "", "", ""), "User not found");
         }
 
-        return ServiceResponseFactory.Success(new UserInfoResponse(user.FirstName, user.LastName, user.Email));
+        return ServiceResponseFactory.Success(new UserInfoResponse(user.Id, user.FirstName, user.LastName, user.Email));
     }
 
     public async Task<ServiceResponse<OperationResultDto>> ChangeUserNamesAsync(ChangeUserNamesRequest request, string userId)

@@ -12,7 +12,7 @@ using System.Net;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class SettlementService(DataContext _context) : ISettlementService
+public class SettlementService(DataContext _context, IMapper<Settlement, SettlementResponse> _mapper) : ISettlementService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateSettlement(string householdId, CreateSettlementRequest request, string userId)
     {
@@ -218,8 +218,7 @@ public class SettlementService(DataContext _context) : ISettlementService
         {
             return ServiceResponseFactory.Error<OperationResultDto>(
                 null,
-                $"Failed to edit settlement: {ex.Message}",
-                HttpStatusCode.InternalServerError
+                $"Failed to edit settlement: {ex.Message}"
             );
         }
     }
@@ -229,9 +228,33 @@ public class SettlementService(DataContext _context) : ISettlementService
         throw new NotImplementedException();
     }
 
-    public Task<ServiceResponse<List<SettlementResponse>>> GetAllSettlements(string householdId)
+    public async Task<ServiceResponse<List<SettlementResponse>>> GetAllSettlements(string householdId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var settlements = _context.Settlements.Where(s => s.HouseholdId == householdId).ToList();
+
+            if (settlements.Count == 0)
+            {
+                return ServiceResponseFactory.Success(new List<SettlementResponse>(), "No settlements");
+            }
+
+            var result = new List<SettlementResponse>();
+
+            foreach (var settlement in settlements)
+            {
+                result.Add(await _mapper.Map(settlement));
+            }
+
+            return ServiceResponseFactory.Success(result, "Settlements retrieved successfully");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponseFactory.Error<List<SettlementResponse>>(
+                null,
+                $"Failed to retrieve household settlements: {ex.Message}"
+                );
+        }
     }
 
     public Task<ServiceResponse<SettlementResponse>> GetSettlement(string settlementId)
