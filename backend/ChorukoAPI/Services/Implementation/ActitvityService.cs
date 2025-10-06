@@ -150,7 +150,7 @@ namespace ChorukoAPI.Services.Implementation
                 }
             };
 
-            return ServiceResponseFactory.Success(response, "Activity was successfully created");
+            return ServiceResponseFactory.Success(response, "Activity was successfully deleted");
         }
 
         private ServiceResponse<OperationResultDto> ValidateActivityData(Activity activity)
