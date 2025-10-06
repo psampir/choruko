@@ -1,4 +1,4 @@
-using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Responses.Settlement;
 using ChorukoAPI.Contracts.Responses.Task;
 using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Data;
@@ -89,10 +89,7 @@ builder.Services.ConfigureApplicationCookie(options =>
         context.Response.StatusCode = 403;
         return Task.CompletedTask;
     };
-}); 
-
-builder.Services.Configure<ImageSettings>(
-    builder.Configuration.GetSection(ImageSettings.SectionName));
+});
 
 builder.Services.AddHttpContextAccessor();
 
@@ -114,6 +111,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
 builder.Services.AddScoped<IMapper<UserPasswordResetData, AdminResetPasswordResponse>, AdminResetPasswordMapper>();
+builder.Services.AddScoped<IMapper<User, UserInfoResponse>, UserInfoMapper>();
+builder.Services.AddScoped<IMapper<Settlement, SettlementResponse>, SettlementMapper>();
 
 builder.Services.AddScoped<ISettlementService, SettlementService>();
 
