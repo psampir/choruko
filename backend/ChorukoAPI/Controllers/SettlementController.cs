@@ -34,9 +34,9 @@ public class SettlementController(ISettlementService settlementService) : Contro
         return result.ToCreatedApiResponse();
     }
 
-    [HttpPost("{settlementId}")]
+    [HttpGet("{settlementId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> CreateSettlement([FromRoute] string settlementId)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> GetSettlement([FromRoute] string settlementId)
     {
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
