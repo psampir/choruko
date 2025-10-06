@@ -63,7 +63,7 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         
         if (!result.Succeeded)
         {
-            return ServiceResponseFactory.Error(result, "Login unsuccessful.");
+            return ServiceResponseFactory.Error(result, "Login unsuccessful. Please check your password and try again.", HttpStatusCode.Unauthorized);
         }
 
         return ServiceResponseFactory.Success(result, "Login successful.");
