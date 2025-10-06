@@ -7,6 +7,8 @@ public class SettlementResponse
 {
     public string Id { get; set; }
 
+    public string HoudeholsId { get; set; }
+
     public string CreatorId { get; set; }
 
     public UserInfoResponse Creator { get; set; }
@@ -20,5 +22,5 @@ public class SettlementResponse
     public SettlementStatus Status { get; set; }
 
     public List<UserInfoResponse>? SettledUsers { get; set; }
-    public List<UserInfoResponse>? UnSettledUsers { get; set; }
+    public List<UserInfoResponse>? UnsettledUsers { get; set; }
 }
