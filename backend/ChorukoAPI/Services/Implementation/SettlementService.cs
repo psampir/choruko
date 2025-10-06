@@ -257,9 +257,28 @@ public class SettlementService(DataContext _context, IMapper<Settlement, Settlem
         }
     }
 
-    public Task<ServiceResponse<SettlementResponse>> GetSettlement(string settlementId)
+    public async Task<ServiceResponse<SettlementResponse>> GetSettlement(string settlementId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var settlement = await _context.Settlements.FirstOrDefaultAsync(s => s.Id == settlementId);
+
+            if (settlement == null)
+            {
+                return ServiceResponseFactory.Error<SettlementResponse>(null, "No settlement found", HttpStatusCode.NotFound);
+            }
+
+            var result = await _mapper.Map(settlement);
+
+            return ServiceResponseFactory.Success(result, "Settlement retrieved successfully");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponseFactory.Error<SettlementResponse>(
+                null,
+                $"Failed to retrieve household settlements: {ex.Message}"
+                );
+        }
     }
 
     public Task<ServiceResponse<OperationResultDto>> MarkAsCompleted(string settlementId)
