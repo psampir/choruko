@@ -51,7 +51,7 @@ public class AuthController(IAuthService _authService) : ControllerBase
         return result.ToCreatedApiResponse();
     }
 
-    [HttpPost("logOut")]
+    [HttpPost("logout")]
     [Authorize]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> LogOut()
     {
