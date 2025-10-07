@@ -43,7 +43,7 @@ class AuthService {
   async login(email: string, password: string) {
     try {
       console.log("📡 Sending login request...");
-      const response = await fetch(`${apiBaseUrl}/auth/login`, {
+      const response = await fetch(`${apiBaseUrl}/Auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,7 @@ class AuthService {
   // Check authentication status
   async checkStatus() {
     try {
-      const response = await fetch(`${apiBaseUrl}/userInfo`, {
+      const response = await fetch(`${apiBaseUrl}/User/user-info`, {
         method: "GET",
         credentials: "include",
       });
@@ -110,7 +110,7 @@ class AuthService {
   // Logout user
   async logout() {
     try {
-      const response = await fetch(`${apiBaseUrl}/logOut`, {
+      const response = await fetch(`${apiBaseUrl}/Auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -122,30 +122,6 @@ class AuthService {
       }
     } catch (error) {
       return { success: false };
-    }
-  }
-
-  // Reset password (if you have this endpoint)
-  async resetPassword(email: string) {
-    try {
-      const response = await fetch(`${apiBaseUrl}/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email }),
-      });
-
-      const message = await response.text();
-
-      if (response.ok) {
-        return { success: true, message };
-      } else {
-        return { success: false, message };
-      }
-    } catch (error) {
-      return { success: false, message: "Network error occurred" };
     }
   }
 }

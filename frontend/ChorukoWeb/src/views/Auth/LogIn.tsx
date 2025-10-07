@@ -72,7 +72,7 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
       // Handle network or other errors
       const errorMsg = parseErrorMessage(
         error.message ||
-          "Connection failed. Please check your internet and try again."
+        "Connection failed. Please check your internet and try again."
       );
       setLocalError(errorMsg);
     }
