@@ -106,12 +106,6 @@ jobs:
           source: "./.github/files/docker-compose.yml"
           destination: "/srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}/docker-compose.yml"
 
-      - name: Copy .env file to the server
-        uses: ./.github/actions/ssh_file_send
-        with:
-          source: "./.github/files/${{ steps.vars.outputs.ENVIRONMENT }}.env"
-          destination: "/srv/docker-compose/choruko-${{ steps.vars.outputs.ENVIRONMENT }}/.env"
-
       - name: Stop and remove existing containers
         uses: ./.github/actions/ssh_execute
         with:
