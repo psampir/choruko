@@ -11,8 +11,30 @@ This guide will help you set up your development environment for Choruko.
 - [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Python 3](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
+- [Git LFS](https://git-lfs.github.com/) (for handling PNG images)
 
 ## Getting Started
+
+### Install Git LFS
+
+This project uses Git LFS (Large File Storage) to manage PNG images. You need to install and configure Git LFS before cloning the repository.
+
+1. **Install Git LFS:**
+
+   - **macOS:** `brew install git-lfs`
+   - **Windows:** Download and run the installer from [git-lfs.github.com](https://git-lfs.github.com/)
+   - **Linux (Debian/Ubuntu):** `sudo apt-get install git-lfs`
+   - **Linux (Fedora):** `sudo dnf install git-lfs`
+
+2. **Initialize Git LFS:**
+
+   After installation, run the following command once to set up Git LFS for your user account:
+
+   ```bash
+   git lfs install
+   ```
+
+### Clone the Repository
 
 Clone the repository to your local machine and navigate into the project directory:
 
@@ -20,6 +42,8 @@ Clone the repository to your local machine and navigate into the project directo
 git clone https://github.com/psampir/choruko.git
 cd choruko
 ```
+
+Git LFS will automatically download the PNG images during the clone process. If you cloned the repository before installing Git LFS, run `git lfs pull` to fetch the image files.
 
 ## Backend Setup
 The backend is an ASP.NET Core application.
