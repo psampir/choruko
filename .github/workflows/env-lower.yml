@@ -14,6 +14,10 @@ on:
           - test1
           - test2
         required: true
+      branch:
+        description: 'Branch to build from'
+        type: string
+        required: true
   push:
     branches:
       - dev
@@ -27,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       environment: ${{ steps.set-env.outputs.environment }}
+      branch: ${{ steps.set-branch.outputs.branch }}
     steps:
       - name: Determine environment
         id: set-env
@@ -39,12 +44,23 @@ jobs:
             echo "environment=unknown" >> $GITHUB_OUTPUT
             exit 1 # Fail if environment is unknown
           fi
+      - name: Determine branch
+        id: set-branch
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref_name }}" == "dev" ]; then
+            echo "branch=dev" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "branch=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=unknown" >> $GITHUB_OUTPUT
+            exit 1 # Fail if branch is unknown
+          fi
   
   build:
     needs: prepare
     uses: ./.github/workflows/build.yml
     with:
-      branch: dev
+      branch: ${{ needs.prepare.outputs.branch }}
       release: false
   
   deploy:
