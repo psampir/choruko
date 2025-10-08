@@ -5,7 +5,7 @@ import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import Popup from "../../../../components/Popup";
 
-import householdDefaulIcon from "../../../../assets/svg/householdDefault.svg";
+// import householdDefaultIcon from "../../../../assets/svg/householdDefault.svg";
 import arrowLeft from "../../../../assets/svg/arrow-left.svg";
 import editBox from "../../../../assets/svg/edit-box.svg";
 import star from "../../../../assets/svg/star.svg";
@@ -97,7 +97,7 @@ const Activities: React.FC = () => {
   ]);
 
   const [openPopup, setOpenPopup] = useState<boolean>(false);
-  const [nameValue, setNameValue] = useState<string>("Poznańska");
+  // const [nameValue, setNameValue] = useState<string>("Poznańska");
   const [editActivityName, setEditActivityName] = useState("");
   const [editActivityPoints, setEditActivityPoints] = useState("");
   const [editingActivityId, setEditingActivityId] = useState<number | null>(
@@ -120,11 +120,11 @@ const Activities: React.FC = () => {
     }, 3000);
   };
 
-  const handleNameChange = () => {
-    if (nameValue.trim()) {
-      showNotification("Your name has been changed");
-    }
-  };
+  // const handleNameChange = () => {
+  //   if (nameValue.trim()) {
+  //     showNotification("Your name has been changed");
+  //   }
+  // };
 
   const handleEditClick = (activity: Activity) => {
     setEditActivityName(activity.info);
@@ -140,10 +140,10 @@ const Activities: React.FC = () => {
         prevActivities.map((activity) =>
           activity.id === editingActivityId
             ? {
-                ...activity,
-                info: editActivityName,
-                points: editActivityPoints,
-              }
+              ...activity,
+              info: editActivityName,
+              points: editActivityPoints,
+            }
             : activity
         )
       );
@@ -180,9 +180,8 @@ const Activities: React.FC = () => {
         onClick={() => navigate("/manageHousehold")}
       />
       <div
-        className={`notification-bar ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
+        className={`notification-bar ${notification.isVisible ? "notification-bar--visible" : ""
+          }`}
       >
         <span>{notification.message}</span>
       </div>
