@@ -177,7 +177,7 @@ const Activities: React.FC = () => {
         className="back-arrow"
         src={arrowLeft}
         alt="Back"
-        onClick={() => navigate("/manageHousehold")}
+        onClick={() => navigate(-1)}
       />
       <div
         className={`notification-bar ${notification.isVisible ? "notification-bar--visible" : ""

@@ -62,7 +62,7 @@ const ManageAccount: React.FC = () => {
         className="back-arrow"
         src={arrowLeft}
         alt="Back"
-        onClick={() => navigate("/leaderboard")}
+        onClick={() => navigate(-1)}
       />
       <div
         className={`notification-bar ${
