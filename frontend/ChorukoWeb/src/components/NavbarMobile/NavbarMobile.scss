@@ -1,0 +1,173 @@
+@use "../../styles/variables";
+
+
+
+.navbar-mobile {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .popup-container.active {
+    z-index: 1111;
+  }
+
+  &-container {
+    display: flex;
+    position: fixed;
+    top: 0;
+    justify-content: space-between;
+    align-items: center;
+    height: var(--navbar-height);
+    padding: 10px var(--spacing-2xl);
+    background-color: var(--color-primary);
+    width: 100%;
+    z-index: var(--z-modal);
+
+    .theme-toggle,
+    .profile-icon {
+      user-select: none;
+      cursor: pointer;
+
+      img {
+        width: 46px;
+        height: 46px;
+      }
+    }
+  }
+
+  .theme-dropdown {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 43px;
+    background-color: var(--color-primary);
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    z-index: var(--z-navbar);
+    transform: translate(-50%, 0%) translateY(-200px);
+    opacity: 0;
+    transition: opacity var(--transition-slow),
+      transform var(--transition-transform);
+
+    &.open {
+      transform: translate(-50%, 0%) translateY(0);
+      opacity: 1;
+    }
+
+    .dark-theme-icon,
+    .default-theme-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      cursor: pointer;
+
+      .letter-icon {
+        font-size: 18px;
+        font-weight: bold;
+        color: #55ad9b;
+      }
+    }
+  }
+
+  .profile__popup-container {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+
+    &.active {
+      opacity: 1;
+      z-index: 1002;
+      pointer-events: auto;
+    }
+
+    .profile-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 95%;
+      background-color: #e0f3db;
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 1003;
+      transform: translate(-50%, -50%);
+
+      .profile-popup__close-icon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 24px;
+        height: 24px;
+        background: url("../../assets/svg/close-icon.svg") no-repeat
+          center/contain;
+        cursor: pointer;
+      }
+
+      .profile-popup__icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+      }
+
+      h5,
+      p {
+        margin: 0;
+      }
+
+      p {
+        font-weight: 600;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+
+        li {
+          button {
+            margin-top: 10px;
+            width: 235px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding-right: 5px;
+            text-align: center;
+
+            img {
+              width: 28px;
+              height: 28px;
+              margin: 0 5px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Styles for iOS devices with a notch
+:root.is-notch .navbar-mobile {
+  &-container {
+    padding-top: calc(env(safe-area-inset-top) + 20px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .theme-dropdown {
+    top: calc(88px + env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}

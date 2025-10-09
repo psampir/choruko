@@ -1,0 +1,67 @@
+services:
+  frontend:
+    image: ${FRONTEND_IMAGE}
+    container_name: choruko_${ENVIRONMENT}_frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    networks:
+      - reverse_proxy
+      - default
+  backend:
+    image: ${BACKEND_IMAGE}
+    container_name: choruko_${ENVIRONMENT}_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - app_data:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      database:
+        condition: service_healthy
+      manager:
+        condition: service_healthy
+  manager:
+    image: ${MANAGER_IMAGE}
+    container_name: choruko_${ENVIRONMENT}_manager
+    restart: unless-stopped
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/migrations-complete"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: postgres:17.5-alpine3.22
+    container_name: choruko_${ENVIRONMENT}_database
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  app_data:
+    name: ${APP_DATA_LOCATION}
+  db_data:
+    name: ${DB_DATA_LOCATION}
+
+networks:
+  reverse_proxy:
+    external: true

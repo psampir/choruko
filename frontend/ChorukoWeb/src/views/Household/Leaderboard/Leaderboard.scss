@@ -1,0 +1,352 @@
+@use "../../../styles/variables";
+
+.leaderboard {
+  background: var(--color-background);
+  padding: 0;
+  font-family: var(--font-family-base);
+  overflow-y: auto; /* Allow page scroll if content is too tall */
+}
+
+.leaderboard__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-2xl);
+  padding-top: var(--spacing-2xl);
+
+  .sun-icon {
+    font-size: var(--font-size-h3);
+  }
+
+  .profile-icon img {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-full);
+  }
+}
+
+.household-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-4xl);
+
+  .household-image {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--border-radius-full);
+    background: var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-lg);
+    overflow: hidden;
+
+    img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+    }
+  }
+
+  .household-name {
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--spacing-xs) 0;
+    color: var(--color-black);
+  }
+
+  .leaderboard-text {
+    font-size: var(--font-size-body3);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 2px;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+}
+
+.time-filter {
+  margin: 0 var(--spacing-2xl) var(--spacing-4xl) var(--spacing-2xl);
+  text-align: center;
+  .dropdown__container {
+    background: var(--color-background-secondary);
+    box-shadow: inset 3px 0 0 0 var(--color-secondary), inset -3px 0 0 0 var(--color-secondary); 
+    border-radius: var(--border-radius-standart);
+
+    &--open {
+      border-radius: var(--border-radius-standart) var(--border-radius-standart)
+        0 0;
+    }
+  }
+  .dropdown {
+    position: relative;
+    background: var(--color-secondary);
+    border-radius: var(--border-radius-standart);
+    cursor: pointer;
+    text-align: center;
+
+    &--open {
+      border-radius: var(--border-radius-standart);
+    }
+
+    &__selected {
+      padding: var(--spacing-sm) var(--spacing-2xl);
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-body2);
+      display: flex;
+      align-items: center;
+      position: relative;
+      justify-content: center;
+    }
+
+    &__arrow {
+      position: absolute;
+      right: var(--spacing-lg);
+      transition: var(--transition-normal);
+      color: var(--color-background);
+      font-size: var(--font-size-body3);
+    }
+
+    &__text {
+      flex: 1;
+      text-align: center;
+      color: var(--color-background);
+    }
+
+    &--open .dropdown__arrow {
+      transform: rotate(180deg);
+    }
+
+    &__options {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-white);
+      border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
+      box-shadow: 0 4px 6px var(--color-shadow);
+      z-index: var(--z-dropdown);
+      overflow: hidden; /* Clip rounded corners properly */
+    }
+
+    &__option {
+      background: var(--color-background-secondary);
+      padding: var(--spacing-sm) var(--spacing-2xl);
+      font-weight: var(--font-weight-medium);
+      font-size: var(--font-size-body2);
+      position: relative;
+      cursor: pointer;
+
+      /* Normal borders for left and right sides */
+      border-left: 3px solid var(--color-secondary);
+      border-right: 3px solid var(--color-secondary);
+
+      /* Create 90% width bottom border using pseudo-element */
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        height: 3px;
+        background-color: var(--color-secondary-half-tr);
+      }
+
+      &:last-child::after {
+        display: none;
+      }
+
+      &:last-child {
+        border-radius: 0 0 var(--border-radius-standart)
+          var(--border-radius-standart);
+        border-bottom: 3px solid var(--color-secondary);
+      }
+
+      &--active {
+        background: var(--color-secondary);
+        color: var(--color-background);
+      }
+    }
+  }
+}
+
+.participants {
+  border: 3px solid var(--color-secondary);
+  background: var(--color-background-secondary);
+  margin: 0 var(--spacing-2xl);
+  border-radius: var(--border-radius-md);
+  padding: 0;
+  overflow: hidden;
+  padding: 0 3px;
+
+  --dynamic-participant-height: 60px;
+  --max-visible-participants: 3;
+
+  max-height: calc(
+    var(--dynamic-participant-height) * var(--max-visible-participants)
+  );
+
+
+
+  .scrollable-content {
+    padding: 0 var(--spacing-sm);
+    overflow-y: scroll;
+
+    /* Touch scrolling optimizations */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+
+    /* Prevent bounce scrolling */
+    overscroll-behavior: contain;
+
+    /* Better touch responsiveness */
+    touch-action: pan-y;
+
+      overflow-y: auto;
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 12px;
+    background-color: #f5f5f5;
+  }
+
+  &::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #d62929;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-corner {
+    display: none;
+  }
+
+  /* Firefox - hide track */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-secondary) transparent;
+
+    /* Enhanced scrollbar styling for touch */
+    &::-webkit-scrollbar {
+      width: 8px;
+      background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      margin: 4px 0;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--color-secondary);
+      border-radius: 10px; /* Increased for more visible rounded corners */
+
+      /* Remove border that might interfere with rounded corners */
+      border: none;
+
+      /* Add subtle shadow for depth instead of border */
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+
+      /* Make thumb more visible during touch */
+      min-height: 20px;
+
+      /* Smooth transitions */
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--color-secondary);
+        opacity: 0.8;
+      }
+
+      &:active {
+        background-color: var(--color-secondary);
+        opacity: 1;
+      }
+    }
+
+    /* Firefox scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-secondary) rgba(0, 0, 0, 0.1);
+    .participant {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-md) 0;
+      border-bottom: 1px solid var(--color-overlay-dark);
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        height: 3px;
+        background-color: var(--color-secondary-half-tr);
+      }
+
+      &:last-child::after {
+        display: none;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &__rank {
+        font-size: var(--font-size-h4);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-black);
+        min-width: 35px;
+      }
+
+      &__avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--border-radius-full);
+        margin: 0 var(--spacing-sm);
+        object-fit: cover;
+      }
+
+      &__name {
+        flex: 1;
+        font-size: var(--font-size-body);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-black);
+      }
+
+      &__points {
+        display: flex;
+        align-items: center;
+        background: var(--color-secondary);
+        padding: 3px var(--spacing-md);
+        border-radius: var(--spacing-lg);
+        gap: var(--spacing-xs);
+        width: fit-content;
+        margin-top: 5px;
+
+        .star {
+          width: 16px;
+          height: 16px;
+        }
+
+        .points {
+          font-size: var(--font-size-body);
+          font-weight: var(--font-weight-semibold);
+          color: var(--color-background);
+        }
+      }
+    }
+  }
+}

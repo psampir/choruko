@@ -1,0 +1,65 @@
+@use "../../styles/variables";
+
+// Button styles for the reusable Button component
+// Base button styles - shared by all button variants
+.button {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font-family-base);
+  transition: var(--transition-fast);
+
+  // Primary button variant
+  &--primary {
+    background-color: #55ad9b;
+    color: var(--color-background);
+    width: 170px;
+    height: 46px;
+    font-size: var(--font-size-h5);
+    font-weight: var(--font-weight-medium);
+  }
+
+  // Red button variant
+  &--red {
+    @extend .button--primary;
+    background-color: #ff7285;
+  }
+
+  // Primary popup button variant
+  &--primary-popup {
+    @extend .button--primary;
+    width: 145px;
+    height: 48px;
+  }
+
+  // Red popup button variant
+  &--red-popup {
+    @extend .button--red;
+    width: 145px;
+    height: 48px;
+  }
+
+  // Additional button variant
+  &--additional {
+    width: 135px;
+    height: 30px;
+    background-color: #95d2b3;
+    color: #021207;
+    font-size: 0.875rem;
+  }
+  &--red {
+    background-color: #ff7285;
+    color: #f1f8e8;
+    width: 170px;
+    height: 46px;
+    font-size: 1.25rem;
+  }
+}
+
+// Media query for light theme
+@media (prefers-color-scheme: light) {
+  button {
+    background-color: #f9f9f9;
+  }
+}

@@ -1,0 +1,78 @@
+@use "../../styles/variables";
+
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-error, #ff4444);
+  background-color: var(--color-error-bg, #fff5f5);
+  border: 1px solid var(--color-error, #ff4444);
+  font-size: 14px;
+  line-height: 1.4;
+
+  &__text {
+    flex: 1;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: var(--color-error, #ff4444);
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 12px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(255, 68, 68, 0.1);
+    }
+  }
+
+  // Inline variant (default) - appears within the form flow
+  &--inline {
+    padding: 12px;
+    margin-bottom: 20px;
+    width: 100%;
+    text-align: left;
+  }
+
+  // Overlay variant - fixed at top of screen
+  &--overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    padding: 0 20px;
+    z-index: 9999;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .error-message__text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--color-background);
+    }
+
+    .error-message__close {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+}

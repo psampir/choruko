@@ -1,0 +1,64 @@
+name: choruko
+
+services:
+  frontend:
+    build:
+      context: ../../../
+      dockerfile: docker/Dockerfiles/frontend/Dockerfile
+    container_name: choruko_frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    ports:
+      - "${CHORUKO_PORT:-2467}:80"
+  backend:
+    build:
+      context: ../../../
+      dockerfile: docker/Dockerfiles/backend/Dockerfile
+    container_name: choruko_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ${APP_DATA_LOCATION}:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      database:
+        condition: service_healthy
+      manager:
+        condition: service_healthy
+  manager:
+    build:
+      context: ../../../
+      dockerfile: docker/Dockerfiles/manager/Dockerfile
+    container_name: choruko_mgr
+    restart: unless-stopped
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/migrations-complete"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: postgres:17.5-alpine3.22
+    container_name: choruko_test_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+    volumes:
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

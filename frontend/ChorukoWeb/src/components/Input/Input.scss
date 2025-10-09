@@ -1,0 +1,124 @@
+@use "../../styles/variables";
+
+// Input styles for the reusable Input component
+// Base input styles - shared by all input variants
+.input {
+  font-family: var(--font-family-base);
+
+  // Primary input variant
+  &--primary {
+    width: 288px;
+    height: 42px;
+    border: 2px solid #55ad9b;
+    background-color: #d8efd3;
+    border-radius: 10px;
+    cursor: text;
+    padding-left: 10px;
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+    transition: var(--transition-fast);
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: #55ad9b;
+      font-size: var(--font-size-body);
+      opacity: 1;
+    }
+
+    // Chrome, Safari, Edge
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px #d8efd3 inset !important;
+      -webkit-text-fill-color: var(--color-text-primary) !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    // Firefox
+    &:-moz-autofill {
+      background-color: #d8efd3 !important;
+      border: 2px solid #55ad9b !important;
+      color: var(--color-text-primary) !important;
+    }
+
+    // Generic autofill (fallback)
+    &:autofill {
+      background-color: #d8efd3 !important;
+      border: 2px solid #55ad9b !important;
+      color: #021207 !important;
+    }
+  }
+
+  // Password input variant (inherits from primary)
+  &--password {
+    @extend .input--primary;
+  }
+
+  // Email input variant (inherits from primary)
+  &--email {
+    @extend .input--primary;
+  }
+
+  &--edit {
+    @extend .input--primary;
+  }
+  // Wrapper for password inputs with eye icon
+  &__wrapper {
+    position: relative;
+    display: inline-block;
+
+    .input__eye,
+    .input__pencil {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      background: url("../../assets/svg/eye.svg") no-repeat center/contain;
+      cursor: pointer;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+
+      // Remove any focus styles
+      &:focus {
+        outline: none;
+        background-color: transparent;
+      }
+
+      // Remove active state background
+      &:active {
+        background-color: transparent;
+        outline: none;
+      }
+
+      // Cross-browser transitions
+      -webkit-transition: opacity 0.2s ease;
+      -moz-transition: opacity 0.2s ease;
+      -o-transition: opacity 0.2s ease;
+      transition: opacity 0.2s ease;
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+
+    .input__pencil {
+      background: url("/src/assets/svg/pencil.svg") no-repeat center;
+    }
+
+    // When password is visible, show closed eye
+    .input--password.active + .input__eye {
+      background: url("../../assets/svg/close-eye.svg") no-repeat center/contain;
+    }
+  }
+}

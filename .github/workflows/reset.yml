@@ -1,0 +1,48 @@
+# Resets the Choruko app to a clean state on the specified environment.
+name: Reset App
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to reset'
+        required: true
+        type: choice
+        options:
+          - main
+          - dev
+          - test1
+          - test2
+
+concurrency:
+  group: reset-${{ github.event.inputs.environment || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up SSH
+        uses: ./.github/actions/ssh_setup
+        with:
+          server-ip-address: ${{ secrets.SERVER_IP_ADDRESS }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Stop and remove existing containers with volumes
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ github.event.inputs.environment }}
+            docker compose down -v
+
+      - name: Create and start containers
+        uses: ./.github/actions/ssh_execute
+        with:
+          command: |
+            cd /srv/docker-compose/choruko-${{ github.event.inputs.environment }}
+            docker compose up -d

@@ -1,0 +1,89 @@
+@use "../../styles/variables";
+
+// Basic styles for Tasks page - using your existing style patterns
+.tasks-container {
+  padding: var(--spacing-2xl);
+  min-height: calc(
+    100vh - calc(var(--navbar-height) * 2)
+  ); // Account for both top and bottom navbar
+}
+
+.page-header {
+  margin-bottom: var(--spacing-3xl);
+
+  h1 {
+    font-size: var(--font-size-h3);
+    margin-bottom: var(--spacing-sm);
+    color: #333;
+  }
+
+  p {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-body2);
+  }
+}
+
+.tasks-content {
+  .tasks-section {
+    margin-bottom: var(--spacing-3xl);
+
+    h2 {
+      font-size: var(--font-size-h6);
+      margin-bottom: var(--spacing-xl);
+      color: #333;
+    }
+  }
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-xl);
+  background: #f8f9fa;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid #e9ecef;
+
+  .task-icon {
+    font-size: var(--font-size-h3);
+    margin-right: var(--spacing-md);
+  }
+
+  .task-info {
+    flex: 1;
+
+    h3 {
+      font-size: var(--font-size-body);
+      margin: 0 0 var(--spacing-xs) 0;
+      color: #333;
+    }
+
+    p {
+      font-size: var(--font-size-body2);
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+  }
+
+  .task-status {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: 4px;
+    font-size: var(--font-size-body3);
+    font-weight: var(--font-weight-medium);
+
+    &.pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    &.completed {
+      background: #d4edda;
+      color: #155724;
+    }
+  }
+}
