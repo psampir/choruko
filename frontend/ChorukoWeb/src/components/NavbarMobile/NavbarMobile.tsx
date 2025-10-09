@@ -4,6 +4,7 @@ import Button from "../Button/Button";
 import Popup from "../Popup";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useUser } from "../../contexts/UserContext";
 
 // Import all SVG assets
 import lightThemeIcon from "../../assets/svg/light-theme.svg";
@@ -19,7 +20,8 @@ import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
 const NavbarMobile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, hasHousehold, user } = useAuth();
+  const { logout, hasHousehold } = useAuth();
+  const { user } = useUser();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
