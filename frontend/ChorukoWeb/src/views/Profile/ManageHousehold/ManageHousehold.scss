@@ -1,6 +1,6 @@
 @use "../../../styles/variables";
 
-body{
+body {
   height: fit-content !important;
   overflow-y: auto !important;
 }
@@ -65,6 +65,7 @@ body{
 
   .input__wrapper {
     width: 300px;
+
     input {
       width: 100%;
     }
@@ -95,7 +96,7 @@ body{
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-2xl);
+    gap: var(--spacing-3xl);
   }
 
   &__name-section {
@@ -104,6 +105,7 @@ body{
     align-items: center;
     gap: var(--spacing-md);
     width: 100%;
+    margin-bottom: var(--spacing-2xl);
   }
 
   &__buttons-grid {
@@ -112,7 +114,7 @@ body{
     gap: var(--spacing-lg);
     width: 100%;
     max-width: 420px;
-    margin-top: var(--spacing-xl);
+    margin-top: var(--spacing-2xl);
     display: grid;
     grid-template-columns: repeat(2 1fr);
     grid-template-rows: repeat(2 auto);
@@ -140,6 +142,7 @@ body{
       margin-top: var(--spacing-lg);
     }
   }
+
   .participants-list {
     position: relative;
     width: 100%;
@@ -175,7 +178,7 @@ body{
       object-fit: cover;
 
 
-      span{
+      span {
         display: flex;
         align-items: center;
 
@@ -200,7 +203,8 @@ body{
         display: none;
       }
     }
-    .participant{
+
+    .participant {
       justify-content: space-between;
     }
 
