@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../contexts/AuthContext";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
@@ -9,9 +10,19 @@ import arrowLeft from "../../../assets/svg/arrow-left.svg";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
-  const [nameValue, setNameValue] = useState<string>("Vin Diesel");
+  const [firstNameValue, setFirstNameValue] = useState<string>("");
+  const [lastNameValue, setLastNameValue] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
+
+  // Initialize name values from user data
+  useEffect(() => {
+    if (user) {
+      setFirstNameValue(user.firstName);
+      setLastNameValue(user.lastName);
+    }
+  }, [user]);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -30,7 +41,7 @@ const ManageAccount: React.FC = () => {
   };
 
   const handleNameChange = () => {
-    if (nameValue.trim()) {
+    if (firstNameValue.trim() && lastNameValue.trim()) {
       showNotification("Your name has been changed");
     }
   };
@@ -90,8 +101,15 @@ const ManageAccount: React.FC = () => {
         <div className="manage-account__main-section change-name">
           <Input
             variant="edit"
-            value={nameValue}
-            onChange={(e) => setNameValue(e.target.value)}
+            placeholder="First Name"
+            value={firstNameValue}
+            onChange={(e) => setFirstNameValue(e.target.value)}
+          />
+          <Input
+            variant="edit"
+            placeholder="Last Name"
+            value={lastNameValue}
+            onChange={(e) => setLastNameValue(e.target.value)}
           />
           <Button variant="primary" onClick={handleNameChange}>
             Change Name
@@ -116,7 +134,7 @@ const ManageAccount: React.FC = () => {
         <Popup variant="red" title="" onClose={() => setOpenPopup(false)}>
           <p>Are you sure you want to delete your account?</p>
           <img src={profileImage} alt="Profile Image" />
-          <p>Vin Diesel</p>
+          <p>{user ? `${user.firstName} ${user.lastName}` : `${firstNameValue} ${lastNameValue}`}</p>
           <Button variant="red">Delete</Button>
         </Popup>
       )}
