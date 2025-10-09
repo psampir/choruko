@@ -47,13 +47,6 @@
   }
 }
 
-.input__wrapper {
-  width: 300px;
-  input {
-    width: 100%;
-  }
-}
-
 .manage-account {
   background: var(--color-background);
   padding: var(--spacing-2xl);
@@ -64,6 +57,13 @@
   align-items: center;
   gap: var(--spacing-2xl);
   min-height: 100vh;
+
+  .input__wrapper {
+    width: 300px;
+    input {
+      width: 100%;
+    }
+  }
 
   .popup-container .popup .popup-content p {
     font-size: var(--font-size-h4);
