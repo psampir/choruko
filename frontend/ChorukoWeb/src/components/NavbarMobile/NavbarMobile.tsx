@@ -19,7 +19,7 @@ import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
 const NavbarMobile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, hasHousehold } = useAuth();
+  const { logout, hasHousehold, user } = useAuth();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
@@ -105,7 +105,7 @@ const NavbarMobile = () => {
             alt="Profile"
             className="profile-popup__icon"
           />
-          <h5>Username</h5>
+          <h5>{user ? `${user.firstName} ${user.lastName}` : "Username"}</h5>
           {hasHousehold && <p>Household Name</p>}
           <ul>
             <li>
