@@ -1,0 +1,84 @@
+name: Test Env Pipeline
+
+permissions:
+  contents: read
+  packages: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        type: choice
+        options:
+          - test1
+          - test2
+        required: true
+      branch:
+        description: 'Branch to build from'
+        type: string
+        required: true
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - actions
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+      branch: ${{ steps.set-branch.outputs.branch }}
+    steps:
+      - name: Determine environment
+        id: set-env
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref_name }}" == "dev" ]; then
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          else
+            echo "environment=unknown" >> $GITHUB_OUTPUT
+            exit 1 # Fail if environment is unknown
+          fi
+      - name: Determine branch
+        id: set-branch
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref_name }}" == "dev" ]; then
+            echo "branch=dev" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "branch=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=unknown" >> $GITHUB_OUTPUT
+            exit 1 # Fail if branch is unknown
+          fi
+  
+  build:
+    needs: prepare
+    uses: ./.github/workflows/build.yml
+    with:
+      branch: ${{ needs.prepare.outputs.branch }}
+      release: false
+  
+  deploy:
+    needs: [prepare, build]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      frontend_image: ${{ needs.build.outputs.frontend_image }}
+      backend_image: ${{ needs.build.outputs.backend_image }}
+      manager_image: ${{ needs.build.outputs.manager_image }}
+      environment: ${{ needs.prepare.outputs.environment }}
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SERVER_IP_ADDRESS: ${{ secrets.SERVER_IP_ADDRESS }}
+      CR_PAT: ${{ secrets.CR_PAT }}
+  
+  ghcr_cleanup:
+    needs: deploy
+    uses: ./.github/workflows/ghcr-cleanup.yml
