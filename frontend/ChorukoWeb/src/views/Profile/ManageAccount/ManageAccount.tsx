@@ -45,7 +45,7 @@ const ManageAccount: React.FC = () => {
   const handleNameChange = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!firstNameValue.trim() || !lastNameValue.trim()) {
       showNotification("Please enter both first and last name");
       return;
@@ -56,9 +56,9 @@ const ManageAccount: React.FC = () => {
       const result = await userService.changeNames(firstNameValue, lastNameValue);
 
       if (result.success) {
-        // Refresh user data after successful name change
-        await checkAuth();
         showNotification("Your name has been changed successfully");
+        // Refresh user data in the background without blocking
+        checkAuth(false).catch(err => console.error("Failed to refresh user data:", err));
       } else {
         showNotification(result.message);
       }

@@ -29,7 +29,7 @@ interface AuthContextType {
     userData: RegisterData
   ) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
-  checkAuth: () => Promise<void>;
+  checkAuth: (showLoading?: boolean) => Promise<void>;
   error: string | null;
   clearError: () => void;
 }
@@ -75,9 +75,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Check authentication status
-  const checkAuth = async () => {
+  const checkAuth = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const result = await authService.checkStatus();
 
       if (result.authenticated && result.user) {
@@ -107,16 +107,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log("✅ Login successful, waiting before checking auth...");
         // Wait a moment for the cookie to be set properly
         await new Promise(resolve => setTimeout(resolve, 100));
-        
+
         console.log("🔍 Now checking authentication status...");
         const authResult = await authService.checkStatus();
-        
+
         if (authResult.authenticated && authResult.user) {
           setUser(authResult.user);
-          return { 
-            success: true, 
+          return {
+            success: true,
             message: result.message,
-            hasHousehold: authResult.hasHousehold 
+            hasHousehold: authResult.hasHousehold
           };
         } else {
           return { success: false, message: "Authentication check failed" };
