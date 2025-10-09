@@ -1,5 +1,6 @@
 import Button from "../../components/Button";
 import RaccoonLogo from "../../components/RaccoonLogo";
+import { useAuth } from "../../contexts/AuthContext";
 import "./JoinOrCreateHousehold.scss";
 
 interface LoginProps {
@@ -11,10 +12,13 @@ const JoinOrCreateHousehold: React.FC<LoginProps> = ({
   onJoinHousehold,
   onCreateHousehold,
 }) => {
+  const { user } = useAuth();
+
   return (
     <div className="join-or-create-household">
       <RaccoonLogo />
-      <h1 className="join-or-create-household__title">Choruko</h1>
+      {user && <h1 className="join-or-create-household__title">Welcome, {user?.firstName}!</h1>}
+
       <div className="join-or-create-household__buttons">
         <Button variant="primary" onClick={onJoinHousehold}>
           Join Household
