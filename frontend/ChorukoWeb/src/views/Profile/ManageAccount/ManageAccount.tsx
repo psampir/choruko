@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
+import userService from "../../../services/userService";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
@@ -10,11 +11,12 @@ import arrowLeft from "../../../assets/svg/arrow-left.svg";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, checkAuth } = useAuth();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
+  const [isChangingName, setIsChangingName] = useState<boolean>(false);
 
   // Initialize name values from user data
   useEffect(() => {
@@ -40,9 +42,31 @@ const ManageAccount: React.FC = () => {
     }, 3000);
   };
 
-  const handleNameChange = () => {
-    if (firstNameValue.trim() && lastNameValue.trim()) {
-      showNotification("Your name has been changed");
+  const handleNameChange = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!firstNameValue.trim() || !lastNameValue.trim()) {
+      showNotification("Please enter both first and last name");
+      return;
+    }
+
+    try {
+      setIsChangingName(true);
+      const result = await userService.changeNames(firstNameValue, lastNameValue);
+
+      if (result.success) {
+        // Refresh user data after successful name change
+        await checkAuth();
+        showNotification("Your name has been changed successfully");
+      } else {
+        showNotification(result.message);
+      }
+    } catch (error) {
+      console.error("Error changing name:", error);
+      showNotification("An error occurred while changing your name");
+    } finally {
+      setIsChangingName(false);
     }
   };
 
@@ -76,9 +100,8 @@ const ManageAccount: React.FC = () => {
         onClick={() => navigate(-1)}
       />
       <div
-        className={`notification-bar ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
+        className={`notification-bar ${notification.isVisible ? "notification-bar--visible" : ""
+          }`}
       >
         <span>{notification.message}</span>
       </div>
@@ -111,8 +134,8 @@ const ManageAccount: React.FC = () => {
             value={lastNameValue}
             onChange={(e) => setLastNameValue(e.target.value)}
           />
-          <Button variant="primary" onClick={handleNameChange}>
-            Change Name
+          <Button variant="primary" type="button" onClick={handleNameChange}>
+            {isChangingName ? "Changing..." : "Change Name"}
           </Button>
         </div>
         <div className="manage-account__main-section change-password">
