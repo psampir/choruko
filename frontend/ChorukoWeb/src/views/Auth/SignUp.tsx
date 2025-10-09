@@ -39,7 +39,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
       const errorData = JSON.parse(errorMessage);
       if (errorData.errors) {
         const fieldErrors = Object.values(errorData.errors).flat() as string[];
-        return fieldErrors.join(". ");
+        return fieldErrors.join(" ");
       }
       if (errorData.title) return errorData.title;
       if (errorData.message) return errorData.message;

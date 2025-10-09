@@ -30,7 +30,7 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
       // Handle validation errors with specific field messages
       if (errorData.errors) {
         const fieldErrors = Object.values(errorData.errors).flat() as string[];
-        return fieldErrors.join(". ");
+        return fieldErrors.join(" ");
       }
 
       // Handle general title/message errors
