@@ -18,7 +18,7 @@ import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
 
 const NavbarMobile = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, hasHousehold } = useAuth();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
@@ -97,7 +97,7 @@ const NavbarMobile = () => {
             className="profile-popup__icon"
           />
           <h5>Username</h5>
-          <p>Household Name</p>
+          {hasHousehold && <p>Household Name</p>}
           <ul>
             <li>
               <Button
@@ -114,23 +114,27 @@ const NavbarMobile = () => {
                 Manage Account
               </Button>
             </li>
-            <li>
-              <Button
-                variant="primary"
-                onClick={() => (
-                  navigate("/manageHousehold"), setProfileOpen(false)
-                )}
-              >
-                <img src={houseIcon} alt="Household Management" />
-                Manage Household
-              </Button>
-            </li>
-            <li>
-              <Button variant="red" onClick={() => setOpenPopup(true)}>
-                <img src={leaveIcon} alt="" />
-                Leave Household
-              </Button>
-            </li>
+            {hasHousehold && (
+              <>
+                <li>
+                  <Button
+                    variant="primary"
+                    onClick={() => (
+                      navigate("/manageHousehold"), setProfileOpen(false)
+                    )}
+                  >
+                    <img src={houseIcon} alt="Household Management" />
+                    Manage Household
+                  </Button>
+                </li>
+                <li>
+                  <Button variant="red" onClick={() => setOpenPopup(true)}>
+                    <img src={leaveIcon} alt="" />
+                    Leave Household
+                  </Button>
+                </li>
+              </>
+            )}
             <li>
               <Button variant="red" onClick={handleLogout}>
                 <img src={closeIconLight} alt="" />
