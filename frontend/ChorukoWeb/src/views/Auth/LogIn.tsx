@@ -59,8 +59,12 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
 
       if (result.success) {
         console.log("Login successful!");
-        // Navigate to profile after successful login
-        navigate("/leaderboard");
+        // Navigate based on household status
+        if (result.hasHousehold) {
+          navigate("/leaderboard");
+        } else {
+          navigate("/joinOrCreateHousehold");
+        }
       } else {
         // Handle login failure with backend error message
         const errorMsg = parseErrorMessage(
