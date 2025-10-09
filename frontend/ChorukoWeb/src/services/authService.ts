@@ -97,8 +97,17 @@ class AuthService {
       });
 
       if (response.ok) {
-        const userInfo = await response.json();
-        return { authenticated: true, user: userInfo };
+        const data = await response.json();
+        // The API returns { isSuccessful: boolean, result: UserInfoResponse }
+        if (data.isSuccessful && data.result) {
+          return { 
+            authenticated: true, 
+            user: data.result,
+            hasHousehold: data.result.hasHousehold 
+          };
+        } else {
+          return { authenticated: false };
+        }
       } else {
         return { authenticated: false };
       }
