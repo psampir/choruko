@@ -9,16 +9,18 @@ class UserService {
   // Change user's first and last name
   async changeNames(firstName: string, lastName: string) {
     try {
+      const requestBody: ChangeNamesData = {
+        firstName,
+        lastName,
+      };
+
       const response = await fetch(`${apiBaseUrl}/User/change-names`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({
-          firstName,
-          lastName,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
