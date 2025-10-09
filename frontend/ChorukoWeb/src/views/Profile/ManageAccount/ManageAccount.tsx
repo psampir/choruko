@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../contexts/AuthContext";
-import userService from "../../../services/userService";
+import { useUser } from "../../../contexts/UserContext";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
@@ -11,12 +10,11 @@ import arrowLeft from "../../../assets/svg/arrow-left.svg";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
-  const { user, checkAuth } = useAuth();
+  const { user, updateUserNames, loading: userLoading } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
-  const [isChangingName, setIsChangingName] = useState<boolean>(false);
 
   // Initialize name values from user data
   useEffect(() => {
@@ -51,22 +49,12 @@ const ManageAccount: React.FC = () => {
       return;
     }
 
-    try {
-      setIsChangingName(true);
-      const result = await userService.changeNames(firstNameValue, lastNameValue);
-
-      if (result.success) {
-        showNotification("Your name has been changed successfully");
-        // Refresh user data in the background without blocking
-        checkAuth(false).catch(err => console.error("Failed to refresh user data:", err));
-      } else {
-        showNotification(result.message);
-      }
-    } catch (error) {
-      console.error("Error changing name:", error);
-      showNotification("An error occurred while changing your name");
-    } finally {
-      setIsChangingName(false);
+    const result = await updateUserNames(firstNameValue, lastNameValue);
+    
+    if (result.success) {
+      showNotification("Your name has been changed successfully");
+    } else {
+      showNotification(result.message || "Failed to change name");
     }
   };
 
@@ -134,8 +122,8 @@ const ManageAccount: React.FC = () => {
             value={lastNameValue}
             onChange={(e) => setLastNameValue(e.target.value)}
           />
-          <Button variant="primary" type="button" onClick={handleNameChange}>
-            {isChangingName ? "Changing..." : "Change Name"}
+          <Button variant="primary" type="button" onClick={handleNameChange} disabled={userLoading}>
+            {userLoading ? "Changing..." : "Change Name"}
           </Button>
         </div>
         <div className="manage-account__main-section change-password">
