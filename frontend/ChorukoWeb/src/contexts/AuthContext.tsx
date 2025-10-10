@@ -10,6 +10,8 @@ interface User {
   email: string;
   userName: string;
   role?: string;
+  hasHousehold?: boolean;
+  householdId?: string | null;
   // Add other user properties from your backend as needed
 }
 
@@ -18,15 +20,16 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
+  hasHousehold: boolean;
   login: (
     email: string,
     password: string
-  ) => Promise<{ success: boolean; message?: string }>;
+  ) => Promise<{ success: boolean; message?: string; hasHousehold?: boolean }>;
   register: (
     userData: RegisterData
   ) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
-  checkAuth: () => Promise<void>;
+  checkAuth: (showLoading?: boolean) => Promise<void>;
   error: string | null;
   clearError: () => void;
 }
@@ -64,6 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Derived state
   const isAuthenticated = user !== null;
+  const hasHousehold = user?.hasHousehold ?? false;
 
   // Clear error function
   const clearError = () => {
@@ -71,9 +75,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Check authentication status
-  const checkAuth = async () => {
+  const checkAuth = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const result = await authService.checkStatus();
 
       if (result.authenticated && result.user) {
@@ -103,10 +107,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log("✅ Login successful, waiting before checking auth...");
         // Wait a moment for the cookie to be set properly
         await new Promise(resolve => setTimeout(resolve, 100));
-        
+
         console.log("🔍 Now checking authentication status...");
-        await checkAuth();
-        return { success: true, message: result.message };
+        const authResult = await authService.checkStatus();
+
+        if (authResult.authenticated && authResult.user) {
+          setUser(authResult.user);
+          return {
+            success: true,
+            message: result.message,
+            hasHousehold: authResult.hasHousehold
+          };
+        } else {
+          return { success: false, message: "Authentication check failed" };
+        }
       } else {
         setError(result.message || "Login failed");
         return { success: false, message: result.message };
@@ -180,6 +194,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     loading,
     isAuthenticated,
+    hasHousehold,
     login,
     register,
     logout,

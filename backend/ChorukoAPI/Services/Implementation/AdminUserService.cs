@@ -50,7 +50,7 @@ public class AdminUserService(
             var errors = string.Join("; ", resetResult.Errors.Select(e => e.Description));
             return ServiceResponseFactory.Error<AdminResetPasswordResponse>(
                 null,
-                $"Password reset failed: {errors}",
+                $"Password reset failed: {errors}.",
                 HttpStatusCode.BadRequest
             );
         }
@@ -64,7 +64,7 @@ public class AdminUserService(
             var errors = string.Join("; ", updateResult.Errors.Select(e => e.Description));
             return ServiceResponseFactory.Error<AdminResetPasswordResponse>(
                 null,
-                $"Failed to update user: {errors}",
+                $"Failed to update user: {errors}.",
                 HttpStatusCode.InternalServerError
             );
         }
@@ -78,7 +78,7 @@ public class AdminUserService(
 
         return ServiceResponseFactory.Success(
             response,
-            "Password reset successfully",
+            "Password reset successfully.",
             HttpStatusCode.OK
         );
     }

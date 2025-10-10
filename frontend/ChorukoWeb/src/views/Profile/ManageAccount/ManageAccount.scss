@@ -47,13 +47,6 @@
   }
 }
 
-.input__wrapper {
-  width: 300px;
-  input {
-    width: 100%;
-  }
-}
-
 .manage-account {
   background: var(--color-background);
   padding: var(--spacing-2xl);
@@ -62,8 +55,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-2xl);
-  min-height: 100vh;
+  gap: var(--spacing-4xl);
+
+  .input__wrapper {
+    width: 300px;
+
+    input {
+      width: 100%;
+    }
+  }
 
   .popup-container .popup .popup-content p {
     font-size: var(--font-size-h4);
@@ -94,13 +94,16 @@
 
     &.change-name {
       gap: var(--spacing-md);
+      margin-bottom: var(--spacing-3xl);
     }
 
     &.change-password {
       margin-top: var(--spacing-4xl);
       gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
     }
   }
+
   .delete-account__btn {
     margin-top: var(--spacing-4xl);
   }
@@ -111,7 +114,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-4xl);
 
   .account-image {
     width: 120px;

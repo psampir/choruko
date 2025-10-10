@@ -76,7 +76,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
 
         return ServiceResponseFactory.Success(
             response,
-            "Household was succesfully created",
+            "Household was succesfully created.",
             HttpStatusCode.OK
         );
     }
@@ -131,7 +131,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         catch (Exception ex)
         {
             // Return a detailed error response on failure
-            return ServiceResponseFactory.Error<string>(null, $"Failed to upload profile picture: {ex.Message}", HttpStatusCode.InternalServerError);
+            return ServiceResponseFactory.Error<string>(null, $"Failed to upload profile picture: {ex.Message}.", HttpStatusCode.InternalServerError);
         }
     }
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Invitations.scss";
 import householdDefault from "/src/assets/svg/householdDefault.svg";
 import NavbarMobile from "../../../components/NavbarMobile";
@@ -10,6 +11,7 @@ interface Invitation {
 }
 
 function Invitations() {
+  const navigate = useNavigate();
   // Initialize with one invitation directly instead of using useEffect
   const [invitations, setInvitations] = useState<Invitation[]>([
     {
@@ -69,6 +71,7 @@ function Invitations() {
         className="invitations back-arrow"
         src="/src/assets/svg/arrow-left.svg"
         alt="back-arrow"
+        onClick={() => navigate(-1)}
       />
       <h2>Invitations</h2>
       <div className="invitations-list">
