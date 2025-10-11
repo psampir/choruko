@@ -30,7 +30,7 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
       // Handle validation errors with specific field messages
       if (errorData.errors) {
         const fieldErrors = Object.values(errorData.errors).flat() as string[];
-        return fieldErrors.join(". ");
+        return fieldErrors.join(" ");
       }
 
       // Handle general title/message errors
@@ -59,8 +59,12 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
 
       if (result.success) {
         console.log("Login successful!");
-        // Navigate to profile after successful login
-        navigate("/leaderboard");
+        // Navigate based on household status
+        if (result.hasHousehold) {
+          navigate("/leaderboard");
+        } else {
+          navigate("/joinOrCreateHousehold");
+        }
       } else {
         // Handle login failure with backend error message
         const errorMsg = parseErrorMessage(
@@ -72,7 +76,7 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
       // Handle network or other errors
       const errorMsg = parseErrorMessage(
         error.message ||
-          "Connection failed. Please check your internet and try again."
+        "Connection failed. Please check your internet and try again."
       );
       setLocalError(errorMsg);
     }

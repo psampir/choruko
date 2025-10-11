@@ -12,7 +12,7 @@ class AuthService {
   // Register a new user
   async register(userData: UserData) {
     try {
-      const response = await fetch(`${apiBaseUrl}/register`, {
+      const response = await fetch(`${apiBaseUrl}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,7 +43,7 @@ class AuthService {
   async login(email: string, password: string) {
     try {
       console.log("📡 Sending login request...");
-      const response = await fetch(`${apiBaseUrl}/login`, {
+      const response = await fetch(`${apiBaseUrl}/Auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,16 +62,16 @@ class AuthService {
         try {
           const data = JSON.parse(responseText);
           console.log("📨 Parsed login response:", data);
-          
+
           // Check if the actual login succeeded
           if (data.result && data.result.succeeded) {
             console.log("✅ Login successful!");
             return { success: true, message: "Login successful" };
           } else {
             console.log("❌ Login failed - invalid credentials");
-            return { 
-              success: false, 
-              message: data.message || "Invalid email or password" 
+            return {
+              success: false,
+              message: data.message || "Invalid email or password"
             };
           }
         } catch (parseError) {
@@ -91,14 +91,23 @@ class AuthService {
   // Check authentication status
   async checkStatus() {
     try {
-      const response = await fetch(`${apiBaseUrl}/userInfo`, {
+      const response = await fetch(`${apiBaseUrl}/User/user-info`, {
         method: "GET",
         credentials: "include",
       });
 
       if (response.ok) {
-        const userInfo = await response.json();
-        return { authenticated: true, user: userInfo };
+        const data = await response.json();
+        // The API returns { isSuccessful: boolean, result: UserInfoResponse }
+        if (data.isSuccessful && data.result) {
+          return { 
+            authenticated: true, 
+            user: data.result,
+            hasHousehold: data.result.hasHousehold 
+          };
+        } else {
+          return { authenticated: false };
+        }
       } else {
         return { authenticated: false };
       }
@@ -110,7 +119,7 @@ class AuthService {
   // Logout user
   async logout() {
     try {
-      const response = await fetch(`${apiBaseUrl}/logOut`, {
+      const response = await fetch(`${apiBaseUrl}/Auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -122,30 +131,6 @@ class AuthService {
       }
     } catch (error) {
       return { success: false };
-    }
-  }
-
-  // Reset password (if you have this endpoint)
-  async resetPassword(email: string) {
-    try {
-      const response = await fetch(`${apiBaseUrl}/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email }),
-      });
-
-      const message = await response.text();
-
-      if (response.ok) {
-        return { success: true, message };
-      } else {
-        return { success: false, message };
-      }
-    } catch (error) {
-      return { success: false, message: "Network error occurred" };
     }
   }
 }

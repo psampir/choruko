@@ -8,10 +8,18 @@ using System.Net;
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Contracts.Responses;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using Microsoft.Extensions.Options;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class HouseholdService(DataContext _context, UserManager<User> _userManager, IWebHostEnvironment _webHostEnvironment, SignInManager<User> _signInManager) : IHouseholdService
+public class HouseholdService(DataContext _context,
+    UserManager<User> _userManager,
+    IWebHostEnvironment _webHostEnvironment,
+    SignInManager<User> _signInManager,
+    IOptions<ImageSettings> _options) : IHouseholdService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdAsync(CreateHouseholdRequest request, string userId)
     {
@@ -30,13 +38,12 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         var uploadResponse = await UploadProfilePicture(request.ProfilePicture);
         if (!uploadResponse.IsSuccessful)
         {
-            // If upload failed, return the error response from the upload method
             return ServiceResponseFactory.Error<OperationResultDto>(null, uploadResponse.Message, uploadResponse.StatusCode);
         }
 
         string? profilePicturePath = uploadResponse.Result;
 
-        // Create the new Household entity
+
         var household = new Household
         {
             Id = Guid.NewGuid().ToString(), 
@@ -48,13 +55,11 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         
         household.Participants.Add(user);
         user.HouseholdId = household.Id;
-
-        // Add the new household to the database context
+        
         _context.Households.Add(household);
         var roleResponse = await MakeHouseholdAdminRole(user);
         if (!roleResponse.IsSuccessful)
         {
-            // If role update fails, return the error immediately
             return roleResponse;
         }
         
@@ -76,7 +81,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
 
         return ServiceResponseFactory.Success(
             response,
-            "Household was succesfully created",
+            "Household was succesfully created.",
             HttpStatusCode.OK
         );
     }
@@ -101,37 +106,84 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
     
     private async Task<ServiceResponse<string>> UploadProfilePicture(IFormFile? file)
     {
-        // If no file is provided, it's not an error.
         if (file == null)
         {
             return ServiceResponseFactory.Success<string>(null, "No profile picture provided.", HttpStatusCode.OK);
         }
 
+        var processingResponse = await ValidateAndProcessImage(file);
+        
+        if (!processingResponse.IsSuccessful)
+        {
+            return processingResponse;
+        }
+        
+        return ServiceResponseFactory.Success(
+            processingResponse.Result!, 
+            "Profile picture uploaded and processed successfully.", 
+            HttpStatusCode.OK
+        );
+    }
+    
+    private async Task<ServiceResponse<string>> ValidateAndProcessImage(IFormFile file)
+    {
+        if (file.Length > _options.Value.MaxFileSize)
+        {
+            return ServiceResponseFactory.Error<string>(null, $"File size must not exceed {_options.Value.MaxFileSize / 1024 / 1024}MB.", HttpStatusCode.RequestEntityTooLarge);
+        }
+        
+        var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (! _options.Value.AllowedFormats.Contains(fileExtension))
+        {
+            return ServiceResponseFactory.Error<string>(null, $"Invalid file format. Only {string.Join(", ", _options.Value.AllowedFormats)} are allowed.", HttpStatusCode.UnsupportedMediaType);
+        }
+
+        string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "households");
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+        
+        string uniqueFileName = Guid.NewGuid().ToString() + ".jpg";
+        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
         try
         {
-            string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "households");
-            if (!Directory.Exists(uploadsFolder))
+            using (var memoryStream = new MemoryStream())
             {
-                Directory.CreateDirectory(uploadsFolder);
-            }
+                await file.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
 
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
+                using (Image image = await Image.LoadAsync(memoryStream))
+                {
+                    if (image.Width < _options.Value.MinDimension || image.Height < _options.Value.MinDimension)
+                    {
+                        return ServiceResponseFactory.Error<string>(null, $"Image dimensions are too small. Minimum required: {_options.Value.MinDimension}x{_options.Value.MinDimension} pixels.", HttpStatusCode.BadRequest);
+                    }
+                    
+                    if (image.Width > _options.Value.MaxDimension || image.Height > _options.Value.MaxDimension)
+                    {
+                        image.Mutate(x => x.Resize(new ResizeOptions
+                        {
+                            Size = new Size(_options.Value.MaxDimension, _options.Value.MaxDimension),
+                            Mode = ResizeMode.Crop
+                        }));
+                    }
+                    
+                    await image.SaveAsJpegAsync(filePath, new JpegEncoder { Quality = 100 });
+                }
             }
 
             string profilePicturePath = Path.Combine("uploads", "households", uniqueFileName).Replace("\\", "/");
-
-            // Return success with the file path
-            return ServiceResponseFactory.Success(profilePicturePath, "Profile picture uploaded successfully.", HttpStatusCode.OK);
+            return ServiceResponseFactory.Success(profilePicturePath, "Profile picture processed successfully.", HttpStatusCode.OK);
+        }
+        catch (ImageFormatException)
+        {
+            return ServiceResponseFactory.Error<string>(null, "The file is not a valid or recognizable image.", HttpStatusCode.UnsupportedMediaType);
         }
         catch (Exception ex)
         {
-            // Return a detailed error response on failure
-            return ServiceResponseFactory.Error<string>(null, $"Failed to upload profile picture: {ex.Message}", HttpStatusCode.InternalServerError);
+            return ServiceResponseFactory.Error<string>(null, $"Failed to process image: {ex.Message}", HttpStatusCode.InternalServerError);
         }
     }
 
