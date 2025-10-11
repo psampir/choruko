@@ -7,8 +7,8 @@ import {
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
-import Tasks from "./views/Tasks/Tasks";
-import Expenses from "./views/Expenses/Expenses";
+import Tasks from "./views/Household/Tasks/Tasks";
+import Expenses from "./views/Household/Expenses/Expenses";
 import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
 import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
