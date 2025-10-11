@@ -36,10 +36,16 @@ public class UserService(
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new UserInfoResponse("", "", ""), "User not found");
+            return ServiceResponseFactory.Error(new UserInfoResponse("", "", "", false, null), "User not found.");
         }
 
-        return ServiceResponseFactory.Success(new UserInfoResponse(user.FirstName, user.LastName, user.Email));
+        var hasHousehold = !string.IsNullOrEmpty(user.HouseholdId);
+        return ServiceResponseFactory.Success(new UserInfoResponse(
+            user.FirstName, 
+            user.LastName, 
+            user.Email, 
+            hasHousehold, 
+            user.HouseholdId));
     }
     public async Task<ServiceResponse<OperationResultDto>> ChangeUserNamesAsync(ChangeUserNamesRequest request, string userId)
     {

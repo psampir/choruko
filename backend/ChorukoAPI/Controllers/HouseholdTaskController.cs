@@ -92,7 +92,7 @@ namespace ChorukoAPI.Controllers
             return result.ToApiResponse();
         }
 
-        [HttpPut("complete/{taskId}")]
+        [HttpPut("completed/{taskId}")]
         [Authorize(Roles = "HouseholdAdmin,Participant")]
         public async Task<ActionResult<ApiResponse<OperationResultDto>>> MarkTaskAsCompleted([FromRoute] string taskId)
         {
@@ -101,7 +101,7 @@ namespace ChorukoAPI.Controllers
             return result.ToApiResponse();
         }
 
-        [HttpPut("uncomplete/{taskId}")]
+        [HttpPut("uncompleted/{taskId}")]
         [Authorize(Roles = "HouseholdAdmin,Participant")]
         public async Task<ActionResult<ApiResponse<OperationResultDto>>> UnMarkTaskAsCompleted([FromRoute] string taskId)
         {

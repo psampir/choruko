@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../../contexts/UserContext";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
@@ -9,9 +10,19 @@ import arrowLeft from "../../../assets/svg/arrow-left.svg";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
+  const { user, updateUserNames, loading: userLoading } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
-  const [nameValue, setNameValue] = useState<string>("Vin Diesel");
+  const [firstNameValue, setFirstNameValue] = useState<string>("");
+  const [lastNameValue, setLastNameValue] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
+
+  // Initialize name values from user data
+  useEffect(() => {
+    if (user) {
+      setFirstNameValue(user.firstName);
+      setLastNameValue(user.lastName);
+    }
+  }, [user]);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -29,9 +40,21 @@ const ManageAccount: React.FC = () => {
     }, 3000);
   };
 
-  const handleNameChange = () => {
-    if (nameValue.trim()) {
-      showNotification("Your name has been changed");
+  const handleNameChange = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!firstNameValue.trim() || !lastNameValue.trim()) {
+      showNotification("Please enter both first and last name");
+      return;
+    }
+
+    const result = await updateUserNames(firstNameValue, lastNameValue);
+    
+    if (result.success) {
+      showNotification("Your name has been changed successfully");
+    } else {
+      showNotification(result.message || "Failed to change name");
     }
   };
 
@@ -62,12 +85,11 @@ const ManageAccount: React.FC = () => {
         className="back-arrow"
         src={arrowLeft}
         alt="Back"
-        onClick={() => navigate("/leaderboard")}
+        onClick={() => navigate(-1)}
       />
       <div
-        className={`notification-bar ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
+        className={`notification-bar ${notification.isVisible ? "notification-bar--visible" : ""
+          }`}
       >
         <span>{notification.message}</span>
       </div>
@@ -90,11 +112,18 @@ const ManageAccount: React.FC = () => {
         <div className="manage-account__main-section change-name">
           <Input
             variant="edit"
-            value={nameValue}
-            onChange={(e) => setNameValue(e.target.value)}
+            placeholder="First Name"
+            value={firstNameValue}
+            onChange={(e) => setFirstNameValue(e.target.value)}
           />
-          <Button variant="primary" onClick={handleNameChange}>
-            Change Name
+          <Input
+            variant="edit"
+            placeholder="Last Name"
+            value={lastNameValue}
+            onChange={(e) => setLastNameValue(e.target.value)}
+          />
+          <Button variant="primary" type="button" onClick={handleNameChange} disabled={userLoading}>
+            {userLoading ? "Changing..." : "Change Name"}
           </Button>
         </div>
         <div className="manage-account__main-section change-password">
@@ -116,7 +145,7 @@ const ManageAccount: React.FC = () => {
         <Popup variant="red" title="" onClose={() => setOpenPopup(false)}>
           <p>Are you sure you want to delete your account?</p>
           <img src={profileImage} alt="Profile Image" />
-          <p>Vin Diesel</p>
+          <p>{user ? `${user.firstName} ${user.lastName}` : `${firstNameValue} ${lastNameValue}`}</p>
           <Button variant="red">Delete</Button>
         </Popup>
       )}

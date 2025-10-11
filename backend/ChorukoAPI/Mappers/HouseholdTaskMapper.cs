@@ -22,7 +22,12 @@ namespace ChorukoAPI.Mappers
                     PointsAwarded = source.Activity.PointsAwarded,
                 },
                 CreatorId = source.CreatorId,
-                Creator = new UserInfoResponse(source.Creator.FirstName, source.Creator.LastName, source.Creator.Email),
+                Creator = new UserInfoResponse(
+                    source.Creator.FirstName, 
+                    source.Creator.LastName, 
+                    source.Creator.Email,
+                    !string.IsNullOrEmpty(source.Creator.HouseholdId),
+                    source.Creator.HouseholdId),
                 CreationDate = source.CreationDate,
                 DeadLine = source.DeadLine,
                 Status = source.Status,
@@ -33,7 +38,9 @@ namespace ChorukoAPI.Mappers
                 Assignees = source.Assignees?.Select(user => new UserInfoResponse(
                     user.FirstName,
                     user.LastName,
-                    user.Email
+                    user.Email,
+                    !string.IsNullOrEmpty(user.HouseholdId),
+                    user.HouseholdId
                 )).ToList() ?? new List<UserInfoResponse>()
             };
         }

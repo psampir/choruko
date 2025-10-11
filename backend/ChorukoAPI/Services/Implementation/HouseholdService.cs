@@ -81,7 +81,7 @@ public class HouseholdService(DataContext _context,
 
         return ServiceResponseFactory.Success(
             response,
-            "Household was succesfully created",
+            "Household was succesfully created.",
             HttpStatusCode.OK
         );
     }
