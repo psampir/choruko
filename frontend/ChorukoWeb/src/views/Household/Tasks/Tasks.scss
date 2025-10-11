@@ -1,4 +1,4 @@
-@use "../../styles/variables";
+@use "../../../styles/variables.scss";
 
 // Basic styles for Tasks page - using your existing style patterns
 .tasks-container {
@@ -24,6 +24,36 @@
 }
 
 .tasks-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  border: 2px solid #000000;
+  
+  .task-info{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid #e9ecef;
+
+
+    .assignies-avatars{
+      width: 40px;
+      height: 40px;
+
+      img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+    }
+  }
+
+
+
   .tasks-section {
     margin-bottom: var(--spacing-3xl);
 
