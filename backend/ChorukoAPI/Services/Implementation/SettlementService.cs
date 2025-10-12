@@ -300,9 +300,46 @@ public class SettlementService(DataContext _context, IMapper<Settlement, Settlem
         }
     }
 
-    public Task<ServiceResponse<OperationResultDto>> MarkAsCompleted(string settlementId)
+    public async Task<ServiceResponse<OperationResultDto>> MarkAsCompleted(string settlementId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var settlement = await _context.Settlements.FirstOrDefaultAsync(s => s.Id == settlementId);
+
+            if (settlement == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No settlement found", HttpStatusCode.NotFound);
+            }
+
+            settlement.Status = SettlementStatus.Completed;
+
+            await _context.SaveChangesAsync();
+
+            var result = new OperationResultDto
+            {
+                Operation = "MarkAsCompleted",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    ["SettlementId"] = settlement.Id
+                }
+            };
+
+            return ServiceResponseFactory.Success(
+                result,
+                "Settlement created successfully",
+                HttpStatusCode.Created
+            );
+        }
+        catch (Exception ex)
+        {
+
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null,
+                $"Failed to change settlement status: {ex.Message}",
+                HttpStatusCode.InternalServerError
+            );
+        }
     }
 
     public Task<ServiceResponse<OperationResultDto>> UnMarkAsCompleted(string settlementId)
