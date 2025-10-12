@@ -80,4 +80,24 @@ public class UserController(IUserService _userService) : ControllerBase
         
         return result.ToApiResponse();
     }
+    
+    [HttpPut("change-password")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token."));
+        }
+
+        var result = await _userService.ChangePasswordAsync(request, userId);
+        
+        return result.ToApiResponse();
+    }
 }
