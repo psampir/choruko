@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using Microsoft.Extensions.Options;
+using ChorukoAPI.Mappers;
 
 namespace ChorukoAPI.Services.Implementation;
 
@@ -22,13 +24,10 @@ public class UserService(
     UserManager<User> _userManager, 
     IHttpContextAccessor _contextAccessor, 
     DataContext _context, 
-    IWebHostEnvironment _webHostEnvironment
-    ) : IUserService
+    IWebHostEnvironment _webHostEnvironment,
+    IOptions<ImageSettings> _options,
+    IMapper<User, UserInfoResponse> _mapper) : IUserService
 {
-    private static readonly long MaxFileSize = 10 * 1024 * 1024; // 5 MB
-    private static readonly int MaxDimension = 400; // 400x400 max
-    private static readonly int MinDimension = 150; // 150x150 min
-    private static readonly string[] AllowedFormats = { ".png", ".jpg", ".jpeg", ".webp", ".gif" };
 
     public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
     {
@@ -36,17 +35,10 @@ public class UserService(
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new UserInfoResponse("", "", "", "", false, null), "User not found.");
+            return ServiceResponseFactory.Error(new UserInfoResponse("", "", "", "", null), "User not found.");
         }
 
-        var hasHousehold = !string.IsNullOrEmpty(user.HouseholdId);
-        return ServiceResponseFactory.Success(new UserInfoResponse(
-            user.Id,
-            user.FirstName, 
-            user.LastName, 
-            user.Email, 
-            hasHousehold, 
-            user.HouseholdId));
+        return ServiceResponseFactory.Success(await _mapper.Map(user));
     }
     public async Task<ServiceResponse<OperationResultDto>> ChangeUserNamesAsync(ChangeUserNamesRequest request, string userId)
     {
@@ -131,15 +123,15 @@ public class UserService(
     }
     private async Task<ServiceResponse<string>> ValidateAndProcessImage(IFormFile file)
     {
-        if (file.Length > MaxFileSize)
+        if (file.Length > _options.Value.MaxFileSize)
         {
-            return ServiceResponseFactory.Error<string>(null, $"File size must not exceed {MaxFileSize / 1024 / 1024}MB.", HttpStatusCode.RequestEntityTooLarge);
+            return ServiceResponseFactory.Error<string>(null, $"File size must not exceed {_options.Value.MaxFileSize / 1024 / 1024}MB.", HttpStatusCode.RequestEntityTooLarge);
         }
         
         var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!AllowedFormats.Contains(fileExtension))
+        if (!_options.Value.AllowedFormats.Contains(fileExtension))
         {
-            return ServiceResponseFactory.Error<string>(null, $"Invalid file format. Only {string.Join(", ", AllowedFormats)} are allowed.", HttpStatusCode.UnsupportedMediaType);
+            return ServiceResponseFactory.Error<string>(null, $"Invalid file format. Only {string.Join(", ", _options.Value.AllowedFormats)} are allowed.", HttpStatusCode.UnsupportedMediaType);
         }
 
         string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "users"); // Note: users folder
@@ -160,16 +152,16 @@ public class UserService(
 
                 using (Image image = await Image.LoadAsync(memoryStream))
                 {
-                    if (image.Width < MinDimension || image.Height < MinDimension)
+                    if (image.Width < _options.Value.MinDimension || image.Height < _options.Value.MinDimension)
                     {
-                        return ServiceResponseFactory.Error<string>(null, $"Image dimensions are too small. Minimum required: {MinDimension}x{MinDimension} pixels.", HttpStatusCode.BadRequest);
+                        return ServiceResponseFactory.Error<string>(null, $"Image dimensions are too small. Minimum required: {_options.Value.MinDimension}x{_options.Value.MinDimension} pixels.", HttpStatusCode.BadRequest);
                     }
                     
-                    if (image.Width > MaxDimension || image.Height > MaxDimension)
+                    if (image.Width > _options.Value.MaxDimension || image.Height > _options.Value.MaxDimension)
                     {
                         image.Mutate(x => x.Resize(new ResizeOptions
                         {
-                            Size = new Size(MaxDimension, MaxDimension),
+                            Size = new Size(_options.Value.MaxDimension, _options.Value.MaxDimension),
                             Mode = ResizeMode.Crop
                         }));
                     }
