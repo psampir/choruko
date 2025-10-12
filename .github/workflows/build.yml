@@ -75,6 +75,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.vars.outputs.BRANCH }}
+          lfs: true
 
       - name: Check if tag exists in the repository
         if: ${{ steps.vars.outputs.RELEASE == 'true' }}

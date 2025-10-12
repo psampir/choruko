@@ -5,6 +5,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { UserProvider, useUser } from "./contexts/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
 import Tasks from "./views/Tasks/Tasks";
@@ -31,11 +32,13 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
 // Layout component for main app pages with bottom navigation
 function MainAppLayout({ children }: { children: React.ReactNode }) {
+  const { user } = useUser();
+  
   return (
     <div className="app">
       <main className="main-content">{children}</main>
       <NavbarMobile />
-      <BottomNav />
+      {user?.hasHousehold && <BottomNav />}
     </div>
   );
 }
@@ -159,9 +162,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
+      <UserProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </UserProvider>
     </AuthProvider>
   );
 }

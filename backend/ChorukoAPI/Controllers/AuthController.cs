@@ -26,6 +26,15 @@ public class AuthController(IAuthService _authService) : ControllerBase
 
         var result = await _authService.RegisterUserAsync(registrationRequest);
 
+        if (!result.IsSuccessful && result.Result != null && !result.Result.Succeeded)
+        {
+            foreach (var error in result.Result.Errors)
+            {
+                ModelState.AddModelError("Password", error.Description);
+            }
+            return ValidationProblem(ModelState);
+        }
+
         return result.ToCreatedApiResponse();
     }
 
@@ -42,7 +51,7 @@ public class AuthController(IAuthService _authService) : ControllerBase
         return result.ToCreatedApiResponse();
     }
 
-    [HttpPost("logOut")]
+    [HttpPost("logout")]
     [Authorize]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> LogOut()
     {

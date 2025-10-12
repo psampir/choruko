@@ -53,7 +53,7 @@ namespace ChorukoAPI.Services.Implementation
                 }
             };
 
-            return ServiceResponseFactory.Success(response, "Activity was successfully created");
+            return ServiceResponseFactory.Success(response, "Activity was successfully created.");
         }
 
         public async Task<ServiceResponse<OperationResultDto>> EditActivityAsync(string activityId, EditActivityRequest request)
@@ -108,7 +108,7 @@ namespace ChorukoAPI.Services.Implementation
                 });
             }
 
-            return ServiceResponseFactory.Success(response, "Successful extraction of household activities");
+            return ServiceResponseFactory.Success(response, "Successful extraction of household activities.");
         }
 
         public async Task<ServiceResponse<ActivityResponse>> GetActivityByIdAsync(string activityId)
@@ -126,7 +126,7 @@ namespace ChorukoAPI.Services.Implementation
                 PointsAwarded = householdActivity.PointsAwarded,
             };
 
-            return ServiceResponseFactory.Success(response, "Successful extraction of household activity");
+            return ServiceResponseFactory.Success(response, "Successful extraction of household activity.");
         }
 
         public async Task<ServiceResponse<OperationResultDto>> DeleteActivityAsync(string activityId)
@@ -150,7 +150,7 @@ namespace ChorukoAPI.Services.Implementation
                 }
             };
 
-            return ServiceResponseFactory.Success(response, "Activity was successfully deleted");
+            return ServiceResponseFactory.Success(response, "Activity was successfully deleted.");
         }
 
         private ServiceResponse<OperationResultDto> ValidateActivityData(Activity activity)
@@ -159,10 +159,10 @@ namespace ChorukoAPI.Services.Implementation
 
             if (isActivityExist)
             {
-                return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist", HttpStatusCode.BadRequest);
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist.", HttpStatusCode.BadRequest);
             }
 
-            return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household");
+            return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household.");
         }
     }
 }

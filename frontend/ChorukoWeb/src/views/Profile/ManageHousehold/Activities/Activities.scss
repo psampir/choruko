@@ -51,14 +51,6 @@ body {
   }
 }
 
-.input__wrapper {
-  width: 280px;
-  margin-bottom: var(--spacing-3xl);
-  input {
-    width: 100%;
-  }
-}
-
 .activities {
   background: var(--color-background);
   padding: var(--spacing-2xl);
@@ -69,6 +61,15 @@ body {
   align-items: center;
   gap: var(--spacing-2xl);
   min-height: 100vh;
+
+  .input__wrapper {
+    width: 280px;
+    margin-bottom: var(--spacing-3xl);
+
+    input {
+      width: 100%;
+    }
+  }
 
   .popup-container .popup .popup-content p {
     font-size: var(--font-size-h4);
@@ -140,6 +141,7 @@ body {
       margin-top: var(--spacing-lg);
     }
   }
+
   .participants-list {
     position: relative;
     width: 100%;
@@ -292,6 +294,7 @@ body {
   button {
     max-width: 150px;
   }
+
   input {
     margin-bottom: var(--spacing-3xl);
   }

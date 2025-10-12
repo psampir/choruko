@@ -6,8 +6,13 @@ on:
     inputs:
       environment:
         description: 'Environment to reset'
-        type: string
         required: true
+        type: choice
+        options:
+          - main
+          - dev
+          - test1
+          - test2
 
 concurrency:
   group: reset-${{ github.event.inputs.environment || github.ref_name }}

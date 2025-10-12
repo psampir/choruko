@@ -16,7 +16,7 @@ namespace ChorukoAPI.Controllers;
 [Authorize]
 public class UserController(IUserService _userService) : ControllerBase
 {
-    [HttpGet("userInfo")]
+    [HttpGet("user-info")]
     [Authorize]
     public async Task<ActionResult<ApiResponse<UserInfoResponse>>> GetUserInfo()
     {
