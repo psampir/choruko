@@ -104,7 +104,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
 
     [HttpPut("unmarkComplete/{settlementId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> UnMarkAsCompleted([FromRoute] string settlementId, CreateSettlementRequest request)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> UnMarkAsCompleted([FromRoute] string settlementId)
     {
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
