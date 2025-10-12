@@ -65,4 +65,19 @@ public class UserController(IUserService _userService) : ControllerBase
         
         return result.ToApiResponse();
     }
+    
+    [HttpDelete("delete-self")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteSelf()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token."));
+        }
+        
+        var result = await _userService.DeleteSelfAsync(userId);
+        
+        return result.ToApiResponse();
+    }
 }
