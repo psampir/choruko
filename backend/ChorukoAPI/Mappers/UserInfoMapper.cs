@@ -7,6 +7,6 @@ public class UserInfoMapper : IMapper<User, UserInfoResponse>
 {
     public async Task<UserInfoResponse> Map(User source)
     {
-        return new UserInfoResponse(source.Id, source.FirstName, source.LastName, source.Email);
+        return new UserInfoResponse(source.Id, source.FirstName, source.LastName, source.Email, source.HouseholdId);
     }
 }
