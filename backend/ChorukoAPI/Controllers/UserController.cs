@@ -38,7 +38,7 @@ public class UserController(IUserService _userService) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token."));
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token.").ToApiResponse());
         }
 
         var result = await _userService.ChangeUserNamesAsync(request, userId);
@@ -59,7 +59,7 @@ public class UserController(IUserService _userService) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token."));
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token.").ToApiResponse());
         }
 
         var result = await _userService.ChangeUserProfilePictureAsync(request, userId);
@@ -74,7 +74,7 @@ public class UserController(IUserService _userService) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token."));
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token.").ToApiResponse());
         }
         
         var result = await _userService.DeleteSelfAsync(userId);
@@ -94,7 +94,7 @@ public class UserController(IUserService _userService) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token."));
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token.").ToApiResponse());
         }
 
         var result = await _userService.ChangePasswordAsync(request, userId);
