@@ -35,7 +35,7 @@ public class UserService(
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new UserInfoResponse("", "", "", "", null), "User not found.");
+            return ServiceResponseFactory.Error(new UserInfoResponse("", "", "", "", null, null), "User not found.");
         }
 
         return ServiceResponseFactory.Success(await _mapper.Map(user));
