@@ -312,12 +312,19 @@ public class UserService(
 
         if (!addResult.Succeeded)
         {
-            var errors = addResult.Errors.Select(e => e.Description);
-            var errorMessage = string.Join(" ", errors);
+            var errorDto = new OperationResultDto
+            {
+                Operation = "ChangePassword",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "IdentityResult", addResult }
+                }
+            };
             
-            return ServiceResponseFactory.Error<OperationResultDto>(
-                null, 
-                $"Failed to set new password: {errorMessage}", 
+            return ServiceResponseFactory.Error(
+                errorDto, 
+                "Password validation failed.", 
                 HttpStatusCode.BadRequest
             );
         }
