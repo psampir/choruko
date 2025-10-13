@@ -279,5 +279,66 @@ public class UserService(
             HttpStatusCode.OK
         );
     }
+    
+    public async Task<ServiceResponse<OperationResultDto>> ChangePasswordAsync(ChangePasswordRequest request, string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+        }
+        
+        var removeResult = await _userManager.RemovePasswordAsync(user);
+        if (!removeResult.Succeeded)
+        {
+            var errors = removeResult.Errors.Select(e => e.Description);
+            var errorMessage = string.Join(" ", errors);
+
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null, 
+                $"Failed to remove old password: {errorMessage}", 
+                HttpStatusCode.InternalServerError
+            );
+        }
+        
+        var addResult = await _userManager.AddPasswordAsync(user, request.NewPassword);
+
+        if (!addResult.Succeeded)
+        {
+            var errorDto = new OperationResultDto
+            {
+                Operation = "ChangePassword",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "IdentityResult", addResult }
+                }
+            };
+            
+            return ServiceResponseFactory.Error(
+                errorDto, 
+                "Password validation failed.", 
+                HttpStatusCode.BadRequest
+            );
+        }
+        
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        var response = new OperationResultDto
+        {
+            Operation = "ChangePassword",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "UserId", user.Id }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            response,
+            "User password was successfully changed.",
+            HttpStatusCode.OK
+        );
+    }
 
 }
