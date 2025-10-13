@@ -11,7 +11,7 @@ public class SettlementMapper(IMapper<User, UserInfoResponse> userMapper) : IMap
         return new SettlementResponse
         {
             Id = source.Id,
-            HoudeholsId = source.HouseholdId,
+            HouseholdId = source.HouseholdId,
             CreatorId = source.CreatorId,
             Creator = await userMapper.Map(source.Creator),
             DateOfCreation = source.DateOfCreation,

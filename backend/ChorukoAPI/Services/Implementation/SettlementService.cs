@@ -235,7 +235,7 @@ public class SettlementService(DataContext _context, IMapper<Settlement, Settlem
     {
         try
         {
-            var settlements = _context.Settlements.Where(s => s.HouseholdId == householdId).ToList();
+            var settlements = await _context.Settlements.Where(s => s.HouseholdId == householdId).ToListAsync();
 
             if (settlements.Count == 0)
             {
@@ -311,7 +311,7 @@ public class SettlementService(DataContext _context, IMapper<Settlement, Settlem
 
             return ServiceResponseFactory.Success(
                 result,
-                "Settlement created successfully",
+                "Settlement marked as completed successfull",
                 HttpStatusCode.Created
             );
         }
@@ -353,7 +353,7 @@ public class SettlementService(DataContext _context, IMapper<Settlement, Settlem
 
             return ServiceResponseFactory.Success(
                 result,
-                "Settlement created successfully",
+                "Settlement unmarked as completed successfully",
                 HttpStatusCode.Created
             );
         }

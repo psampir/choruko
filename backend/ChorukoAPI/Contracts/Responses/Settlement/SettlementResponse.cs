@@ -7,7 +7,7 @@ public class SettlementResponse
 {
     public string Id { get; set; }
 
-    public string HoudeholsId { get; set; }
+    public string HouseholdId { get; set; }
 
     public string CreatorId { get; set; }
 

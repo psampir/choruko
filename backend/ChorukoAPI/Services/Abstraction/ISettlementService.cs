@@ -13,5 +13,5 @@ public interface ISettlementService
     Task<ServiceResponse<OperationResultDto>> EditSettlement(string settlementId, EditSettlementRequest request);
     Task<ServiceResponse<OperationResultDto>> MarkAsCompleted(string settlementId);
     Task<ServiceResponse<OperationResultDto>> UnMarkAsCompleted(string settlementId);
-    Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string householdId);
+    Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string settlementId);
 }
