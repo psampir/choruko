@@ -96,30 +96,20 @@ const ManageAccount: React.FC = () => {
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Update the preview immediately
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setProfileImageSrc(result);
-      };
-      reader.readAsDataURL(file);
-
-      // Upload to server
+      // Upload to server first
       const result = await updateProfilePicture(file);
       
       if (result.success) {
+        // Only update preview after successful upload
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setProfileImageSrc(result);
+        };
+        reader.readAsDataURL(file);
         showNotification("Profile picture updated successfully");
       } else {
         showNotification(result.message || "Failed to update profile picture");
-        // Revert to original image on failure
-        if (user) {
-          const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
-          if (pictureUrl) {
-            setProfileImageSrc(pictureUrl);
-          } else {
-            setProfileImageSrc(ProfileDefaultIcon);
-          }
-        }
       }
     }
   };
