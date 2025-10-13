@@ -17,7 +17,7 @@ const ManageAccount: React.FC = () => {
   const [lastNameValue, setLastNameValue] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
+  const [profileImageSrc, setProfileImageSrc] = useState<string>(ProfileDefaultIcon);
 
   // Initialize name values and profile picture from user data
   useEffect(() => {
@@ -28,7 +28,7 @@ const ManageAccount: React.FC = () => {
       // Load profile picture from backend if available
       const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
       if (pictureUrl) {
-        setProfileImage(pictureUrl);
+        setProfileImageSrc(pictureUrl);
       }
     }
   }, [user]);
@@ -100,7 +100,7 @@ const ManageAccount: React.FC = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
-        setProfileImage(result);
+        setProfileImageSrc(result);
       };
       reader.readAsDataURL(file);
 
@@ -115,9 +115,9 @@ const ManageAccount: React.FC = () => {
         if (user) {
           const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
           if (pictureUrl) {
-            setProfileImage(pictureUrl);
+            setProfileImageSrc(pictureUrl);
           } else {
-            setProfileImage(ProfileDefaultIcon);
+            setProfileImageSrc(ProfileDefaultIcon);
           }
         }
       }
@@ -157,7 +157,7 @@ const ManageAccount: React.FC = () => {
 
       <h1 className="manage-account__template-name">Manage Account</h1>
       <div className="account-header">
-        <img className="account-image" src={profileImage} alt="Account" />
+        <img className="account-image" src={profileImageSrc} alt="Account" />
         <Button variant="primary" onClick={triggerFileInput}>
           Change Picture
         </Button>
@@ -215,7 +215,7 @@ const ManageAccount: React.FC = () => {
       {openPopup && (
         <Popup variant="red" title="" onClose={() => setOpenPopup(false)}>
           <p>Are you sure you want to delete your account?</p>
-          <img src={profileImage} alt="Profile Image" />
+          <img src={profileImageSrc} alt="Profile Image" />
           <p>{user ? `${user.firstName} ${user.lastName}` : `${firstNameValue} ${lastNameValue}`}</p>
           <Button variant="red" onClick={handleDeleteAccount} disabled={userLoading}>
             {userLoading ? "Deleting..." : "Delete"}
