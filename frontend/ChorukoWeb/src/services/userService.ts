@@ -69,6 +69,30 @@ class UserService {
     }
   }
 
+  // Change user's profile picture
+  async changePicture(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append("ProfilePicture", file);
+
+      const response = await fetch(`${apiBaseUrl}/User/change-picture`, {
+        method: "PUT",
+        credentials: "include",
+        body: formData,
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Profile picture changed successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to change profile picture" };
+      }
+    } catch (error) {
+      console.error("Error changing profile picture:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
   // Get user info (already handled in authService, but can be added here for completeness)
   async getUserInfo() {
     try {

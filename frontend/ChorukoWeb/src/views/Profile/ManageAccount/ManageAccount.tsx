@@ -11,7 +11,7 @@ import { getProfilePictureUrl } from "../../../utils/imageUtils";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
-  const { user, updateUserNames, updatePassword, loading: userLoading } = useUser();
+  const { user, updateUserNames, updatePassword, updateProfilePicture, loading: userLoading } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
@@ -93,16 +93,34 @@ const ManageAccount: React.FC = () => {
     }
   };
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Update the preview immediately
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setProfileImage(result);
-        showNotification("Profile picture updated");
       };
       reader.readAsDataURL(file);
+
+      // Upload to server
+      const result = await updateProfilePicture(file);
+      
+      if (result.success) {
+        showNotification("Profile picture updated successfully");
+      } else {
+        showNotification(result.message || "Failed to update profile picture");
+        // Revert to original image on failure
+        if (user) {
+          const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
+          if (pictureUrl) {
+            setProfileImage(pictureUrl);
+          } else {
+            setProfileImage(ProfileDefaultIcon);
+          }
+        }
+      }
     }
   };
 

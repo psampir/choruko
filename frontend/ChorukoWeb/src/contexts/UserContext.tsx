@@ -22,6 +22,7 @@ interface UserContextType {
   error: string | null;
   updateUserNames: (firstName: string, lastName: string) => Promise<{ success: boolean; message?: string }>;
   updatePassword: (newPassword: string, confirmNewPassword: string) => Promise<{ success: boolean; message?: string }>;
+  updateProfilePicture: (file: File) => Promise<{ success: boolean; message?: string }>;
   refreshUser: () => Promise<void>;
   clearError: () => void;
 }
@@ -123,6 +124,31 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  // Update user's profile picture
+  const updateProfilePicture = async (file: File) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await userService.changePicture(file);
+
+      if (result.success) {
+        // Refresh user data after successful update
+        await refreshUser();
+        return { success: true, message: "Profile picture updated successfully" };
+      } else {
+        setError(result.message);
+        return { success: false, message: result.message };
+      }
+    } catch (err) {
+      const errorMessage = "An error occurred while updating your profile picture";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Context value
   const value: UserContextType = {
     user,
@@ -130,6 +156,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     error,
     updateUserNames,
     updatePassword,
+    updateProfilePicture,
     refreshUser,
     clearError,
   };
