@@ -93,6 +93,26 @@ class UserService {
     }
   }
 
+  // Delete user account
+  async deleteSelf() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/User/delete-self`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Account deleted successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to delete account" };
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
   // Get user info (already handled in authService, but can be added here for completeness)
   async getUserInfo() {
     try {
