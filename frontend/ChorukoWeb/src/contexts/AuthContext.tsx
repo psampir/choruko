@@ -10,7 +10,6 @@ interface User {
   email: string;
   userName: string;
   role?: string;
-  hasHousehold?: boolean;
   householdId?: string | null;
   profilePicturePath?: string | null;
   // Add other user properties from your backend as needed
@@ -68,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Derived state
   const isAuthenticated = user !== null;
-  const hasHousehold = user?.hasHousehold ?? false;
+  const hasHousehold = user?.householdId !== null && user?.householdId !== undefined;
 
   // Clear error function
   const clearError = () => {
@@ -117,7 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return {
             success: true,
             message: result.message,
-            hasHousehold: authResult.hasHousehold
+            hasHousehold: authResult.user.householdId !== null && authResult.user.householdId !== undefined
           };
         } else {
           return { success: false, message: "Authentication check failed" };

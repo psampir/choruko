@@ -11,7 +11,6 @@ interface User {
   email: string;
   userName: string;
   role?: string;
-  hasHousehold?: boolean;
   householdId?: string | null;
   profilePicturePath?: string | null;
 }
