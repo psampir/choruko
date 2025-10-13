@@ -36,9 +36,9 @@ export const getProfilePictureUrl = (profilePicturePath?: string | null): string
   }
   
   const baseUrl = getStaticBaseUrl();
-  // Use the URL constructor to robustly join baseUrl and profilePicturePath
-  const url = new URL(profilePicturePath, baseUrl.endsWith('/') ? baseUrl : baseUrl + '/');
+  // Ensure there's no double slash
+  const cleanPath = profilePicturePath.startsWith('/') ? profilePicturePath : `/${profilePicturePath}`;
   
-  return url.toString();
+  return `${baseUrl}${cleanPath}`;
 };
 
