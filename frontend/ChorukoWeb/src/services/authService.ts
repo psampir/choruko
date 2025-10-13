@@ -102,8 +102,7 @@ class AuthService {
         if (data.isSuccessful && data.result) {
           return { 
             authenticated: true, 
-            user: data.result,
-            hasHousehold: data.result.hasHousehold 
+            user: data.result
           };
         } else {
           return { authenticated: false };
