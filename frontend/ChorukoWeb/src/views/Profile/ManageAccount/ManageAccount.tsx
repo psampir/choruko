@@ -11,7 +11,7 @@ import { getProfilePictureUrl } from "../../../utils/imageUtils";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
-  const { user, updateUserNames, updatePassword, updateProfilePicture, loading: userLoading } = useUser();
+  const { user, updateUserNames, updatePassword, updateProfilePicture, deleteAccount, loading: userLoading } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
@@ -128,6 +128,18 @@ const ManageAccount: React.FC = () => {
     document.getElementById("profile-image-input")?.click();
   };
 
+  const handleDeleteAccount = async () => {
+    const result = await deleteAccount();
+    
+    if (result.success) {
+      // User will be logged out and redirected by the deleteAccount function
+      showNotification("Account deleted successfully");
+    } else {
+      showNotification(result.message || "Failed to delete account");
+      setOpenPopup(false);
+    }
+  };
+
   return (
     <div className="manage-account">
       <img
@@ -205,7 +217,9 @@ const ManageAccount: React.FC = () => {
           <p>Are you sure you want to delete your account?</p>
           <img src={profileImage} alt="Profile Image" />
           <p>{user ? `${user.firstName} ${user.lastName}` : `${firstNameValue} ${lastNameValue}`}</p>
-          <Button variant="red">Delete</Button>
+          <Button variant="red" onClick={handleDeleteAccount} disabled={userLoading}>
+            {userLoading ? "Deleting..." : "Delete"}
+          </Button>
         </Popup>
       )}
     </div>

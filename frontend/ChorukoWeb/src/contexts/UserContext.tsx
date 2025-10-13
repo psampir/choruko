@@ -23,6 +23,7 @@ interface UserContextType {
   updateUserNames: (firstName: string, lastName: string) => Promise<{ success: boolean; message?: string }>;
   updatePassword: (newPassword: string, confirmNewPassword: string) => Promise<{ success: boolean; message?: string }>;
   updateProfilePicture: (file: File) => Promise<{ success: boolean; message?: string }>;
+  deleteAccount: () => Promise<{ success: boolean; message?: string }>;
   refreshUser: () => Promise<void>;
   clearError: () => void;
 }
@@ -46,7 +47,7 @@ interface UserProviderProps {
 
 // UserProvider component
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const { user: authUser, checkAuth } = useAuth();
+  const { user: authUser, checkAuth, clearAuth } = useAuth();
   const [user, setUser] = useState<User | null>(authUser);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -149,6 +150,31 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  // Delete user account
+  const deleteAccount = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await userService.deleteSelf();
+
+      if (result.success) {
+        // Clear auth state without calling logout API (user is already deleted)
+        clearAuth();
+        return { success: true, message: "Account deleted successfully" };
+      } else {
+        setError(result.message);
+        return { success: false, message: result.message };
+      }
+    } catch (err) {
+      const errorMessage = "An error occurred while deleting your account";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Context value
   const value: UserContextType = {
     user,
@@ -157,6 +183,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     updateUserNames,
     updatePassword,
     updateProfilePicture,
+    deleteAccount,
     refreshUser,
     clearError,
   };
