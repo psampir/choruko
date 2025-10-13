@@ -10,10 +10,12 @@ import arrowLeft from "../../../assets/svg/arrow-left.svg";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
-  const { user, updateUserNames, loading: userLoading } = useUser();
+  const { user, updateUserNames, updatePassword, loading: userLoading } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
 
   // Initialize name values from user data
@@ -58,8 +60,30 @@ const ManageAccount: React.FC = () => {
     }
   };
 
-  const handlePasswordChange = () => {
-    showNotification("Your password has been changed");
+  const handlePasswordChange = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!newPassword || !confirmPassword) {
+      showNotification("Please fill in all password fields");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showNotification("New passwords do not match");
+      return;
+    }
+
+    const result = await updatePassword(newPassword, confirmPassword);
+    
+    if (result.success) {
+      showNotification("Your password has been changed successfully");
+      // Clear password fields after successful change
+      setNewPassword("");
+      setConfirmPassword("");
+    } else {
+      showNotification(result.message || "Failed to change password");
+    }
   };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,10 +151,20 @@ const ManageAccount: React.FC = () => {
           </Button>
         </div>
         <div className="manage-account__main-section change-password">
-          <Input variant="password" placeholder="New Password" />
-          <Input variant="password" placeholder="Confirm New Password" />
-          <Button variant="primary" onClick={handlePasswordChange}>
-            Change Password
+          <Input 
+            variant="password" 
+            placeholder="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <Input 
+            variant="password" 
+            placeholder="Confirm New Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <Button variant="primary" type="button" onClick={handlePasswordChange} disabled={userLoading}>
+            {userLoading ? "Changing..." : "Change Password"}
           </Button>
         </div>
         <Button
