@@ -7,6 +7,7 @@ import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
 import ProfileDefaultIcon from "../../../assets/svg/profile-icon-light.svg";
 import arrowLeft from "../../../assets/svg/arrow-left.svg";
+import { getProfilePictureUrl } from "../../../utils/imageUtils";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
@@ -18,11 +19,17 @@ const ManageAccount: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
 
-  // Initialize name values from user data
+  // Initialize name values and profile picture from user data
   useEffect(() => {
     if (user) {
       setFirstNameValue(user.firstName);
       setLastNameValue(user.lastName);
+      
+      // Load profile picture from backend if available
+      const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
+      if (pictureUrl) {
+        setProfileImage(pictureUrl);
+      }
     }
   }, [user]);
 

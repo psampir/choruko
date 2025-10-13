@@ -13,6 +13,7 @@ interface User {
   role?: string;
   hasHousehold?: boolean;
   householdId?: string | null;
+  profilePicturePath?: string | null;
 }
 
 // Define the context interface
