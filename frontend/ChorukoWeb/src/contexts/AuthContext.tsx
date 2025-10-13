@@ -12,6 +12,7 @@ interface User {
   role?: string;
   hasHousehold?: boolean;
   householdId?: string | null;
+  profilePicturePath?: string | null;
   // Add other user properties from your backend as needed
 }
 
