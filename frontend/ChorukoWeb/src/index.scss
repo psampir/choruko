@@ -73,6 +73,11 @@
   padding-bottom: var(--navbar-height); /* Space for bottom navbar */
 }
 
+/* Additional top padding for notched devices */
+:root.is-notch .main-content {
+  padding-top: calc(var(--navbar-height) + env(safe-area-inset-top));
+}
+
 body {
   display: flex;
   justify-content: center;
