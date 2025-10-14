@@ -5,4 +5,5 @@ public record UserInfoResponse(
     string FirstName, 
     string LastName, 
     string Email,
-    string? HouseholdId);
+    string? HouseholdId,
+    string? ProfilePicturePath);

@@ -7,20 +7,29 @@ import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
 import ProfileDefaultIcon from "../../../assets/svg/profile-icon-light.svg";
 import arrowLeft from "../../../assets/svg/arrow-left.svg";
+import { getProfilePictureUrl } from "../../../utils/imageUtils";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
-  const { user, updateUserNames, loading: userLoading } = useUser();
+  const { user, updateUserNames, updatePassword, updateProfilePicture, deleteAccount, loading: userLoading } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [profileImageSrc, setProfileImageSrc] = useState<string>(ProfileDefaultIcon);
 
-  // Initialize name values from user data
+  // Initialize name values and profile picture from user data
   useEffect(() => {
     if (user) {
       setFirstNameValue(user.firstName);
       setLastNameValue(user.lastName);
+      
+      // Load profile picture from backend if available
+      const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
+      if (pictureUrl) {
+        setProfileImageSrc(pictureUrl);
+      }
     }
   }, [user]);
 
@@ -58,25 +67,67 @@ const ManageAccount: React.FC = () => {
     }
   };
 
-  const handlePasswordChange = () => {
-    showNotification("Your password has been changed");
+  const handlePasswordChange = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!newPassword || !confirmPassword) {
+      showNotification("Please fill in all password fields");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showNotification("New passwords do not match");
+      return;
+    }
+
+    const result = await updatePassword(newPassword, confirmPassword);
+    
+    if (result.success) {
+      showNotification("Your password has been changed successfully");
+      // Clear password fields after successful change
+      setNewPassword("");
+      setConfirmPassword("");
+    } else {
+      showNotification(result.message || "Failed to change password");
+    }
   };
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setProfileImage(result);
-        showNotification("Profile picture updated");
-      };
-      reader.readAsDataURL(file);
+      // Upload to server first
+      const result = await updateProfilePicture(file);
+      
+      if (result.success) {
+        // Only update preview after successful upload
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setProfileImageSrc(result);
+        };
+        reader.readAsDataURL(file);
+        showNotification("Profile picture updated successfully");
+      } else {
+        showNotification(result.message || "Failed to update profile picture");
+      }
     }
   };
 
   const triggerFileInput = () => {
     document.getElementById("profile-image-input")?.click();
+  };
+
+  const handleDeleteAccount = async () => {
+    const result = await deleteAccount();
+    
+    if (result.success) {
+      // User will be logged out and redirected by the deleteAccount function
+      showNotification("Account deleted successfully");
+    } else {
+      showNotification(result.message || "Failed to delete account");
+      setOpenPopup(false);
+    }
   };
 
   return (
@@ -96,7 +147,7 @@ const ManageAccount: React.FC = () => {
 
       <h1 className="manage-account__template-name">Manage Account</h1>
       <div className="account-header">
-        <img className="account-image" src={profileImage} alt="Account" />
+        <img className="account-image" src={profileImageSrc} alt="Account" />
         <Button variant="primary" onClick={triggerFileInput}>
           Change Picture
         </Button>
@@ -127,10 +178,20 @@ const ManageAccount: React.FC = () => {
           </Button>
         </div>
         <div className="manage-account__main-section change-password">
-          <Input variant="password" placeholder="New Password" />
-          <Input variant="password" placeholder="Confirm New Password" />
-          <Button variant="primary" onClick={handlePasswordChange}>
-            Change Password
+          <Input 
+            variant="password" 
+            placeholder="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <Input 
+            variant="password" 
+            placeholder="Confirm New Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <Button variant="primary" type="button" onClick={handlePasswordChange} disabled={userLoading}>
+            {userLoading ? "Changing..." : "Change Password"}
           </Button>
         </div>
         <Button
@@ -144,9 +205,11 @@ const ManageAccount: React.FC = () => {
       {openPopup && (
         <Popup variant="red" title="" onClose={() => setOpenPopup(false)}>
           <p>Are you sure you want to delete your account?</p>
-          <img src={profileImage} alt="Profile Image" />
+          <img src={profileImageSrc} alt="Profile Image" />
           <p>{user ? `${user.firstName} ${user.lastName}` : `${firstNameValue} ${lastNameValue}`}</p>
-          <Button variant="red">Delete</Button>
+          <Button variant="red" onClick={handleDeleteAccount} disabled={userLoading}>
+            {userLoading ? "Deleting..." : "Delete"}
+          </Button>
         </Popup>
       )}
     </div>
