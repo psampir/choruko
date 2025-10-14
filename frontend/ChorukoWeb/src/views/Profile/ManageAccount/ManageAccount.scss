@@ -15,6 +15,11 @@
   }
 }
 
+// Styles for iOS devices with a notch
+:root.is-notch .back-arrow {
+  top: calc(90px + env(safe-area-inset-top));
+}
+
 .notification-bar {
   position: fixed;
   display: flex;
