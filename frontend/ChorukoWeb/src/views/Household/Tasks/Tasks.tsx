@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Tasks.scss";
 import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
@@ -17,6 +17,22 @@ interface Task {
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // State to manage collapsed sections
+  const [collapsedSections, setCollapsedSections] = useState({
+    overtime: false,
+    todo: false,
+    done: false,
+  });
+
+  // Toggle section collapse
+  const toggleSection = (section: keyof typeof collapsedSections) => {
+    setCollapsedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
 
   // State to manage tasks
   const [tasks, setTasks] = useState<Task[]>([
@@ -55,6 +71,62 @@ const Tasks: React.FC = () => {
       status: "overtime",
     },
   ]);
+
+  // Ref to track if we've already processed the new task
+  const hasAddedTaskRef = useRef(false);
+
+  // Effect to handle new task from AddTask page
+  useEffect(() => {
+    const state = location.state as {
+      newTask?: {
+        name: string;
+        description: string;
+        assignees: string[];
+        deadline: string;
+      };
+    };
+
+    // Only process if we have a new task and haven't already added it
+    if (state?.newTask && !hasAddedTaskRef.current) {
+      hasAddedTaskRef.current = true;
+      const { newTask } = state;
+
+      // Calculate time left based on deadline
+      const calculateTimeLeft = (deadline: string) => {
+        if (!deadline) return "0h";
+
+        const deadlineDate = new Date(deadline);
+        const now = new Date();
+        const diffMs = deadlineDate.getTime() - now.getTime();
+        const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+
+        return diffHours > 0 ? `${diffHours}h` : `${diffHours}h`;
+      };
+
+      const timeLeft = calculateTimeLeft(newTask.deadline);
+
+      // Create the task with proper format
+      setTasks((prevTasks) => {
+        const taskToAdd: Task = {
+          id: prevTasks.length + 1,
+          name: newTask.name,
+          description: newTask.description,
+          assignees: newTask.assignees,
+          timeLeft: timeLeft,
+          status: "todo",
+        };
+        return [...prevTasks, taskToAdd];
+      });
+
+      // Clear the location state to prevent re-adding on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+
+    // Reset the ref when state is cleared
+    if (!state?.newTask) {
+      hasAddedTaskRef.current = false;
+    }
+  }, [location.state, navigate, location.pathname]);
 
   // Add new task function
   const addTask = () => {
@@ -157,38 +229,99 @@ const Tasks: React.FC = () => {
 
       <div className="tasks__content">
         {/* Overtime Section */}
-        <div className="tasks__section tasks__section--overtime">
-          <h2 className="tasks__section-title">OVERTIME</h2>
-          {overtimeTasks.length > 0 ? (
-            overtimeTasks.map((task, index) =>
-              renderTask(task, index === overtimeTasks.length - 1, index === 0)
-            )
-          ) : (
-            <p className="tasks__empty-message">No overtime tasks</p>
+        <div
+          className={`tasks__section tasks__section--overtime ${
+            collapsedSections.overtime ? "tasks__section--collapsed" : ""
+          }`}
+        >
+          <h2
+            className="tasks__section-title"
+            onClick={() => toggleSection("overtime")}
+          >
+            OVERTIME
+          </h2>
+          <span
+            className="dropdown__arrow"
+            onClick={() => toggleSection("overtime")}
+          >
+            &#9660;
+          </span>
+          {!collapsedSections.overtime && (
+            <div className="tasks__list">
+              {overtimeTasks.length > 0 ? (
+                overtimeTasks.map((task, index) =>
+                  renderTask(
+                    task,
+                    index === overtimeTasks.length - 1,
+                    index === 0
+                  )
+                )
+              ) : (
+                <p className="tasks__empty-message">No overtime tasks</p>
+              )}
+            </div>
           )}
         </div>
 
         {/* To-Do Section */}
-        <div className="tasks__section tasks__section--todo">
-          <h2 className="tasks__section-title">TO DO</h2>
-          {todoTasks.length > 0 ? (
-            todoTasks.map((task, index) =>
-              renderTask(task, index === todoTasks.length - 1, index === 0)
-            )
-          ) : (
-            <p className="tasks__empty-message">No tasks to do</p>
+        <div
+          className={`tasks__section tasks__section--todo ${
+            collapsedSections.todo ? "tasks__section--collapsed" : ""
+          }`}
+        >
+          <h2
+            className="tasks__section-title"
+            onClick={() => toggleSection("todo")}
+          >
+            TO DO
+          </h2>
+          <span
+            className="dropdown__arrow"
+            onClick={() => toggleSection("todo")}
+          >
+            &#9660;
+          </span>
+          {!collapsedSections.todo && (
+            <div className="tasks__list">
+              {todoTasks.length > 0 ? (
+                todoTasks.map((task, index) =>
+                  renderTask(task, index === todoTasks.length - 1, index === 0)
+                )
+              ) : (
+                <p className="tasks__empty-message">No tasks to do</p>
+              )}
+            </div>
           )}
         </div>
 
         {/* Done Section */}
-        <div className="tasks__section tasks__section--done">
-          <h2 className="tasks__section-title">DONE</h2>
-          {doneTasks.length > 0 ? (
-            doneTasks.map((task, index) =>
-              renderTask(task, index === doneTasks.length - 1, index === 0)
-            )
-          ) : (
-            <p className="tasks__empty-message">No completed tasks</p>
+        <div
+          className={`tasks__section tasks__section--done ${
+            collapsedSections.done ? "tasks__section--collapsed" : ""
+          }`}
+        >
+          <h2
+            className="tasks__section-title"
+            onClick={() => toggleSection("done")}
+          >
+            DONE
+          </h2>
+          <span
+            className="dropdown__arrow"
+            onClick={() => toggleSection("done")}
+          >
+            &#9660;
+          </span>
+          {!collapsedSections.done && (
+            <div className="tasks__list">
+              {doneTasks.length > 0 ? (
+                doneTasks.map((task, index) =>
+                  renderTask(task, index === doneTasks.length - 1, index === 0)
+                )
+              ) : (
+                <p className="tasks__empty-message">No completed tasks</p>
+              )}
+            </div>
           )}
         </div>
       </div>

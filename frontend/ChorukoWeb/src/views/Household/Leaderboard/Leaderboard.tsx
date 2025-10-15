@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import BottomNav from "../../../components/BottomNav/BottomNav";
 import star from "../../../assets/svg/star.svg";
 import "./Leaderboard.scss";
 
@@ -140,7 +141,7 @@ const Leaderboard: React.FC = () => {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <div className="dropdown__selected">
-              <span className="dropdown__arrow">▼</span>
+              <span className="dropdown__arrow">&#9660;</span>
               <span className="dropdown__text">{activeFilter}</span>
             </div>
             {isDropdownOpen && (
@@ -191,6 +192,8 @@ const Leaderboard: React.FC = () => {
           ))}
         </div>
       </div>
+
+      <BottomNav />
     </div>
   );
 };
