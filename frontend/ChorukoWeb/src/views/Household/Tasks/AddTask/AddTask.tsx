@@ -5,13 +5,15 @@ import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import NavbarMobile from "../../../../components/NavbarMobile";
 import arrowLeftIcon from "../../../../assets/svg/arrow-left.svg";
-import pencilIcon from "../../../../assets/svg/pencil.svg";
+
 import checkIcon from "../../../../assets/svg/check.svg";
+import star from "../../../../assets/svg/star.svg";
 
 // Activity type definition
 interface Activity {
   id: number;
   name: string;
+  info: string;
   points: number;
 }
 
@@ -29,11 +31,30 @@ const AddTask: React.FC = () => {
   const [selectedAssignees, setSelectedAssignees] = useState<number[]>([]);
   const [deadline, setDeadline] = useState("");
 
+  // State for collapsed sections
+  const [collapsedSections, setCollapsedSections] = useState({
+    activities: false,
+    assignees: false,
+  });
+
+  // Toggle section collapse
+  const toggleSection = (section: keyof typeof collapsedSections) => {
+    setCollapsedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
   // Mock data for activities
   const activities: Activity[] = [
-    { id: 1, name: "Vacuuming the floor", points: 64 },
-    { id: 2, name: "Vacuuming the floor", points: 64 },
-    { id: 3, name: "Vacuuming the floor", points: 64 },
+    {
+      id: 1,
+      name: "Vacuuming the floor",
+      info: "Vacuuming the floor",
+      points: 64,
+    },
+    { id: 2, name: "Clean dishes", info: "Clean dishes", points: 64 },
+    { id: 3, name: "Make breakfast", info: "Make breakfast", points: 64 },
   ];
 
   // Mock data for assignees
@@ -68,14 +89,34 @@ const AddTask: React.FC = () => {
   };
 
   const handleAddTask = () => {
-    // TODO: Implement task creation logic
-    console.log({
-      taskDescription,
-      selectedActivity,
-      selectedAssignees,
-      deadline,
-    });
-    navigate("/tasks");
+    // Validate that required fields are filled
+    if (
+      !taskDescription ||
+      !selectedActivity ||
+      selectedAssignees.length === 0
+    ) {
+      console.log("Please fill all required fields");
+      return;
+    }
+
+    // Get the selected activity details
+    const activity = activities.find((a) => a.id === selectedActivity);
+
+    // Get the selected assignees' avatars
+    const assigneeAvatars = assignees
+      .filter((assignee) => selectedAssignees.includes(assignee.id))
+      .map((assignee) => assignee.avatar);
+
+    // Create the new task object
+    const newTask = {
+      name: activity?.name || taskDescription,
+      description: taskDescription,
+      assignees: assigneeAvatars,
+      deadline: deadline,
+    };
+
+    // Navigate back to tasks with the new task data
+    navigate("/tasks", { state: { newTask } });
   };
 
   const handleBack = () => {
@@ -102,93 +143,112 @@ const AddTask: React.FC = () => {
         {/* Task Description */}
         <div className="add-task__section">
           <Input
-            variant="primary"
+            variant="edit"
             placeholder="Task description"
             value={taskDescription}
             onChange={(e) => setTaskDescription(e.target.value)}
             className="add-task__input"
           />
-          <button className="add-task__edit-icon" aria-label="Edit description">
-            <img src={pencilIcon} alt="Edit" />
-          </button>
         </div>
 
         {/* Choose Activity Section */}
-        <div className="add-task__section add-task__section--bordered">
-          <div className="add-task__section-header">
-            <h2 className="add-task__section-title">CHOOSE AN ACTIVITY</h2>
-          </div>
-          <div className="add-task__list">
-            {activities.map((activity) => (
-              <div
-                key={activity.id}
-                className={`add-task__item ${
-                  selectedActivity === activity.id
-                    ? "add-task__item--selected"
-                    : ""
-                }`}
-                onClick={() => handleActivitySelect(activity.id)}
-              >
-                <div className="add-task__item-info">
-                  <span className="add-task__points">★ {activity.points}</span>
-                  <span className="add-task__activity-name">
-                    {activity.name}
-                  </span>
-                </div>
-                <button
-                  className="add-task__item-action"
-                  aria-label="Edit activity"
-                >
-                  <img src={pencilIcon} alt="Edit" />
-                </button>
+        {activities && (
+          <div
+            className={`participants-list ${
+              collapsedSections.activities ? "participants-list--collapsed" : ""
+            }`}
+          >
+            <div
+              className="participants-list__header"
+              onClick={() => toggleSection("activities")}
+            >
+              ACTIVITIES
+              <span className="dropdown__arrow">&#9660;</span>
+            </div>
+            {!collapsedSections.activities && (
+              <div className="participants-list__content">
+                {activities.map((activity) => (
+                  <div
+                    className={`activity ${
+                      selectedActivity === activity.id
+                        ? "activity--selected"
+                        : ""
+                    }`}
+                    key={activity.id}
+                    onClick={() => handleActivitySelect(activity.id)}
+                  >
+                    <div className="activity-data">
+                      <span className="points">
+                        <img src={star} alt="star" />
+                        {activity.points}
+                      </span>
+                      <p>{activity.info}</p>
+                    </div>
+                    {selectedActivity === activity.id && (
+                      <img
+                        src={checkIcon}
+                        alt="Selected"
+                        className="check-icon"
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        </div>
+        )}
 
         {/* Select Assignees Section */}
-        <div className="add-task__section add-task__section--bordered">
-          <div className="add-task__section-header">
-            <h2 className="add-task__section-title">SELECT ASSIGNEES</h2>
+        <div
+          className={`participants-list ${
+            collapsedSections.assignees ? "participants-list--collapsed" : ""
+          }`}
+        >
+          <div
+            className="participants-list__header"
+            onClick={() => toggleSection("assignees")}
+          >
+            SELECT ASSIGNEES
+            <span className="dropdown__arrow">&#9660;</span>
           </div>
-          <div className="add-task__list">
-            {assignees.map((assignee) => (
-              <div
-                key={assignee.id}
-                className={`add-task__item ${
-                  selectedAssignees.includes(assignee.id)
-                    ? "add-task__item--selected"
-                    : ""
-                }`}
-                onClick={() => handleAssigneeToggle(assignee.id)}
-              >
-                <div className="add-task__item-info">
-                  <img
-                    src={assignee.avatar}
-                    alt={assignee.name}
-                    className="add-task__avatar"
-                  />
-                  <span className="add-task__assignee-name">
-                    {assignee.name}
-                  </span>
+          {!collapsedSections.assignees && (
+            <div className="participants-list__content">
+              {assignees.map((assignee) => (
+                <div
+                  key={assignee.id}
+                  className={`activity ${
+                    selectedAssignees.includes(assignee.id)
+                      ? "activity--selected"
+                      : ""
+                  }`}
+                  onClick={() => handleAssigneeToggle(assignee.id)}
+                >
+                  <div className="activity-data">
+                    <img
+                      src={assignee.avatar}
+                      alt={assignee.name}
+                      className="assignee-avatar"
+                    />
+                    <p>{assignee.name}</p>
+                  </div>
+                  {selectedAssignees.includes(assignee.id) && (
+                    <img
+                      src={checkIcon}
+                      alt="Selected"
+                      className="check-icon"
+                    />
+                  )}
                 </div>
-                {selectedAssignees.includes(assignee.id) && (
-                  <img
-                    src={checkIcon}
-                    alt="Selected"
-                    className="add-task__check"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Deadline */}
         <div className="add-task__section">
           <Input
             type="date"
-            variant="primary"
+            variant="datetime"
             placeholder="Deadline"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}

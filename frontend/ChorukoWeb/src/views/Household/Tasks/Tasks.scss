@@ -34,14 +34,30 @@
   // Element: tasks__section
   &__section {
     position: relative;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
     width: 100%;
     border: 2px solid var(--color-secondary);
     border-radius: var(--border-radius-standart);
     background-color: var(--color-background-secondary);
+    
+    .tasks__list{
+      padding-top: 33px;
+    }
 
-    // First task in any section should have margin-top for the absolute title
-    .task--first {
-      margin-top: 36px;
+    // Collapsed state - only show title
+    &--collapsed {
+      height: 30px;
+      min-height: 30px;
+
+      .tasks__list {
+        display: none;
+      }
+
+      .dropdown__arrow {
+        transform: rotate(-90deg);
+      }
     }
 
     // Modifiers for different section types
@@ -54,15 +70,11 @@
       background-color: var(--color-error-bg-secondary);
 
       .tasks__section-title {
-        position: absolute;
-        top: -3px;
-        width: calc(100% + 3px);
-        height: calc(33px + 3px);
-
         border: 2px solid var(--color-error-bg);
-        padding: 0 var(--spacing-md);
         background-color: var(--color-error-bg);
+        z-index: 5;
       }
+
 
       .task::after {
         background-color: var(--color-error-bg-tr);
@@ -71,6 +83,7 @@
 
     &--todo {
       border-color: var(--color-secondary);
+
     }
 
     &--done {
@@ -78,21 +91,63 @@
     }
   }
 
+  // Element: tasks__list (wrapper for tasks with scroll)
+  &__list {
+    width: 100%;
+    max-height: calc(2 * (var(--spacing-sm) * 2 + 72px)); // 2 tasks height
+    overflow-y: auto;
+
+    // Custom scrollbar styling
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--color-secondary-half-tr);
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--color-secondary);
+    }
+  }
+
   &__section-title {
     position: absolute;
+    top: -3px;
+    width: calc(100% + 3px);
+    height: calc(33px + 3px);
+    padding: 0 var(--spacing-md);
+    background-color: var(--color-error-bg);
+    z-index: 5;
+
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: var(--font-size-h6);
-    top: -3px;
-    width: calc(100% + 3px);
-    height: calc(33px + 3px);
-
+    border: 2px solid var(--color-secondary);
     border-radius: var(--border-radius-standart);
     background-color: var(--color-secondary);
     font-size: var(--font-size-body);
     font-weight: 400;
     color: var(--color-background);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .dropdown__arrow {
+    position: absolute;
+    right: 15px;
+    top: 7px;
+    color: var(--color-background);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    font-size: var(--font-size-body3);
+    z-index: 5;
   }
 
   // Empty state message
@@ -142,7 +197,7 @@
   // Element: task__name
   &__name {
     font-size: var(--font-size-h5);
-    margin: 0 0 var(--spacing-xs) 0;
+    margin: 0 0 var(--spacing-sm) 0;
     color: #333;
   }
 
