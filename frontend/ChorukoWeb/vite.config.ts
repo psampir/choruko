@@ -60,7 +60,7 @@ export default defineConfig({
         background_color: '#ffffff',
         start_url: '/login',
         scope: '/',
-        display: 'standalone',
+        display: 'fullscreen',
         display_override: ['standalone', 'browser'],
         orientation: 'portrait-primary',
         icons: manifestIcons
