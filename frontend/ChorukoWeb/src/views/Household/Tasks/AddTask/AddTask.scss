@@ -52,6 +52,12 @@
 
   &__section {
     margin-bottom: var(--spacing-xl);
+
+    .add-task__input {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   // Element: add-task__footer
@@ -76,6 +82,7 @@
     margin-bottom: var(--spacing-xl);
     max-height: calc(100vh - 200px - 80px);
     scroll-behavior: smooth;
+    overflow-x: hidden;
 
     // Collapsed state
     &--collapsed {

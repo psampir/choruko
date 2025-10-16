@@ -41,8 +41,8 @@
     border: 2px solid var(--color-secondary);
     border-radius: var(--border-radius-standart);
     background-color: var(--color-background-secondary);
-    
-    .tasks__list{
+
+    .tasks__list {
       padding-top: 33px;
     }
 
@@ -75,7 +75,6 @@
         z-index: 5;
       }
 
-
       .task::after {
         background-color: var(--color-error-bg-tr);
       }
@@ -83,7 +82,6 @@
 
     &--todo {
       border-color: var(--color-secondary);
-
     }
 
     &--done {
@@ -192,6 +190,8 @@
   // Element: task__info
   &__info {
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
   }
 
   // Element: task__name
@@ -205,6 +205,10 @@
   &__description {
     font-size: var(--font-size-body2);
     margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
   }
 
   // Element: task__meta
@@ -227,6 +231,8 @@
     position: relative;
     display: flex;
     height: 32px;
+    min-width: 32px;
+    padding-left: 32px;
   }
 
   // Element: task__assignee-avatar
@@ -252,7 +258,7 @@
 
     // Second avatar positioning (when there are 2 or less)
     &:nth-child(2) {
-      left: -29px;
+      left: 3px;
       z-index: 2;
     }
 
@@ -261,7 +267,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      left: -28px;
+      left: 4px;
       background-color: var(--color-error-bg);
       font-size: var(--font-size-h5);
       color: var(--color-background);
