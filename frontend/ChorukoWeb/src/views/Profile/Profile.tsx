@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { getProfilePictureUrl } from '../../utils/imageUtils';
 import './Profile.scss';
 
 const Profile: React.FC = () => {
@@ -9,11 +10,17 @@ const Profile: React.FC = () => {
     await logout();
   };
 
+  const profilePictureUrl = getProfilePictureUrl(user?.profilePicturePath);
+
   return (
     <div className="profile">
       <div className="profile-header">
         <div className="profile-avatar">
-          {user?.firstName?.charAt(0)?.toUpperCase() || '👤'}
+          {profilePictureUrl ? (
+            <img src={profilePictureUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+          ) : (
+            user?.firstName?.charAt(0)?.toUpperCase() || '👤'
+          )}
         </div>
         <h1>Profile</h1>
       </div>

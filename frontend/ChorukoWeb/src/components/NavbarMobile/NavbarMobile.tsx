@@ -5,6 +5,7 @@ import Popup from "../Popup";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
+import { getProfilePictureUrl } from "../../utils/imageUtils";
 
 // Import all SVG assets
 import lightThemeIcon from "../../assets/svg/light-theme.svg";
@@ -55,6 +56,9 @@ const NavbarMobile = () => {
     }
   };
 
+  // Get profile picture URL
+  const profilePictureUrl = getProfilePictureUrl(user?.profilePicturePath);
+
   return (
     <div className="navbar-mobile">
       <nav className="navbar-mobile-container">
@@ -67,12 +71,22 @@ const NavbarMobile = () => {
         </span>
         {!hideProfilePopup && (
           <span className="profile-icon">
-            <img
-              src={profileIcon}
-              alt="Profile"
-              className="nav-profile-icon"
-              onClick={profileClickHandler}
-            />
+            {profilePictureUrl ? (
+              <img
+                src={profilePictureUrl}
+                alt="Profile"
+                className="nav-profile-icon"
+                onClick={profileClickHandler}
+                style={{ width: '46px', height: '46px', objectFit: 'cover', borderRadius: '50%' }}
+              />
+            ) : (
+              <img
+                src={profileIcon}
+                alt="Profile"
+                className="nav-profile-icon"
+                onClick={profileClickHandler}
+              />
+            )}
           </span>
         )}
       </nav>
@@ -97,64 +111,73 @@ const NavbarMobile = () => {
           className={`profile__popup-container ${isProfileOpen ? "active" : ""}`}
           onClick={profileClickHandler}
         >
-        <div className="profile-popup" onClick={handlePopupClick}>
-          <i
-            className="profile-popup__close-icon"
-            onClick={profileClickHandler}
-          ></i>
-          <img
-            src={profileIcon}
-            alt="Profile"
-            className="profile-popup__icon"
-          />
-          <h5>{user ? `${user.firstName} ${user.lastName}` : "Username"}</h5>
-          {hasHousehold && <p>Household Name</p>}
-          <ul>
-            <li>
-              <Button
-                variant="primary"
-                onClick={() => (
-                  navigate("/manageAccount"), setProfileOpen(false)
-                )}
-              >
-                <img
-                  src={profileIconLight}
-                  alt="Profile Management"
-                  className="profile-management__icon"
-                />
-                Manage Account
-              </Button>
-            </li>
-            {hasHousehold && (
-              <>
-                <li>
-                  <Button
-                    variant="primary"
-                    onClick={() => (
-                      navigate("/manageHousehold"), setProfileOpen(false)
-                    )}
-                  >
-                    <img src={houseIcon} alt="Household Management" />
-                    Manage Household
-                  </Button>
-                </li>
-                <li>
-                  <Button variant="red" onClick={() => setOpenPopup(true)}>
-                    <img src={leaveIcon} alt="" />
-                    Leave Household
-                  </Button>
-                </li>
-              </>
+          <div className="profile-popup" onClick={handlePopupClick}>
+            <i
+              className="profile-popup__close-icon"
+              onClick={profileClickHandler}
+            ></i>
+            {profilePictureUrl ? (
+              <img
+                src={profilePictureUrl}
+                alt="Profile"
+                className="profile-popup__icon"
+                style={{ width: '46px', height: '46px', objectFit: 'cover', borderRadius: '50%' }}
+              />
+            ) : (
+              <img
+                src={profileIcon}
+                alt="Profile"
+                className="profile-popup__icon"
+              />
             )}
-            <li>
-              <Button variant="red" onClick={handleLogout}>
-                <img src={closeIconLight} alt="" />
-                Log Out
-              </Button>
-            </li>
-          </ul>
+            <h5>{user ? `${user.firstName} ${user.lastName}` : "Username"}</h5>
+            {hasHousehold && <p>Household Name</p>}
+            <ul>
+              <li>
+                <Button
+                  variant="primary"
+                  onClick={() => (
+                    navigate("/manageAccount"), setProfileOpen(false)
+                  )}
+                >
+                  <img
+                    src={profileIconLight}
+                    alt="Profile Management"
+                    className="profile-management__icon"
+                  />
+                  Manage Account
+                </Button>
+              </li>
+              {hasHousehold && (
+                <>
+                  <li>
+                    <Button
+                      variant="primary"
+                      onClick={() => (
+                        navigate("/manageHousehold"), setProfileOpen(false)
+                      )}
+                    >
+                      <img src={houseIcon} alt="Household Management" />
+                      Manage Household
+                    </Button>
+                  </li>
+                  <li>
+                    <Button variant="red" onClick={() => setOpenPopup(true)}>
+                      <img src={leaveIcon} alt="" />
+                      Leave Household
+                    </Button>
+                  </li>
+                </>
+              )}
+              <li>
+                <Button variant="red" onClick={handleLogout}>
+                  <img src={closeIconLight} alt="" />
+                  Log Out
+                </Button>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
       )}
 
       {openPopup && (

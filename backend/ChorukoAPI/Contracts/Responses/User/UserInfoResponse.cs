@@ -1,8 +1,9 @@
 ﻿namespace ChorukoAPI.Contracts.Responses.User;
 
 public record UserInfoResponse(
+    string Id,
     string FirstName, 
     string LastName, 
-    string Email, 
-    bool HasHousehold, 
-    string? HouseholdId);
+    string Email,
+    string? HouseholdId,
+    string? ProfilePicturePath);

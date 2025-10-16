@@ -17,6 +17,12 @@
     height: 46px;
     cursor: pointer;
   }
+}
+
+// Styles for iOS devices with a notch
+:root.is-notch .create-household .back-arrow {
+  top: calc(-60px + env(safe-area-inset-top));
+}
   h2 {
     position: absolute;
     top: 175px;

@@ -1,4 +1,5 @@
 using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Responses.Settlement;
 using ChorukoAPI.Contracts.Responses.Task;
 using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Data;
@@ -114,6 +115,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
 builder.Services.AddScoped<IMapper<UserPasswordResetData, AdminResetPasswordResponse>, AdminResetPasswordMapper>();
+builder.Services.AddScoped<IMapper<User, UserInfoResponse>, UserInfoMapper>();
+builder.Services.AddScoped<IMapper<Settlement, SettlementResponse>, SettlementMapper>();
+
+builder.Services.AddScoped<ISettlementService, SettlementService>();
 
 builder.Services.AddControllers();
 

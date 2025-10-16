@@ -39,7 +39,7 @@ function MainAppLayout({ children }: { children: React.ReactNode }) {
     <div className="app">
       <main className="main-content">{children}</main>
       <NavbarMobile />
-      {user?.hasHousehold && <BottomNav />}
+      {user?.householdId && <BottomNav />}
     </div>
   );
 }

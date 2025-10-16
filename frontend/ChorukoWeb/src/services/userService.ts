@@ -5,6 +5,11 @@ interface ChangeNamesData {
   lastName: string;
 }
 
+interface ChangePasswordData {
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
 class UserService {
   // Change user's first and last name
   async changeNames(firstName: string, lastName: string) {
@@ -31,6 +36,79 @@ class UserService {
       }
     } catch (error) {
       console.error("Error changing name:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Change user's password
+  async changePassword(newPassword: string, confirmNewPassword: string) {
+    try {
+      const requestBody: ChangePasswordData = {
+        newPassword,
+        confirmNewPassword,
+      };
+
+      const response = await fetch(`${apiBaseUrl}/User/change-password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Password changed successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to change password" };
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Change user's profile picture
+  async changePicture(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append("ProfilePicture", file);
+
+      const response = await fetch(`${apiBaseUrl}/User/change-picture`, {
+        method: "PUT",
+        credentials: "include",
+        body: formData,
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Profile picture changed successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to change profile picture" };
+      }
+    } catch (error) {
+      console.error("Error changing profile picture:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Delete user account
+  async deleteSelf() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/User/delete-self`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Account deleted successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to delete account" };
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
       return { success: false, message: "Network error occurred" };
     }
   }
