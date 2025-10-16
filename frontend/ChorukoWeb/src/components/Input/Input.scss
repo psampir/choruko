@@ -65,6 +65,7 @@
 
   &--edit {
     @extend .input--primary;
+    padding-right: 42px;
   }
 
   // Datetime input variant (inherits from primary)
@@ -130,6 +131,7 @@
 
   // Wrapper for password inputs with eye icon
   &__wrapper {
+    min-width: 288px;
     position: relative;
 
     .input__eye,
