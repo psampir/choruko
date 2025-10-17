@@ -4,20 +4,35 @@ import "./Tasks.scss";
 import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import timerIcon from "../../../assets/svg/timer.svg";
+import Popup from "../../../components/Popup/Popup";
+// import { useUser } from "../../../contexts/UserContext";
+import profileIcon from "../../../assets/svg/profile-icon.svg";
+import starIcon from "../../../assets/svg/star-black.svg";
+import timer from "../../../assets/svg/timer.svg";
 
 // Task type definition
+interface Assignee {
+  name: string;
+  avatar: string;
+}
+interface Author {
+  name: string;
+  avatar: string | null;
+}
 interface Task {
   id: number;
   name: string;
   description: string;
-  assignees: string[];
+  assignees: Assignee[];
   timeLeft: string;
   status: "overtime" | "todo" | "done";
+  author?: Author;
 }
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  // const { user } = useUser();
 
   // State to manage collapsed sections
   const [collapsedSections, setCollapsedSections] = useState({
@@ -41,34 +56,75 @@ const Tasks: React.FC = () => {
       name: "Activity name",
       description: "Activity description",
       assignees: [
-        "https://randomuser.me/api/portraits/men/1.jpg",
-        "https://randomuser.me/api/portraits/men/2.jpg",
-        "https://randomuser.me/api/portraits/men/3.jpg",
-        "https://randomuser.me/api/portraits/women/1.jpg",
+        {
+          name: "Andreas Toretto",
+          avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+        },
+        {
+          name: "John Doe",
+          avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+        },
+        {
+          name: "Jane Smith",
+          avatar: "https://randomuser.me/api/portraits/men/3.jpg",
+        },
+        {
+          name: "Anna Lee",
+          avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+        },
       ],
       timeLeft: "-4h",
       status: "overtime",
+      author: {
+        name: "Andreas Toretto",
+        avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+      },
     },
     {
       id: 2,
       name: "Second task",
       description: "Another task description",
-      assignees: ["https://randomuser.me/api/portraits/women/2.jpg"],
+      assignees: [
+        {
+          name: "Anna Lee",
+          avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+        },
+      ],
       timeLeft: "2h",
       status: "todo",
+      author: {
+        name: "Gabby Mayers",
+        avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+      },
     },
     {
       id: 3,
       name: "Activity name",
       description: "Activity description",
       assignees: [
-        "https://randomuser.me/api/portraits/men/1.jpg",
-        "https://randomuser.me/api/portraits/men/2.jpg",
-        "https://randomuser.me/api/portraits/men/3.jpg",
-        "https://randomuser.me/api/portraits/women/1.jpg",
+        {
+          name: "Andreas Toretto",
+          avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+        },
+        {
+          name: "John Doe",
+          avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+        },
+        {
+          name: "Jane Smith",
+          avatar: "https://randomuser.me/api/portraits/men/3.jpg",
+        },
+        {
+          name: "Anna Lee",
+          avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+        },
       ],
       timeLeft: "-4h",
       status: "overtime",
+      author: {
+        name: "Ann Huang",
+        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+      },
     },
   ]);
 
@@ -83,6 +139,7 @@ const Tasks: React.FC = () => {
         description: string;
         assignees: string[];
         deadline: string;
+        author?: string;
       };
     };
 
@@ -111,9 +168,19 @@ const Tasks: React.FC = () => {
           id: prevTasks.length + 1,
           name: newTask.name,
           description: newTask.description,
-          assignees: newTask.assignees,
+          assignees: Array.isArray(newTask.assignees)
+            ? newTask.assignees.map((a: any) =>
+                typeof a === "object"
+                  ? { name: a.name, avatar: a.avatar }
+                  : { name: a, avatar: a }
+              )
+            : [],
           timeLeft: timeLeft,
           status: "todo",
+          author:
+            newTask.author && typeof newTask.author === "object"
+              ? (newTask.author as Author)
+              : undefined,
         };
         return [...prevTasks, taskToAdd];
       });
@@ -130,24 +197,16 @@ const Tasks: React.FC = () => {
 
   // Add new task function
   const addTask = () => {
-    // const newTask: Task = {
-    //   id: tasks.length + 1,
-    //   name: "New Task",
-    //   description: "Task description",
-    //   assignees: [
-    //     "https://randomuser.me/api/portraits/men/" +
-    //       (tasks.length + 1) +
-    //       ".jpg",
-    //     "https://randomuser.me/api/portraits/women/" +
-    //       (tasks.length + 1) +
-    //       ".jpg",
-    //   ],
-    //   timeLeft: "0h",
-    //   status: "todo",
-    // };
-    // setTasks([...tasks, newTask]);
-
     navigate("/tasks/add");
+  };
+
+  // Mark task as done
+  const markTaskAsDone = (taskId: number) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId ? { ...task, status: "done" as const } : task
+      )
+    );
   };
 
   // Determine which avatars to show
@@ -170,9 +229,15 @@ const Tasks: React.FC = () => {
   const todoTasks = tasks.filter((task) => task.status === "todo");
   const doneTasks = tasks.filter((task) => task.status === "done");
 
+  // Popup state
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
+
   // Render individual task component
   const renderTask = (task: Task, isLast: boolean, isFirst: boolean) => {
-    const visibleAvatars = getVisibleAvatars(task.assignees);
+    const visibleAvatars = getVisibleAvatars(
+      task.assignees.map((a) => a.avatar)
+    );
     const hiddenCount =
       task.assignees.length > 2 ? task.assignees.length - 1 : 0;
 
@@ -182,6 +247,11 @@ const Tasks: React.FC = () => {
           isLast ? "task--last" : ""
         }`}
         key={task.id}
+        onClick={() => {
+          setSelectedTask(task);
+          setShowPopup(true);
+        }}
+        style={{ cursor: "pointer" }}
       >
         <div className="task__info">
           <p className="task__name">{task.name}</p>
@@ -201,7 +271,9 @@ const Tasks: React.FC = () => {
                 />
               ))}
               {hiddenCount > 0 && (
-                <span className="task__assignee-avatar task__assignee-avatar--active task__assignee-avatar--counter">
+                <span
+                  className={`task__assignee-avatar task__assignee-avatar--active task__assignee-avatar--counter task__assignee-avatar--counter-${task.status}`}
+                >
                   +{hiddenCount}
                 </span>
               )}
@@ -325,6 +397,88 @@ const Tasks: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Popup for task details using Popup component */}
+      {showPopup && selectedTask && (
+        <Popup
+          open={showPopup}
+          onClose={() => {
+            setShowPopup(false);
+            setSelectedTask(null);
+          }}
+          title={selectedTask.name}
+          variant={selectedTask.status === "overtime" ? "red" : "primary"}
+          actions={[
+            {
+              label: "Mark as done",
+              onClick: () => {
+                markTaskAsDone(selectedTask.id);
+                setShowPopup(false);
+                setSelectedTask(null);
+              },
+              variant:
+                selectedTask.status === "overtime" ? "danger" : "primary",
+            },
+          ]}
+          className="task-details-popup task-details-popup--button-top"
+        >
+          <div className="task-details-content">
+            <div className="task-details-description">
+              {selectedTask.description}
+            </div>
+            <div className="participants-list assignor-list">
+              <div className="participants-list__header">ASSIGNOR</div>
+              <div className="participants-list__content">
+                <div className="activity activity--selected">
+                  <div className="activity-data">
+                    <img
+                      src={selectedTask.author?.avatar || profileIcon}
+                      alt={selectedTask.author?.name || "User"}
+                      className="assignee-avatar"
+                    />
+                    <p>{selectedTask.author?.name || "Unknown"}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="participants-list assignees-list">
+              <div className="participants-list__header">ASSIGNEES</div>
+              <div className="participants-list__content">
+                {selectedTask.assignees.map((a, idx) => (
+                  <div className="activity activity--selected" key={idx}>
+                    <div className="activity-data">
+                      <img
+                        src={a.avatar}
+                        alt={a.name}
+                        className="assignee-avatar"
+                      />
+                      <p>{a.name}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="task-details-footer">
+              <div className="task-details-footer-item">
+                <span className="task-details-footer-icon">
+                  <img src={starIcon} alt="star icon" />
+                </span>
+                <span className="task-details-footer-label">POINTS</span>
+                <span className="task-details-footer-value">5 pts</span>
+              </div>
+              <div className="task-details-footer-item">
+                <span className="task-details-footer-icon">
+                  <img src={timer} alt="date icon" />
+                </span>
+                <span className="task-details-footer-label">DEADLINE</span>
+                <span className="task-details-footer-value">
+                  {selectedTask.timeLeft}
+                </span>
+              </div>
+            </div>
+          </div>
+        </Popup>
+      )}
 
       <BottomNav />
     </div>
