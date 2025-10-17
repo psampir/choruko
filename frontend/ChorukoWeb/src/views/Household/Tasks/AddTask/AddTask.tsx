@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../../../contexts/UserContext";
 import "./AddTask.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
@@ -26,6 +27,7 @@ interface Assignee {
 
 const AddTask: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [taskDescription, setTaskDescription] = useState("");
   const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
   const [selectedAssignees, setSelectedAssignees] = useState<number[]>([]);
@@ -102,17 +104,23 @@ const AddTask: React.FC = () => {
     // Get the selected activity details
     const activity = activities.find((a) => a.id === selectedActivity);
 
-    // Get the selected assignees' avatars
-    const assigneeAvatars = assignees
-      .filter((assignee) => selectedAssignees.includes(assignee.id))
-      .map((assignee) => assignee.avatar);
+    // Get the selected assignees' objects
+    const selectedAssigneeObjs = assignees.filter((assignee) =>
+      selectedAssignees.includes(assignee.id)
+    );
 
     // Create the new task object
     const newTask = {
       name: activity?.name || taskDescription,
       description: taskDescription,
-      assignees: assigneeAvatars,
+      assignees: selectedAssigneeObjs,
       deadline: deadline,
+      author: user
+        ? {
+            name: `${user.firstName} ${user.lastName}`,
+            avatar: user.profilePicturePath || null,
+          }
+        : null,
     };
 
     // Navigate back to tasks with the new task data
