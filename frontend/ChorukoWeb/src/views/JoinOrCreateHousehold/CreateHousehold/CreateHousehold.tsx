@@ -8,7 +8,7 @@ import arrowLeftIcon from "../../../assets/svg/arrow-left.svg";
 
 function CreateHousehold() {
   const navigate = useNavigate();
-  
+
   return (
     <div className="create-household">
       <NavbarMobile />
@@ -31,7 +31,9 @@ function CreateHousehold() {
       <Button variant="primary" className="create-btn">
         Create
       </Button>
-    </div>
+
+    </div >
   );
 }
+
 export default CreateHousehold;

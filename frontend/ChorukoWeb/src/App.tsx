@@ -8,15 +8,14 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
-import Tasks from "./views/Household/Tasks/Tasks";
-import AddTask from "./views/Household/Tasks/AddTask/AddTask";
-import Settlements from "./views/Household/Settlements/Settlements";
-import AddSettlement from "./views/Household/Settlements/AddSettlement/AddSettlement";
+import Tasks from "./views/Tasks/Tasks";
+import Expenses from "./views/Expenses/Expenses";
 import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
 import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
 import JoinOrCreateHousehold from "./views/JoinOrCreateHousehold/JoinOrCreateHousehold";
 import Invitations from "./views/JoinOrCreateHousehold/Invitations/Invitations";
+import CreateHousehold from "./views/JoinOrCreateHousehold/CreateHousehold/CreateHousehold";
 import Leaderboard from "./views/Household/Leaderboard/Leaderboard";
 import ManageAccount from "./views/Profile/ManageAccount/ManageAccount";
 import ManageHousehold from "./views/Profile/ManageHousehold/ManageHousehold";
@@ -35,7 +34,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 // Layout component for main app pages with bottom navigation
 function MainAppLayout({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
-
+  
   return (
     <div className="app">
       <main className="main-content">{children}</main>
@@ -71,7 +70,6 @@ function AppRoutes() {
             <AppLayout>
               <JoinOrCreateHousehold
                 onJoinHousehold={() => {}}
-                onCreateHousehold={() => {}}
               />
             </AppLayout>
           </ProtectedRoute>
@@ -90,15 +88,6 @@ function AppRoutes() {
       />
 
       <Route
-        path="/tasks/add"
-        element={
-          <ProtectedRoute>
-            <AddTask />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
         path="/invitations"
         element={
           <ProtectedRoute>
@@ -110,21 +99,23 @@ function AppRoutes() {
       />
 
       <Route
-        path="/settlements"
+        path="/createHousehold"
         element={
           <ProtectedRoute>
-            <MainAppLayout>
-              <Settlements />
-            </MainAppLayout>
+            <AppLayout>
+              <CreateHousehold />
+            </AppLayout>
           </ProtectedRoute>
         }
       />
 
       <Route
-        path="/settlements/add"
+        path="/expenses"
         element={
           <ProtectedRoute>
-            <AddSettlement />
+            <MainAppLayout>
+              <Expenses />
+            </MainAppLayout>
           </ProtectedRoute>
         }
       />
@@ -161,7 +152,7 @@ function AppRoutes() {
         }
       />
 
-      <Route
+       <Route
         path="/activities"
         element={
           <ProtectedRoute>
