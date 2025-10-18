@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import star from "../../../assets/svg/star.svg";
+import householdDefaultIcon from "../../../assets/svg/householdDefault.svg";
+import householdService from "../../../services/householdService";
+import type { HouseholdInfo } from "../../../services/householdService";
 import "./Leaderboard.scss";
 
 // Mock data for the leaderboard
@@ -67,9 +70,25 @@ type TimeFilter = "CURRENT MONTH" | "CURRENT YEAR" | "ALL TIME";
 const Leaderboard: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<TimeFilter>("CURRENT MONTH");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [householdInfo, setHouseholdInfo] = useState<HouseholdInfo | null>(null);
+  const [loading, setLoading] = useState(true);
   const participantsRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
   const participantRef = useRef<HTMLDivElement>(null);
+
+  // Fetch household information
+  useEffect(() => {
+    const fetchHouseholdInfo = async () => {
+      setLoading(true);
+      const result = await householdService.getHouseholdInfo();
+      if (result.success && result.data) {
+        setHouseholdInfo(result.data);
+      }
+      setLoading(false);
+    };
+
+    fetchHouseholdInfo();
+  }, []);
 
   const handleFilterChange = (filter: TimeFilter) => {
     setActiveFilter(filter);
@@ -121,10 +140,12 @@ const Leaderboard: React.FC = () => {
       <div className="household-section">
         <img
           className="household-image"
-          src="/src/assets/svg/householdDefault.svg"
+          src={householdInfo?.profilePictureUrl || householdDefaultIcon}
           alt="Household"
         />
-        <h1 className="household-name">Poznańska</h1>
+        <h1 className="household-name">
+          {loading ? "Loading..." : householdInfo?.name || "No Household"}
+        </h1>
         <p className="leaderboard-text">LEADERBOARD</p>
       </div>
 
