@@ -4,6 +4,7 @@ import { useHousehold } from "../../../contexts/HouseholdContext";
 import { useUser } from "../../../contexts/UserContext";
 import householdService from "../../../services/householdService";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
+import type { HouseholdMember } from "../../../services/householdService";
 import "./ManageHousehold.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
@@ -36,6 +37,7 @@ const ManageHousehold: React.FC = () => {
   const [nameValue, setNameValue] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>(householdDefaulIcon);
   const [clickedButton, setClickedButton] = useState<ButtonAction | null>(null);
+  const [selectedMember, setSelectedMember] = useState<HouseholdMember | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [notification, setNotification] = useState<{
@@ -175,6 +177,40 @@ const ManageHousehold: React.FC = () => {
     }
   };
 
+  const handleDeleteParticipant = async () => {
+    if (!selectedMember) return;
+
+    setLoading(true);
+    try {
+      const result = await householdService.removeUserFromHousehold(selectedMember.id);
+      if (result.success) {
+        showNotification("Participant removed successfully", "success");
+        setOpenPopup(false);
+        setSelectedMember(null);
+        await refreshHousehold();
+      } else {
+        showNotification(result.message || "Failed to remove participant", "error");
+      }
+    } catch (error) {
+      showNotification("An unexpected error occurred", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteMemberClick = (member: HouseholdMember) => {
+    setSelectedMember(member);
+    setClickedButton(buttonActions.deleteParticipant);
+    setOpenPopup(true);
+  };
+
+  // Sort members to show admin first
+  const sortedMembers = [...members].sort((a, b) => {
+    if (a.id === householdInfo?.adminId) return -1;
+    if (b.id === householdInfo?.adminId) return 1;
+    return 0;
+  });
+
   return (
     <div className="manage-household">
       <img
@@ -253,7 +289,7 @@ const ManageHousehold: React.FC = () => {
       {members && members.length > 0 && (
         <div className="participants-list">
           <div className="participants-list__header">PARTICIPANTS</div>
-          {members.map((member, index) => (
+          {sortedMembers.map((member, index) => (
             <div
               className="participant"
               key={member.id}
@@ -268,7 +304,12 @@ const ManageHousehold: React.FC = () => {
               </span>
 
               {member.id !== user?.id && (
-                <img src={decline} alt="Delete member" className="delete-member" onClick={() => { setOpenPopup(true) }} />
+                <img 
+                  src={decline} 
+                  alt="Delete member" 
+                  className="delete-member" 
+                  onClick={() => handleDeleteMemberClick(member)} 
+                />
               )}
             </div>
           ))}
@@ -278,7 +319,7 @@ const ManageHousehold: React.FC = () => {
       {openPopup && (
         <Popup
           variant={
-            clickedButton === buttonActions.deleteHousehold ? "red" : "primary"
+            clickedButton === buttonActions.deleteHousehold || clickedButton === buttonActions.deleteParticipant ? "red" : "primary"
           }
           title=""
           onClose={() => setOpenPopup(false)}
@@ -329,6 +370,19 @@ const ManageHousehold: React.FC = () => {
               <p>{householdInfo?.name || "Household"}</p>
               <Button variant="red" onClick={handleDeleteHousehold} disabled={loading}>
                 {loading ? "Deleting..." : "Delete"}
+              </Button>
+            </>
+          )}
+          {clickedButton === buttonActions.deleteParticipant && selectedMember && (
+            <>
+              <p>Are you sure you want to remove this participant?</p>
+              <img 
+                src={getProfilePictureUrl(selectedMember.profilePicturePath) || profileDefaultIcon} 
+                alt={`${selectedMember.firstName} ${selectedMember.lastName}`} 
+              />
+              <p>{`${selectedMember.firstName} ${selectedMember.lastName}`}</p>
+              <Button variant="red" onClick={handleDeleteParticipant} disabled={loading}>
+                {loading ? "Removing..." : "Remove"}
               </Button>
             </>
           )}
