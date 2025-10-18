@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import star from "../../../assets/svg/star.svg";
 import householdDefaultIcon from "../../../assets/svg/householdDefault.svg";
-import householdService from "../../../services/householdService";
-import type { HouseholdInfo } from "../../../services/householdService";
+import { useHousehold } from "../../../contexts/HouseholdContext";
 import "./Leaderboard.scss";
 
 // Mock data for the leaderboard
@@ -71,25 +70,10 @@ type TimeFilter = "CURRENT MONTH" | "CURRENT YEAR" | "ALL TIME";
 const Leaderboard: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<TimeFilter>("CURRENT MONTH");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [householdInfo, setHouseholdInfo] = useState<HouseholdInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { householdInfo, loading } = useHousehold();
   const participantsRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
   const participantRef = useRef<HTMLDivElement>(null);
-
-  // Fetch household information
-  useEffect(() => {
-    const fetchHouseholdInfo = async () => {
-      setLoading(true);
-      const result = await householdService.getHouseholdInfo();
-      if (result.success && result.data) {
-        setHouseholdInfo(result.data);
-      }
-      setLoading(false);
-    };
-
-    fetchHouseholdInfo();
-  }, []);
 
   const handleFilterChange = (filter: TimeFilter) => {
     setActiveFilter(filter);

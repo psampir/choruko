@@ -5,6 +5,7 @@ import Input from "../../../components/Input";
 import NavbarMobile from "../../../components/NavbarMobile";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
+import { useHousehold } from "../../../contexts/HouseholdContext";
 import householdIcon from "../../../assets/svg/householdDefault.svg";
 import arrowLeftIcon from "../../../assets/svg/arrow-left.svg";
 import householdService from "../../../services/householdService";
@@ -12,6 +13,7 @@ import householdService from "../../../services/householdService";
 function CreateHousehold() {
   const navigate = useNavigate();
   const { refreshUser } = useUser();
+  const { refreshHousehold } = useHousehold();
   const [householdName, setHouseholdName] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(householdIcon);
@@ -74,6 +76,8 @@ function CreateHousehold() {
         showNotification("Household created successfully!", "success");
         // Refresh user info to update hasHousehold state
         await refreshUser();
+        // Refresh household info to load household data
+        await refreshHousehold();
         setTimeout(() => {
           navigate("/leaderboard");
         }, 1500);

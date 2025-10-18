@@ -5,6 +5,14 @@ interface CreateHouseholdData {
   profilePicture?: File;
 }
 
+interface HouseholdMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+  profilePicturePath: string | null;
+  points: number;
+}
+
 interface HouseholdInfo {
   id: string;
   name: string;
@@ -13,6 +21,7 @@ interface HouseholdInfo {
   adminLastName: string;
   participantsCount: number;
   profilePictureUrl: string | null;
+  members: HouseholdMember[];
 }
 
 class HouseholdService {
@@ -73,4 +82,4 @@ class HouseholdService {
 
 // Export a single instance
 export default new HouseholdService();
-export type { HouseholdInfo };
+export type { HouseholdInfo, HouseholdMember };
