@@ -16,6 +16,16 @@ namespace ChorukoAPI.Controllers;
 [Route("api/[controller]")] 
 public class HouseholdController(IHouseholdService _householdService) : ControllerBase
 {
+    [HttpGet("household-info")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<HouseholdInfoResponse>>> GetHouseholdInfo()
+    {
+        var result = await _householdService.GetHouseholdInfoAsync();
+
+        return result.ToApiResponse();
+    }
+
+
     [HttpPost("create")] 
     [Authorize(Roles="None")]
     public async Task<ActionResult<ApiResponse<HouseholdResponse>>> CreateHousehold([FromForm] CreateHouseholdRequest request)
