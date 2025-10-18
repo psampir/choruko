@@ -152,23 +152,27 @@ const NavbarMobile = () => {
               </li>
               {hasHousehold && (
                 <>
-                  <li>
-                    <Button
-                      variant="primary"
-                      onClick={() => (
-                        navigate("/manageHousehold"), setProfileOpen(false)
-                      )}
-                    >
-                      <img src={houseIcon} alt="Household Management" />
-                      Manage Household
-                    </Button>
-                  </li>
-                  <li>
-                    <Button variant="red" onClick={() => setOpenPopup(true)}>
-                      <img src={leaveIcon} alt="" />
-                      Leave Household
-                    </Button>
-                  </li>
+                  {user?.id === householdInfo?.adminId && (
+                    <li>
+                      <Button
+                        variant="primary"
+                        onClick={() => (
+                          navigate("/manageHousehold"), setProfileOpen(false)
+                        )}
+                      >
+                        <img src={houseIcon} alt="Household Management" />
+                        Manage Household
+                      </Button>
+                    </li>
+                  )}
+                  {user?.id !== householdInfo?.adminId && (
+                    <li>
+                      <Button variant="red" onClick={() => setOpenPopup(true)}>
+                        <img src={leaveIcon} alt="" />
+                        Leave Household
+                      </Button>
+                    </li>
+                  )}
                 </>
               )}
               <li>
