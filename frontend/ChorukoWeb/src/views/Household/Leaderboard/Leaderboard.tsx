@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import star from "../../../assets/svg/star.svg";
 import householdDefaultIcon from "../../../assets/svg/householdDefault.svg";
 import { useHousehold } from "../../../contexts/HouseholdContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import "./Leaderboard.scss";
 
 // Mock data for the leaderboard
@@ -67,9 +69,11 @@ const mockParticipants = [
 type TimeFilter = "CURRENT MONTH" | "CURRENT YEAR" | "ALL TIME";
 
 const Leaderboard: React.FC = () => {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<TimeFilter>("CURRENT MONTH");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { householdInfo, loading } = useHousehold();
+  const { householdInfo, loading, error } = useHousehold();
+  const { hasHousehold, checkAuth } = useAuth();
   const participantsRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
   const participantRef = useRef<HTMLDivElement>(null);
@@ -78,6 +82,26 @@ const Leaderboard: React.FC = () => {
     setActiveFilter(filter);
     setIsDropdownOpen(false);
   };
+
+  // Check if user was removed from household
+  useEffect(() => {
+    const checkHouseholdAccess = async () => {
+      // If there's an error indicating no household access
+      if (error && error.includes("not part of any household")) {
+        console.log("User no longer has household access, refreshing auth and redirecting...");
+        // Refresh auth state to update hasHousehold
+        await checkAuth(false);
+        navigate("/joinOrCreateHousehold", { replace: true });
+      }
+      // Also check hasHousehold flag directly
+      else if (!loading && !hasHousehold) {
+        console.log("User has no household, redirecting...");
+        navigate("/joinOrCreateHousehold", { replace: true });
+      }
+    };
+
+    checkHouseholdAccess();
+  }, [error, hasHousehold, loading, checkAuth, navigate]);
 
   // Calculate dynamic height after component mounts
   useEffect(() => {

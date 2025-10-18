@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useHousehold } from "../../../contexts/HouseholdContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
 import householdService from "../../../services/householdService";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
@@ -31,7 +32,8 @@ type ButtonAction = (typeof buttonActions)[keyof typeof buttonActions];
 
 const ManageHousehold: React.FC = () => {
   const navigate = useNavigate();
-  const { householdInfo, members, refreshHousehold } = useHousehold();
+  const { householdInfo, members, refreshHousehold, error: householdError, loading: householdLoading } = useHousehold();
+  const { hasHousehold, checkAuth } = useAuth();
   const { user } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("");
@@ -49,6 +51,25 @@ const ManageHousehold: React.FC = () => {
     isVisible: false,
     type: "success",
   });
+
+  // Check if user was removed from household
+  useEffect(() => {
+    const checkHouseholdAccess = async () => {
+      // If there's an error indicating no household access
+      if (householdError && householdError.includes("not part of any household")) {
+        console.log("User no longer has household access, refreshing auth and redirecting...");
+        await checkAuth(false);
+        navigate("/joinOrCreateHousehold", { replace: true });
+      }
+      // Also check hasHousehold flag directly
+      else if (!householdLoading && !hasHousehold) {
+        console.log("User has no household, redirecting...");
+        navigate("/joinOrCreateHousehold", { replace: true });
+      }
+    };
+
+    checkHouseholdAccess();
+  }, [householdError, hasHousehold, householdLoading, checkAuth, navigate]);
 
   // Initialize values from householdInfo
   useEffect(() => {
@@ -304,11 +325,11 @@ const ManageHousehold: React.FC = () => {
               </span>
 
               {member.id !== user?.id && (
-                <img 
-                  src={decline} 
-                  alt="Delete member" 
-                  className="delete-member" 
-                  onClick={() => handleDeleteMemberClick(member)} 
+                <img
+                  src={decline}
+                  alt="Delete member"
+                  className="delete-member"
+                  onClick={() => handleDeleteMemberClick(member)}
                 />
               )}
             </div>
@@ -326,7 +347,7 @@ const ManageHousehold: React.FC = () => {
         >
           {clickedButton === buttonActions.delegateAdmin && (
             <>
-              <p>Selelect a new household admin</p>
+              <p>Select a new household admin</p>
               {members && members.length > 0 && (
                 <div className="participants-list">
                   <div className="participants-list__header">PARTICIPANTS</div>
@@ -376,9 +397,9 @@ const ManageHousehold: React.FC = () => {
           {clickedButton === buttonActions.deleteParticipant && selectedMember && (
             <>
               <p>Are you sure you want to remove this participant?</p>
-              <img 
-                src={getProfilePictureUrl(selectedMember.profilePicturePath) || profileDefaultIcon} 
-                alt={`${selectedMember.firstName} ${selectedMember.lastName}`} 
+              <img
+                src={getProfilePictureUrl(selectedMember.profilePicturePath) || profileDefaultIcon}
+                alt={`${selectedMember.firstName} ${selectedMember.lastName}`}
               />
               <p>{`${selectedMember.firstName} ${selectedMember.lastName}`}</p>
               <Button variant="red" onClick={handleDeleteParticipant} disabled={loading}>
