@@ -33,7 +33,7 @@ interface HouseholdProviderProps {
 
 // HouseholdProvider component
 export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }) => {
-  const { hasHousehold } = useAuth();
+  const { hasHousehold, checkAuth } = useAuth();
   const [householdInfo, setHouseholdInfo] = useState<HouseholdInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +59,11 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
       if (result.success && result.data) {
         setHouseholdInfo(result.data);
       } else {
+        // If backend indicates user has no household, refresh auth state
+        if (result.message?.includes("not part of any household")) {
+          console.log("Backend indicates user has no household, refreshing auth state...");
+          await checkAuth(false);
+        }
         setError(result.message || "Failed to fetch household info");
         setHouseholdInfo(null);
       }
