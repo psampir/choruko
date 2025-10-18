@@ -78,6 +78,74 @@ class HouseholdService {
       return { success: false, message: "Network error occurred" };
     }
   }
+
+  // Rename household
+  async renameHousehold(newName: string) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Household/rename`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ newName }),
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Household renamed successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to rename household" };
+      }
+    } catch (error) {
+      console.error("Error renaming household:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Change household picture
+  async changeHouseholdPicture(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append("ProfilePicture", file);
+
+      const response = await fetch(`${apiBaseUrl}/Household/change-picture`, {
+        method: "PATCH",
+        credentials: "include",
+        body: formData,
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Household picture changed successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to change household picture" };
+      }
+    } catch (error) {
+      console.error("Error changing household picture:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Delete household
+  async deleteHousehold() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Household/delete`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Household deleted successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to delete household" };
+      }
+    } catch (error) {
+      console.error("Error deleting household:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
 }
 
 // Export a single instance

@@ -49,6 +49,14 @@ body {
     transform: translateY(0);
   }
 
+  &--error {
+    background: var(--color-error-bg);
+  }
+
+  &--success {
+    background: var(--color-secondary);
+  }
+
   span {
     display: block;
     color: var(--color-background);
