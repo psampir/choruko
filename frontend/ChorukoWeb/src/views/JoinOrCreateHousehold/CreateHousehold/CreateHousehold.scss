@@ -1,7 +1,3 @@
-body{
-  align-items: flex-start;
-}
-
 .create-household {
   width: 100vw;
   height: 100%;
@@ -10,23 +6,18 @@ body{
   align-items: center;
   // padding: 0 2rem;
   background-color: #f1f8e8;
-  margin-top: 155px;
+  // margin-top: 155px;
 
   // Fix the selector - target images with both classes
   .back-arrow {
     position: absolute;
-    top: -60px;
+    // top: -60px;
     left: 20px;
     width: 46px;
     height: 46px;
     cursor: pointer;
   }
-}
 
-// Styles for iOS devices with a notch
-:root.is-notch .create-household .back-arrow {
-  top: calc(-60px + env(safe-area-inset-top));
-}
   h2 {
     position: absolute;
     top: 175px;
@@ -40,12 +31,12 @@ body{
     // Override for back arrow specifically
   }
 
-  .create-household__select-image{
+  .create-household__select-image {
     margin-top: 10px;
   }
 
   .input__wrapper {
-    margin-top:30px ;
+    margin-top: 30px;
   }
 
   &__actions {
@@ -68,8 +59,13 @@ body{
       }
     }
   }
+
   .create-btn {
     margin-top: 50px;
   }
 }
 
+// Styles for iOS devices with a notch
+:root.is-notch .create-household .back-arrow {
+  top: calc(-60px + env(safe-area-inset-top));
+}
