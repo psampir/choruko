@@ -5,6 +5,7 @@ import Popup from "../Popup";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
+import { useHousehold } from "../../contexts/HouseholdContext";
 import { getProfilePictureUrl } from "../../utils/imageUtils";
 
 // Import all SVG assets
@@ -23,6 +24,7 @@ const NavbarMobile = () => {
   const location = useLocation();
   const { logout, hasHousehold } = useAuth();
   const { user } = useUser();
+  const { householdInfo } = useHousehold();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
@@ -131,7 +133,7 @@ const NavbarMobile = () => {
               />
             )}
             <h5>{user ? `${user.firstName} ${user.lastName}` : "Username"}</h5>
-            {hasHousehold && <p>Household Name</p>}
+            {hasHousehold && <p>{householdInfo?.name || "Loading..."}</p>}
             <ul>
               <li>
                 <Button
@@ -188,8 +190,11 @@ const NavbarMobile = () => {
           title=""
         >
           <p>Are you sure you want to leave this household?</p>
-          <img src={householdDefaulIcon} alt="Household Image" />
-          <p>Household Name</p>
+          <img 
+            src={householdInfo?.profilePictureUrl || householdDefaulIcon} 
+            alt="Household Image" 
+          />
+          <p>{householdInfo?.name || "Household"}</p>
           <Button variant="red">Leave</Button>
         </Popup>
       )}

@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
+import { HouseholdProvider } from "./contexts/HouseholdContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
 import Tasks from "./views/Tasks/Tasks";
@@ -174,9 +175,11 @@ function App() {
   return (
     <AuthProvider>
       <UserProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
+        <HouseholdProvider>
+          <Router>
+            <AppRoutes />
+          </Router>
+        </HouseholdProvider>
       </UserProvider>
     </AuthProvider>
   );
