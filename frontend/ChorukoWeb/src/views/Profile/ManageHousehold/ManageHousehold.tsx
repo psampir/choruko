@@ -161,10 +161,9 @@ const ManageHousehold: React.FC = () => {
       if (result.success) {
         showNotification("Household deleted successfully", "success");
         setOpenPopup(false);
-        // Logout and redirect after deletion
+        // Redirect to joinOrCreateHousehold after a short delay
         setTimeout(async () => {
-          await logout();
-          navigate("/auth");
+          navigate("/joinOrCreateHousehold");
         }, 1500);
       } else {
         showNotification(result.message || "Failed to delete household", "error");
@@ -185,9 +184,8 @@ const ManageHousehold: React.FC = () => {
         onClick={() => navigate(-1)}
       />
       <div
-        className={`notification-bar notification-bar--${notification.type} ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
+        className={`notification-bar notification-bar--${notification.type} ${notification.isVisible ? "notification-bar--visible" : ""
+          }`}
       >
         <span>{notification.message}</span>
       </div>
@@ -269,7 +267,7 @@ const ManageHousehold: React.FC = () => {
                 <p>{`${member.firstName} ${member.lastName}`}</p>
               </span>
 
-              <img src={decline} alt="Delete member" className="delete-member" onClick={()=>{setOpenPopup(true)}}/>
+              <img src={decline} alt="Delete member" className="delete-member" onClick={() => { setOpenPopup(true) }} />
             </div>
           ))}
         </div>
@@ -307,7 +305,7 @@ const ManageHousehold: React.FC = () => {
                   ))}
                 </div>
               )}
-              <Button variant="primary" onClick={()=>setOpenPopup(false)}>Delegate</Button>
+              <Button variant="primary" onClick={() => setOpenPopup(false)}>Delegate</Button>
             </>
           )}
           {clickedButton === buttonActions.addParticipants && (
