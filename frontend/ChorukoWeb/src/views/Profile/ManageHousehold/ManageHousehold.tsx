@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useHousehold } from "../../../contexts/HouseholdContext";
-import { useAuth } from "../../../contexts/AuthContext";
+import { useUser } from "../../../contexts/UserContext";
 import householdService from "../../../services/householdService";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 import "./ManageHousehold.scss";
@@ -31,7 +31,7 @@ type ButtonAction = (typeof buttonActions)[keyof typeof buttonActions];
 const ManageHousehold: React.FC = () => {
   const navigate = useNavigate();
   const { householdInfo, members, refreshHousehold } = useHousehold();
-  const { logout } = useAuth();
+  const { user } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>(householdDefaulIcon);
@@ -161,8 +161,8 @@ const ManageHousehold: React.FC = () => {
       if (result.success) {
         showNotification("Household deleted successfully", "success");
         setOpenPopup(false);
-        // Redirect to joinOrCreateHousehold after a short delay
-        setTimeout(async () => {
+        // Redirect to joinOrCreateHousehold after deletion
+        setTimeout(() => {
           navigate("/joinOrCreateHousehold");
         }, 1500);
       } else {
@@ -267,7 +267,9 @@ const ManageHousehold: React.FC = () => {
                 <p>{`${member.firstName} ${member.lastName}`}</p>
               </span>
 
-              <img src={decline} alt="Delete member" className="delete-member" onClick={() => { setOpenPopup(true) }} />
+              {member.id !== user?.id && (
+                <img src={decline} alt="Delete member" className="delete-member" onClick={() => { setOpenPopup(true) }} />
+              )}
             </div>
           ))}
         </div>
