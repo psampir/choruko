@@ -7,4 +7,5 @@ public record HouseholdInfoResponse(
     string AdminFirstName,
     string AdminLastName,
     int ParticipantsCount,
-    string? ProfilePictureUrl);
+    string? ProfilePictureUrl,
+    List<HouseholdMemberResponse> Members);
