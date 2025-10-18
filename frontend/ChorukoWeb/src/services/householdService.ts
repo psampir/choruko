@@ -146,6 +146,26 @@ class HouseholdService {
       return { success: false, message: "Network error occurred" };
     }
   }
+
+  // Remove user from household
+  async removeUserFromHousehold(userIdToDelete: string) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Household/${userIdToDelete}/remove`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return { success: true, message: "User removed from household successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to remove user from household" };
+      }
+    } catch (error) {
+      console.error("Error removing user from household:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
 }
 
 // Export a single instance
