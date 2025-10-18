@@ -553,51 +553,59 @@ public class HouseholdService(DataContext _context,
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
         }
-    
-        // 1. Get the household associated with the user.
+        
         var household = await _context.Households
             .FirstOrDefaultAsync(h => h.Id == user.HouseholdId);
-    
+        
         if (household == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
         }
-
-        // 2. Check for existing picture and delete it.
-        if (!string.IsNullOrEmpty(household.ProfilePicturePath))
-        {
-            DeleteProfilePicture(household.ProfilePicturePath);
-        }
-
-        // 3. Upload the new picture.
+        
+        var oldProfilePicturePath = household.ProfilePicturePath;
+        
         var uploadResponse = await UploadProfilePicture(request.ProfilePicture);
+
         if (!uploadResponse.IsSuccessful)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, uploadResponse.Message, uploadResponse.StatusCode);
         }
+        
+        string newProfilePicturePath = uploadResponse.Result!;
+        
+        household.ProfilePicturePath = newProfilePicturePath;
 
-        // 4. Update the household's profile picture path in the database.
-        household.ProfilePicturePath = uploadResponse.Result;
-
-        // 5. Save changes to the database.
-        await _context.SaveChangesAsync();
-
-        var response = new OperationResultDto
+        try
         {
-            Operation = "ChangeHouseholdPicture",
-            Timestamp = DateTime.UtcNow,
-            Metadata = new Dictionary<string, object>
+            await _context.SaveChangesAsync();
+            
+            if (!string.IsNullOrEmpty(oldProfilePicturePath))
             {
-                { "HouseholdId", household.Id },
-                { "NewProfilePicturePath", household.ProfilePicturePath }
+                DeleteProfilePicture(oldProfilePicturePath); 
             }
-        };
 
-        return ServiceResponseFactory.Success(
-            response,
-            "Household picture was successfully changed.",
-            HttpStatusCode.OK
-        );
+            var response = new OperationResultDto
+            {
+                Operation = "ChangeHouseholdPicture",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "HouseholdId", household.Id },
+                    { "NewProfilePicturePath", newProfilePicturePath }
+                }
+            };
+
+            return ServiceResponseFactory.Success(
+                response,
+                "Household picture was successfully changed.",
+                HttpStatusCode.OK
+            );
+        }
+        catch (Exception ex)
+        {
+            DeleteProfilePicture(newProfilePicturePath); 
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed to save changes to the database: {ex.Message}", HttpStatusCode.InternalServerError);
+        }
     }
     public async Task<ServiceResponse<OperationResultDto>> SetHouseholdAdminAsync(string userId, string newAdminId)
     {
