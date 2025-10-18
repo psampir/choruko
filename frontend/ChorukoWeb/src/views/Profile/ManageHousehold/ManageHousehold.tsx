@@ -40,6 +40,7 @@ const ManageHousehold: React.FC = () => {
   const [profileImage, setProfileImage] = useState<string>(householdDefaulIcon);
   const [clickedButton, setClickedButton] = useState<ButtonAction | null>(null);
   const [selectedMember, setSelectedMember] = useState<HouseholdMember | null>(null);
+  const [selectedNewAdmin, setSelectedNewAdmin] = useState<HouseholdMember | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [notification, setNotification] = useState<{
@@ -154,6 +155,10 @@ const ManageHousehold: React.FC = () => {
     setClickedButton(action);
     if (action !== "define_activity") {
       setOpenPopup(true);
+      // Reset selected new admin when opening delegate popup
+      if (action === "delegate_admin") {
+        setSelectedNewAdmin(null);
+      }
     } else {
       navigate("/activities");
     }
@@ -165,7 +170,7 @@ const ManageHousehold: React.FC = () => {
     );
   };
 
-  const handleDelegateAdmin = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleSelectNewAdmin = (member: HouseholdMember, event: React.MouseEvent<HTMLDivElement>) => {
     const participantsListInPopup =
       event.currentTarget.closest(".participants-list");
 
@@ -175,6 +180,36 @@ const ManageHousehold: React.FC = () => {
         element.classList.remove("admin-choose");
       });
     event.currentTarget.classList.add("admin-choose");
+    setSelectedNewAdmin(member);
+  };
+
+  const handleDelegateAdmin = async () => {
+    if (!selectedNewAdmin) {
+      showNotification("Please select a new admin", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await householdService.setHouseholdAdmin(selectedNewAdmin.id);
+      if (result.success) {
+        showNotification("Admin delegated successfully", "success");
+        setOpenPopup(false);
+        setSelectedNewAdmin(null);
+        // Refresh auth state since current user is no longer admin
+        await checkAuth(false);
+        // Redirect to profile or home after delegation
+        setTimeout(() => {
+          navigate("/profile");
+        }, 1500);
+      } else {
+        showNotification(result.message || "Failed to delegate admin", "error");
+      }
+    } catch (error) {
+      showNotification("An unexpected error occurred", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteHousehold = async () => {
@@ -231,6 +266,9 @@ const ManageHousehold: React.FC = () => {
     if (b.id === householdInfo?.adminId) return 1;
     return 0;
   });
+
+  // Filter out current admin for delegation popup
+  const delegateablemembers = members.filter(member => member.id !== user?.id);
 
   return (
     <div className="manage-household">
@@ -348,15 +386,15 @@ const ManageHousehold: React.FC = () => {
           {clickedButton === buttonActions.delegateAdmin && (
             <>
               <p>Select a new household admin</p>
-              {members && members.length > 0 && (
+              {delegateablemembers && delegateablemembers.length > 0 ? (
                 <div className="participants-list">
                   <div className="participants-list__header">PARTICIPANTS</div>
-                  {members.map((member, index) => (
+                  {delegateablemembers.map((member, index) => (
                     <div
                       className="participant__delegate-admin"
                       key={member.id}
                       id={String(index)}
-                      onClick={handleDelegateAdmin}
+                      onClick={(e) => handleSelectNewAdmin(member, e)}
                     >
                       <img
                         src={
@@ -368,8 +406,16 @@ const ManageHousehold: React.FC = () => {
                     </div>
                   ))}
                 </div>
+              ) : (
+                <p>No other members available to delegate admin role</p>
               )}
-              <Button variant="primary" onClick={() => setOpenPopup(false)}>Delegate</Button>
+              <Button 
+                variant="primary" 
+                onClick={handleDelegateAdmin}
+                disabled={loading || !selectedNewAdmin}
+              >
+                {loading ? "Delegating..." : "Delegate"}
+              </Button>
             </>
           )}
           {clickedButton === buttonActions.addParticipants && (

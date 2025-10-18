@@ -166,6 +166,26 @@ class HouseholdService {
       return { success: false, message: "Network error occurred" };
     }
   }
+
+  // Set new household admin
+  async setHouseholdAdmin(newAdminId: string) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Household/${newAdminId}/set-admin`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Admin delegated successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to delegate admin" };
+      }
+    } catch (error) {
+      console.error("Error delegating admin:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
 }
 
 // Export a single instance
