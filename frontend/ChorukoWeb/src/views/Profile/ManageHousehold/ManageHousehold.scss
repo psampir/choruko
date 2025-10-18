@@ -33,7 +33,6 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  background: var(--color-secondary);
   color: var(--color-background);
   text-align: center;
   padding: var(--spacing-lg);
@@ -50,11 +49,11 @@ body {
   }
 
   &--error {
-    background: var(--color-error-bg);
+    background: var(--color-error-bg) !important;
   }
 
   &--success {
-    background: var(--color-secondary);
+    background: var(--color-secondary) !important;
   }
 
   span {
@@ -198,6 +197,8 @@ body {
         img {
           width: 40px;
           height: 40px;
+          border-radius: var(--border-radius-full);
+          object-fit: cover;
           margin-right: var(--spacing-md);
         }
       }
@@ -241,6 +242,8 @@ body {
       img {
         width: 40px;
         height: 40px;
+        border-radius: var(--border-radius-full);
+        object-fit: cover;
         margin-right: var(--spacing-md);
       }
 
