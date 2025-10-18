@@ -5,6 +5,16 @@ interface CreateHouseholdData {
   profilePicture?: File;
 }
 
+interface HouseholdInfo {
+  id: string;
+  name: string;
+  adminId: string;
+  adminFirstName: string;
+  adminLastName: string;
+  participantsCount: number;
+  profilePictureUrl: string | null;
+}
+
 class HouseholdService {
   // Create a new household
   async createHousehold(data: CreateHouseholdData) {
@@ -34,7 +44,33 @@ class HouseholdService {
       return { success: false, message: "Network error occurred" };
     }
   }
+
+  // Get household information
+  async getHouseholdInfo() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Household/household-info`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.isSuccessful && data.result) {
+          return { success: true, data: data.result as HouseholdInfo };
+        } else {
+          return { success: false, message: "Failed to fetch household info" };
+        }
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: errorText || "Failed to fetch household info" };
+      }
+    } catch (error) {
+      console.error("Error fetching household info:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
 }
 
 // Export a single instance
 export default new HouseholdService();
+export type { HouseholdInfo };
