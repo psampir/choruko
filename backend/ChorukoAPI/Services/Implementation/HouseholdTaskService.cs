@@ -249,12 +249,26 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     public async Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId)
     {
-        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
+        var householdTask = await _context.HouseholdTasks
+            .Include(t => t.Assignees) 
+            .FirstOrDefaultAsync(h => h.Id == taskId);
+        
         if (householdTask == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
 
+        int rewardPoints = householdTask.Reward;
+        
+        foreach (var assignee in householdTask.Assignees)
+        {
+            assignee.PointsCurrentMonth += rewardPoints;
+            assignee.PointsCurrentYear += rewardPoints;
+            assignee.PointsAllTime += rewardPoints;
+            
+            _context.Users.Update(assignee);
+        }
+        
         householdTask.Status = Models.TaskStatus.Completed;
         _context.SaveChanges();
 
@@ -274,22 +288,44 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     public async Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId)
     {
-        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
+        var householdTask = await _context.HouseholdTasks
+            .Include(h => h.Assignees)
+            .FirstOrDefaultAsync(h => h.Id == taskId);
+        
         if (householdTask == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
+        
+        if (householdTask.Status != Models.TaskStatus.Completed)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Task is not currently marked as completed.", HttpStatusCode.BadRequest);
+        }
+        
+        int rewardPoints = householdTask.Reward;
 
-        if (householdTask.Assignees.Count == 0)
+        if (householdTask.Assignees != null && householdTask.Assignees.Count > 0)
+        {
+            foreach (var assignee in householdTask.Assignees)
+            {
+                assignee.PointsCurrentMonth = Math.Max(0, assignee.PointsCurrentMonth - rewardPoints);
+                assignee.PointsCurrentYear = Math.Max(0, assignee.PointsCurrentYear - rewardPoints);
+                assignee.PointsAllTime = Math.Max(0, assignee.PointsAllTime - rewardPoints);
+                
+                _context.Users.Update(assignee);
+            }
+        }
+        
+        if (householdTask.Assignees == null || householdTask.Assignees.Count == 0)
         {
             householdTask.Status = Models.TaskStatus.Unassigned;
-            _context.SaveChanges();
         }
         else
         {
             householdTask.Status = Models.TaskStatus.Assigned;
-            _context.SaveChanges();
         }
+        
+        _context.SaveChanges();
 
         var response = new OperationResultDto
         {

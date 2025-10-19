@@ -326,6 +326,15 @@ namespace ChorukoAPI.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
+                    b.Property<int>("PointsAllTime")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PointsCurrentMonth")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PointsCurrentYear")
+                        .HasColumnType("integer");
+
                     b.Property<string>("ProfilePicturePath")
                         .HasColumnType("text");
 
