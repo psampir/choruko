@@ -5,4 +5,7 @@ public record HouseholdMemberResponse(
     string FirstName,
     string LastName,
     string? ProfilePicturePath,
-    int Points);
+    int pointsCurrentMonth,
+    int pointsCurrentYear,
+    int pointsAllTime
+);
