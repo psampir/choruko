@@ -12,7 +12,9 @@ interface HouseholdParticipant {
   firstName: string;
   lastName: string;
   profilePicturePath: string | null;
-  points: number;
+  pointsCurrentMonth: number;
+  pointsCurrentYear: number;
+  pointsAllTime: number;
 }
 
 interface HouseholdInfo {
