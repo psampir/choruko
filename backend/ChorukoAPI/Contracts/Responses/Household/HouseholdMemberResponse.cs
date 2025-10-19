@@ -1,6 +1,6 @@
 namespace ChorukoAPI.Contracts.Responses.Household;
 
-public record HouseholdMemberResponse(
+public record HouseholdParticipantResponse(
     string Id,
     string FirstName,
     string LastName,
