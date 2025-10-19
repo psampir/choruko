@@ -64,6 +64,19 @@ public class UserController(IUserService _userService) : ControllerBase
 
         var result = await _userService.ChangeUserProfilePictureAsync(request, userId);
         
+        if (!result.IsSuccessful && result.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+        
+        if (!result.IsSuccessful && (result.StatusCode == System.Net.HttpStatusCode.RequestEntityTooLarge 
+            || result.StatusCode == System.Net.HttpStatusCode.UnsupportedMediaType))
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+        
         return result.ToApiResponse();
     }
     
