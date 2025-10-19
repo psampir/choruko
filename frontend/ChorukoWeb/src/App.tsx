@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
+import { HouseholdProvider } from "./contexts/HouseholdContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
 import Tasks from "./views/Tasks/Tasks";
@@ -15,6 +16,7 @@ import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
 import JoinOrCreateHousehold from "./views/JoinOrCreateHousehold/JoinOrCreateHousehold";
 import Invitations from "./views/JoinOrCreateHousehold/Invitations/Invitations";
+import CreateHousehold from "./views/JoinOrCreateHousehold/CreateHousehold/CreateHousehold";
 import Leaderboard from "./views/Household/Leaderboard/Leaderboard";
 import ManageAccount from "./views/Profile/ManageAccount/ManageAccount";
 import ManageHousehold from "./views/Profile/ManageHousehold/ManageHousehold";
@@ -38,7 +40,7 @@ function MainAppLayout({ children }: { children: React.ReactNode }) {
     <div className="app">
       <main className="main-content">{children}</main>
       <NavbarMobile />
-      {user?.hasHousehold && <BottomNav />}
+      {user?.householdId && <BottomNav />}
     </div>
   );
 }
@@ -69,7 +71,6 @@ function AppRoutes() {
             <AppLayout>
               <JoinOrCreateHousehold
                 onJoinHousehold={() => {}}
-                onCreateHousehold={() => {}}
               />
             </AppLayout>
           </ProtectedRoute>
@@ -93,6 +94,17 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <Invitations />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/createHousehold"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <CreateHousehold />
             </AppLayout>
           </ProtectedRoute>
         }
@@ -163,9 +175,11 @@ function App() {
   return (
     <AuthProvider>
       <UserProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
+        <HouseholdProvider>
+          <Router>
+            <AppRoutes />
+          </Router>
+        </HouseholdProvider>
       </UserProvider>
     </AuthProvider>
   );

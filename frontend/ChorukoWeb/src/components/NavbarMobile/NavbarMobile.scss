@@ -114,8 +114,7 @@
         right: 10px;
         width: 24px;
         height: 24px;
-        background: url("../../assets/svg/close-icon.svg") no-repeat
-          center/contain;
+        background: url("../../assets/svg/close-icon.svg") no-repeat center/contain;
         cursor: pointer;
       }
 
@@ -170,4 +169,9 @@
   .theme-dropdown {
     top: calc(88px + env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
+}
+
+// Styles for iOS devices with a notch
+:root.is-notch .invitations.back-arrow {
+  top: calc(90px + env(safe-area-inset-top));
 }

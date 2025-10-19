@@ -11,8 +11,8 @@ interface User {
   email: string;
   userName: string;
   role?: string;
-  hasHousehold?: boolean;
   householdId?: string | null;
+  profilePicturePath?: string | null;
 }
 
 // Define the context interface
@@ -21,6 +21,9 @@ interface UserContextType {
   loading: boolean;
   error: string | null;
   updateUserNames: (firstName: string, lastName: string) => Promise<{ success: boolean; message?: string }>;
+  updatePassword: (newPassword: string, confirmNewPassword: string) => Promise<{ success: boolean; message?: string }>;
+  updateProfilePicture: (file: File) => Promise<{ success: boolean; message?: string }>;
+  deleteAccount: () => Promise<{ success: boolean; message?: string }>;
   refreshUser: () => Promise<void>;
   clearError: () => void;
 }
@@ -44,7 +47,7 @@ interface UserProviderProps {
 
 // UserProvider component
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const { user: authUser, checkAuth } = useAuth();
+  const { user: authUser, checkAuth, clearAuth } = useAuth();
   const [user, setUser] = useState<User | null>(authUser);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,12 +102,88 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  // Update user's password
+  const updatePassword = async (newPassword: string, confirmNewPassword: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await userService.changePassword(newPassword, confirmNewPassword);
+
+      if (result.success) {
+        return { success: true, message: "Password updated successfully" };
+      } else {
+        setError(result.message);
+        return { success: false, message: result.message };
+      }
+    } catch (err) {
+      const errorMessage = "An error occurred while updating your password";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update user's profile picture
+  const updateProfilePicture = async (file: File) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await userService.changePicture(file);
+
+      if (result.success) {
+        // Refresh user data after successful update
+        await refreshUser();
+        return { success: true, message: "Profile picture updated successfully" };
+      } else {
+        setError(result.message);
+        return { success: false, message: result.message };
+      }
+    } catch (err) {
+      const errorMessage = "An error occurred while updating your profile picture";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete user account
+  const deleteAccount = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await userService.deleteSelf();
+
+      if (result.success) {
+        // Clear auth state without calling logout API (user is already deleted)
+        clearAuth();
+        return { success: true, message: "Account deleted successfully" };
+      } else {
+        setError(result.message);
+        return { success: false, message: result.message };
+      }
+    } catch (err) {
+      const errorMessage = "An error occurred while deleting your account";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Context value
   const value: UserContextType = {
     user,
     loading,
     error,
     updateUserNames,
+    updatePassword,
+    updateProfilePicture,
+    deleteAccount,
     refreshUser,
     clearError,
   };

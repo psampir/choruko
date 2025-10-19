@@ -1,5 +1,6 @@
 using ChorukoAPI.Contracts;
 using ChorukoAPI.Contracts.Requests.Household;
+using ChorukoAPI.Contracts.Responses.Household;
 using ChorukoAPI.Data;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
@@ -12,6 +13,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using Microsoft.Extensions.Options;
+using ChorukoAPI.Mappers;
 
 namespace ChorukoAPI.Services.Implementation;
 
@@ -19,8 +21,38 @@ public class HouseholdService(DataContext _context,
     UserManager<User> _userManager,
     IWebHostEnvironment _webHostEnvironment,
     SignInManager<User> _signInManager,
-    IOptions<ImageSettings> _options) : IHouseholdService
+    IOptions<ImageSettings> _options,
+    IHttpContextAccessor _contextAccessor,
+    IMapper<Household, HouseholdInfoResponse> _mapper) : IHouseholdService
 {
+    public async Task<ServiceResponse<HouseholdInfoResponse>> GetHouseholdInfoAsync()
+    {
+        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdMemberResponse>()), "User not found.", HttpStatusCode.NotFound);
+        }
+
+        if (string.IsNullOrEmpty(user.HouseholdId))
+        {
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdMemberResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
+        }
+
+        var household = await _context.Households
+            .Include(h => h.Admin)
+            .Include(h => h.Participants)
+            .FirstOrDefaultAsync(h => h.Id == user.HouseholdId);
+
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdMemberResponse>()), "Household not found.", HttpStatusCode.NotFound);
+        }
+
+        return ServiceResponseFactory.Success(await _mapper.Map(household));
+    }
+
+
     public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdAsync(CreateHouseholdRequest request, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -553,51 +585,59 @@ public class HouseholdService(DataContext _context,
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
         }
-    
-        // 1. Get the household associated with the user.
+        
         var household = await _context.Households
             .FirstOrDefaultAsync(h => h.Id == user.HouseholdId);
-    
+        
         if (household == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
         }
-
-        // 2. Check for existing picture and delete it.
-        if (!string.IsNullOrEmpty(household.ProfilePicturePath))
-        {
-            DeleteProfilePicture(household.ProfilePicturePath);
-        }
-
-        // 3. Upload the new picture.
+        
+        var oldProfilePicturePath = household.ProfilePicturePath;
+        
         var uploadResponse = await UploadProfilePicture(request.ProfilePicture);
+
         if (!uploadResponse.IsSuccessful)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, uploadResponse.Message, uploadResponse.StatusCode);
         }
+        
+        string newProfilePicturePath = uploadResponse.Result!;
+        
+        household.ProfilePicturePath = newProfilePicturePath;
 
-        // 4. Update the household's profile picture path in the database.
-        household.ProfilePicturePath = uploadResponse.Result;
-
-        // 5. Save changes to the database.
-        await _context.SaveChangesAsync();
-
-        var response = new OperationResultDto
+        try
         {
-            Operation = "ChangeHouseholdPicture",
-            Timestamp = DateTime.UtcNow,
-            Metadata = new Dictionary<string, object>
+            await _context.SaveChangesAsync();
+            
+            if (!string.IsNullOrEmpty(oldProfilePicturePath))
             {
-                { "HouseholdId", household.Id },
-                { "NewProfilePicturePath", household.ProfilePicturePath }
+                DeleteProfilePicture(oldProfilePicturePath); 
             }
-        };
 
-        return ServiceResponseFactory.Success(
-            response,
-            "Household picture was successfully changed.",
-            HttpStatusCode.OK
-        );
+            var response = new OperationResultDto
+            {
+                Operation = "ChangeHouseholdPicture",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "HouseholdId", household.Id },
+                    { "NewProfilePicturePath", newProfilePicturePath }
+                }
+            };
+
+            return ServiceResponseFactory.Success(
+                response,
+                "Household picture was successfully changed.",
+                HttpStatusCode.OK
+            );
+        }
+        catch (Exception ex)
+        {
+            DeleteProfilePicture(newProfilePicturePath); 
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed to save changes to the database: {ex.Message}", HttpStatusCode.InternalServerError);
+        }
     }
     public async Task<ServiceResponse<OperationResultDto>> SetHouseholdAdminAsync(string userId, string newAdminId)
     {

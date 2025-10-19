@@ -30,11 +30,14 @@
   user-select: none;
 
   /* Hide page scrollbar completely */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
 
   &::-webkit-scrollbar {
-    display: none; /* WebKit browsers (Chrome, Safari, Edge) */
+    display: none;
+    /* WebKit browsers (Chrome, Safari, Edge) */
   }
 }
 
@@ -65,12 +68,19 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
-  padding-top: var(--navbar-height); /* Space for top navbar - always present */
+  padding-top: var(--navbar-height);
+  /* Space for top navbar - always present */
 }
 
 /* Additional bottom padding for pages with bottom nav */
 .app:has(.bottom-nav) .main-content {
-  padding-bottom: var(--navbar-height); /* Space for bottom navbar */
+  padding-bottom: var(--navbar-height);
+  /* Space for bottom navbar */
+}
+
+/* Additional top padding for notched devices */
+:root.is-notch .main-content {
+  padding-top: calc(var(--navbar-height) + env(safe-area-inset-top));
 }
 
 body {

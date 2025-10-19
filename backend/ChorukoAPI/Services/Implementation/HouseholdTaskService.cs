@@ -26,8 +26,33 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             var household = await _context.Households
                 .Include(h => h.Activities)
                 .Include(h => h.Participants)
-                .Include(h => h.Tasks).FirstOrDefaultAsync(h => h.Id == householdId);
+                .Include(h => h.Tasks)
+                .FirstOrDefaultAsync(h => h.Id == householdId);
 
+            if (household == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(
+                    null, 
+                    $"Household with ID '{householdId}' not found.", 
+                    System.Net.HttpStatusCode.NotFound
+                );
+            }
+            
+            if (!string.IsNullOrEmpty(request.ActivityId))
+            {
+                var activityExists = await _context.Activities
+                    .AnyAsync(a => a.Id == request.ActivityId && a.HouseholdId == householdId);
+
+                if (!activityExists)
+                {
+                    return ServiceResponseFactory.Error<OperationResultDto>(
+                        null,
+                        "The specified ActivityId is invalid or does not belong to this household.",
+                        System.Net.HttpStatusCode.BadRequest
+                    );
+                }
+            }
+            
             var householdTask = new HouseholdTask
             {
                 Id = Guid.NewGuid().ToString(),

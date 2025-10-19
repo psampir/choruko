@@ -35,7 +35,7 @@ public class UserService(
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new UserInfoResponse("", "", "", "", null), "User not found.");
+            return ServiceResponseFactory.Error(new UserInfoResponse("", "", "", "", null, null), "User not found.");
         }
 
         return ServiceResponseFactory.Success(await _mapper.Map(user));
@@ -84,42 +84,75 @@ public class UserService(
             return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
         }
         
-        if (!string.IsNullOrEmpty(user.ProfilePicturePath))
-        {
-            DeleteProfilePicture(user.ProfilePicturePath);
-        }
+        var oldProfilePicturePath = user.ProfilePicturePath;
         
         var uploadResponse = await UploadProfilePicture(request.ProfilePicture);
+
         if (!uploadResponse.IsSuccessful)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, uploadResponse.Message, uploadResponse.StatusCode);
         }
         
-        user.ProfilePicturePath = uploadResponse.Result;
+        string newProfilePicturePath = uploadResponse.Result!;
         
-        var result = await _userManager.UpdateAsync(user);
-
-        if (!result.Succeeded)
+        user.ProfilePicturePath = newProfilePicturePath;
+        
+        try
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to update user's profile picture path.", HttpStatusCode.InternalServerError);
-        }
+            var result = await _userManager.UpdateAsync(user);
 
-        var response = new OperationResultDto
-        {
-            Operation = "ChangeUserProfilePicture",
-            Timestamp = DateTime.UtcNow,
-            Metadata = new Dictionary<string, object>
+            if (!result.Succeeded)
             {
-                { "UserId", user.Id },
-                { "NewProfilePicturePath", user.ProfilePicturePath }
+                try
+                {
+                    DeleteProfilePicture(newProfilePicturePath);
+                }
+                catch (Exception cleanupEx) 
+                {
+                    Console.WriteLine($"LOG: Failed to clean up new file after Identity update failed. Path: {newProfilePicturePath}. Error: {cleanupEx.Message}");
+                }
+                
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to update user's profile picture path in the database.", HttpStatusCode.InternalServerError);
             }
-        };
+            
+            if (!string.IsNullOrEmpty(oldProfilePicturePath))
+            {
+                try
+                {
+                    DeleteProfilePicture(oldProfilePicturePath);
+                }
+                catch (Exception cleanupEx)
+                {
+                    Console.WriteLine($"LOG: Failed to clean up old file after successful DB update. Path: {oldProfilePicturePath}. Error: {cleanupEx.Message}");
+                }
+            }
 
-        return ServiceResponseFactory.Success(
-            response,
-            "User profile picture was successfully changed.",
-            HttpStatusCode.OK
-        );
+            var response = new OperationResultDto
+            {
+                Operation = "ChangeUserProfilePicture",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "UserId", user.Id },
+                    { "NewProfilePicturePath", user.ProfilePicturePath }
+                }
+            };
+
+            return ServiceResponseFactory.Success(
+                response,
+                "User profile picture was successfully changed.",
+                HttpStatusCode.OK
+            );
+        }
+        catch (Exception dbEx)
+        {
+            DeleteProfilePicture(newProfilePicturePath); 
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null, 
+                $"An unexpected error occurred during database update: {dbEx.Message}", 
+                HttpStatusCode.InternalServerError
+            );
+        }
     }
     private async Task<ServiceResponse<string>> ValidateAndProcessImage(IFormFile file)
     {
@@ -184,7 +217,6 @@ public class UserService(
     }
     private async Task<ServiceResponse<string>> UploadProfilePicture(IFormFile? file)
     {
-        // If no file is provided, it's not an error.
         if (file == null)
         {
             return ServiceResponseFactory.Success<string>(null, "No profile picture provided.", HttpStatusCode.OK);
@@ -276,6 +308,67 @@ public class UserService(
         return ServiceResponseFactory.Success(
             response,
             "User account was successfully deleted.",
+            HttpStatusCode.OK
+        );
+    }
+    
+    public async Task<ServiceResponse<OperationResultDto>> ChangePasswordAsync(ChangePasswordRequest request, string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+        }
+        
+        var removeResult = await _userManager.RemovePasswordAsync(user);
+        if (!removeResult.Succeeded)
+        {
+            var errors = removeResult.Errors.Select(e => e.Description);
+            var errorMessage = string.Join(" ", errors);
+
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null, 
+                $"Failed to remove old password: {errorMessage}", 
+                HttpStatusCode.InternalServerError
+            );
+        }
+        
+        var addResult = await _userManager.AddPasswordAsync(user, request.NewPassword);
+
+        if (!addResult.Succeeded)
+        {
+            var errorDto = new OperationResultDto
+            {
+                Operation = "ChangePassword",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "IdentityResult", addResult }
+                }
+            };
+            
+            return ServiceResponseFactory.Error(
+                errorDto, 
+                "Password validation failed.", 
+                HttpStatusCode.BadRequest
+            );
+        }
+        
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        var response = new OperationResultDto
+        {
+            Operation = "ChangePassword",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "UserId", user.Id }
+            }
+        };
+
+        return ServiceResponseFactory.Success(
+            response,
+            "User password was successfully changed.",
             HttpStatusCode.OK
         );
     }
