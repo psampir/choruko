@@ -661,21 +661,35 @@ public class HouseholdService(DataContext _context,
         }
 
         var newAdminRoles = await _userManager.GetRolesAsync(newAdmin);
+        
+        if (newAdminRoles.Contains("HouseholdAdmin"))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User is already an admin.", HttpStatusCode.Conflict);
+        }
         if (!newAdminRoles.Contains("Participant"))
         {
-            if (newAdminRoles.Contains("HouseholdAdmin"))
-            {
-                return ServiceResponseFactory.Error<OperationResultDto>(null, "User is already the household admin.", HttpStatusCode.Conflict);
-            }
-        
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "New admin must be part of the household to be promoted.", HttpStatusCode.Forbidden);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "New admin must have the 'Participant' role.", HttpStatusCode.Forbidden);
         }
         
-        await _userManager.RemoveFromRoleAsync(currentAdmin, "HouseholdAdmin");
-        await _userManager.AddToRoleAsync(currentAdmin, "Participant");
+        var removeOldAdminRoleResult = await _userManager.RemoveFromRoleAsync(currentAdmin, "HouseholdAdmin");
+        if (!removeOldAdminRoleResult.Succeeded)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to demote current admin: " + string.Join(", ", removeOldAdminRoleResult.Errors.Select(e => e.Description)), HttpStatusCode.InternalServerError);
+        }
         
-        await _userManager.AddToRoleAsync(newAdmin, "HouseholdAdmin");
-        await _userManager.RemoveFromRoleAsync(newAdmin, "Participant");
+        var addOldAdminRoleResult = await _userManager.AddToRoleAsync(currentAdmin, "Participant");
+        if (!addOldAdminRoleResult.Succeeded)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to assign 'Participant' role to old admin: " + string.Join(", ", addOldAdminRoleResult.Errors.Select(e => e.Description)), HttpStatusCode.InternalServerError);
+        }
+        
+        var promoteNewAdminResult = await _userManager.AddToRoleAsync(newAdmin, "HouseholdAdmin");
+        if (!promoteNewAdminResult.Succeeded)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to promote new admin: " + string.Join(", ", promoteNewAdminResult.Errors.Select(e => e.Description)), HttpStatusCode.InternalServerError);
+        }
+        
+        await _userManager.RemoveFromRoleAsync(newAdmin, "Participant"); 
         
         var household = await _context.Households.FirstOrDefaultAsync(h => h.Id == currentAdmin.HouseholdId);
         if (household != null)
@@ -696,13 +710,13 @@ public class HouseholdService(DataContext _context,
             {
                 { "OldAdminId", currentAdmin.Id },
                 { "NewAdminId", newAdmin.Id },
-                { "HouseholdId", household.Id }
+                { "HouseholdId", household?.Id } 
             }
         };
 
         return ServiceResponseFactory.Success(
             response,
-            "Household admin was successfully transferred.",
+            "Household admin was successfully set and roles were swapped.",
             HttpStatusCode.OK
         );
     }
