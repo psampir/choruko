@@ -661,14 +661,18 @@ public class HouseholdService(DataContext _context,
         }
 
         var newAdminRoles = await _userManager.GetRolesAsync(newAdmin);
-        if (newAdminRoles.Contains("HouseholdAdmin"))
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "User is already an admin.", HttpStatusCode.Conflict);
-        }
         if (!newAdminRoles.Contains("Participant"))
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "New admin must have the 'Participant' role.", HttpStatusCode.Forbidden);
+            if (newAdminRoles.Contains("HouseholdAdmin"))
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User is already the household admin.", HttpStatusCode.Conflict);
+            }
+        
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "New admin must be part of the household to be promoted.", HttpStatusCode.Forbidden);
         }
+        
+        await _userManager.RemoveFromRoleAsync(currentAdmin, "HouseholdAdmin");
+        await _userManager.AddToRoleAsync(currentAdmin, "Participant");
         
         await _userManager.AddToRoleAsync(newAdmin, "HouseholdAdmin");
         await _userManager.RemoveFromRoleAsync(newAdmin, "Participant");
@@ -682,6 +686,7 @@ public class HouseholdService(DataContext _context,
         
         await _context.SaveChangesAsync();
         await _signInManager.RefreshSignInAsync(currentAdmin);
+        await _signInManager.RefreshSignInAsync(newAdmin);
 
         var response = new OperationResultDto
         {
@@ -691,13 +696,13 @@ public class HouseholdService(DataContext _context,
             {
                 { "OldAdminId", currentAdmin.Id },
                 { "NewAdminId", newAdmin.Id },
-                { "HouseholdId", household?.Id }
+                { "HouseholdId", household.Id }
             }
         };
 
         return ServiceResponseFactory.Success(
             response,
-            "Household admin was successfully set.",
+            "Household admin was successfully transferred.",
             HttpStatusCode.OK
         );
     }
