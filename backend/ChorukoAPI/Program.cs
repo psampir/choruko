@@ -117,6 +117,7 @@ builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, Househ
 builder.Services.AddScoped<IMapper<UserPasswordResetData, AdminResetPasswordResponse>, AdminResetPasswordMapper>();
 builder.Services.AddScoped<IMapper<User, UserInfoResponse>, UserInfoMapper>();
 builder.Services.AddScoped<IMapper<Settlement, SettlementResponse>, SettlementMapper>();
+builder.Services.AddScoped<IMapper<Settlement, SettlementWithoutUsersResponse>, SettlementWithoutUsersMapper>();
 
 builder.Services.AddScoped<ISettlementService, SettlementService>();
 
