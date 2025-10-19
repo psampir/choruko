@@ -2,12 +2,12 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "./AuthContext";
 import householdService from "../services/householdService";
-import type { HouseholdInfo, HouseholdMember } from "../services/householdService";
+import type { HouseholdInfo, HouseholdParticipant } from "../services/householdService";
 
 // Define the context interface
 interface HouseholdContextType {
   householdInfo: HouseholdInfo | null;
-  members: HouseholdMember[];
+  participants: HouseholdParticipant[];
   loading: boolean;
   error: string | null;
   refreshHousehold: () => Promise<void>;
@@ -53,9 +53,9 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
     try {
       setLoading(true);
       setError(null);
-      
+
       const result = await householdService.getHouseholdInfo();
-      
+
       if (result.success && result.data) {
         setHouseholdInfo(result.data);
       } else {
@@ -85,12 +85,12 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
     }
   }, [hasHousehold]);
 
-  // Extract members from householdInfo
-  const members = householdInfo?.members ?? [];
+  // Extract participants from householdInfo
+  const participants = householdInfo?.participants ?? [];
 
   const value: HouseholdContextType = {
     householdInfo,
-    members,
+    participants,
     loading,
     error,
     refreshHousehold,
