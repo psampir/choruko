@@ -10,6 +10,35 @@ interface ChangePasswordData {
   confirmNewPassword: string;
 }
 
+// Function to extract user-friendly error message from backend response
+const parseErrorMessage = (errorMessage: string): string => {
+  try {
+    // Try to parse JSON error message from backend
+    const errorData = JSON.parse(errorMessage);
+
+    // Handle validation errors with specific field messages
+    if (errorData.errors) {
+      const fieldErrors = Object.values(errorData.errors).flat() as string[];
+      return fieldErrors.join(" ");
+    }
+
+    // Handle general title/message errors
+    if (errorData.title) {
+      return errorData.title;
+    }
+
+    if (errorData.message) {
+      return errorData.message;
+    }
+
+    // If JSON but no recognizable error structure
+    return "An error occurred. Please try again.";
+  } catch {
+    // If not JSON, return the message as-is
+    return errorMessage || "An unexpected error occurred. Please try again.";
+  }
+};
+
 class UserService {
   // Change user's first and last name
   async changeNames(firstName: string, lastName: string) {
@@ -85,7 +114,7 @@ class UserService {
         return { success: true, message: "Profile picture changed successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to change profile picture" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to change profile picture" };
       }
     } catch (error) {
       console.error("Error changing profile picture:", error);
