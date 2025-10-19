@@ -1,3 +1,5 @@
+import { parseErrorMessage } from "../utils/errorUtils";
+
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface ChangeNamesData {
@@ -9,35 +11,6 @@ interface ChangePasswordData {
   newPassword: string;
   confirmNewPassword: string;
 }
-
-// Function to extract user-friendly error message from backend response
-const parseErrorMessage = (errorMessage: string): string => {
-  try {
-    // Try to parse JSON error message from backend
-    const errorData = JSON.parse(errorMessage);
-
-    // Handle validation errors with specific field messages
-    if (errorData.errors) {
-      const fieldErrors = Object.values(errorData.errors).flat() as string[];
-      return fieldErrors.join(" ");
-    }
-
-    // Handle general title/message errors
-    if (errorData.title) {
-      return errorData.title;
-    }
-
-    if (errorData.message) {
-      return errorData.message;
-    }
-
-    // If JSON but no recognizable error structure
-    return "An error occurred. Please try again.";
-  } catch {
-    // If not JSON, return the message as-is
-    return errorMessage || "An unexpected error occurred. Please try again.";
-  }
-};
 
 class UserService {
   // Change user's first and last name
