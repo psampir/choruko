@@ -339,5 +339,13 @@
         }
       }
     }
+
+    .loading-message,
+    .empty-message {
+      padding: var(--spacing-2xl);
+      text-align: center;
+      font-size: var(--font-size-body);
+      color: var(--color-text-secondary);
+    }
   }
 }
