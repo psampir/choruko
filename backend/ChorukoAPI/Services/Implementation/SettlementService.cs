@@ -12,7 +12,10 @@ using System.Net;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class SettlementService(DataContext _context, IMapper<Settlement, SettlementResponse> _mapper) : ISettlementService
+public class SettlementService(
+    DataContext _context,
+    IMapper<Settlement, SettlementResponse> _mapper,
+    IMapper<Settlement, SettlementWithoutUsersResponse> mapper) : ISettlementService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateSettlement(string householdId, CreateSettlementRequest request, string userId)
     {
@@ -231,29 +234,33 @@ public class SettlementService(DataContext _context, IMapper<Settlement, Settlem
         return ServiceResponseFactory.Success(response, "Settlement was successfully deleted");
     }
 
-    public async Task<ServiceResponse<List<SettlementResponse>>> GetAllSettlements(string householdId)
+    public async Task<ServiceResponse<List<SettlementWithoutUsersResponse>>> GetAllSettlements(string householdId)
     {
         try
         {
-            var settlements = await _context.Settlements.Where(s => s.HouseholdId == householdId).ToListAsync();
+            var settlements = await _context.Settlements
+                .Include(s => s.Creator)
+                .Where(s => s.HouseholdId == householdId)
+                .AsNoTracking()
+                .ToListAsync();
 
             if (settlements.Count == 0)
             {
-                return ServiceResponseFactory.Success(new List<SettlementResponse>(), "No settlements");
+                return ServiceResponseFactory.Success(new List<SettlementWithoutUsersResponse>(), "No settlements");
             }
 
-            var result = new List<SettlementResponse>();
+            var result = new List<SettlementWithoutUsersResponse>();
 
             foreach (var settlement in settlements)
             {
-                result.Add(await _mapper.Map(settlement));
+                result.Add(await mapper.Map(settlement));
             }
 
             return ServiceResponseFactory.Success(result, "Settlements retrieved successfully");
         }
         catch (Exception ex)
         {
-            return ServiceResponseFactory.Error<List<SettlementResponse>>(
+            return ServiceResponseFactory.Error<List<SettlementWithoutUsersResponse>>(
                 null,
                 $"Failed to retrieve household settlements: {ex.Message}"
                 );
