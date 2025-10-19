@@ -42,6 +42,15 @@ public class UserService(
     }
     public async Task<ServiceResponse<OperationResultDto>> ChangeUserNamesAsync(ChangeUserNamesRequest request, string userId)
     {
+        if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null, 
+                "First name and last name required.", 
+                HttpStatusCode.BadRequest
+            );
+        }
+        
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
