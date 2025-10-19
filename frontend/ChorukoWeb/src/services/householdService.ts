@@ -181,10 +181,30 @@ class HouseholdService {
         return { success: true, message: "Admin delegated successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to delegate admin" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to delegate admin" };
       }
     } catch (error) {
       console.error("Error delegating admin:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Leave household
+  async leaveHousehold() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Household/leave`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Left household successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to leave household" };
+      }
+    } catch (error) {
+      console.error("Error leaving household:", error);
       return { success: false, message: "Network error occurred" };
     }
   }

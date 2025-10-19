@@ -7,6 +7,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
 import { useHousehold } from "../../contexts/HouseholdContext";
 import { getProfilePictureUrl } from "../../utils/imageUtils";
+import householdService from "../../services/householdService";
 
 // Import all SVG assets
 import lightThemeIcon from "../../assets/svg/light-theme.svg";
@@ -22,12 +23,14 @@ import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
 const NavbarMobile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, hasHousehold } = useAuth();
+  const { logout, hasHousehold, checkAuth } = useAuth();
   const { user } = useUser();
   const { householdInfo } = useHousehold();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
 
   // Check if we're on manage pages where profile popup should be hidden
   const hideProfilePopup = location.pathname === "/manageAccount" || location.pathname === "/manageHousehold";
@@ -55,6 +58,32 @@ const NavbarMobile = () => {
       navigate("/auth"); // Navigate to auth page after logout
     } catch (error) {
       console.error("Logout failed:", error);
+    }
+  };
+
+  // Leave household handler
+  const handleLeaveHousehold = async () => {
+    setLoading(true);
+    setError("");
+    
+    try {
+      const result = await householdService.leaveHousehold();
+      
+      if (result.success) {
+        setOpenPopup(false);
+        setProfileOpen(false);
+        // Refresh auth state to update hasHousehold flag
+        await checkAuth(false);
+        // Redirect to join or create household page
+        navigate("/joinOrCreateHousehold");
+      } else {
+        setError(result.message || "Failed to leave household");
+      }
+    } catch (error) {
+      console.error("Error leaving household:", error);
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -199,7 +228,10 @@ const NavbarMobile = () => {
             alt="Household Image" 
           />
           <p>{householdInfo?.name || "Household"}</p>
-          <Button variant="red">Leave</Button>
+          {error && <p style={{ color: 'var(--color-error)', marginTop: '10px' }}>{error}</p>}
+          <Button variant="red" onClick={handleLeaveHousehold} disabled={loading}>
+            {loading ? "Leaving..." : "Leave"}
+          </Button>
         </Popup>
       )}
     </div>
