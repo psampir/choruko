@@ -146,6 +146,19 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         var result = await _householdService.ChangeHouseholdPictureAsync(request, userId);
 
+        if (!result.IsSuccessful && result.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+        
+        if (!result.IsSuccessful && (result.StatusCode == System.Net.HttpStatusCode.RequestEntityTooLarge 
+            || result.StatusCode == System.Net.HttpStatusCode.UnsupportedMediaType))
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+
         return result.ToApiResponse();
     }
     
