@@ -26,9 +26,11 @@ const Activities: React.FC = () => {
   const [notification, setNotification] = useState<{
     message: string;
     isVisible: boolean;
+    type: "success" | "error";
   }>({
     message: "",
     isVisible: false,
+    type: "success",
   });
 
   // Load activities on mount
@@ -39,16 +41,16 @@ const Activities: React.FC = () => {
   // Show error notification if any
   useEffect(() => {
     if (error) {
-      showNotification(error);
+      showNotification(error, "error");
       clearError();
     }
   }, [error, clearError]);
 
-  const showNotification = (message: string) => {
-    setNotification({ message, isVisible: true });
+  const showNotification = (message: string, type: "success" | "error" = "success") => {
+    setNotification({ message, isVisible: true, type });
 
     setTimeout(() => {
-      setNotification({ message: "", isVisible: false });
+      setNotification({ message: "", isVisible: false, type: "success" });
     }, 3000);
   };
 
@@ -70,25 +72,25 @@ const Activities: React.FC = () => {
       const points = parseInt(editActivityPoints, 10);
 
       if (isNaN(points) || points < 1 || points > 1000) {
-        showNotification("Points must be between 1 and 1000");
+        showNotification("Points must be between 1 and 1000", "error");
         return;
       }
 
       if (editActivityName.trim().length < 3) {
-        showNotification("Activity name must be at least 3 characters long");
+        showNotification("Activity name must be at least 3 characters long", "error");
         return;
       }
 
       const result = await editActivity(editingActivityId, editActivityName, points);
 
       if (result.success) {
-        showNotification(result.message || "Activity updated successfully!");
+        showNotification(result.message || "Activity updated successfully!", "success");
         setOpenEditPopup(false);
         setEditingActivityId(null);
         setEditActivityName("");
         setEditActivityPoints("");
       } else {
-        showNotification(result.message || "Failed to update activity");
+        showNotification(result.message || "Failed to update activity", "error");
       }
     }
   };
@@ -97,24 +99,24 @@ const Activities: React.FC = () => {
     const points = parseInt(createActivityPoints, 10);
 
     if (isNaN(points) || points < 1 || points > 1000) {
-      showNotification("Points must be between 1 and 1000");
+      showNotification("Points must be between 1 and 1000", "error");
       return;
     }
 
     if (createActivityName.trim().length < 3) {
-      showNotification("Activity name must be at least 3 characters long");
+      showNotification("Activity name must be at least 3 characters long", "error");
       return;
     }
 
     const result = await createActivity(createActivityName, points);
 
     if (result.success) {
-      showNotification(result.message || "Activity created successfully!");
+      showNotification(result.message || "Activity created successfully!", "success");
       setOpenCreatePopup(false);
       setCreateActivityName("");
       setCreateActivityPoints("");
     } else {
-      showNotification(result.message || "Failed to create activity");
+      showNotification(result.message || "Failed to create activity", "error");
     }
   };
 
@@ -123,13 +125,13 @@ const Activities: React.FC = () => {
       const result = await deleteActivity(editingActivityId);
 
       if (result.success) {
-        showNotification(result.message || "Activity deleted successfully!");
+        showNotification(result.message || "Activity deleted successfully!", "success");
         setOpenEditPopup(false);
         setEditingActivityId(null);
         setEditActivityName("");
         setEditActivityPoints("");
       } else {
-        showNotification(result.message || "Failed to delete activity");
+        showNotification(result.message || "Failed to delete activity", "error");
       }
     }
   };
@@ -146,7 +148,7 @@ const Activities: React.FC = () => {
         Add
       </Button>
       <div
-        className={`notification-bar ${notification.isVisible ? "notification-bar--visible" : ""
+        className={`notification-bar notification-bar--${notification.type} ${notification.isVisible ? "notification-bar--visible" : ""
           }`}
       >
         <span>{notification.message}</span>
