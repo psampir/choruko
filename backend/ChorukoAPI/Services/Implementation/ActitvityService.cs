@@ -67,7 +67,7 @@ namespace ChorukoAPI.Services.Implementation
             activity.Name = request.Name;
             activity.PointsAwarded = request.PointsAwarded;
 
-            var validationResponse = ValidateActivityData(activity);
+            var validationResponse = ValidateActivityData(activity, isEdit: true);
             if (!validationResponse.IsSuccessful)
             {
                 return validationResponse;
@@ -153,9 +153,12 @@ namespace ChorukoAPI.Services.Implementation
             return ServiceResponseFactory.Success(response, "Activity was successfully deleted");
         }
 
-        private ServiceResponse<OperationResultDto> ValidateActivityData(Activity activity)
+        private ServiceResponse<OperationResultDto> ValidateActivityData(Activity activity, bool isEdit = false)
         {
-            var isActivityExist = _context.Activities.Any(a => a.HouseholdId == activity.HouseholdId && a.Name == activity.Name);
+            var isActivityExist = _context.Activities.Any(a => 
+                a.HouseholdId == activity.HouseholdId && 
+                a.Name == activity.Name && 
+                (!isEdit || a.Id != activity.Id));
 
             if (isActivityExist)
             {
