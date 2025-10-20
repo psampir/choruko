@@ -48,6 +48,28 @@
     color: #021207;
     font-size: 0.875rem;
   }
+
+  // Add button variant - fixed position button for adding items
+  &--add {
+    position: absolute;
+    top: 87.5px;
+    right: 20px;
+    width: 80px;
+    height: 50px;
+    border-radius: var(--border-radius-sm);
+    background-color: var(--color-secondary);
+    color: var(--color-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-h2);
+    z-index: 100;
+
+    &:hover {
+      background-color: var(--color-primary-dark);
+    }
+  }
+
   &--red {
     background-color: #ff7285;
     color: #f1f8e8;
@@ -55,6 +77,11 @@
     height: 46px;
     font-size: 1.25rem;
   }
+}
+
+// Styles for iOS devices with a notch
+:root.is-notch .button--add {
+  top: calc(87.5px + env(safe-area-inset-top));
 }
 
 // Media query for light theme
