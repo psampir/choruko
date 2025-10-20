@@ -7,6 +7,7 @@ import {
 import { AuthProvider } from "./contexts/AuthContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import { HouseholdProvider } from "./contexts/HouseholdContext";
+import { ActivityProvider } from "./contexts/ActivityContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
 import Tasks from "./views/Tasks/Tasks";
@@ -176,9 +177,11 @@ function App() {
     <AuthProvider>
       <UserProvider>
         <HouseholdProvider>
-          <Router>
-            <AppRoutes />
-          </Router>
+          <ActivityProvider>
+            <Router>
+              <AppRoutes />
+            </Router>
+          </ActivityProvider>
         </HouseholdProvider>
       </UserProvider>
     </AuthProvider>

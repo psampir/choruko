@@ -1,3 +1,5 @@
+import { parseErrorMessage } from "../utils/errorUtils";
+
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface CreateHouseholdData {
@@ -5,12 +7,14 @@ interface CreateHouseholdData {
   profilePicture?: File;
 }
 
-interface HouseholdMember {
+interface HouseholdParticipant {
   id: string;
   firstName: string;
   lastName: string;
   profilePicturePath: string | null;
-  points: number;
+  pointsCurrentMonth: number;
+  pointsCurrentYear: number;
+  pointsAllTime: number;
 }
 
 interface HouseholdInfo {
@@ -21,7 +25,7 @@ interface HouseholdInfo {
   adminLastName: string;
   participantsCount: number;
   profilePictureUrl: string | null;
-  members: HouseholdMember[];
+  participants: HouseholdParticipant[];
 }
 
 class HouseholdService {
@@ -119,7 +123,7 @@ class HouseholdService {
         return { success: true, message: "Household picture changed successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to change household picture" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to change household picture" };
       }
     } catch (error) {
       console.error("Error changing household picture:", error);
@@ -179,10 +183,30 @@ class HouseholdService {
         return { success: true, message: "Admin delegated successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to delegate admin" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to delegate admin" };
       }
     } catch (error) {
       console.error("Error delegating admin:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Leave household
+  async leaveHousehold() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Household/leave`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Left household successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to leave household" };
+      }
+    } catch (error) {
+      console.error("Error leaving household:", error);
       return { success: false, message: "Network error occurred" };
     }
   }
@@ -190,4 +214,4 @@ class HouseholdService {
 
 // Export a single instance
 export default new HouseholdService();
-export type { HouseholdInfo, HouseholdMember };
+export type { HouseholdInfo, HouseholdParticipant };

@@ -5,7 +5,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
 import householdService from "../../../services/householdService";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
-import type { HouseholdMember } from "../../../services/householdService";
+import type { HouseholdParticipant } from "../../../services/householdService";
 import "./ManageHousehold.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
@@ -32,15 +32,15 @@ type ButtonAction = (typeof buttonActions)[keyof typeof buttonActions];
 
 const ManageHousehold: React.FC = () => {
   const navigate = useNavigate();
-  const { householdInfo, members, refreshHousehold, error: householdError, loading: householdLoading } = useHousehold();
+  const { householdInfo, participants, refreshHousehold, error: householdError, loading: householdLoading } = useHousehold();
   const { hasHousehold, checkAuth } = useAuth();
   const { user } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string>(householdDefaulIcon);
   const [clickedButton, setClickedButton] = useState<ButtonAction | null>(null);
-  const [selectedMember, setSelectedMember] = useState<HouseholdMember | null>(null);
-  const [selectedNewAdmin, setSelectedNewAdmin] = useState<HouseholdMember | null>(null);
+  const [selectedParticipant, setSelectedParticipant] = useState<HouseholdParticipant | null>(null);
+  const [selectedNewAdmin, setSelectedNewAdmin] = useState<HouseholdParticipant | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [notification, setNotification] = useState<{
@@ -170,7 +170,7 @@ const ManageHousehold: React.FC = () => {
     );
   };
 
-  const handleSelectNewAdmin = (member: HouseholdMember, event: React.MouseEvent<HTMLDivElement>) => {
+  const handleSelectNewAdmin = (participant: HouseholdParticipant, event: React.MouseEvent<HTMLDivElement>) => {
     const participantsListInPopup =
       event.currentTarget.closest(".participants-list");
 
@@ -180,7 +180,7 @@ const ManageHousehold: React.FC = () => {
         element.classList.remove("admin-choose");
       });
     event.currentTarget.classList.add("admin-choose");
-    setSelectedNewAdmin(member);
+    setSelectedNewAdmin(participant);
   };
 
   const handleDelegateAdmin = async () => {
@@ -234,15 +234,15 @@ const ManageHousehold: React.FC = () => {
   };
 
   const handleDeleteParticipant = async () => {
-    if (!selectedMember) return;
+    if (!selectedParticipant) return;
 
     setLoading(true);
     try {
-      const result = await householdService.removeUserFromHousehold(selectedMember.id);
+      const result = await householdService.removeUserFromHousehold(selectedParticipant.id);
       if (result.success) {
         showNotification("Participant removed successfully", "success");
         setOpenPopup(false);
-        setSelectedMember(null);
+        setSelectedParticipant(null);
         await refreshHousehold();
       } else {
         showNotification(result.message || "Failed to remove participant", "error");
@@ -254,21 +254,21 @@ const ManageHousehold: React.FC = () => {
     }
   };
 
-  const handleDeleteMemberClick = (member: HouseholdMember) => {
-    setSelectedMember(member);
+  const handleDeleteParticipantClick = (participant: HouseholdParticipant) => {
+    setSelectedParticipant(participant);
     setClickedButton(buttonActions.deleteParticipant);
     setOpenPopup(true);
   };
 
-  // Sort members to show admin first
-  const sortedMembers = [...members].sort((a, b) => {
+  // Sort participants to show admin first
+  const sortedParticipants = [...participants].sort((a, b) => {
     if (a.id === householdInfo?.adminId) return -1;
     if (b.id === householdInfo?.adminId) return 1;
     return 0;
   });
 
   // Filter out current admin for delegation popup
-  const delegateablemembers = members.filter(member => member.id !== user?.id);
+  const delegateableParticipants = participants.filter(participant => participant.id !== user?.id);
 
   return (
     <div className="manage-household">
@@ -345,29 +345,29 @@ const ManageHousehold: React.FC = () => {
           </Button>
         </div>
       </div>
-      {members && members.length > 0 && (
+      {participants && participants.length > 0 && (
         <div className="participants-list">
           <div className="participants-list__header">PARTICIPANTS</div>
-          {sortedMembers.map((member, index) => (
+          {sortedParticipants.map((participant, index) => (
             <div
               className="participant"
-              key={member.id}
+              key={participant.id}
               id={String(index)}
             >
               <span>
                 <img
-                  src={getProfilePictureUrl(member.profilePicturePath) || profileDefaultIcon}
-                  alt={`${member.firstName} ${member.lastName}`}
+                  src={getProfilePictureUrl(participant.profilePicturePath) || profileDefaultIcon}
+                  alt={`${participant.firstName} ${participant.lastName}`}
                 />
-                <p>{`${member.firstName} ${member.lastName}`}</p>
+                <p>{`${participant.firstName} ${participant.lastName}`}</p>
               </span>
 
-              {member.id !== user?.id && (
+              {participant.id !== user?.id && (
                 <img
                   src={decline}
-                  alt="Delete member"
-                  className="delete-member"
-                  onClick={() => handleDeleteMemberClick(member)}
+                  alt="Delete participant"
+                  className="delete-participant"
+                  onClick={() => handleDeleteParticipantClick(participant)}
                 />
               )}
             </div>
@@ -386,31 +386,31 @@ const ManageHousehold: React.FC = () => {
           {clickedButton === buttonActions.delegateAdmin && (
             <>
               <p>Select a new household admin</p>
-              {delegateablemembers && delegateablemembers.length > 0 ? (
+              {delegateableParticipants && delegateableParticipants.length > 0 ? (
                 <div className="participants-list">
                   <div className="participants-list__header">PARTICIPANTS</div>
-                  {delegateablemembers.map((member, index) => (
+                  {delegateableParticipants.map((participant, index) => (
                     <div
                       className="participant__delegate-admin"
-                      key={member.id}
+                      key={participant.id}
                       id={String(index)}
-                      onClick={(e) => handleSelectNewAdmin(member, e)}
+                      onClick={(e) => handleSelectNewAdmin(participant, e)}
                     >
                       <img
                         src={
-                          getProfilePictureUrl(member.profilePicturePath) || profileDefaultIcon
+                          getProfilePictureUrl(participant.profilePicturePath) || profileDefaultIcon
                         }
-                        alt={`${member.firstName} ${member.lastName}`}
+                        alt={`${participant.firstName} ${participant.lastName}`}
                       />
-                      <p>{`${member.firstName} ${member.lastName}`}</p>
+                      <p>{`${participant.firstName} ${participant.lastName}`}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p>No other members available to delegate admin role</p>
+                <p>No other participants available to delegate admin role</p>
               )}
-              <Button 
-                variant="primary" 
+              <Button
+                variant="primary"
                 onClick={handleDelegateAdmin}
                 disabled={loading || !selectedNewAdmin}
               >
@@ -440,14 +440,14 @@ const ManageHousehold: React.FC = () => {
               </Button>
             </>
           )}
-          {clickedButton === buttonActions.deleteParticipant && selectedMember && (
+          {clickedButton === buttonActions.deleteParticipant && selectedParticipant && (
             <>
               <p>Are you sure you want to remove this participant?</p>
               <img
-                src={getProfilePictureUrl(selectedMember.profilePicturePath) || profileDefaultIcon}
-                alt={`${selectedMember.firstName} ${selectedMember.lastName}`}
+                src={getProfilePictureUrl(selectedParticipant.profilePicturePath) || profileDefaultIcon}
+                alt={`${selectedParticipant.firstName} ${selectedParticipant.lastName}`}
               />
-              <p>{`${selectedMember.firstName} ${selectedMember.lastName}`}</p>
+              <p>{`${selectedParticipant.firstName} ${selectedParticipant.lastName}`}</p>
               <Button variant="red" onClick={handleDeleteParticipant} disabled={loading}>
                 {loading ? "Removing..." : "Remove"}
               </Button>
