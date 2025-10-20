@@ -11,8 +11,6 @@
   --color-white: #ffffff;
   --color-black: #000000;
   --color-error-bg: #ff7285;
-  --color-error-bg-secondary: #ffcaca;
-  --color-error-bg-tr: #ff7285b0;
 
   // UI Colors
   --color-border: #e0e0e0;
@@ -24,7 +22,7 @@
 
   // Font Sizes
   --font-size-h1: 32px; // 2rem
-  --font-size-h2: 26px; // 1.625rem
+  --font-size-h2: 26px; // 1.625rem  
   --font-size-h3: 24px; // 1.5rem
   --font-size-h4: 22px; // 1.375rem
   --font-size-h5: 20px; // 1.25rem
@@ -55,7 +53,7 @@
   // Layout
   --navbar-height: 70px;
   --border-radius-sm: 8px;
-  --border-radius-standart: 10px;
+  --border-radius-standard: 10px;
   --border-radius-md: 12px;
   --border-radius-lg: 15px;
   --border-radius-xl: 20px;
@@ -65,7 +63,6 @@
   --z-dropdown: 10;
   --z-navbar: 1000;
   --z-modal: 1001;
-  --z-modal2: 1002;
 
   // Transitions
   --transition-fast: 0.2s ease;
