@@ -89,6 +89,49 @@ public class HouseholdService(DataContext _context,
         user.HouseholdId = household.Id;
         
         _context.Households.Add(household);
+        
+        // Create default activities for the new household
+        var defaultActivities = new List<Activity>
+        {
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Wash the dishes",
+                PointsAwarded = 10
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Vacuum the house",
+                PointsAwarded = 15
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Do the laundry",
+                PointsAwarded = 12
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Take out the trash",
+                PointsAwarded = 5
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Cook a meal",
+                PointsAwarded = 20
+            }
+        };
+        
+        await _context.Activities.AddRangeAsync(defaultActivities);
+        
         var roleResponse = await MakeHouseholdAdminRole(user);
         if (!roleResponse.IsSuccessful)
         {
