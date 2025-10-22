@@ -5,12 +5,12 @@ import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import timerIcon from "../../../assets/svg/timer.svg";
 import Popup from "../../../components/Popup/Popup";
-// import { useUser } from "../../../contexts/UserContext";
+import { useUser } from "../../../contexts/UserContext";
 import profileIcon from "../../../assets/svg/profile-icon.svg";
 import starIcon from "../../../assets/svg/star-black.svg";
 import timer from "../../../assets/svg/timer.svg";
+import pencilLight from "../../../assets/svg/pencil-light.svg";
 
-// Task type definition
 interface Assignee {
   name: string;
   avatar: string;
@@ -25,6 +25,7 @@ interface Task {
   description: string;
   assignees: Assignee[];
   timeLeft: string;
+  deadline?: string;
   status: "overtime" | "todo" | "done";
   author?: Author;
 }
@@ -32,16 +33,145 @@ interface Task {
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  // const { user } = useUser();
+  const { user } = useUser();
 
-  // State to manage collapsed sections
   const [collapsedSections, setCollapsedSections] = useState({
     overtime: false,
     todo: false,
     done: false,
   });
 
-  // Toggle section collapse
+  // Load tasks from localStorage or return default tasks
+  const getInitialTasks = (): Task[] => {
+    const saved = localStorage.getItem("choruko-tasks");
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return [
+      {
+        id: 1,
+        name: "Activity name",
+        description: "Activity description",
+        assignees: [
+          {
+            name: "Andreas Toretto",
+            avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+          },
+          {
+            name: "John Doe",
+            avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+          },
+          {
+            name: "Jane Smith",
+            avatar: "https://randomuser.me/api/portraits/men/3.jpg",
+          },
+          {
+            name: "Anna Lee",
+            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+          },
+        ],
+        timeLeft: "-4h",
+        deadline: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        status: "overtime",
+        author: {
+          name: "Andreas Toretto",
+          avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+        },
+      },
+      {
+        id: 2,
+        name: "Second task",
+        description: "Another task description",
+        assignees: [
+          {
+            name: "Anna Lee",
+            avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+          },
+        ],
+        timeLeft: "2h",
+        deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+        status: "todo",
+        author: {
+          name: "Gabby Mayers",
+          avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+        },
+      },
+      {
+        id: 3,
+        name: "Activity name",
+        description: "Activity description",
+        assignees: [
+          {
+            name: "Andreas Toretto",
+            avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+          },
+          {
+            name: "John Doe",
+            avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+          },
+          {
+            name: "Jane Smith",
+            avatar: "https://randomuser.me/api/portraits/men/3.jpg",
+          },
+          {
+            name: "Anna Lee",
+            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+          },
+        ],
+        timeLeft: "-4h",
+        deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+        status: "overtime",
+        author: {
+          name: "Ann Huang",
+          avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+        },
+      },
+    ];
+  };
+
+  const [tasks, setTasks] = useState<Task[]>(getInitialTasks());
+
+  // Persist tasks to localStorage on every change
+  useEffect(() => {
+    localStorage.setItem("choruko-tasks", JSON.stringify(tasks));
+  }, [tasks]);
+
+  const [, setCurrentTime] = useState(Date.now());
+
+  // Dynamic interval updates based on closest deadline
+  useEffect(() => {
+    const getUpdateInterval = () => {
+      const now = Date.now();
+      let minHoursToDeadline = Infinity;
+
+      tasks.forEach((task) => {
+        if (task.deadline) {
+          const deadlineDate = new Date(task.deadline).getTime();
+          const diffMs = Math.abs(deadlineDate - now);
+          const diffHours = diffMs / (1000 * 60 * 60);
+
+          if (diffHours < minHoursToDeadline) {
+            minHoursToDeadline = diffHours;
+          }
+        }
+      });
+
+      if (minHoursToDeadline < 1) {
+        return 60000;
+      } else if (minHoursToDeadline < 24) {
+        return 3600000;
+      } else {
+        return 86400000;
+      }
+    };
+
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, getUpdateInterval());
+
+    return () => clearInterval(interval);
+  }, [tasks]);
+
   const toggleSection = (section: keyof typeof collapsedSections) => {
     setCollapsedSections((prev) => ({
       ...prev,
@@ -49,89 +179,31 @@ const Tasks: React.FC = () => {
     }));
   };
 
-  // State to manage tasks
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: 1,
-      name: "Activity name",
-      description: "Activity description",
-      assignees: [
-        {
-          name: "Andreas Toretto",
-          avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        },
-        {
-          name: "John Doe",
-          avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-        },
-        {
-          name: "Jane Smith",
-          avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-        },
-        {
-          name: "Anna Lee",
-          avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        },
-      ],
-      timeLeft: "-4h",
-      status: "overtime",
-      author: {
-        name: "Andreas Toretto",
-        avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-      },
-    },
-    {
-      id: 2,
-      name: "Second task",
-      description: "Another task description",
-      assignees: [
-        {
-          name: "Anna Lee",
-          avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-        },
-      ],
-      timeLeft: "2h",
-      status: "todo",
-      author: {
-        name: "Gabby Mayers",
-        avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-      },
-    },
-    {
-      id: 3,
-      name: "Activity name",
-      description: "Activity description",
-      assignees: [
-        {
-          name: "Andreas Toretto",
-          avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        },
-        {
-          name: "John Doe",
-          avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-        },
-        {
-          name: "Jane Smith",
-          avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-        },
-        {
-          name: "Anna Lee",
-          avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        },
-      ],
-      timeLeft: "-4h",
-      status: "overtime",
-      author: {
-        name: "Ann Huang",
-        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-      },
-    },
-  ]);
+  const formatTimeLeft = (deadline?: string) => {
+    if (!deadline) return "N/A";
 
-  // Ref to track if we've already processed the new task
+    const deadlineDate = new Date(deadline);
+    const now = new Date();
+    const diffMs = deadlineDate.getTime() - now.getTime();
+    const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+
+    // Show date/time format if more than 24 hours
+    if (Math.abs(diffHours) > 24) {
+      const day = deadlineDate.getDate().toString().padStart(2, "0");
+      const month = (deadlineDate.getMonth() + 1).toString().padStart(2, "0");
+      const hours = deadlineDate.getHours().toString().padStart(2, "0");
+      const minutes = deadlineDate.getMinutes().toString().padStart(2, "0");
+      return `${day}.${month} ${hours}:${minutes}`;
+    }
+
+    return diffHours > 0 ? `${diffHours}h` : `${diffHours}h`;
+  };
+
   const hasAddedTaskRef = useRef(false);
+  const hasUpdatedTaskRef = useRef(false);
+  const hasDeletedTaskRef = useRef(false);
 
-  // Effect to handle new task from AddTask page
+  // Handle task operations from AddTask page via navigation state
   useEffect(() => {
     const state = location.state as {
       newTask?: {
@@ -141,14 +213,59 @@ const Tasks: React.FC = () => {
         deadline: string;
         author?: string;
       };
+      updatedTask?: {
+        id: number;
+        name: string;
+        description: string;
+        assignees: any[];
+        deadline: string;
+        author?: any;
+      };
+      deleteTaskId?: number;
     };
 
-    // Only process if we have a new task and haven't already added it
+    if (state?.deleteTaskId && !hasDeletedTaskRef.current) {
+      hasDeletedTaskRef.current = true;
+      setTasks((prevTasks) =>
+        prevTasks.filter((task) => task.id !== state.deleteTaskId)
+      );
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+
+    if (state?.updatedTask && !hasUpdatedTaskRef.current) {
+      hasUpdatedTaskRef.current = true;
+      const { updatedTask } = state;
+
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => {
+          if (task.id === updatedTask.id) {
+            return {
+              ...task,
+              name: updatedTask.name,
+              description: updatedTask.description,
+              assignees: Array.isArray(updatedTask.assignees)
+                ? updatedTask.assignees.map((a: any) =>
+                    typeof a === "object"
+                      ? { name: a.name, avatar: a.avatar }
+                      : { name: a, avatar: a }
+                  )
+                : [],
+              deadline: updatedTask.deadline,
+              status: task.status,
+              timeLeft: task.timeLeft,
+              author: updatedTask.author || task.author,
+            };
+          }
+          return task;
+        })
+      );
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+
     if (state?.newTask && !hasAddedTaskRef.current) {
       hasAddedTaskRef.current = true;
       const { newTask } = state;
 
-      // Calculate time left based on deadline
       const calculateTimeLeft = (deadline: string) => {
         if (!deadline) return "0h";
 
@@ -157,12 +274,21 @@ const Tasks: React.FC = () => {
         const diffMs = deadlineDate.getTime() - now.getTime();
         const diffHours = Math.round(diffMs / (1000 * 60 * 60));
 
+        if (Math.abs(diffHours) > 24) {
+          const day = deadlineDate.getDate().toString().padStart(2, "0");
+          const month = (deadlineDate.getMonth() + 1)
+            .toString()
+            .padStart(2, "0");
+          const hours = deadlineDate.getHours().toString().padStart(2, "0");
+          const minutes = deadlineDate.getMinutes().toString().padStart(2, "0");
+          return `${day}.${month} ${hours}:${minutes}`;
+        }
+
         return diffHours > 0 ? `${diffHours}h` : `${diffHours}h`;
       };
 
       const timeLeft = calculateTimeLeft(newTask.deadline);
 
-      // Create the task with proper format
       setTasks((prevTasks) => {
         const taskToAdd: Task = {
           id: prevTasks.length + 1,
@@ -185,22 +311,20 @@ const Tasks: React.FC = () => {
         return [...prevTasks, taskToAdd];
       });
 
-      // Clear the location state to prevent re-adding on refresh
       navigate(location.pathname, { replace: true, state: {} });
     }
 
-    // Reset the ref when state is cleared
-    if (!state?.newTask) {
+    if (!state?.newTask && !state?.updatedTask && !state?.deleteTaskId) {
       hasAddedTaskRef.current = false;
+      hasUpdatedTaskRef.current = false;
+      hasDeletedTaskRef.current = false;
     }
   }, [location.state, navigate, location.pathname]);
 
-  // Add new task function
   const addTask = () => {
     navigate("/tasks/add");
   };
 
-  // Mark task as done
   const markTaskAsDone = (taskId: number) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
@@ -209,31 +333,26 @@ const Tasks: React.FC = () => {
     );
   };
 
-  // Determine which avatars to show
   const getVisibleAvatars = (avatars: string[]) => {
     if (avatars.length <= 2) {
-      // Show all if 2 or less
       return avatars.map((src, index) => ({ src, isActive: true, index }));
     } else {
-      // Show first one + hide the rest
+      // Show only first avatar, hide rest with counter
       return avatars.map((src, index) => ({
         src,
-        isActive: index === 0, // Only first is active
+        isActive: index === 0,
         index,
       }));
     }
   };
 
-  // Filter tasks by status
   const overtimeTasks = tasks.filter((task) => task.status === "overtime");
   const todoTasks = tasks.filter((task) => task.status === "todo");
   const doneTasks = tasks.filter((task) => task.status === "done");
 
-  // Popup state
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showPopup, setShowPopup] = useState(false);
 
-  // Render individual task component
   const renderTask = (task: Task, isLast: boolean, isFirst: boolean) => {
     const visibleAvatars = getVisibleAvatars(
       task.assignees.map((a) => a.avatar)
@@ -279,7 +398,9 @@ const Tasks: React.FC = () => {
               )}
             </div>
             <div className="task__time-left">
-              <p className="task__time-left-amount">{task.timeLeft}</p>
+              <p className="task__time-left-amount">
+                {formatTimeLeft(task.deadline)}
+              </p>
               <span>
                 <img src={timerIcon} alt="timer icon" />
               </span>
@@ -398,7 +519,7 @@ const Tasks: React.FC = () => {
         </div>
       </div>
 
-      {/* Popup for task details using Popup component */}
+      {/* Task Details Popup */}
       {showPopup && selectedTask && (
         <Popup
           open={showPopup}
@@ -420,6 +541,34 @@ const Tasks: React.FC = () => {
                 selectedTask.status === "overtime" ? "danger" : "primary",
             },
           ]}
+          customActions={
+            // Show edit button only for task author
+            user &&
+            selectedTask.author?.name ===
+              `${user.firstName} ${user.lastName}` ? (
+              <div
+                className="task-edit-button"
+                onClick={() => {
+                  navigate("/tasks/add", {
+                    state: {
+                      editTask: {
+                        id: selectedTask.id,
+                        name: selectedTask.name,
+                        description: selectedTask.description,
+                        assignees: selectedTask.assignees,
+                        deadline: selectedTask.deadline,
+                        author: selectedTask.author,
+                      },
+                    },
+                  });
+                  setShowPopup(false);
+                  setSelectedTask(null);
+                }}
+              >
+                <img src={pencilLight} alt="Edit task" />
+              </div>
+            ) : null
+          }
           className="task-details-popup task-details-popup--button-top"
         >
           <div className="task-details-content">
@@ -459,21 +608,25 @@ const Tasks: React.FC = () => {
               </div>
             </div>
             <div className="task-details-footer">
-              <div className="task-details-footer-item">
-                <span className="task-details-footer-icon">
-                  <img src={starIcon} alt="star icon" />
-                </span>
-                <span className="task-details-footer-label">POINTS</span>
-                <span className="task-details-footer-value">5 pts</span>
+              <div className="task-details-footer-item first">
+                <div>
+                  <span className="task-details-footer-icon">
+                    <img src={timer} alt="date icon" />
+                  </span>
+                  <span className="task-details-footer-label">DEADLINE</span>
+                </div>
+                <div>
+                  <span className="task-details-footer-icon">
+                    <img src={starIcon} alt="star icon" />
+                  </span>
+                  <span className="task-details-footer-label">POINTS</span>
+                </div>
               </div>
-              <div className="task-details-footer-item">
-                <span className="task-details-footer-icon">
-                  <img src={timer} alt="date icon" />
-                </span>
-                <span className="task-details-footer-label">DEADLINE</span>
+              <div className="task-details-footer-item second">
                 <span className="task-details-footer-value">
-                  {selectedTask.timeLeft}
+                  {formatTimeLeft(selectedTask.deadline)}
                 </span>
+                <div className="task-details-footer-value">5 pts</div>
               </div>
             </div>
           </div>

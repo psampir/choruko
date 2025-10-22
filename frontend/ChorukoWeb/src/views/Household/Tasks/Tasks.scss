@@ -221,7 +221,7 @@
   // Element: task__assignees
   &__assignees {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     flex-direction: column;
     gap: var(--spacing-sm);
   }
@@ -278,10 +278,10 @@
         background-color: var(--color-error-bg);
       }
 
-      &-todo, &-done {
+      &-todo,
+      &-done {
         background-color: var(--color-secondary);
       }
-
     }
   }
 
@@ -289,6 +289,12 @@
   &__time-left {
     display: flex;
     align-items: center;
+    
+    span{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
     span img {
       width: 24px;
@@ -347,7 +353,12 @@
     }
 
     .popup-actions {
-      order: -2; // Place before title
+      order: -2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row !important;
+      padding-top: var(--spacing-md) !important;
     }
 
     .popup-title {
@@ -446,7 +457,7 @@
 
   .task-details-footer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
     gap: var(--spacing-md);
@@ -454,9 +465,24 @@
     &-item {
       display: flex;
       align-items: center;
+      flex-direction: column;
       gap: var(--spacing-sm);
       border-radius: var(--border-radius-standart);
       flex: 1;
+
+      div {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--spacing-sm);
+      }
+
+      &.first {
+        justify-content: flex-end;
+      }
+      &.second {
+        justify-content: flex-start;
+      }
     }
 
     &-icon {
@@ -478,6 +504,27 @@
       font-size: var(--font-size-body2);
       font-weight: var(--font-weight-semibold);
       color: var(--color-text-primary);
+    }
+  }
+
+  .task-edit-button {
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-black);
+    border-radius: var(--border-radius-standart);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    img {
+      width: 20px;
+      height: 20px;
     }
   }
 }
