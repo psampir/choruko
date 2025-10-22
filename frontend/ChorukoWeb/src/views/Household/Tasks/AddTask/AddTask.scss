@@ -260,4 +260,20 @@
       }
     }
   }
+
+  // Element: add-task__delete-btn
+  &__delete-btn {
+    margin-top: var(--spacing-md);
+  }
+
+  // Element: add-task__footer with multiple buttons
+  &__footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+
+    .button {
+      width: 100%;
+    }
+  }
 }

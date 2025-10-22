@@ -16,6 +16,7 @@ interface PopupProps extends React.HTMLAttributes<HTMLDivElement> {
   open?: boolean;
   onClose?: () => void;
   actions?: PopupAction[];
+  customActions?: React.ReactNode;
   showCloseButton?: boolean;
 }
 
@@ -27,6 +28,7 @@ const Popup: React.FC<PopupProps> = ({
   open,
   onClose,
   actions,
+  customActions,
   showCloseButton = true,
   ...props
 }) => {
@@ -62,20 +64,22 @@ const Popup: React.FC<PopupProps> = ({
 
         {children && <div className="popup-content">{children}</div>}
 
-        {actions && actions.length > 0 && (
+        {((actions && actions.length > 0) || customActions) && (
           <div className="popup-actions">
-            {actions.map((action, index) => (
-              <button
-                key={index}
-                className={`popup-button popup-button--${
-                  action.variant || "primary"
-                }`}
-                onClick={action.onClick}
-                disabled={action.disabled}
-              >
-                {action.label}
-              </button>
-            ))}
+            {actions &&
+              actions.map((action, index) => (
+                <button
+                  key={index}
+                  className={`popup-button popup-button--${
+                    action.variant || "primary"
+                  }`}
+                  onClick={action.onClick}
+                  disabled={action.disabled}
+                >
+                  {action.label}
+                </button>
+              ))}
+            {customActions}
           </div>
         )}
       </div>

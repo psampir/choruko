@@ -1,11 +1,12 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../../../../contexts/UserContext";
 import "./AddTask.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import NavbarMobile from "../../../../components/NavbarMobile";
 import arrowLeftIcon from "../../../../assets/svg/arrow-left.svg";
+import Popup from "../../../../components/Popup/Popup";
 
 import checkIcon from "../../../../assets/svg/check.svg";
 import star from "../../../../assets/svg/star.svg";
@@ -27,11 +28,45 @@ interface Assignee {
 
 const AddTask: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useUser();
+
+  // Check if we're in edit mode
+  const editTask = location.state?.editTask;
+  const isEditMode = !!editTask;
+
   const [taskDescription, setTaskDescription] = useState("");
   const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
   const [selectedAssignees, setSelectedAssignees] = useState<number[]>([]);
   const [deadline, setDeadline] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Pre-fill form when in edit mode
+  useEffect(() => {
+    if (editTask) {
+      setTaskDescription(editTask.description || "");
+      setDeadline(editTask.deadline || "");
+
+      // Find and select the activity by name
+      const activity = activities.find((a) => a.name === editTask.name);
+      if (activity) {
+        setSelectedActivity(activity.id);
+      }
+
+      // Select assignees by matching both name AND avatar
+      if (editTask.assignees && Array.isArray(editTask.assignees)) {
+        const assigneeIds = assignees
+          .filter((assignee) =>
+            editTask.assignees.some(
+              (ea: any) =>
+                ea.name === assignee.name && ea.avatar === assignee.avatar
+            )
+          )
+          .map((assignee) => assignee.id);
+        setSelectedAssignees(assigneeIds);
+      }
+    }
+  }, [editTask]);
 
   // State for collapsed sections
   const [collapsedSections, setCollapsedSections] = useState({
@@ -109,22 +144,44 @@ const AddTask: React.FC = () => {
       selectedAssignees.includes(assignee.id)
     );
 
-    // Create the new task object
-    const newTask = {
-      name: activity?.name || taskDescription,
-      description: taskDescription,
-      assignees: selectedAssigneeObjs,
-      deadline: deadline,
-      author: user
-        ? {
-            name: `${user.firstName} ${user.lastName}`,
-            avatar: user.profilePicturePath || null,
-          }
-        : null,
-    };
+    if (isEditMode && editTask) {
+      // Update existing task
+      const updatedTask = {
+        id: editTask.id,
+        name: activity?.name || taskDescription,
+        description: taskDescription,
+        assignees: selectedAssigneeObjs,
+        deadline: deadline,
+        author: editTask.author,
+      };
 
-    // Navigate back to tasks with the new task data
-    navigate("/tasks", { state: { newTask } });
+      // Navigate back to tasks with the updated task data
+      navigate("/tasks", { state: { updatedTask } });
+    } else {
+      // Create new task
+      const newTask = {
+        name: activity?.name || taskDescription,
+        description: taskDescription,
+        assignees: selectedAssigneeObjs,
+        deadline: deadline,
+        author: user
+          ? {
+              name: `${user.firstName} ${user.lastName}`,
+              avatar: user.profilePicturePath || null,
+            }
+          : null,
+      };
+
+      // Navigate back to tasks with the new task data
+      navigate("/tasks", { state: { newTask } });
+    }
+  };
+
+  const handleDeleteTask = () => {
+    if (editTask) {
+      // Navigate back with delete flag
+      navigate("/tasks", { state: { deleteTaskId: editTask.id } });
+    }
   };
 
   const handleBack = () => {
@@ -145,7 +202,9 @@ const AddTask: React.FC = () => {
           >
             <img src={arrowLeftIcon} alt="Back" />
           </button>
-          <h1 className="add-task__title">Add a new task</h1>
+          <h1 className="add-task__title">
+            {isEditMode ? "Edit task" : "Add a new task"}
+          </h1>
         </div>
 
         {/* Task Description */}
@@ -264,13 +323,52 @@ const AddTask: React.FC = () => {
           />
         </div>
 
-        {/* Add Button */}
+        {/* Add/Save Button */}
         <div className="add-task__footer">
           <Button variant="primary" onClick={handleAddTask}>
-            Add
+            {isEditMode ? "Save Changes" : "Add"}
           </Button>
+          {isEditMode && (
+            <Button
+              variant="red"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="add-task__delete-btn"
+            >
+              Delete task
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Delete Confirmation Popup */}
+      {showDeleteConfirm && (
+        <Popup
+          open={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          title="Delete Task"
+          variant="red"
+          actions={[
+            {
+              label: "Cancel",
+              onClick: () => setShowDeleteConfirm(false),
+              variant: "secondary",
+            },
+            {
+              label: "Delete",
+              onClick: () => {
+                handleDeleteTask();
+                setShowDeleteConfirm(false);
+              },
+              variant: "danger",
+            },
+          ]}
+        >
+          <p>
+            Are you sure you want to delete this task? This action cannot be
+            undone.
+          </p>
+        </Popup>
+      )}
     </div>
   );
 };
