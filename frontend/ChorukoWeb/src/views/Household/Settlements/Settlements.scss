@@ -1,0 +1,412 @@
+@use "../../../styles/variables.scss";
+
+// Block: settlements
+.settlements {
+  overflow-x: hidden;
+  padding: var(--spacing-2xl);
+  min-height: calc(100vh - calc(var(--navbar-height) * 2));
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-3xl);
+
+    .button {
+      width: 80px;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-weight: var(--font-weight-normal);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2xl);
+  }
+
+  &__section {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--border-radius-standart);
+    background-color: var(--color-background-secondary);
+
+    .settlements__list {
+      padding-top: 33px;
+    }
+
+    &--collapsed {
+      height: 30px;
+      min-height: 30px;
+
+      .settlements__list {
+        display: none;
+      }
+
+      .dropdown__arrow {
+        transform: rotate(-90deg);
+      }
+    }
+
+    &--todo {
+      border-color: var(--color-secondary);
+    }
+
+    &--done {
+      border-color: var(--color-primary);
+    }
+  }
+
+  &__list {
+    width: 100%;
+    max-height: calc(2 * (var(--spacing-sm) * 2 + 72px));
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--color-secondary-half-tr);
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--color-secondary);
+    }
+  }
+
+  &__section-title {
+    position: absolute;
+    top: -3px;
+    width: calc(100% + 3px);
+    height: calc(33px + 3px);
+    padding: 0 var(--spacing-md);
+    z-index: 5;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-h6);
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--border-radius-standart);
+    background-color: var(--color-secondary);
+    font-size: var(--font-size-body);
+    font-weight: 400;
+    color: var(--color-background);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .dropdown__arrow {
+    position: absolute;
+    right: 15px;
+    top: 7px;
+    color: var(--color-background);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    font-size: var(--font-size-body3);
+    z-index: 5;
+  }
+
+  &__empty-message {
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-body2);
+    padding: var(--spacing-2xl);
+    font-style: italic;
+  }
+}
+
+// Block: settlement (individual settlement item)
+.settlement {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid #e9ecef;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    height: 3px;
+    background-color: var(--color-secondary-half-tr);
+  }
+
+  &--last::after {
+    display: none;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+  .--container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row;
+
+    &::after {
+      display: none !important;
+    }
+  }
+  &__icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-secondary);
+    height: 40px;
+    width: 40px;
+    border-radius: 10px;
+
+    img {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  &__author-avatar {
+    flex-shrink: 0;
+  }
+
+  &__avatar-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &__name {
+    font-size: var(--font-size-h5);
+    margin: 0 0 var(--spacing-sm) 0;
+    color: #333;
+  }
+
+  &__description {
+    font-size: var(--font-size-body2);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+}
+
+// Settlement details popup styles
+.settlement-details-popup {
+  .popup-content {
+    padding: 0;
+  }
+
+  .settlement-details-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    width: 100%;
+  }
+
+  &.settlement-details-popup--button-top {
+    .popup {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .popup-actions {
+      order: -2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row !important;
+      padding-top: var(--spacing-md) !important;
+    }
+
+    .popup-title {
+      order: -1;
+    }
+
+    .popup-content {
+      order: 0;
+    }
+
+    .popup-button {
+      &:active {
+        background-color: var(--color-secondary) !important;
+        color: var(--color-white) !important;
+        box-shadow: none !important;
+        transform: none !important;
+      }
+    }
+  }
+
+  .settlement-details-description {
+    font-size: var(--font-size-body2);
+    line-height: 1.5;
+    color: var(--color-text-primary);
+  }
+
+  .participants-list {
+    border-radius: var(--border-radius-standart);
+    background-color: var(--color-secondary);
+    overflow: hidden;
+
+    &.assignor-list {
+      background-color: var(--color-primary);
+
+      .participants-list__header {
+        background-color: var(--color-primary);
+      }
+    }
+
+    &__header {
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: var(--font-size-body3);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-background);
+      background-color: var(--color-secondary);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    &__content {
+      padding: var(--spacing-md);
+      background-color: var(--color-background-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+
+      .activity {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--spacing-sm);
+        border-radius: var(--border-radius-standart);
+        background-color: var(--color-background);
+
+        &-data {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+
+          .assignee-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+          }
+
+          p {
+            margin: 0;
+            font-size: var(--font-size-body2);
+            color: var(--color-text-primary);
+          }
+        }
+      }
+    }
+  }
+
+  .settlement-details-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: var(--color-background-secondary);
+    border-radius: var(--border-radius-standart);
+
+    &-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+
+      &.first {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: start;
+
+        > div {
+          display: flex;
+          gap: var(--spacing-xs);
+          align-items: center;
+        }
+      }
+
+      &.second {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: end;
+      }
+    }
+
+    &-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    &-label {
+      font-size: var(--font-size-body3);
+      color: var(--color-text-secondary);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    &-value {
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+// Settlement edit button
+.settlement-edit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-background-secondary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: var(--color-background-secondary);
+  }
+
+  &:active {
+    background-color: var(--color-secondary-half-tr);
+  }
+
+  img {
+    width: 20px;
+    height: 20px;
+  }
+}

@@ -2,10 +2,11 @@ import React, { useState, useRef, type InputHTMLAttributes } from "react";
 import "./Input.scss";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  variant?: "primary" | "password" | "email" | "edit" | "datetime";
+  variant?: "primary" | "password" | "email" | "edit" | "datetime" | "currency";
   className?: string;
   children?: React.ReactNode;
   onEditClick?: () => void;
+  currencySymbol?: string; // Custom symbol for currency variant (default: "#")
 }
 
 const Input: React.FC<InputProps> = ({
@@ -13,6 +14,7 @@ const Input: React.FC<InputProps> = ({
   className = "",
   children,
   onEditClick,
+  currencySymbol = "#",
   ...props
 }) => {
   // Detect password either by variant or incoming type for convenience
@@ -102,6 +104,15 @@ const Input: React.FC<InputProps> = ({
             tabIndex={0}
             role="button"
           />
+          {children}
+        </div>
+      ) : variant === "currency" ? (
+        <div className="input__wrapper">
+          <input
+            className={`input ${variantClass} ${className}`}
+            {...restProps}
+          />
+          <span className="input__currency-symbol">{currencySymbol}</span>
           {children}
         </div>
       ) : (
