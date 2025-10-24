@@ -10,7 +10,8 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
 import Tasks from "./views/Household/Tasks/Tasks";
 import AddTask from "./views/Household/Tasks/AddTask/AddTask";
-import Expenses from "./views/Household/Expenses/Expenses";
+import Settlements from "./views/Household/Settlements/Settlements";
+import AddSettlement from "./views/Household/Settlements/AddSettlement/AddSettlement";
 import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
 import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
@@ -109,12 +110,21 @@ function AppRoutes() {
       />
 
       <Route
-        path="/expenses"
+        path="/settlements"
         element={
           <ProtectedRoute>
             <MainAppLayout>
-              <Expenses />
+              <Settlements />
             </MainAppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/settlements/add"
+        element={
+          <ProtectedRoute>
+            <AddSettlement />
           </ProtectedRoute>
         }
       />

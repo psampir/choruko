@@ -68,6 +68,11 @@
     padding-right: 42px;
   }
 
+  &--currency {
+    @extend .input--primary;
+    padding-right: 42px;
+  }
+
   // Datetime input variant (inherits from primary)
   &--datetime {
     @extend .input--primary;
@@ -136,7 +141,8 @@
 
     .input__eye,
     .input__pencil,
-    .input__date {
+    .input__date,
+    .input__currency-symbol {
       position: absolute;
       right: 16px;
       top: 50%;
@@ -182,6 +188,17 @@
 
     .input__date {
       background: url("/src/assets/svg/date.svg") no-repeat center/contain;
+    }
+
+    .input__currency-symbol {
+      background: none;
+      color: #55ad9b;
+      font-size: var(--font-size-body);
+      font-weight: 500;
+      width: auto;
+      height: auto;
+      cursor: default;
+      pointer-events: none;
     }
 
     // Custom placeholder for datetime input
