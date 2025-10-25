@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
+import { useHousehold } from "../../../contexts/HouseholdContext";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
@@ -12,6 +13,7 @@ import { getProfilePictureUrl } from "../../../utils/imageUtils";
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserNames, updatePassword, updateProfilePicture, deleteAccount, loading: userLoading } = useUser();
+  const { refreshHousehold } = useHousehold();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
@@ -63,6 +65,7 @@ const ManageAccount: React.FC = () => {
     const result = await updateUserNames(firstNameValue, lastNameValue);
     
     if (result.success) {
+      await refreshHousehold();
       showNotification("Your name has been changed successfully", "success");
     } else {
       showNotification(result.message || "Failed to change name", "error");
@@ -109,6 +112,7 @@ const ManageAccount: React.FC = () => {
           setProfileImageSrc(result);
         };
         reader.readAsDataURL(file);
+        await refreshHousehold();
         showNotification("Profile picture updated successfully", "success");
       } else {
         showNotification(result.message || "Failed to update profile picture", "error");
