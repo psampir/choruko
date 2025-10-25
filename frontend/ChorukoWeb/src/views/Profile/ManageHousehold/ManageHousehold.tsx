@@ -386,6 +386,7 @@ const ManageHousehold: React.FC = () => {
           {clickedButton === buttonActions.delegateAdmin && (
             <>
               <p>Select a new household admin</p>
+              <p className="warning-text">You will be logged out after delegating admin rights.</p>
               {delegateableParticipants && delegateableParticipants.length > 0 ? (
                 <div className="participants-list">
                   <div className="participants-list__header">PARTICIPANTS</div>

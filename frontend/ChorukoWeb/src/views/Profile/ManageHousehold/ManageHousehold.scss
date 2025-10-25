@@ -87,6 +87,12 @@ body {
     font-size: var(--font-size-h4);
   }
 
+  .popup-container .popup .popup-content p.warning-text {
+    font-size: var(--font-size-body2);
+    color: var(--color-text-secondary);
+    margin-top: var(--spacing-xs);
+  }
+
   & button {
     width: 200px;
   }
