@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ChorukoAPI.Models;
-using System.Reflection.Emit;
 
 namespace ChorukoAPI.Data;
 
@@ -14,8 +13,6 @@ public class DataContext(DbContextOptions<DataContext> options, IConfiguration C
     public DbSet<Invitation> Invitations { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Settlement> Settlements { get; set; }
-    public DbSet<TaskReward> TaskRewards { get; set; }
-    public DbSet<PushSubscription> PushSubscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -66,10 +63,6 @@ public class DataContext(DbContextOptions<DataContext> options, IConfiguration C
             .WithMany()
             .HasForeignKey(s => s.CreatorId)
             .OnDelete(DeleteBehavior.Restrict);
-        
-        builder.Entity<PushSubscription>()
-            .HasIndex(sub => sub.Endpoint)
-            .IsUnique();
 
         // Many-to-Many для SettledUsers
         builder.Entity<Settlement>()
