@@ -30,7 +30,7 @@ namespace ChorukoAPI.Controllers
 
             var result = await householdTaskService.CreateHouseholdTaskAsync(householdId, request, userId);
 
-            return result.ToCreatedApiResponse();
+            return result.ToCreatedApiResponse("Create task");
         }
 
         [HttpPut("edit/{taskId}")]
@@ -39,7 +39,7 @@ namespace ChorukoAPI.Controllers
         {
             var result = await householdTaskService.EditHouseholdTaskAsync(taskId, request);
 
-            return result.ToCreatedApiResponse();
+            return result.ToCreatedApiResponse("Edit task");
         }
 
         [HttpGet("all/{householdId}")]
@@ -48,7 +48,7 @@ namespace ChorukoAPI.Controllers
         {
             var result = await householdTaskService.GetAllHouseholdTaskAsync(householdId);
 
-            return result.ToApiResponse();
+            return result.ToApiResponse("Task list");
         }
 
         [HttpGet("{taskId}")]
@@ -57,7 +57,7 @@ namespace ChorukoAPI.Controllers
         {
             var result = await householdTaskService.GetHouseholdTaskByIdAsync(taskId);
 
-            return result.ToApiResponse();
+            return result.ToApiResponse("Task details");
         }
 
         [HttpPut("assign/{taskId}")]
@@ -73,7 +73,7 @@ namespace ChorukoAPI.Controllers
 
             var result = await householdTaskService.AssignUserToTask(taskId, userId);
 
-            return result.ToApiResponse();
+            return result.ToApiResponse("Assign to task");
         }
 
         [HttpPut("unassign/{taskId}")]
@@ -89,7 +89,7 @@ namespace ChorukoAPI.Controllers
 
             var result = await householdTaskService.UnAssignUserFromTask(taskId, userId);
 
-            return result.ToApiResponse();
+            return result.ToApiResponse("Unassign from task");
         }
 
         [HttpPut("completed/{taskId}")]
@@ -98,7 +98,7 @@ namespace ChorukoAPI.Controllers
         {
             var result = await householdTaskService.MarkTaskAsCompleted(taskId);
 
-            return result.ToApiResponse();
+            return result.ToApiResponse("Complete task");
         }
 
         [HttpPut("uncompleted/{taskId}")]
@@ -107,7 +107,7 @@ namespace ChorukoAPI.Controllers
         {
             var result = await householdTaskService.UnMarkTaskAsCompleted(taskId);
 
-            return result.ToApiResponse();
+            return result.ToApiResponse("Uncomplete task");
         }
 
         [HttpDelete("delete/{taskId}")]
@@ -116,7 +116,7 @@ namespace ChorukoAPI.Controllers
         {
             var result = await householdTaskService.DeleteHouseholdTask(taskId);
 
-            return result.ToApiResponse();
+            return result.ToApiResponse("Delete task");
         }
     }
 }
