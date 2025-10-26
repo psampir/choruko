@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using ChorukoAPI.Services.Background;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -122,6 +123,8 @@ builder.Services.AddScoped<IMapper<Household, HouseholdInfoResponse>, HouseholdI
 builder.Services.AddScoped<IMapper<Settlement, SettlementWithoutUsersResponse>, SettlementWithoutUsersMapper>();
 
 builder.Services.AddScoped<ISettlementService, SettlementService>();
+
+builder.Services.AddHostedService<PointsResetService>();
 
 builder.Services.AddControllers();
 
