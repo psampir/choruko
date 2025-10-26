@@ -23,7 +23,7 @@ public class UserController(IUserService _userService) : ControllerBase
     {
         var result = await _userService.GetUserInfoAsync();
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("UserInfo");
     }
     
     [HttpPut("change-names")]
@@ -43,7 +43,7 @@ public class UserController(IUserService _userService) : ControllerBase
 
         var result = await _userService.ChangeUserNamesAsync(request, userId);
         
-        return result.ToApiResponse();
+        return result.ToApiResponse("NewName");
     }
     
     [HttpPut("change-picture")]
@@ -77,7 +77,7 @@ public class UserController(IUserService _userService) : ControllerBase
             return ValidationProblem(ModelState);
         }
         
-        return result.ToApiResponse();
+        return result.ToApiResponse("ProfilePicture");
     }
     
     [HttpDelete("delete-self")]
@@ -92,7 +92,7 @@ public class UserController(IUserService _userService) : ControllerBase
         
         var result = await _userService.DeleteSelfAsync(userId);
         
-        return result.ToApiResponse();
+        return result.ToApiResponse("Delete user");
     }
     
     [HttpPut("change-password")]
@@ -126,6 +126,6 @@ public class UserController(IUserService _userService) : ControllerBase
             }
         }
         
-        return result.ToApiResponse();
+        return result.ToApiResponse("NewPassword");
     }
 }
