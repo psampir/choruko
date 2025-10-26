@@ -1,8 +1,11 @@
 namespace ChorukoAPI.Contracts.Responses.Household;
 
-public record HouseholdMemberResponse(
+public record HouseholdParticipantResponse(
     string Id,
     string FirstName,
     string LastName,
     string? ProfilePicturePath,
-    int Points);
+    int pointsCurrentMonth,
+    int pointsCurrentYear,
+    int pointsAllTime
+);

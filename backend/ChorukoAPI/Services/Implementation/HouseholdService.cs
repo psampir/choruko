@@ -31,12 +31,12 @@ public class HouseholdService(DataContext _context,
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdMemberResponse>()), "User not found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "User not found.", HttpStatusCode.NotFound);
         }
 
         if (string.IsNullOrEmpty(user.HouseholdId))
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdMemberResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
         }
 
         var household = await _context.Households
@@ -46,7 +46,7 @@ public class HouseholdService(DataContext _context,
 
         if (household == null)
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdMemberResponse>()), "Household not found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "Household not found.", HttpStatusCode.NotFound);
         }
 
         return ServiceResponseFactory.Success(await _mapper.Map(household));
@@ -89,6 +89,49 @@ public class HouseholdService(DataContext _context,
         user.HouseholdId = household.Id;
         
         _context.Households.Add(household);
+        
+        // Create default activities for the new household
+        var defaultActivities = new List<Activity>
+        {
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Wash the dishes",
+                PointsAwarded = 10
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Vacuum the house",
+                PointsAwarded = 15
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Do the laundry",
+                PointsAwarded = 12
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Take out the trash",
+                PointsAwarded = 5
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Cook a meal",
+                PointsAwarded = 20
+            }
+        };
+        
+        await _context.Activities.AddRangeAsync(defaultActivities);
+        
         var roleResponse = await MakeHouseholdAdminRole(user);
         if (!roleResponse.IsSuccessful)
         {
