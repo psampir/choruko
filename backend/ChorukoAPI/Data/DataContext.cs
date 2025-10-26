@@ -13,7 +13,6 @@ public class DataContext(DbContextOptions<DataContext> options, IConfiguration C
     public DbSet<Invitation> Invitations { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Settlement> Settlements { get; set; }
-    public DbSet<TaskReward> TaskRewards { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
