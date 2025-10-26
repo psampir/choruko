@@ -18,7 +18,7 @@ namespace ChorukoAPI.Controllers
                 return BadRequest(ModelState);
 
             var result = await adminUserService.ResetUserPasswordAsync(request);
-            return result.ToApiResponse();
+            return result.ToApiResponse("Reset password");
         }
     }
 }
