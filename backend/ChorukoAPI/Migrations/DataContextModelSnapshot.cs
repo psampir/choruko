@@ -203,6 +203,44 @@ namespace ChorukoAPI.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("ChorukoAPI.Models.PushSubscription", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AuthKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("P256dhKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Endpoint")
+                        .IsUnique();
+
+                    b.ToTable("PushSubscriptions");
+                });
+
             modelBuilder.Entity("ChorukoAPI.Models.Settlement", b =>
                 {
                     b.Property<string>("Id")
