@@ -126,7 +126,7 @@
         color: var(--color-white);
 
         &:hover:not(:disabled) {
-          background-color: var(--color-primary);
+          opacity: 0.9;
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(85, 173, 155, 0.3);
         }
@@ -160,7 +160,6 @@
         color: var(--color-white);
 
         &:hover:not(:disabled) {
-          background-color: var(--color-error-bg);
           opacity: 0.9;
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
