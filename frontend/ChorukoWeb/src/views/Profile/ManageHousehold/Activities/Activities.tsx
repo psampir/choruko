@@ -5,14 +5,24 @@ import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import Popup from "../../../../components/Popup";
 import { useActivity } from "../../../../contexts/ActivityContext";
+import { useIsDarkTheme } from "../../../../utils/iconUtils";
 
-import arrowLeft from "../../../../assets/svg/arrow-left.svg";
-import editBox from "../../../../assets/svg/edit-box.svg";
-import star from "../../../../assets/svg/star.svg";
+import arrowLeftLight from "../../../../assets/svg/light/arrow-left.svg";
+import editBoxLight from "../../../../assets/svg/light/edit-box.svg";
+import starLight from "../../../../assets/svg/light/star.svg";
+
+import arrowLeftDark from "../../../../assets/svg/dark/arrow-left.svg";
+import editBoxDark from "../../../../assets/svg/dark/edit-box.svg";
+import starDark from "../../../../assets/svg/dark/star.svg";
 
 const Activities: React.FC = () => {
   const navigate = useNavigate();
   const { activities, loading, error, refreshActivities, createActivity, editActivity, deleteActivity, clearError } = useActivity();
+  const isDark = useIsDarkTheme();
+  
+  const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
+  const editBox = isDark ? editBoxDark : editBoxLight;
+  const star = isDark ? starDark : starLight;
 
   const [openEditPopup, setOpenEditPopup] = useState<boolean>(false);
   const [openCreatePopup, setOpenCreatePopup] = useState<boolean>(false);

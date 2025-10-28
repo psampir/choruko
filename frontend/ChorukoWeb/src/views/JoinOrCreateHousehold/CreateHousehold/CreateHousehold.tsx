@@ -6,14 +6,20 @@ import NavbarMobile from "../../../components/NavbarMobile";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
-import householdIcon from "../../../assets/svg/householdDefault.svg";
-import arrowLeftIcon from "../../../assets/svg/arrow-left.svg";
+import { useIsDarkTheme } from "../../../utils/iconUtils";
+import householdIconLight from "../../../assets/svg/light/householdDefault.svg";
+import householdIconDark from "../../../assets/svg/dark/householdDefault.svg";
+import arrowLeftIconLight from "../../../assets/svg/light/arrow-left.svg";
+import arrowLeftIconDark from "../../../assets/svg/dark/arrow-left.svg";
 import householdService from "../../../services/householdService";
 
 function CreateHousehold() {
   const navigate = useNavigate();
   const { refreshUser } = useUser();
   const { refreshHousehold } = useHousehold();
+  const isDark = useIsDarkTheme();
+  const householdIcon = isDark ? householdIconDark : householdIconLight;
+  const arrowLeftIcon = isDark ? arrowLeftIconDark : arrowLeftIconLight;
   const [householdName, setHouseholdName] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(householdIcon);

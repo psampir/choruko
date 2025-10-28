@@ -7,18 +7,30 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
 import { useHousehold } from "../../contexts/HouseholdContext";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useIsDarkTheme } from "../../utils/iconUtils";
 import { getProfilePictureUrl } from "../../utils/imageUtils";
 import householdService from "../../services/householdService";
 
-import lightThemeIcon from "../../assets/svg/light-theme.svg";
-import profileIcon from "../../assets/svg/profile-icon.svg";
-import darkThemeIcon from "../../assets/svg/dark-theme.svg";
-import systemThemeIcon from "../../assets/svg/system-theme.svg";
-import profileIconLight from "../../assets/svg/profile-icon-light.svg";
-import houseIcon from "../../assets/svg/house.svg";
-import leaveIcon from "../../assets/svg/leave.svg";
-import closeIconLight from "../../assets/svg/close-icon-light.svg";
-import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
+// Light theme icons
+import lightThemeIconLight from "../../assets/svg/light/light-theme.svg";
+import profileIconLight from "../../assets/svg/light/profile-icon.svg";
+import darkThemeIconLight from "../../assets/svg/light/dark-theme.svg";
+import systemThemeIconLight from "../../assets/svg/light/system-theme.svg";
+import houseIconLight from "../../assets/svg/light/house.svg";
+import leaveIconLight from "../../assets/svg/light/leave.svg";
+import closeIconLight from "../../assets/svg/light/close-icon.svg";
+import householdDefaultIconLight from "../../assets/svg/light/householdDefault.svg";
+
+// Dark theme icons
+import lightThemeIconDark from "../../assets/svg/dark/light-theme.svg";
+import profileIconDark from "../../assets/svg/dark/profile-icon.svg";
+import darkThemeIconDark from "../../assets/svg/dark/dark-theme.svg";
+import systemThemeIconDark from "../../assets/svg/dark/system-theme.svg";
+import houseIconDark from "../../assets/svg/dark/house.svg";
+import leaveIconDark from "../../assets/svg/dark/leave.svg";
+import closeIconDark from "../../assets/svg/dark/close-icon.svg";
+import householdDefaultIconDark from "../../assets/svg/dark/householdDefault.svg";
+
 import type { ThemeType } from "../../contexts/ThemeContext";
 
 const NavbarMobile = () => {
@@ -28,11 +40,22 @@ const NavbarMobile = () => {
   const { user } = useUser();
   const { householdInfo } = useHousehold();
   const { theme, setTheme } = useTheme();
+  const isDark = useIsDarkTheme();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+
+  // Select themed icons
+  const lightThemeIcon = isDark ? lightThemeIconDark : lightThemeIconLight;
+  const darkThemeIcon = isDark ? darkThemeIconDark : darkThemeIconLight;
+  const systemThemeIcon = isDark ? systemThemeIconDark : systemThemeIconLight;
+  const profileIcon = isDark ? profileIconDark : profileIconLight;
+  const houseIcon = isDark ? houseIconDark : houseIconLight;
+  const leaveIcon = isDark ? leaveIconDark : leaveIconLight;
+  const closeIcon = isDark ? closeIconDark : closeIconLight;
+  const householdDefaultIcon = isDark ? householdDefaultIconDark : householdDefaultIconLight;
 
   // Check if we're on manage pages where profile popup should be hidden
   const hideProfilePopup = location.pathname === "/manageAccount" || location.pathname === "/manageHousehold";
@@ -46,8 +69,8 @@ const NavbarMobile = () => {
     setDropdownOpen(false);
   };
 
-  const getThemeIcon = (theme: ThemeType) => {
-    switch (theme) {
+  const getThemeIcon = (themeType: ThemeType) => {
+    switch (themeType) {
       case "light":
         return { src: lightThemeIcon, alt: "Light Theme" };
       case "dark":
@@ -199,7 +222,7 @@ const NavbarMobile = () => {
                   )}
                 >
                   <img
-                    src={profileIconLight}
+                    src={profileIcon}
                     alt="Profile Management"
                     className="profile-management__icon"
                   />
@@ -233,7 +256,7 @@ const NavbarMobile = () => {
               )}
               <li>
                 <Button variant="red" onClick={handleLogout}>
-                  <img src={closeIconLight} alt="" />
+                  <img src={closeIcon} alt="" />
                   Log Out
                 </Button>
               </li>
@@ -251,7 +274,7 @@ const NavbarMobile = () => {
         >
           <p>Are you sure you want to leave this household?</p>
           <img 
-            src={householdInfo?.profilePictureUrl || householdDefaulIcon} 
+            src={householdInfo?.profilePictureUrl || householdDefaultIcon} 
             alt="Household Image" 
           />
           <p>{householdInfo?.name || "Household"}</p>
