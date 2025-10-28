@@ -12,6 +12,42 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_STORAGE_KEY = "choruko-theme-preference";
 
+const applyTheme = (theme: ThemeType) => {
+  const root = document.documentElement;
+  
+  const getSystemTheme = (): "light" | "dark" => {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  };
+
+  const effectiveTheme = theme === "system" ? getSystemTheme() : theme;
+
+  if (effectiveTheme === "dark") {
+    root.style.setProperty("--color-primary", "var(--color-dark-primary)");
+    root.style.setProperty("--color-secondary", "var(--color-dark-secondary)");
+    root.style.setProperty("--color-secondary-half-tr", "var(--color-dark-secondary-half-tr)");
+    root.style.setProperty("--color-background", "var(--color-dark-background)");
+    root.style.setProperty("--color-background-secondary", "var(--color-dark-background-secondary)");
+    root.style.setProperty("--color-text-primary", "var(--color-dark-text-primary)");
+    root.style.setProperty("--color-text-secondary", "var(--color-dark-text-secondary)");
+    root.style.setProperty("--color-white", "var(--color-dark-white)");
+    root.style.setProperty("--color-black", "var(--color-dark-black)");
+    root.style.setProperty("--color-error-bg", "var(--color-dark-error-bg)");
+    root.style.setProperty("--color-error-bg-secondary", "var(--color-dark-error-bg-secondary)");
+  } else {
+    root.style.setProperty("--color-primary", "#95d2b3");
+    root.style.setProperty("--color-secondary", "#55ad9b");
+    root.style.setProperty("--color-secondary-half-tr", "#56ae9c80");
+    root.style.setProperty("--color-background", "#f1f8e8");
+    root.style.setProperty("--color-background-secondary", "#d8efd3");
+    root.style.setProperty("--color-text-primary", "#021207");
+    root.style.setProperty("--color-text-secondary", "#666");
+    root.style.setProperty("--color-white", "#ffffff");
+    root.style.setProperty("--color-black", "#000000");
+    root.style.setProperty("--color-error-bg", "#ff7285");
+    root.style.setProperty("--color-error-bg-secondary", "#ffb9b9");
+  }
+};
+
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -23,14 +59,28 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   const setTheme = (newTheme: ThemeType) => {
     setThemeState(newTheme);
     localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    applyTheme(newTheme);
   };
 
   useEffect(() => {
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
     if (savedTheme && (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system")) {
       setThemeState(savedTheme as ThemeType);
+      applyTheme(savedTheme as ThemeType);
+    } else {
+      applyTheme("light");
     }
-  }, []);
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleSystemThemeChange = () => {
+      if (theme === "system") {
+        applyTheme("system");
+      }
+    };
+
+    mediaQuery.addEventListener("change", handleSystemThemeChange);
+    return () => mediaQuery.removeEventListener("change", handleSystemThemeChange);
+  }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
