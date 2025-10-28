@@ -18,8 +18,9 @@ import darkThemeIconLight from "../../assets/svg/light/dark-theme.svg";
 import systemThemeIconLight from "../../assets/svg/light/system-theme.svg";
 import houseIconLight from "../../assets/svg/light/house.svg";
 import leaveIconLight from "../../assets/svg/light/leave.svg";
-import closeIconLight from "../../assets/svg/light/close-icon.svg";
 import householdDefaultIconLight from "../../assets/svg/light/householdDefault.svg";
+import profileIconLightVariant from "../../assets/svg/light/profile-icon-light.svg";
+import closeIconLightVariant from "../../assets/svg/light/close-icon-light.svg";
 
 // Dark theme icons
 import lightThemeIconDark from "../../assets/svg/dark/light-theme.svg";
@@ -28,8 +29,9 @@ import darkThemeIconDark from "../../assets/svg/dark/dark-theme.svg";
 import systemThemeIconDark from "../../assets/svg/dark/system-theme.svg";
 import houseIconDark from "../../assets/svg/dark/house.svg";
 import leaveIconDark from "../../assets/svg/dark/leave.svg";
-import closeIconDark from "../../assets/svg/dark/close-icon.svg";
 import householdDefaultIconDark from "../../assets/svg/dark/householdDefault.svg";
+import profileIconDarkVariant from "../../assets/svg/dark/profile-icon-light.svg";
+import closeIconDarkVariant from "../../assets/svg/dark/close-icon-light.svg";
 
 import type { ThemeType } from "../../contexts/ThemeContext";
 
@@ -54,8 +56,11 @@ const NavbarMobile = () => {
   const profileIcon = isDark ? profileIconDark : profileIconLight;
   const houseIcon = isDark ? houseIconDark : houseIconLight;
   const leaveIcon = isDark ? leaveIconDark : leaveIconLight;
-  const closeIcon = isDark ? closeIconDark : closeIconLight;
   const householdDefaultIcon = isDark ? householdDefaultIconDark : householdDefaultIconLight;
+  
+  // Icons for popup buttons - inverted (light icons on dark popup, dark icons on light popup)
+  const profileIconForButton = isDark ? profileIconDarkVariant : profileIconLightVariant;
+  const closeIconForButton = isDark ? closeIconDarkVariant : closeIconLightVariant;
 
   // Check if we're on manage pages where profile popup should be hidden
   const hideProfilePopup = location.pathname === "/manageAccount" || location.pathname === "/manageHousehold";
@@ -222,7 +227,7 @@ const NavbarMobile = () => {
                   )}
                 >
                   <img
-                    src={profileIcon}
+                    src={profileIconForButton}
                     alt="Profile Management"
                     className="profile-management__icon"
                   />
@@ -256,7 +261,7 @@ const NavbarMobile = () => {
               )}
               <li>
                 <Button variant="red" onClick={handleLogout}>
-                  <img src={closeIcon} alt="" />
+                  <img src={closeIconForButton} alt="" />
                   Log Out
                 </Button>
               </li>
