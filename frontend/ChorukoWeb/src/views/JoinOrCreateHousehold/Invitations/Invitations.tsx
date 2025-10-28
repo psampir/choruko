@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Invitations.scss";
-import householdDefault from "/src/assets/svg/householdDefault.svg";
+import { useIsDarkTheme } from "../../../utils/iconUtils";
+import householdDefaultLight from "/src/assets/svg/light/householdDefault.svg";
+import householdDefaultDark from "/src/assets/svg/dark/householdDefault.svg";
 import NavbarMobile from "../../../components/NavbarMobile";
 import Popup from "../../../components/Popup";
 interface Invitation {
@@ -12,6 +14,8 @@ interface Invitation {
 
 function Invitations() {
   const navigate = useNavigate();
+  const isDark = useIsDarkTheme();
+  const householdDefault = isDark ? householdDefaultDark : householdDefaultLight;
   // Initialize with one invitation directly instead of using useEffect
   const [invitations, setInvitations] = useState<Invitation[]>([
     {

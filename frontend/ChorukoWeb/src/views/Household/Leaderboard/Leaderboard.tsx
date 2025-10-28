@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import star from "../../../assets/svg/star.svg";
-import householdDefaultIcon from "../../../assets/svg/householdDefault.svg";
-import profileDefaultIcon from "../../../assets/svg/profile-icon.svg";
+import { useIsDarkTheme } from "../../../utils/iconUtils";
+import starLight from "../../../assets/svg/light/star.svg";
+import householdDefaultIconLight from "../../../assets/svg/light/householdDefault.svg";
+import profileDefaultIconLight from "../../../assets/svg/light/profile-icon.svg";
+import starDark from "../../../assets/svg/dark/star.svg";
+import householdDefaultIconDark from "../../../assets/svg/dark/householdDefault.svg";
+import profileDefaultIconDark from "../../../assets/svg/dark/profile-icon.svg";
 import { useHousehold } from "../../../contexts/HouseholdContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
@@ -17,6 +21,12 @@ const Leaderboard: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { householdInfo, participants, loading, error } = useHousehold();
   const { hasHousehold, checkAuth } = useAuth();
+  const isDark = useIsDarkTheme();
+  
+  const star = isDark ? starDark : starLight;
+  const householdDefaultIcon = isDark ? householdDefaultIconDark : householdDefaultIconLight;
+  const profileDefaultIcon = isDark ? profileDefaultIconDark : profileDefaultIconLight;
+  
   const participantsRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
   const participantRef = useRef<HTMLDivElement>(null);
