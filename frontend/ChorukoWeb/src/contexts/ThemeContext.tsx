@@ -53,7 +53,10 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [theme, setThemeState] = useState<ThemeType>(() => {
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    return (savedTheme as ThemeType) || "light";
+    const initialTheme = (savedTheme as ThemeType) || "light";
+    // Apply theme immediately during initialization
+    applyTheme(initialTheme);
+    return initialTheme;
   });
 
   const setTheme = (newTheme: ThemeType) => {
@@ -63,14 +66,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    if (savedTheme && (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system")) {
-      setThemeState(savedTheme as ThemeType);
-      applyTheme(savedTheme as ThemeType);
-    } else {
-      applyTheme("light");
-    }
-
+    // Only listen for system theme changes, don't re-apply the initial theme
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleSystemThemeChange = () => {
       if (theme === "system") {
