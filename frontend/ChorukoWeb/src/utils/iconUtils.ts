@@ -1,17 +1,27 @@
 import { useTheme } from "../contexts/ThemeContext";
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 // Helper to determine if dark theme is active
 export const useIsDarkTheme = (): boolean => {
   const { theme } = useTheme();
-
-  const getSystemTheme = (): "light" | "dark" => {
+  const [systemTheme, setSystemTheme] = useState<"light" | "dark">(() => {
     return window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
-  };
+  });
 
-  const effectiveTheme = theme === "system" ? getSystemTheme() : theme;
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSystemTheme(e.matches ? "dark" : "light");
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  const effectiveTheme = theme === "system" ? systemTheme : theme;
   return effectiveTheme === "dark";
 };
 
