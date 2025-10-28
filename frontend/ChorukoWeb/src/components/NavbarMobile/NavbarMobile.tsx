@@ -20,6 +20,8 @@ import leaveIcon from "../../assets/svg/leave.svg";
 import closeIconLight from "../../assets/svg/close-icon-light.svg";
 import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
 
+type ThemeType = "light" | "dark" | "system";
+
 const NavbarMobile = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,12 +33,34 @@ const NavbarMobile = () => {
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [selectedTheme, setSelectedTheme] = useState<ThemeType>("light");
 
   // Check if we're on manage pages where profile popup should be hidden
   const hideProfilePopup = location.pathname === "/manageAccount" || location.pathname === "/manageHousehold";
 
   const dropdownToggle = () => {
     setDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleThemeSelect = (theme: ThemeType) => {
+    setSelectedTheme(theme);
+    setDropdownOpen(false);
+  };
+
+  const getThemeIcon = (theme: ThemeType) => {
+    switch (theme) {
+      case "light":
+        return { src: lightThemeIcon, alt: "Light Theme" };
+      case "dark":
+        return { src: darkThemeIcon, alt: "Dark Theme" };
+      case "system":
+        return { src: defaultThemeIcon, alt: "System Theme" };
+    }
+  };
+
+  const getAvailableThemes = (): ThemeType[] => {
+    const allThemes: ThemeType[] = ["light", "dark", "system"];
+    return allThemes.filter((theme) => theme !== selectedTheme);
   };
 
   const profileClickHandler = () => {
@@ -89,15 +113,19 @@ const NavbarMobile = () => {
 
   // Get profile picture URL
   const profilePictureUrl = getProfilePictureUrl(user?.profilePicturePath);
+  
+  // Get current theme icon and available themes
+  const currentThemeIcon = getThemeIcon(selectedTheme);
+  const availableThemes = getAvailableThemes();
 
   return (
     <div className="navbar-mobile">
       <nav className="navbar-mobile-container">
         <span className="theme-toggle" onClick={dropdownToggle}>
           <img
-            src={lightThemeIcon}
-            alt="Light Theme"
-            className="nav-theme-icon light-theme-icon"
+            src={currentThemeIcon.src}
+            alt={currentThemeIcon.alt}
+            className="nav-theme-icon"
           />
         </span>
         {!hideProfilePopup && (
@@ -123,18 +151,18 @@ const NavbarMobile = () => {
       </nav>
 
       <div className={`theme-dropdown${isDropdownOpen ? " open" : ""}`}>
-        <img
-          src={darkThemeIcon}
-          alt="Dark Theme"
-          className=" nav-theme-icon dark-theme-icon"
-          onClick={dropdownToggle}
-        />
-        <img
-          src={defaultThemeIcon}
-          alt="Default Theme"
-          className="theme-icon default-theme-icon"
-          onClick={dropdownToggle}
-        />
+        {availableThemes.map((theme) => {
+          const themeIcon = getThemeIcon(theme);
+          return (
+            <img
+              key={theme}
+              src={themeIcon.src}
+              alt={themeIcon.alt}
+              className="nav-theme-icon"
+              onClick={() => handleThemeSelect(theme)}
+            />
+          );
+        })}
       </div>
 
       {!hideProfilePopup && (
