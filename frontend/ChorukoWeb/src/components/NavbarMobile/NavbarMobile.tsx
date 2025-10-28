@@ -13,7 +13,7 @@ import householdService from "../../services/householdService";
 import lightThemeIcon from "../../assets/svg/light-theme.svg";
 import profileIcon from "../../assets/svg/profile-icon.svg";
 import darkThemeIcon from "../../assets/svg/dark-theme.svg";
-import defaultThemeIcon from "../../assets/svg/default-theme.svg";
+import systemThemeIcon from "../../assets/svg/system-theme.svg";
 import profileIconLight from "../../assets/svg/profile-icon-light.svg";
 import houseIcon from "../../assets/svg/house.svg";
 import leaveIcon from "../../assets/svg/leave.svg";
@@ -54,7 +54,7 @@ const NavbarMobile = () => {
       case "dark":
         return { src: darkThemeIcon, alt: "Dark Theme" };
       case "system":
-        return { src: defaultThemeIcon, alt: "System Theme" };
+        return { src: systemThemeIcon, alt: "System Theme" };
     }
   };
 
