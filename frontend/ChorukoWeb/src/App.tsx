@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import { HouseholdProvider } from "./contexts/HouseholdContext";
 import { ActivityProvider } from "./contexts/ActivityContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
 import Tasks from "./views/Tasks/Tasks";
@@ -174,17 +175,19 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <UserProvider>
-        <HouseholdProvider>
-          <ActivityProvider>
-            <Router>
-              <AppRoutes />
-            </Router>
-          </ActivityProvider>
-        </HouseholdProvider>
-      </UserProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <UserProvider>
+          <HouseholdProvider>
+            <ActivityProvider>
+              <Router>
+                <AppRoutes />
+              </Router>
+            </ActivityProvider>
+          </HouseholdProvider>
+        </UserProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 export default App;
