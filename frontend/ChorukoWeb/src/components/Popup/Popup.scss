@@ -44,7 +44,7 @@
     }
 
     &--red {
-      background-color: #ffb9b9;
+      background-color: var(--color-error-bg-secondary);
     }
 
     .popup-title {
