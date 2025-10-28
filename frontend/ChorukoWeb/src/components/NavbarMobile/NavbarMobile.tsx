@@ -6,10 +6,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
 import { useHousehold } from "../../contexts/HouseholdContext";
+import { useTheme } from "../../contexts/ThemeContext";
 import { getProfilePictureUrl } from "../../utils/imageUtils";
 import householdService from "../../services/householdService";
 
-// Import all SVG assets
 import lightThemeIcon from "../../assets/svg/light-theme.svg";
 import profileIcon from "../../assets/svg/profile-icon.svg";
 import darkThemeIcon from "../../assets/svg/dark-theme.svg";
@@ -19,8 +19,7 @@ import houseIcon from "../../assets/svg/house.svg";
 import leaveIcon from "../../assets/svg/leave.svg";
 import closeIconLight from "../../assets/svg/close-icon-light.svg";
 import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
-
-type ThemeType = "light" | "dark" | "system";
+import type { ThemeType } from "../../contexts/ThemeContext";
 
 const NavbarMobile = () => {
   const navigate = useNavigate();
@@ -28,12 +27,12 @@ const NavbarMobile = () => {
   const { logout, hasHousehold, checkAuth } = useAuth();
   const { user } = useUser();
   const { householdInfo } = useHousehold();
+  const { theme, setTheme } = useTheme();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
-  const [selectedTheme, setSelectedTheme] = useState<ThemeType>("light");
 
   // Check if we're on manage pages where profile popup should be hidden
   const hideProfilePopup = location.pathname === "/manageAccount" || location.pathname === "/manageHousehold";
@@ -42,8 +41,8 @@ const NavbarMobile = () => {
     setDropdownOpen(!isDropdownOpen);
   };
 
-  const handleThemeSelect = (theme: ThemeType) => {
-    setSelectedTheme(theme);
+  const handleThemeSelect = (newTheme: ThemeType) => {
+    setTheme(newTheme);
     setDropdownOpen(false);
   };
 
@@ -60,7 +59,7 @@ const NavbarMobile = () => {
 
   const getAvailableThemes = (): ThemeType[] => {
     const allThemes: ThemeType[] = ["light", "dark", "system"];
-    return allThemes.filter((theme) => theme !== selectedTheme);
+    return allThemes.filter((t) => t !== theme);
   };
 
   const profileClickHandler = () => {
@@ -115,7 +114,7 @@ const NavbarMobile = () => {
   const profilePictureUrl = getProfilePictureUrl(user?.profilePicturePath);
   
   // Get current theme icon and available themes
-  const currentThemeIcon = getThemeIcon(selectedTheme);
+  const currentThemeIcon = getThemeIcon(theme);
   const availableThemes = getAvailableThemes();
 
   return (
@@ -151,15 +150,15 @@ const NavbarMobile = () => {
       </nav>
 
       <div className={`theme-dropdown${isDropdownOpen ? " open" : ""}`}>
-        {availableThemes.map((theme) => {
-          const themeIcon = getThemeIcon(theme);
+        {availableThemes.map((themeOption) => {
+          const themeIcon = getThemeIcon(themeOption);
           return (
             <img
-              key={theme}
+              key={themeOption}
               src={themeIcon.src}
               alt={themeIcon.alt}
               className="nav-theme-icon"
-              onClick={() => handleThemeSelect(theme)}
+              onClick={() => handleThemeSelect(themeOption)}
             />
           );
         })}
