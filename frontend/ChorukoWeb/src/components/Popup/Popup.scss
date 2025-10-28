@@ -156,11 +156,12 @@
       }
 
       &--danger {
-        background-color: #ff4444;
+        background-color: var(--color-error-bg);
         color: var(--color-white);
 
         &:hover:not(:disabled) {
-          background-color: #ff3333;
+          background-color: var(--color-error-bg);
+          opacity: 0.9;
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
         }
