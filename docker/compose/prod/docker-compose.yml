@@ -18,7 +18,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ${APP_DATA_LOCATION}:/usr/src/app/upload
+      - ${APP_DATA_LOCATION}:/app/wwwroot/uploads
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       database:

@@ -53,7 +53,7 @@ namespace ChorukoAPI.Services.Implementation
                 }
             };
 
-            return ServiceResponseFactory.Success(response, "Activity was successfully created");
+            return ServiceResponseFactory.Success(response, "Activity was successfully created.");
         }
 
         public async Task<ServiceResponse<OperationResultDto>> EditActivityAsync(string activityId, EditActivityRequest request)
@@ -67,7 +67,7 @@ namespace ChorukoAPI.Services.Implementation
             activity.Name = request.Name;
             activity.PointsAwarded = request.PointsAwarded;
 
-            var validationResponse = ValidateActivityData(activity);
+            var validationResponse = ValidateActivityData(activity, isEdit: true);
             if (!validationResponse.IsSuccessful)
             {
                 return validationResponse;
@@ -91,11 +91,7 @@ namespace ChorukoAPI.Services.Implementation
         public async Task<ServiceResponse<List<ActivityResponse>>> GetActivitiesAsync(string? householdId)
         {
             var householdActivities = await _context.Activities.Where(a => a.HouseholdId == householdId).ToListAsync();
-            if (householdActivities.Count == 0)
-            {
-                return ServiceResponseFactory.Error<List<ActivityResponse>>(null, "No activities found in specified household.", HttpStatusCode.NotFound);
-            }
-
+            
             var response = new List<ActivityResponse>();
 
             foreach(var activity in householdActivities)
@@ -108,7 +104,7 @@ namespace ChorukoAPI.Services.Implementation
                 });
             }
 
-            return ServiceResponseFactory.Success(response, "Successful extraction of household activities");
+            return ServiceResponseFactory.Success(response, "Successful extraction of household activities.");
         }
 
         public async Task<ServiceResponse<ActivityResponse>> GetActivityByIdAsync(string activityId)
@@ -126,7 +122,7 @@ namespace ChorukoAPI.Services.Implementation
                 PointsAwarded = householdActivity.PointsAwarded,
             };
 
-            return ServiceResponseFactory.Success(response, "Successful extraction of household activity");
+            return ServiceResponseFactory.Success(response, "Successful extraction of household activity.");
         }
 
         public async Task<ServiceResponse<OperationResultDto>> DeleteActivityAsync(string activityId)
@@ -150,19 +146,22 @@ namespace ChorukoAPI.Services.Implementation
                 }
             };
 
-            return ServiceResponseFactory.Success(response, "Activity was successfully created");
+            return ServiceResponseFactory.Success(response, "Activity was successfully deleted.");
         }
 
-        private ServiceResponse<OperationResultDto> ValidateActivityData(Activity activity)
+        private ServiceResponse<OperationResultDto> ValidateActivityData(Activity activity, bool isEdit = false)
         {
-            var isActivityExist = _context.Activities.Any(a => a.HouseholdId == activity.HouseholdId && a.Name == activity.Name);
+            var isActivityExist = _context.Activities.Any(a => 
+                a.HouseholdId == activity.HouseholdId && 
+                a.Name == activity.Name && 
+                (!isEdit || a.Id != activity.Id));
 
             if (isActivityExist)
             {
-                return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist", HttpStatusCode.BadRequest);
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist.", HttpStatusCode.BadRequest);
             }
 
-            return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household");
+            return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household.");
         }
     }
 }

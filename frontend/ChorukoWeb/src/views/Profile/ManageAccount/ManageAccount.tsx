@@ -1,59 +1,135 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../../contexts/UserContext";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
 import ProfileDefaultIcon from "../../../assets/svg/profile-icon-light.svg";
 import arrowLeft from "../../../assets/svg/arrow-left.svg";
+import { getProfilePictureUrl } from "../../../utils/imageUtils";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
+  const { user, updateUserNames, updatePassword, updateProfilePicture, deleteAccount, loading: userLoading } = useUser();
   const [openPopup, setOpenPopup] = useState<boolean>(false);
-  const [nameValue, setNameValue] = useState<string>("Vin Diesel");
-  const [profileImage, setProfileImage] = useState<string>(ProfileDefaultIcon);
+  const [firstNameValue, setFirstNameValue] = useState<string>("");
+  const [lastNameValue, setLastNameValue] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [profileImageSrc, setProfileImageSrc] = useState<string>(ProfileDefaultIcon);
+
+  // Initialize name values and profile picture from user data
+  useEffect(() => {
+    if (user) {
+      setFirstNameValue(user.firstName);
+      setLastNameValue(user.lastName);
+      
+      // Load profile picture from backend if available
+      const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
+      if (pictureUrl) {
+        setProfileImageSrc(pictureUrl);
+      }
+    }
+  }, [user]);
 
   const [notification, setNotification] = useState<{
     message: string;
     isVisible: boolean;
+    type: "success" | "error";
   }>({
     message: "",
     isVisible: false,
+    type: "success",
   });
 
-  const showNotification = (message: string) => {
-    setNotification({ message, isVisible: true });
+  const showNotification = (message: string, type: "success" | "error" = "success") => {
+    setNotification({ message, isVisible: true, type });
 
     setTimeout(() => {
-      setNotification({ message: "", isVisible: false });
+      setNotification({ message: "", isVisible: false, type: "success" });
     }, 3000);
   };
 
-  const handleNameChange = () => {
-    if (nameValue.trim()) {
-      showNotification("Your name has been changed");
+  const handleNameChange = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!firstNameValue.trim() || !lastNameValue.trim()) {
+      showNotification("Please enter both first and last name", "error");
+      return;
+    }
+
+    const result = await updateUserNames(firstNameValue, lastNameValue);
+    
+    if (result.success) {
+      showNotification("Your name has been changed successfully", "success");
+    } else {
+      showNotification(result.message || "Failed to change name", "error");
     }
   };
 
-  const handlePasswordChange = () => {
-    showNotification("Your password has been changed");
+  const handlePasswordChange = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!newPassword || !confirmPassword) {
+      showNotification("Please fill in all password fields", "error");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showNotification("New passwords do not match", "error");
+      return;
+    }
+
+    const result = await updatePassword(newPassword, confirmPassword);
+    
+    if (result.success) {
+      showNotification("Your password has been changed successfully", "success");
+      // Clear password fields after successful change
+      setNewPassword("");
+      setConfirmPassword("");
+    } else {
+      showNotification(result.message || "Failed to change password", "error");
+    }
   };
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setProfileImage(result);
-        showNotification("Profile picture updated");
-      };
-      reader.readAsDataURL(file);
+      // Upload to server first
+      const result = await updateProfilePicture(file);
+      
+      if (result.success) {
+        // Only update preview after successful upload
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          setProfileImageSrc(result);
+        };
+        reader.readAsDataURL(file);
+        showNotification("Profile picture updated successfully", "success");
+      } else {
+        showNotification(result.message || "Failed to update profile picture", "error");
+      }
     }
   };
 
   const triggerFileInput = () => {
     document.getElementById("profile-image-input")?.click();
+  };
+
+  const handleDeleteAccount = async () => {
+    const result = await deleteAccount();
+    
+    if (result.success) {
+      // User will be logged out and redirected by the deleteAccount function
+      showNotification("Account deleted successfully", "success");
+    } else {
+      showNotification(result.message || "Failed to delete account", "error");
+      setOpenPopup(false);
+    }
   };
 
   return (
@@ -62,19 +138,18 @@ const ManageAccount: React.FC = () => {
         className="back-arrow"
         src={arrowLeft}
         alt="Back"
-        onClick={() => navigate("/leaderboard")}
+        onClick={() => navigate(-1)}
       />
       <div
-        className={`notification-bar ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
+        className={`notification-bar notification-bar--${notification.type} ${notification.isVisible ? "notification-bar--visible" : ""
+          }`}
       >
         <span>{notification.message}</span>
       </div>
 
       <h1 className="manage-account__template-name">Manage Account</h1>
       <div className="account-header">
-        <img className="account-image" src={profileImage} alt="Account" />
+        <img className="account-image" src={profileImageSrc} alt="Account" />
         <Button variant="primary" onClick={triggerFileInput}>
           Change Picture
         </Button>
@@ -90,18 +165,35 @@ const ManageAccount: React.FC = () => {
         <div className="manage-account__main-section change-name">
           <Input
             variant="edit"
-            value={nameValue}
-            onChange={(e) => setNameValue(e.target.value)}
+            placeholder="First Name"
+            value={firstNameValue}
+            onChange={(e) => setFirstNameValue(e.target.value)}
           />
-          <Button variant="primary" onClick={handleNameChange}>
-            Change Name
+          <Input
+            variant="edit"
+            placeholder="Last Name"
+            value={lastNameValue}
+            onChange={(e) => setLastNameValue(e.target.value)}
+          />
+          <Button variant="primary" type="button" onClick={handleNameChange} disabled={userLoading}>
+            {userLoading ? "Changing..." : "Change Name"}
           </Button>
         </div>
         <div className="manage-account__main-section change-password">
-          <Input variant="password" placeholder="New Password" />
-          <Input variant="password" placeholder="Confirm New Password" />
-          <Button variant="primary" onClick={handlePasswordChange}>
-            Change Password
+          <Input 
+            variant="password" 
+            placeholder="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <Input 
+            variant="password" 
+            placeholder="Confirm New Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <Button variant="primary" type="button" onClick={handlePasswordChange} disabled={userLoading}>
+            {userLoading ? "Changing..." : "Change Password"}
           </Button>
         </div>
         <Button
@@ -115,9 +207,11 @@ const ManageAccount: React.FC = () => {
       {openPopup && (
         <Popup variant="red" title="" onClose={() => setOpenPopup(false)}>
           <p>Are you sure you want to delete your account?</p>
-          <img src={profileImage} alt="Profile Image" />
-          <p>Vin Diesel</p>
-          <Button variant="red">Delete</Button>
+          <img src={profileImageSrc} alt="Profile Image" />
+          <p>{user ? `${user.firstName} ${user.lastName}` : `${firstNameValue} ${lastNameValue}`}</p>
+          <Button variant="red" onClick={handleDeleteAccount} disabled={userLoading}>
+            {userLoading ? "Deleting..." : "Delete"}
+          </Button>
         </Popup>
       )}
     </div>

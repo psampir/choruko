@@ -4,6 +4,7 @@ using ChorukoAPI.Contracts.Requests.User;
 using ChorukoAPI.Mappers;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using ChorukoAPI.Contracts;
@@ -16,13 +17,13 @@ namespace ChorukoAPI.Controllers;
 [Authorize]
 public class UserController(IUserService _userService) : ControllerBase
 {
-    [HttpGet("userInfo")]
+    [HttpGet("user-info")]
     [Authorize]
     public async Task<ActionResult<ApiResponse<UserInfoResponse>>> GetUserInfo()
     {
         var result = await _userService.GetUserInfoAsync();
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("UserInfo");
     }
     
     [HttpPut("change-names")]
@@ -37,12 +38,12 @@ public class UserController(IUserService _userService) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token."));
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token.").ToApiResponse());
         }
 
         var result = await _userService.ChangeUserNamesAsync(request, userId);
         
-        return result.ToApiResponse();
+        return result.ToApiResponse("NewName");
     }
     
     [HttpPut("change-picture")]
@@ -58,11 +59,73 @@ public class UserController(IUserService _userService) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token."));
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token.").ToApiResponse());
         }
 
         var result = await _userService.ChangeUserProfilePictureAsync(request, userId);
         
-        return result.ToApiResponse();
+        if (!result.IsSuccessful && result.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+        
+        if (!result.IsSuccessful && (result.StatusCode == System.Net.HttpStatusCode.RequestEntityTooLarge 
+            || result.StatusCode == System.Net.HttpStatusCode.UnsupportedMediaType))
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+        
+        return result.ToApiResponse("ProfilePicture");
+    }
+    
+    [HttpDelete("delete-self")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteSelf()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token.").ToApiResponse());
+        }
+        
+        var result = await _userService.DeleteSelfAsync(userId);
+        
+        return result.ToApiResponse("Delete user");
+    }
+    
+    [HttpPut("change-password")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User ID not found in token.").ToApiResponse());
+        }
+
+        var result = await _userService.ChangePasswordAsync(request, userId);
+        
+        if (!result.IsSuccessful && result.StatusCode == System.Net.HttpStatusCode.BadRequest 
+            && result.Result?.Metadata?.ContainsKey("IdentityResult") == true)
+        {
+            var identityResult = result.Result.Metadata["IdentityResult"] as IdentityResult;
+            if (identityResult != null && !identityResult.Succeeded)
+            {
+                foreach (var error in identityResult.Errors)
+                {
+                    ModelState.AddModelError("NewPassword", error.Description);
+                }
+                return ValidationProblem(ModelState);
+            }
+        }
+        
+        return result.ToApiResponse("NewPassword");
     }
 }

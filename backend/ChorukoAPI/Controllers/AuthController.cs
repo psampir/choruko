@@ -26,7 +26,7 @@ public class AuthController(IAuthService _authService) : ControllerBase
 
         var result = await _authService.RegisterUserAsync(registrationRequest);
 
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("Password");
     }
 
     [HttpPost("login")]
@@ -39,16 +39,16 @@ public class AuthController(IAuthService _authService) : ControllerBase
 
         var result = await _authService.LoginUserAsync(loginRequest);
 
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("Login");
     }
 
-    [HttpPost("logOut")]
+    [HttpPost("logout")]
     [Authorize]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> LogOut()
     {
         var result = await _authService.LogoutUserAsync();
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("Log out");
     }
     
 }

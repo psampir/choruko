@@ -10,6 +10,7 @@
   height: 100%;
   width: 100%;
   touch-action: pan-y;
+  padding: var(--spacing-3xl) 0;
 
   &__popup-container {
     display: none;

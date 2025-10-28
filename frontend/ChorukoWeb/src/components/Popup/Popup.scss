@@ -62,8 +62,7 @@
       right: var(--spacing-md);
       width: var(--spacing-3xl);
       height: var(--spacing-3xl);
-      background: url("../../assets/svg/close-icon.svg") no-repeat
-        center/contain;
+      background: url("../../assets/svg/close-icon.svg") no-repeat center/contain;
       cursor: pointer;
       transition: var(--transition-fast);
       border-radius: var(--border-radius-sm);
@@ -84,6 +83,15 @@
         line-height: 1.5;
         font-size: var(--font-size-body);
         color: var(--color-text-primary);
+      }
+
+      img {
+        width: 120px;
+        height: 120px;
+        border-radius: var(--border-radius-full);
+        object-fit: cover;
+        margin: var(--spacing-lg) 0;
+        border: 2px solid var(--color-border);
       }
     }
 

@@ -4,6 +4,7 @@ import ErrorMessage from "../../components/ErrorMessage";
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { parseErrorMessage } from "../../utils/errorUtils";
 
 interface LogInProps {
   onModeChange: (mode: string) => void;
@@ -21,35 +22,6 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState("");
 
-  // Function to extract user-friendly error message from backend response
-  const parseErrorMessage = (errorMessage: string): string => {
-    try {
-      // Try to parse JSON error message from backend
-      const errorData = JSON.parse(errorMessage);
-
-      // Handle validation errors with specific field messages
-      if (errorData.errors) {
-        const fieldErrors = Object.values(errorData.errors).flat() as string[];
-        return fieldErrors.join(". ");
-      }
-
-      // Handle general title/message errors
-      if (errorData.title) {
-        return errorData.title;
-      }
-
-      if (errorData.message) {
-        return errorData.message;
-      }
-
-      // If JSON but no recognizable error structure
-      return "An error occurred. Please try again.";
-    } catch {
-      // If not JSON, return the message as-is
-      return errorMessage || "An unexpected error occurred. Please try again.";
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError("");
@@ -59,8 +31,12 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
 
       if (result.success) {
         console.log("Login successful!");
-        // Navigate to profile after successful login
-        navigate("/leaderboard");
+        // Navigate based on household status
+        if (result.hasHousehold) {
+          navigate("/leaderboard");
+        } else {
+          navigate("/joinOrCreateHousehold");
+        }
       } else {
         // Handle login failure with backend error message
         const errorMsg = parseErrorMessage(
@@ -72,7 +48,7 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
       // Handle network or other errors
       const errorMsg = parseErrorMessage(
         error.message ||
-          "Connection failed. Please check your internet and try again."
+        "Connection failed. Please check your internet and try again."
       );
       setLocalError(errorMsg);
     }

@@ -11,14 +11,14 @@ namespace ChorukoAPI.Controllers
     [Route("api/Admin")]
     public class AdminController(IAdminUserService adminUserService) : ControllerBase
     {
-        [HttpPost("users/resetPassword")]
+        [HttpPost("users/reset-password")]
         public async Task<ActionResult<ApiResponse<AdminResetPasswordResponse>>> ResetUserPassword([FromBody] AdminResetPasswordRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var result = await adminUserService.ResetUserPasswordAsync(request);
-            return result.ToApiResponse();
+            return result.ToApiResponse("Reset password");
         }
     }
 }

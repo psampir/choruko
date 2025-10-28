@@ -2,8 +2,12 @@ import "./NavbarMobile.scss";
 import { useState } from "react";
 import Button from "../Button/Button";
 import Popup from "../Popup";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useUser } from "../../contexts/UserContext";
+import { useHousehold } from "../../contexts/HouseholdContext";
+import { getProfilePictureUrl } from "../../utils/imageUtils";
+import householdService from "../../services/householdService";
 
 // Import all SVG assets
 import lightThemeIcon from "../../assets/svg/light-theme.svg";
@@ -18,16 +22,26 @@ import householdDefaulIcon from "../../assets/svg/householdDefault.svg";
 
 const NavbarMobile = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const location = useLocation();
+  const { logout, hasHousehold, checkAuth } = useAuth();
+  const { user } = useUser();
+  const { householdInfo } = useHousehold();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [openPopup, setOpenPopup] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+
+  // Check if we're on manage pages where profile popup should be hidden
+  const hideProfilePopup = location.pathname === "/manageAccount" || location.pathname === "/manageHousehold";
 
   const dropdownToggle = () => {
     setDropdownOpen(!isDropdownOpen);
   };
 
   const profileClickHandler = () => {
+    // Don't open profile popup on manage pages
+    if (hideProfilePopup) return;
     setProfileOpen(!isProfileOpen);
   };
 
@@ -47,6 +61,35 @@ const NavbarMobile = () => {
     }
   };
 
+  // Leave household handler
+  const handleLeaveHousehold = async () => {
+    setLoading(true);
+    setError("");
+    
+    try {
+      const result = await householdService.leaveHousehold();
+      
+      if (result.success) {
+        setOpenPopup(false);
+        setProfileOpen(false);
+        // Refresh auth state to update hasHousehold flag
+        await checkAuth(false);
+        // Redirect to join or create household page
+        navigate("/joinOrCreateHousehold");
+      } else {
+        setError(result.message || "Failed to leave household");
+      }
+    } catch (error) {
+      console.error("Error leaving household:", error);
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get profile picture URL
+  const profilePictureUrl = getProfilePictureUrl(user?.profilePicturePath);
+
   return (
     <div className="navbar-mobile">
       <nav className="navbar-mobile-container">
@@ -57,14 +100,26 @@ const NavbarMobile = () => {
             className="nav-theme-icon light-theme-icon"
           />
         </span>
-        <span className="profile-icon">
-          <img
-            src={profileIcon}
-            alt="Profile"
-            className="nav-profile-icon"
-            onClick={profileClickHandler}
-          />
-        </span>
+        {!hideProfilePopup && (
+          <span className="profile-icon">
+            {profilePictureUrl ? (
+              <img
+                src={profilePictureUrl}
+                alt="Profile"
+                className="nav-profile-icon"
+                onClick={profileClickHandler}
+                style={{ width: '46px', height: '46px', objectFit: 'cover', borderRadius: '50%' }}
+              />
+            ) : (
+              <img
+                src={profileIcon}
+                alt="Profile"
+                className="nav-profile-icon"
+                onClick={profileClickHandler}
+              />
+            )}
+          </span>
+        )}
       </nav>
 
       <div className={`theme-dropdown${isDropdownOpen ? " open" : ""}`}>
@@ -82,64 +137,83 @@ const NavbarMobile = () => {
         />
       </div>
 
-      <div
-        className={`profile__popup-container ${isProfileOpen ? "active" : ""}`}
-        onClick={profileClickHandler}
-      >
-        <div className="profile-popup" onClick={handlePopupClick}>
-          <i
-            className="profile-popup__close-icon"
-            onClick={profileClickHandler}
-          ></i>
-          <img
-            src={profileIcon}
-            alt="Profile"
-            className="profile-popup__icon"
-          />
-          <h5>Username</h5>
-          <p>Household Name</p>
-          <ul>
-            <li>
-              <Button
-                variant="primary"
-                onClick={() => (
-                  navigate("/manageAccount"), setProfileOpen(false)
-                )}
-              >
-                <img
-                  src={profileIconLight}
-                  alt="Profile Management"
-                  className="profile-management__icon"
-                />
-                Manage Account
-              </Button>
-            </li>
-            <li>
-              <Button
-                variant="primary"
-                onClick={() => (
-                  navigate("/manageHousehold"), setProfileOpen(false)
-                )}
-              >
-                <img src={houseIcon} alt="Household Management" />
-                Manage Household
-              </Button>
-            </li>
-            <li>
-              <Button variant="red" onClick={() => setOpenPopup(true)}>
-                <img src={leaveIcon} alt="" />
-                Leave Household
-              </Button>
-            </li>
-            <li>
-              <Button variant="red" onClick={handleLogout}>
-                <img src={closeIconLight} alt="" />
-                Log Out
-              </Button>
-            </li>
-          </ul>
+      {!hideProfilePopup && (
+        <div
+          className={`profile__popup-container ${isProfileOpen ? "active" : ""}`}
+          onClick={profileClickHandler}
+        >
+          <div className="profile-popup" onClick={handlePopupClick}>
+            <i
+              className="profile-popup__close-icon"
+              onClick={profileClickHandler}
+            ></i>
+            {profilePictureUrl ? (
+              <img
+                src={profilePictureUrl}
+                alt="Profile"
+                className="profile-popup__icon"
+                style={{ width: '46px', height: '46px', objectFit: 'cover', borderRadius: '50%' }}
+              />
+            ) : (
+              <img
+                src={profileIcon}
+                alt="Profile"
+                className="profile-popup__icon"
+              />
+            )}
+            <h5>{user ? `${user.firstName} ${user.lastName}` : "Username"}</h5>
+            {hasHousehold && <p>{householdInfo?.name || "Loading..."}</p>}
+            <ul>
+              <li>
+                <Button
+                  variant="primary"
+                  onClick={() => (
+                    navigate("/manageAccount"), setProfileOpen(false)
+                  )}
+                >
+                  <img
+                    src={profileIconLight}
+                    alt="Profile Management"
+                    className="profile-management__icon"
+                  />
+                  Manage Account
+                </Button>
+              </li>
+              {hasHousehold && (
+                <>
+                  {user?.id === householdInfo?.adminId && (
+                    <li>
+                      <Button
+                        variant="primary"
+                        onClick={() => (
+                          navigate("/manageHousehold"), setProfileOpen(false)
+                        )}
+                      >
+                        <img src={houseIcon} alt="Household Management" />
+                        Manage Household
+                      </Button>
+                    </li>
+                  )}
+                  {user?.id !== householdInfo?.adminId && (
+                    <li>
+                      <Button variant="red" onClick={() => setOpenPopup(true)}>
+                        <img src={leaveIcon} alt="" />
+                        Leave Household
+                      </Button>
+                    </li>
+                  )}
+                </>
+              )}
+              <li>
+                <Button variant="red" onClick={handleLogout}>
+                  <img src={closeIconLight} alt="" />
+                  Log Out
+                </Button>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
+      )}
 
       {openPopup && (
         <Popup
@@ -149,9 +223,15 @@ const NavbarMobile = () => {
           title=""
         >
           <p>Are you sure you want to leave this household?</p>
-          <img src={householdDefaulIcon} alt="Household Image" />
-          <p>Household Name</p>
-          <Button variant="red">Leave</Button>
+          <img 
+            src={householdInfo?.profilePictureUrl || householdDefaulIcon} 
+            alt="Household Image" 
+          />
+          <p>{householdInfo?.name || "Household"}</p>
+          {error && <p style={{ color: 'var(--color-error)', marginTop: '10px' }}>{error}</p>}
+          <Button variant="red" onClick={handleLeaveHousehold} disabled={loading}>
+            {loading ? "Leaving..." : "Leave"}
+          </Button>
         </Popup>
       )}
     </div>

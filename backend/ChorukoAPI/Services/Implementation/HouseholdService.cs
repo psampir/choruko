@@ -1,5 +1,6 @@
 using ChorukoAPI.Contracts;
 using ChorukoAPI.Contracts.Requests.Household;
+using ChorukoAPI.Contracts.Responses.Household;
 using ChorukoAPI.Data;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
@@ -8,11 +9,50 @@ using System.Net;
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Contracts.Responses;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using Microsoft.Extensions.Options;
+using ChorukoAPI.Mappers;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class HouseholdService(DataContext _context, UserManager<User> _userManager, IWebHostEnvironment _webHostEnvironment, SignInManager<User> _signInManager) : IHouseholdService
+public class HouseholdService(DataContext _context,
+    UserManager<User> _userManager,
+    IWebHostEnvironment _webHostEnvironment,
+    SignInManager<User> _signInManager,
+    IOptions<ImageSettings> _options,
+    IHttpContextAccessor _contextAccessor,
+    IMapper<Household, HouseholdInfoResponse> _mapper) : IHouseholdService
 {
+    public async Task<ServiceResponse<HouseholdInfoResponse>> GetHouseholdInfoAsync()
+    {
+        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "User not found.", HttpStatusCode.NotFound);
+        }
+
+        if (string.IsNullOrEmpty(user.HouseholdId))
+        {
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
+        }
+
+        var household = await _context.Households
+            .Include(h => h.Admin)
+            .Include(h => h.Participants)
+            .FirstOrDefaultAsync(h => h.Id == user.HouseholdId);
+
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "Household not found.", HttpStatusCode.NotFound);
+        }
+
+        return ServiceResponseFactory.Success(await _mapper.Map(household));
+    }
+
+
     public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdAsync(CreateHouseholdRequest request, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -30,13 +70,12 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         var uploadResponse = await UploadProfilePicture(request.ProfilePicture);
         if (!uploadResponse.IsSuccessful)
         {
-            // If upload failed, return the error response from the upload method
             return ServiceResponseFactory.Error<OperationResultDto>(null, uploadResponse.Message, uploadResponse.StatusCode);
         }
 
         string? profilePicturePath = uploadResponse.Result;
 
-        // Create the new Household entity
+
         var household = new Household
         {
             Id = Guid.NewGuid().ToString(), 
@@ -48,13 +87,54 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         
         household.Participants.Add(user);
         user.HouseholdId = household.Id;
-
-        // Add the new household to the database context
+        
         _context.Households.Add(household);
+        
+        // Create default activities for the new household
+        var defaultActivities = new List<Activity>
+        {
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Wash the dishes",
+                PointsAwarded = 10
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Vacuum the house",
+                PointsAwarded = 15
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Do the laundry",
+                PointsAwarded = 12
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Take out the trash",
+                PointsAwarded = 5
+            },
+            new Activity
+            {
+                Id = Guid.NewGuid().ToString(),
+                HouseholdId = household.Id,
+                Name = "Cook a meal",
+                PointsAwarded = 20
+            }
+        };
+        
+        await _context.Activities.AddRangeAsync(defaultActivities);
+        
         var roleResponse = await MakeHouseholdAdminRole(user);
         if (!roleResponse.IsSuccessful)
         {
-            // If role update fails, return the error immediately
             return roleResponse;
         }
         
@@ -76,7 +156,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
 
         return ServiceResponseFactory.Success(
             response,
-            "Household was succesfully created",
+            "Household was succesfully created.",
             HttpStatusCode.OK
         );
     }
@@ -101,37 +181,84 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
     
     private async Task<ServiceResponse<string>> UploadProfilePicture(IFormFile? file)
     {
-        // If no file is provided, it's not an error.
         if (file == null)
         {
             return ServiceResponseFactory.Success<string>(null, "No profile picture provided.", HttpStatusCode.OK);
         }
 
+        var processingResponse = await ValidateAndProcessImage(file);
+        
+        if (!processingResponse.IsSuccessful)
+        {
+            return processingResponse;
+        }
+        
+        return ServiceResponseFactory.Success(
+            processingResponse.Result!, 
+            "Profile picture uploaded and processed successfully.", 
+            HttpStatusCode.OK
+        );
+    }
+    
+    private async Task<ServiceResponse<string>> ValidateAndProcessImage(IFormFile file)
+    {
+        if (file.Length > _options.Value.MaxFileSize)
+        {
+            return ServiceResponseFactory.Error<string>(null, $"File size must not exceed {_options.Value.MaxFileSize / 1024 / 1024}MB.", HttpStatusCode.RequestEntityTooLarge);
+        }
+        
+        var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (! _options.Value.AllowedFormats.Contains(fileExtension))
+        {
+            return ServiceResponseFactory.Error<string>(null, $"Invalid file format. Only {string.Join(", ", _options.Value.AllowedFormats)} are allowed.", HttpStatusCode.UnsupportedMediaType);
+        }
+
+        string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "households");
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+        
+        string uniqueFileName = Guid.NewGuid().ToString() + ".jpg";
+        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
         try
         {
-            string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "households");
-            if (!Directory.Exists(uploadsFolder))
+            using (var memoryStream = new MemoryStream())
             {
-                Directory.CreateDirectory(uploadsFolder);
-            }
+                await file.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
 
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(fileStream);
+                using (Image image = await Image.LoadAsync(memoryStream))
+                {
+                    if (image.Width < _options.Value.MinDimension || image.Height < _options.Value.MinDimension)
+                    {
+                        return ServiceResponseFactory.Error<string>(null, $"Image dimensions are too small. Minimum required: {_options.Value.MinDimension}x{_options.Value.MinDimension} pixels.", HttpStatusCode.BadRequest);
+                    }
+                    
+                    if (image.Width > _options.Value.MaxDimension || image.Height > _options.Value.MaxDimension)
+                    {
+                        image.Mutate(x => x.Resize(new ResizeOptions
+                        {
+                            Size = new Size(_options.Value.MaxDimension, _options.Value.MaxDimension),
+                            Mode = ResizeMode.Crop
+                        }));
+                    }
+                    
+                    await image.SaveAsJpegAsync(filePath, new JpegEncoder { Quality = 100 });
+                }
             }
 
             string profilePicturePath = Path.Combine("uploads", "households", uniqueFileName).Replace("\\", "/");
-
-            // Return success with the file path
-            return ServiceResponseFactory.Success(profilePicturePath, "Profile picture uploaded successfully.", HttpStatusCode.OK);
+            return ServiceResponseFactory.Success(profilePicturePath, "Profile picture processed successfully.", HttpStatusCode.OK);
+        }
+        catch (ImageFormatException)
+        {
+            return ServiceResponseFactory.Error<string>(null, "The file is not a valid or recognizable image.", HttpStatusCode.UnsupportedMediaType);
         }
         catch (Exception ex)
         {
-            // Return a detailed error response on failure
-            return ServiceResponseFactory.Error<string>(null, $"Failed to upload profile picture: {ex.Message}", HttpStatusCode.InternalServerError);
+            return ServiceResponseFactory.Error<string>(null, $"Failed to process image: {ex.Message}", HttpStatusCode.InternalServerError);
         }
     }
 
@@ -501,51 +628,59 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
         }
-    
-        // 1. Get the household associated with the user.
+        
         var household = await _context.Households
             .FirstOrDefaultAsync(h => h.Id == user.HouseholdId);
-    
+        
         if (household == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
         }
-
-        // 2. Check for existing picture and delete it.
-        if (!string.IsNullOrEmpty(household.ProfilePicturePath))
-        {
-            DeleteProfilePicture(household.ProfilePicturePath);
-        }
-
-        // 3. Upload the new picture.
+        
+        var oldProfilePicturePath = household.ProfilePicturePath;
+        
         var uploadResponse = await UploadProfilePicture(request.ProfilePicture);
+
         if (!uploadResponse.IsSuccessful)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, uploadResponse.Message, uploadResponse.StatusCode);
         }
+        
+        string newProfilePicturePath = uploadResponse.Result!;
+        
+        household.ProfilePicturePath = newProfilePicturePath;
 
-        // 4. Update the household's profile picture path in the database.
-        household.ProfilePicturePath = uploadResponse.Result;
-
-        // 5. Save changes to the database.
-        await _context.SaveChangesAsync();
-
-        var response = new OperationResultDto
+        try
         {
-            Operation = "ChangeHouseholdPicture",
-            Timestamp = DateTime.UtcNow,
-            Metadata = new Dictionary<string, object>
+            await _context.SaveChangesAsync();
+            
+            if (!string.IsNullOrEmpty(oldProfilePicturePath))
             {
-                { "HouseholdId", household.Id },
-                { "NewProfilePicturePath", household.ProfilePicturePath }
+                DeleteProfilePicture(oldProfilePicturePath); 
             }
-        };
 
-        return ServiceResponseFactory.Success(
-            response,
-            "Household picture was successfully changed.",
-            HttpStatusCode.OK
-        );
+            var response = new OperationResultDto
+            {
+                Operation = "ChangeHouseholdPicture",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "HouseholdId", household.Id },
+                    { "NewProfilePicturePath", newProfilePicturePath }
+                }
+            };
+
+            return ServiceResponseFactory.Success(
+                response,
+                "Household picture was successfully changed.",
+                HttpStatusCode.OK
+            );
+        }
+        catch (Exception ex)
+        {
+            DeleteProfilePicture(newProfilePicturePath); 
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed to save changes to the database: {ex.Message}", HttpStatusCode.InternalServerError);
+        }
     }
     public async Task<ServiceResponse<OperationResultDto>> SetHouseholdAdminAsync(string userId, string newAdminId)
     {
@@ -569,6 +704,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         }
 
         var newAdminRoles = await _userManager.GetRolesAsync(newAdmin);
+        
         if (newAdminRoles.Contains("HouseholdAdmin"))
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "User is already an admin.", HttpStatusCode.Conflict);
@@ -578,8 +714,25 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
             return ServiceResponseFactory.Error<OperationResultDto>(null, "New admin must have the 'Participant' role.", HttpStatusCode.Forbidden);
         }
         
-        await _userManager.AddToRoleAsync(newAdmin, "HouseholdAdmin");
-        await _userManager.RemoveFromRoleAsync(newAdmin, "Participant");
+        var removeOldAdminRoleResult = await _userManager.RemoveFromRoleAsync(currentAdmin, "HouseholdAdmin");
+        if (!removeOldAdminRoleResult.Succeeded)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to demote current admin: " + string.Join(", ", removeOldAdminRoleResult.Errors.Select(e => e.Description)), HttpStatusCode.InternalServerError);
+        }
+        
+        var addOldAdminRoleResult = await _userManager.AddToRoleAsync(currentAdmin, "Participant");
+        if (!addOldAdminRoleResult.Succeeded)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to assign 'Participant' role to old admin: " + string.Join(", ", addOldAdminRoleResult.Errors.Select(e => e.Description)), HttpStatusCode.InternalServerError);
+        }
+        
+        var promoteNewAdminResult = await _userManager.AddToRoleAsync(newAdmin, "HouseholdAdmin");
+        if (!promoteNewAdminResult.Succeeded)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to promote new admin: " + string.Join(", ", promoteNewAdminResult.Errors.Select(e => e.Description)), HttpStatusCode.InternalServerError);
+        }
+        
+        await _userManager.RemoveFromRoleAsync(newAdmin, "Participant"); 
         
         var household = await _context.Households.FirstOrDefaultAsync(h => h.Id == currentAdmin.HouseholdId);
         if (household != null)
@@ -590,6 +743,7 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
         
         await _context.SaveChangesAsync();
         await _signInManager.RefreshSignInAsync(currentAdmin);
+        await _signInManager.RefreshSignInAsync(newAdmin);
 
         var response = new OperationResultDto
         {
@@ -599,13 +753,13 @@ public class HouseholdService(DataContext _context, UserManager<User> _userManag
             {
                 { "OldAdminId", currentAdmin.Id },
                 { "NewAdminId", newAdmin.Id },
-                { "HouseholdId", household?.Id }
+                { "HouseholdId", household?.Id } 
             }
         };
 
         return ServiceResponseFactory.Success(
             response,
-            "Household admin was successfully set.",
+            "Household admin was successfully set and roles were swapped.",
             HttpStatusCode.OK
         );
     }
