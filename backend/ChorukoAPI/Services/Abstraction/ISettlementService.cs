@@ -7,7 +7,7 @@ namespace ChorukoAPI.Services.Abstraction;
 
 public interface ISettlementService
 {
-    Task<ServiceResponse<List<SettlementResponse>>> GetAllSettlements(string householdId);
+    Task<ServiceResponse<List<SettlementWithoutUsersResponse>>> GetAllSettlements(string householdId);
     Task<ServiceResponse<SettlementResponse>> GetSettlement(string settlementId);
     Task<ServiceResponse<OperationResultDto>> CreateSettlement(string householdId, CreateSettlementRequest request, string userId);
     Task<ServiceResponse<OperationResultDto>> EditSettlement(string settlementId, EditSettlementRequest request);

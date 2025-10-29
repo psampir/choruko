@@ -1,11 +1,22 @@
 import "./BottomNav.scss";
 import { useNavigate, useLocation } from "react-router-dom";
-import houseBlackIcon from "../../assets/svg/house-black.svg";
-import houseBlackFillIcon from "../../assets/svg/house-black-fill.svg";
-import taskIcon from "../../assets/svg/task.svg";
-import taskFillIcon from "../../assets/svg/task-fill.svg";
-import expensesIcon from "../../assets/svg/expenses.svg";
-import expensesFillIcon from "../../assets/svg/expenses-fill.svg";
+import { useIsDarkTheme } from "../../utils/iconUtils";
+
+// Light theme icons
+import houseBlackIconLight from "../../assets/svg/light/house-black.svg";
+import houseBlackFillIconLight from "../../assets/svg/light/house-black-fill.svg";
+import taskIconLight from "../../assets/svg/light/task.svg";
+import taskFillIconLight from "../../assets/svg/light/task-fill.svg";
+import expensesIconLight from "../../assets/svg/light/expenses.svg";
+import expensesFillIconLight from "../../assets/svg/light/expenses-fill.svg";
+
+// Dark theme icons
+import houseBlackIconDark from "../../assets/svg/dark/house-black.svg";
+import houseBlackFillIconDark from "../../assets/svg/dark/house-black-fill.svg";
+import taskIconDark from "../../assets/svg/dark/task.svg";
+import taskFillIconDark from "../../assets/svg/dark/task-fill.svg";
+import expensesIconDark from "../../assets/svg/dark/expenses.svg";
+import expensesFillIconDark from "../../assets/svg/dark/expenses-fill.svg";
 
 interface BottomNavProps {
   activeTab?: string;
@@ -18,6 +29,15 @@ const BottomNav: React.FC<BottomNavProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isDark = useIsDarkTheme();
+
+  // Select themed icons
+  const houseBlackIcon = isDark ? houseBlackIconDark : houseBlackIconLight;
+  const houseBlackFillIcon = isDark ? houseBlackFillIconDark : houseBlackFillIconLight;
+  const taskIcon = isDark ? taskIconDark : taskIconLight;
+  const taskFillIcon = isDark ? taskFillIconDark : taskFillIconLight;
+  const expensesIcon = isDark ? expensesIconDark : expensesIconLight;
+  const expensesFillIcon = isDark ? expensesFillIconDark : expensesFillIconLight;
   
   // Determine active tab from current route
   const getCurrentTab = () => {

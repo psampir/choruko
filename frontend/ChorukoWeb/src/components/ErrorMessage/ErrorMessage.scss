@@ -4,9 +4,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: var(--color-error, #ff4444);
-  background-color: var(--color-error-bg, #fff5f5);
-  border: 1px solid var(--color-error, #ff4444);
+  color: var(--color-text-primary);
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error);
   font-size: 14px;
   line-height: 1.4;
 
@@ -17,7 +17,7 @@
   &__close {
     background: none;
     border: none;
-    color: var(--color-error, #ff4444);
+    color: var(--color-text-primary);
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
@@ -32,7 +32,7 @@
     transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: rgba(255, 68, 68, 0.1);
+      opacity: 0.7;
     }
   }
 
