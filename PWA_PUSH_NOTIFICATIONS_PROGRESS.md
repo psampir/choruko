@@ -1,6 +1,6 @@
 # PWA Push Notifications Implementation Progress
 
-**Last Updated:** 2025-10-25
+**Last Updated:** 2025-10-29
 
 ## Overview
 Implementing push notifications for the Choruko PWA to notify users about app events even when the app is closed.
@@ -19,33 +19,33 @@ Implementing push notifications for the Choruko PWA to notify users about app ev
 
 ## Implementation Plan - Broken Down Into Tasks
 
-### Phase 1: Backend Infrastructure
-**Task 1.1: Database Setup**
-- [ ] Create `PushSubscription` entity/model
+### Phase 1: Backend Infrastructure ✅ COMPLETED
+**Task 1.1: Database Setup** ✅
+- [x] Create `PushSubscription` entity/model
   - Properties: Id, UserId, Endpoint, P256dhKey, AuthKey, UserAgent, CreatedAt, LastUsedAt
   - One-to-many relationship with User
-- [ ] Create EF Core migration
-- [ ] Apply migration to database
+- [x] Create EF Core migration
+- [ ] Apply migration to database (needs to be run in environment)
 
-**Task 1.2: VAPID Keys Generation**
-- [ ] Install `WebPush` NuGet package
-- [ ] Generate VAPID keys (public/private keypair)
-- [ ] Store in `appsettings.json` or environment variables
-- [ ] Add configuration model for VAPID settings
+**Task 1.2: VAPID Keys Generation** ✅
+- [x] Install `WebPush` NuGet package
+- [x] Generate VAPID keys (public/private keypair)
+- [x] Store in `appsettings.json` or environment variables
+- [x] Add configuration model for VAPID settings
 
-**Task 1.3: Backend API Endpoints**
-- [ ] Create `PushSubscriptionController`
-- [ ] POST `/api/push/subscribe` - Save new push subscription
-- [ ] DELETE `/api/push/unsubscribe` - Remove subscription
-- [ ] GET `/api/push/public-key` - Return VAPID public key to frontend
+**Task 1.3: Backend API Endpoints** ✅
+- [x] Create `PushSubscriptionController`
+- [x] POST `/api/push/subscribe` - Save new push subscription
+- [x] DELETE `/api/push/unsubscribe` - Remove subscription
+- [x] GET `/api/push/public-key` - Return VAPID public key to frontend
 
-**Task 1.4: Push Service Implementation**
-- [ ] Create `IPushNotificationService` interface
-- [ ] Create `PushNotificationService` implementation
-- [ ] Method to send push to single subscription
-- [ ] Method to send push to all user's subscriptions
-- [ ] Handle failed subscriptions (410 status) - remove from DB
-- [ ] Register service in DI container
+**Task 1.4: Push Service Implementation** ✅
+- [x] Create `IPushNotificationService` interface
+- [x] Create `PushNotificationService` implementation
+- [x] Method to send push to single subscription
+- [x] Method to send push to all user's subscriptions
+- [x] Handle failed subscriptions (410 status) - remove from DB
+- [ ] Register service in DI container (needs verification in Program.cs)
 
 ### Phase 2: Frontend - Service Worker
 **Task 2.1: Service Worker Push Handling**
@@ -160,3 +160,77 @@ Start with **Phase 1: Backend Infrastructure** - Set up the database and VAPID k
 - Documented current state
 - Created implementation plan
 - Ready to begin implementation
+
+### Session 2 - 2025-10-27 to 2025-10-29
+**Backend Implementation - Phase 1** ✅ COMPLETED
+
+#### Database Setup (2025-10-27)
+- Created `PushSubscription` model with all required properties (Id, UserId, Endpoint, P256dhKey, AuthKey, UserAgent, CreatedAt, LastUsedAt)
+- Created EF Core migration `AddPushSubscriptionTable` (commit: 7e6efde, fa07579)
+- Added `PushSubscription` DbSet to DataContext
+
+#### VAPID Configuration (2025-10-27 to 2025-10-29)
+- Installed WebPush NuGet package (commit: 6f28637)
+- Created `VapidSettings` configuration model (commit: 400f518)
+- Added VAPID configuration to `appsettings.json`
+- Implemented automatic VAPID key generation (commit: d06050f)
+- Created `VapidKeysChecker` and `VapidKeysGenerator` extensions
+- Added VAPID key validation on application startup in `Program.cs`
+
+#### API Endpoints (2025-10-29)
+- Created `PushSubscriptionController` with three endpoints (commit: 77b8425):
+  - POST `/api/push/subscribe` - Save new push subscription
+  - DELETE `/api/push/unsubscribe` - Remove subscription
+  - GET `/api/push/public-key` - Return VAPID public key to frontend
+- Created request DTOs:
+  - `PushSubscriptionRequest` (commit: e0e86cb)
+  - `PushSubscriptionUnsubscribeRequest` (commit: 52d1a19)
+
+#### Push Notification Service (2025-10-28)
+- Created `IPushNotificationService` interface (commit: 7cb6ef7)
+- Implemented `PushNotificationService` with full functionality (commit: 7cb6ef7):
+  - Send push to single subscription
+  - Send push to all user subscriptions
+  - Automatic cleanup of failed/expired subscriptions (410 status)
+  - WebPush integration with VAPID authentication
+
+#### Branch Status
+- Work done on `add-notification-handling` branch
+- Merged into `148-add-notification-handler` branch (commit: e7d1115)
+
+### Session 3 - 2025-10-29 (Evening)
+**VAPID Key Management Improvements & Service Registration** ✅
+
+#### VAPID Key Generation Refactored
+- **Completed:** Proper VAPID key generation on application startup
+- **Implementation details:**
+  - `VapidKeysChecker`: Checks if `vapid-keys.json` exists and contains valid keys
+  - `VapidKeysGenerator`: Generates new VAPID key pair using WebPush library and saves to JSON file
+  - `VapidKeysLoader`: Loads keys from JSON file into application configuration at startup
+  - Keys are stored in `vapid-keys.json` (excluded from git via .gitignore)
+  - Automatic generation on first run if file doesn't exist
+  - Configuration properly loads from file instead of appsettings.json
+
+#### Service Registration
+- **Completed:** Registered `IPushNotificationService` in DI container
+- **Completed:** Registered `VapidSettings` configuration binding
+- Service is now available for injection throughout the application
+
+#### Security & Best Practices
+- Added `vapid-keys.json` to `.gitignore` to prevent committing sensitive keys
+- Keys are generated once and persisted across application restarts
+- Empty placeholders remain in `appsettings.json` for documentation purposes
+- Console logging shows key generation status on startup
+
+#### Files Modified
+- `Extensions/VapidKeysChecker.cs` - Implemented full checking logic
+- `Extensions/VapidKeysGenerator.cs` - Implemented key generation and file writing
+- `Extensions/VapidKeysLoader.cs` - **NEW:** Loads keys from file into configuration
+- `Program.cs` - Fixed logic (was inverted), added loader, registered services
+- `backend/.gitignore` - Added vapid-keys.json to ignore list
+
+#### Next Steps
+- **TODO:** Apply database migration in development/production environments
+- **TODO:** Test VAPID key generation by running the application
+- **TODO:** Begin Phase 2: Frontend - Service Worker implementation
+- **TODO:** Begin Phase 3: Frontend - Application Logic
