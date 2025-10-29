@@ -38,14 +38,17 @@ const AddTask: React.FC = () => {
   const [taskDescription, setTaskDescription] = useState("");
   const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
   const [selectedAssignees, setSelectedAssignees] = useState<number[]>([]);
-  const [deadline, setDeadline] = useState("");
+  const [deadline, setDeadline] = useState<Date | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Pre-fill form when in edit mode
   useEffect(() => {
     if (editTask) {
       setTaskDescription(editTask.description || "");
-      setDeadline(editTask.deadline || "");
+      // Convert deadline string to Date object
+      if (editTask.deadline) {
+        setDeadline(new Date(editTask.deadline));
+      }
 
       // Find and select the activity by name
       const activity = activities.find((a) => a.name === editTask.name);
@@ -151,7 +154,7 @@ const AddTask: React.FC = () => {
         name: activity?.name || taskDescription,
         description: taskDescription,
         assignees: selectedAssigneeObjs,
-        deadline: deadline,
+        deadline: deadline ? deadline.toISOString() : "",
         author: editTask.author,
       };
 
@@ -163,7 +166,7 @@ const AddTask: React.FC = () => {
         name: activity?.name || taskDescription,
         description: taskDescription,
         assignees: selectedAssigneeObjs,
-        deadline: deadline,
+        deadline: deadline ? deadline.toISOString() : "",
         author: user
           ? {
               name: `${user.firstName} ${user.lastName}`,
@@ -314,11 +317,10 @@ const AddTask: React.FC = () => {
         {/* Deadline */}
         <div className="add-task__section">
           <Input
-            type="date"
             variant="datetime"
             placeholder="Deadline"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
+            dateValue={deadline}
+            onDateChange={setDeadline}
             className="add-task__input add-task__input--date"
           />
         </div>

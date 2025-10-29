@@ -68,65 +68,16 @@
     padding-right: 42px;
   }
 
+  &--currency {
+    @extend .input--primary;
+    padding-right: 42px;
+  }
+
   // Datetime input variant (inherits from primary)
   &--datetime {
     @extend .input--primary;
-
-    // Hide the default calendar picker indicator
-    &::-webkit-calendar-picker-indicator {
-      display: none;
-      opacity: 0;
-    }
-
-    // Remove default clear button in datetime inputs
-    &::-webkit-clear-button {
-      display: none;
-    }
-
-    // Hide the datetime skeleton when empty
-    &.input--empty {
-      color: transparent;
-
-      &::-webkit-datetime-edit {
-        color: transparent;
-      }
-
-      &::-webkit-datetime-edit-fields-wrapper {
-        color: transparent;
-      }
-
-      &::-webkit-datetime-edit-text {
-        color: transparent;
-      }
-
-      &::-webkit-datetime-edit-month-field {
-        color: transparent;
-      }
-
-      &::-webkit-datetime-edit-day-field {
-        color: transparent;
-      }
-
-      &::-webkit-datetime-edit-year-field {
-        color: transparent;
-      }
-
-      &::-webkit-datetime-edit-hour-field {
-        color: transparent;
-      }
-
-      &::-webkit-datetime-edit-minute-field {
-        color: transparent;
-      }
-
-      &::-webkit-datetime-edit-second-field {
-        color: transparent;
-      }
-
-      &::-webkit-datetime-edit-ampm-field {
-        color: transparent;
-      }
-    }
+    padding-right: 42px;
+    width: 100%;
   }
 
   // Wrapper for password inputs with eye icon
@@ -136,7 +87,8 @@
 
     .input__eye,
     .input__pencil,
-    .input__date {
+    .input__date,
+    .input__currency-symbol {
       position: absolute;
       right: 16px;
       top: 50%;
@@ -182,25 +134,24 @@
 
     .input__date {
       background: url("/src/assets/svg/date.svg") no-repeat center/contain;
+      z-index: 1;
     }
 
-    // Custom placeholder for datetime input
-    &--datetime {
-      .input__placeholder {
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #55ad9b;
-        font-size: var(--font-size-body);
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-      }
+    .input__currency-symbol {
+      background: none;
+      color: #55ad9b;
+      font-size: var(--font-size-body);
+      font-weight: 500;
+      width: auto;
+      height: auto;
+      cursor: default;
+      pointer-events: none;
+    }
 
-      // Hide placeholder when input is focused or has value
-      .input--datetime:focus ~ .input__placeholder,
-      .input--datetime:not(.input--empty) ~ .input__placeholder {
-        opacity: 0;
+    // Datepicker wrapper styling
+    &--datetime {
+      .datepicker-wrapper {
+        width: 100%;
       }
     }
 
@@ -208,5 +159,216 @@
     .input--password.active + .input__eye {
       background: url("../../assets/svg/close-eye.svg") no-repeat center/contain;
     }
+  }
+}
+
+// React DatePicker custom styling
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__input-container {
+  width: 100%;
+}
+
+.react-datepicker {
+  font-family: var(--font-family-base);
+  border: 2px solid #55ad9b;
+  border-radius: 10px;
+  background-color: #d8efd3;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  &-popper {
+    z-index: 10;
+  }
+
+  &__header {
+    background-color: #95d2b3;
+    border-bottom: 1px solid #55ad9b;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 8px 0;
+  }
+
+  &__current-month {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  &__day-names {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 8px;
+  }
+
+  &__day-name {
+    color: var(--color-text-primary);
+    font-weight: 500;
+    width: 2rem;
+    line-height: 2rem;
+    text-align: center;
+    margin: 0.166rem;
+  }
+
+  &__month {
+    margin: 0.4rem;
+  }
+
+  &__week {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  &__day {
+    color: var(--color-text-primary);
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    text-align: center;
+    margin: 0.166rem;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #55ad9b;
+      color: white;
+      border-radius: 5px;
+    }
+
+    &--selected,
+    &--keyboard-selected {
+      background-color: #55ad9b;
+      color: white;
+      font-weight: 600;
+      border-radius: 5px;
+    }
+
+    &--today {
+      font-weight: bold;
+      background-color: rgba(85, 173, 155, 0.2);
+      border-radius: 5px;
+    }
+
+    &--outside-month {
+      color: #95d2b3;
+    }
+
+    &--disabled {
+      color: #95d2b3;
+      cursor: default;
+
+      &:hover {
+        background-color: transparent;
+        color: #95d2b3;
+      }
+    }
+  }
+
+  &__time-container {
+    border-left: 2px solid #55ad9b;
+    width: 85px;
+    display: flex;
+    flex-direction: column;
+
+    .react-datepicker__header {
+      border-top-right-radius: 8px;
+      border-top-left-radius: 0;
+    }
+
+    .react-datepicker__time {
+      background-color: #d8efd3;
+      border-bottom-right-radius: 8px;
+
+      .react-datepicker__time-box {
+        width: 85px;
+
+        .react-datepicker__time-list {
+          padding: 0;
+          overflow-y: auto;
+          height: calc(195px + 2rem);
+
+          &::-webkit-scrollbar {
+            width: 6px;
+          }
+
+          &::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background: #55ad9b;
+            border-radius: 3px;
+          }
+        }
+
+        .react-datepicker__time-list-item {
+          height: 30px;
+          padding: 5px 10px;
+          white-space: nowrap;
+          text-align: center;
+          color: var(--color-text-primary);
+
+          &:hover {
+            background-color: #95d2b3;
+            cursor: pointer;
+          }
+
+          &--selected {
+            background-color: #55ad9b;
+            color: white;
+            font-weight: 600;
+
+            &:hover {
+              background-color: #55ad9b;
+            }
+          }
+
+          &--disabled {
+            color: #95d2b3;
+
+            &:hover {
+              background-color: transparent;
+              cursor: default;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &__navigation {
+    top: 12px;
+    line-height: 1.7rem;
+    border: none;
+    outline: none;
+
+    &--previous {
+      left: 12px;
+    }
+
+    &--next {
+      right: 12px;
+    }
+
+    &-icon {
+      &::before {
+        border-color: #55ad9b;
+        border-width: 2px 2px 0 0;
+        height: 8px;
+        width: 8px;
+      }
+    }
+
+    &:hover {
+      *::before {
+        border-color: var(--color-text-primary);
+      }
+    }
+  }
+
+  &__triangle {
+    display: none;
   }
 }
