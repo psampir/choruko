@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Invitations.scss";
-import householdDefault from "/src/assets/svg/householdDefault.svg";
+import { useIsDarkTheme } from "../../../utils/iconUtils";
+import householdDefaultLight from "/src/assets/svg/light/householdDefault.svg";
+import householdDefaultDark from "/src/assets/svg/dark/householdDefault.svg";
+import arrowLeftLight from "/src/assets/svg/light/arrow-left.svg";
+import arrowLeftDark from "/src/assets/svg/dark/arrow-left.svg";
+import acceptLight from "/src/assets/svg/light/accept.svg";
+import acceptDark from "/src/assets/svg/dark/accept.svg";
+import declineLight from "/src/assets/svg/light/decline.svg";
+import declineDark from "/src/assets/svg/dark/decline.svg";
 import NavbarMobile from "../../../components/NavbarMobile";
 import Popup from "../../../components/Popup";
 interface Invitation {
@@ -12,6 +20,14 @@ interface Invitation {
 
 function Invitations() {
   const navigate = useNavigate();
+  const isDark = useIsDarkTheme();
+  
+  // Select themed icons
+  const householdDefault = isDark ? householdDefaultDark : householdDefaultLight;
+  const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
+  const acceptIcon = isDark ? acceptDark : acceptLight;
+  const declineIcon = isDark ? declineDark : declineLight;
+  
   // Initialize with one invitation directly instead of using useEffect
   const [invitations, setInvitations] = useState<Invitation[]>([
     {
@@ -20,6 +36,16 @@ function Invitations() {
       image: householdDefault,
     },
   ]);
+
+  // Update invitation images when theme changes
+  useEffect(() => {
+    setInvitations((prev) =>
+      prev.map((inv) => ({
+        ...inv,
+        image: householdDefault,
+      }))
+    );
+  }, [householdDefault]);
 
   const [popup, setPopup] = useState<boolean>(false);
   const [selectedInvitation, setSelectedInvitation] = useState<{
@@ -69,7 +95,7 @@ function Invitations() {
       <NavbarMobile />
       <img
         className="invitations back-arrow"
-        src="/src/assets/svg/arrow-left.svg"
+        src={arrowLeft}
         alt="back-arrow"
         onClick={() => navigate(-1)}
       />
@@ -89,11 +115,15 @@ function Invitations() {
                     })
                   }
                   className="accept"
-                ></span>
+                >
+                  <img src={acceptIcon} alt="Accept" />
+                </span>
                 <span
                   onClick={() => declineInvitation(invitation.id)}
                   className="decline"
-                ></span>
+                >
+                  <img src={declineIcon} alt="Decline" />
+                </span>
               </li>
             ))
           ) : (

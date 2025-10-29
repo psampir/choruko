@@ -33,7 +33,6 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  background: var(--color-secondary);
   color: var(--color-background);
   text-align: center;
   padding: var(--spacing-lg);
@@ -47,6 +46,14 @@ body {
 
   &--visible {
     transform: translateY(0);
+  }
+
+  &--error {
+    background: var(--color-error-bg) !important;
+  }
+
+  &--success {
+    background: var(--color-secondary) !important;
   }
 
   span {
@@ -190,6 +197,8 @@ body {
         img {
           width: 40px;
           height: 40px;
+          border-radius: var(--border-radius-full);
+          object-fit: cover;
           margin-right: var(--spacing-md);
         }
       }
@@ -214,7 +223,7 @@ body {
     }
 
     .participant {
-      .delete-member {
+      .delete-participant {
         width: 30px;
         height: 30px;
         cursor: pointer;
@@ -233,6 +242,8 @@ body {
       img {
         width: 40px;
         height: 40px;
+        border-radius: var(--border-radius-full);
+        object-fit: cover;
         margin-right: var(--spacing-md);
       }
 

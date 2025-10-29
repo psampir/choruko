@@ -4,6 +4,7 @@ using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Responses.Household;
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Mappers;
+using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +32,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
 
         var result = await settlementService.GetAllSettlements(householdId);
 
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("Settlement list");
     }
 
     [HttpGet("{settlementId}")]
@@ -48,7 +49,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
 
         var result = await settlementService.GetSettlement(settlementId);
 
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("Settlement detail");
     }
 
     [HttpPost("create/{householdId}")]
@@ -65,7 +66,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
 
         var result = await settlementService.CreateSettlement(householdId, request, userId);
 
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("NewSettlement");
     }
 
     [HttpPut("edit/{settlementId}")]
@@ -82,7 +83,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
 
         var result = await settlementService.EditSettlement(settlementId, request);
 
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("EditSettlement");
     }
 
     [HttpPut("markComplete/{settlementId}")]
@@ -99,7 +100,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
 
         var result = await settlementService.MarkAsCompleted(settlementId);
 
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("Settlement complete");
     }
 
     [HttpPut("unmarkComplete/{settlementId}")]
@@ -116,7 +117,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
 
         var result = await settlementService.UnMarkAsCompleted(settlementId);
 
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("Settlement uncomplete");
     }
 
     [HttpDelete("delete/{settlementId}")]
@@ -133,6 +134,6 @@ public class SettlementController(ISettlementService settlementService) : Contro
 
         var result = await settlementService.DeleteSettlement(settlementId);
 
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("Delete settlement");
     }
 }

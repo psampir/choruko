@@ -7,6 +7,7 @@ using ChorukoAPI.Contracts.Responses.Household;
 
 public interface IHouseholdService
 {
+    Task<ServiceResponse<HouseholdInfoResponse>> GetHouseholdInfoAsync();
     Task<ServiceResponse<OperationResultDto>> CreateHouseholdAsync(CreateHouseholdRequest request, string userId);
     
     Task<ServiceResponse<OperationResultDto>> DeleteUserFromHouseholdAsync(string userIdToDelete, string currentUserId);
