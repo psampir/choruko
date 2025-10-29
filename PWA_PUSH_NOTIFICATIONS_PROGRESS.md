@@ -25,7 +25,8 @@ Implementing push notifications for the Choruko PWA to notify users about app ev
   - Properties: Id, UserId, Endpoint, P256dhKey, AuthKey, UserAgent, CreatedAt, LastUsedAt
   - One-to-many relationship with User
 - [x] Create EF Core migration
-- [ ] Apply migration to database (needs to be run in environment)
+- [x] Apply migration to database
+  - ⚠️ **NOTE FOR DEVS:** After merging to dev, run `python3 backend/update-db.py` to apply migration
 
 **Task 1.2: VAPID Keys Generation** ✅
 - [x] Install `WebPush` NuGet package
@@ -45,7 +46,7 @@ Implementing push notifications for the Choruko PWA to notify users about app ev
 - [x] Method to send push to single subscription
 - [x] Method to send push to all user's subscriptions
 - [x] Handle failed subscriptions (410 status) - remove from DB
-- [ ] Register service in DI container (needs verification in Program.cs)
+- [x] Register service in DI container
 
 ### Phase 2: Frontend - Service Worker
 **Task 2.1: Service Worker Push Handling**
@@ -229,8 +230,19 @@ Start with **Phase 1: Backend Infrastructure** - Set up the database and VAPID k
 - `Program.cs` - Fixed logic (was inverted), added loader, registered services
 - `backend/.gitignore` - Added vapid-keys.json to ignore list
 
+#### Migration Applied
+- **DONE:** Applied `AddPushSubscriptionTable` migration locally
+- `PushSubscriptions` table created with unique index on `Endpoint`
+- Used `backend/update-db.py` script for applying migration
+
+#### Important Notes for Team
+- ⚠️ **MIGRATION REQUIRED:** After merging this branch to `dev`, all developers must run:
+  ```bash
+  python3 backend/update-db.py
+  ```
+  This applies the new `PushSubscriptions` table migration.
+
 #### Next Steps
-- **TODO:** Apply database migration in development/production environments
-- **TODO:** Test VAPID key generation by running the application
+- **TODO:** Test VAPID key generation and push notification endpoints
 - **TODO:** Begin Phase 2: Frontend - Service Worker implementation
 - **TODO:** Begin Phase 3: Frontend - Application Logic
