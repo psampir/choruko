@@ -1,6 +1,6 @@
 # PWA Push Notifications Implementation Progress
 
-**Last Updated:** 2025-10-29
+**Last Updated:** 2025-10-29 (23:17 UTC)
 
 ## Overview
 Implementing push notifications for the Choruko PWA to notify users about app events even when the app is closed.
@@ -48,18 +48,18 @@ Implementing push notifications for the Choruko PWA to notify users about app ev
 - [x] Handle failed subscriptions (410 status) - remove from DB
 - [x] Register service in DI container
 
-### Phase 2: Frontend - Service Worker
-**Task 2.1: Service Worker Push Handling**
-- [ ] Add `push` event listener to `sw.ts`
-- [ ] Parse incoming push data
-- [ ] Display notification using Notifications API
-- [ ] Handle notification click event (open app to specific route)
-- [ ] Handle notification close event (optional analytics)
+### Phase 2: Frontend - Service Worker ✅ COMPLETED
+**Task 2.1: Service Worker Push Handling** ✅
+- [x] Add `push` event listener to `sw.ts`
+- [x] Parse incoming push data
+- [x] Display notification using Notifications API
+- [x] Handle notification click event (open app to specific route)
+- [x] Handle notification close event (optional analytics)
 
-**Task 2.2: Service Worker Helpers**
-- [ ] Create utility functions for notification display
-- [ ] Add notification icons/badges configuration
-- [ ] Add default notification options
+**Task 2.2: Service Worker Helpers** ✅
+- [x] Create utility functions for notification display (inline in push handler)
+- [x] Add notification icons/badges configuration (defaults with override pattern)
+- [x] Add default notification options (fallback values)
 
 ### Phase 3: Frontend - Application Logic
 **Task 3.1: Permission & Subscription Management**
@@ -242,7 +242,33 @@ Start with **Phase 1: Backend Infrastructure** - Set up the database and VAPID k
   ```
   This applies the new `PushSubscriptions` table migration.
 
+### Session 4 - 2025-10-29 (Late Evening)
+**Phase 2: Service Worker Implementation** ✅ COMPLETED
+
+#### Service Worker Push Handling
+- **Completed:** Added comprehensive push notification handling to `sw.ts`
+- **Implementation details:**
+  - `push` event listener: Receives push from browser, parses JSON payload, displays notification
+  - `notificationclick` event: Handles user clicks, focuses existing window or opens new one, navigates to URL
+  - `notificationclose` event: Optional analytics hook for dismissed notifications
+  - Default values with override pattern: Ensures notifications always work even if payload is missing
+  - Event-driven architecture: Service worker wakes on events, processes, then sleeps
+
+#### Technical Details
+- **Payload format:** `{title, body, icon, badge, url, data}`
+- **Navigation logic:** Reuses existing app window if open, otherwise opens new window
+- **Notification options:** Tag for grouping, requireInteraction: false for auto-dismiss
+- **Error handling:** Try-catch on JSON parsing with fallback to defaults
+- **Pattern:** Observer pattern + Promise chain pattern with `event.waitUntil()`
+
+#### Files Modified
+- `frontend/ChorukoWeb/src/sw.ts` - Added 87 lines of push notification handling code
+
+#### Build Status
+- ✅ TypeScript compilation successful
+- ✅ Vite build successful
+- ✅ Service worker bundle generated: `dist/sw.js` (17.08 kB gzipped: 5.81 kB)
+
 #### Next Steps
-- **TODO:** Test VAPID key generation and push notification endpoints
-- **TODO:** Begin Phase 2: Frontend - Service Worker implementation
-- **TODO:** Begin Phase 3: Frontend - Application Logic
+- **TODO:** Begin Phase 3: Frontend - Application Logic (hooks, UI components, API integration)
+- **TODO:** Test push notifications end-to-end with backend
