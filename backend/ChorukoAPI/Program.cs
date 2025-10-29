@@ -4,6 +4,7 @@ using ChorukoAPI.Contracts.Responses.Settlement;
 using ChorukoAPI.Contracts.Responses.Task;
 using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Data;
+using ChorukoAPI.Extensions;
 using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
@@ -140,6 +141,16 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+
+if(VapidKeysChecker.CheckVapidKeys())
+{
+    VapidKeysGenerator.GenarateKeys();
+}
+else
+{
+    Console.WriteLine("VAPID keys already configured.");
+}
 
 using (var scope = app.Services.CreateScope())
 {
