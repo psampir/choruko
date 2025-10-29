@@ -97,6 +97,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.Configure<ImageSettings>(
     builder.Configuration.GetSection(ImageSettings.SectionName));
 
+builder.Services.Configure<VapidSettings>(
+    builder.Configuration.GetSection("VapidSettings"));
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthorization();
@@ -123,6 +126,7 @@ builder.Services.AddScoped<IMapper<Household, HouseholdInfoResponse>, HouseholdI
 builder.Services.AddScoped<IMapper<Settlement, SettlementWithoutUsersResponse>, SettlementWithoutUsersMapper>();
 
 builder.Services.AddScoped<ISettlementService, SettlementService>();
+builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 
 builder.Services.AddControllers();
 
@@ -141,17 +145,20 @@ builder.Services.AddCors(options =>
         });
 });
 
-var app = builder.Build();
-
-
-if(VapidKeysChecker.CheckVapidKeys())
+// Generate VAPID keys if they don't exist
+if (!VapidKeysChecker.CheckVapidKeys())
 {
-    VapidKeysGenerator.GenarateKeys();
+    VapidKeysGenerator.GenerateKeys();
 }
 else
 {
     Console.WriteLine("VAPID keys already configured.");
 }
+
+// Load VAPID keys from file into configuration
+VapidKeysLoader.LoadVapidKeys(builder.Configuration);
+
+var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
