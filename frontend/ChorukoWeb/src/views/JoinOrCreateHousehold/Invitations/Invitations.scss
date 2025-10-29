@@ -98,17 +98,18 @@
 
       span {
         display: flex;
-        width: 30px;
-        height: 30px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        
+        img {
+          width: 30px;
+          height: 30px;
+        }
       }
 
       .accept {
-        background: url("src/assets/svg/accept.svg") no-repeat center center;
         margin-right: 10px;
-      }
-
-      .decline {
-        background: url("src/assets/svg/decline.svg") no-repeat center center;
       }
     }
 
@@ -150,17 +151,18 @@
 
       span {
         display: flex;
-        width: 30px;
-        height: 30px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        
+        img {
+          width: 30px;
+          height: 30px;
+        }
       }
 
       .accept {
-        background: url("src/assets/svg/accept.svg") no-repeat center center;
         margin-right: 10px;
-      }
-
-      .decline {
-        background: url("src/assets/svg/decline.svg") no-repeat center center;
       }
     }
   }
