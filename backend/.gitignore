@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# VAPID keys (generated automatically)
+vapid-keys.json
+
 # launch settings
 launchSettings.json
 
