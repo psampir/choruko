@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
+import { useIsDarkTheme } from "../../../utils/iconUtils";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
-import ProfileDefaultIcon from "../../../assets/svg/profile-icon-light.svg";
-import arrowLeft from "../../../assets/svg/arrow-left.svg";
+import ProfileDefaultIconLight from "../../../assets/svg/light/profile-icon-light.svg";
+import arrowLeftLight from "../../../assets/svg/light/arrow-left.svg";
+import ProfileDefaultIconDark from "../../../assets/svg/dark/profile-icon-light.svg";
+import arrowLeftDark from "../../../assets/svg/dark/arrow-left.svg";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserNames, updatePassword, updateProfilePicture, deleteAccount, loading: userLoading } = useUser();
+  const isDark = useIsDarkTheme();
+  
+  const ProfileDefaultIcon = isDark ? ProfileDefaultIconDark : ProfileDefaultIconLight;
+  const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
+  
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");

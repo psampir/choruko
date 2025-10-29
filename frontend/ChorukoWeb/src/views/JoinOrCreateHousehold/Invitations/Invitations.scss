@@ -26,12 +26,12 @@
     /* Container that will mask the scrollbar */
     width: 90%;
     max-height: 60vh;
-    border: 2px solid #55ad9b;
+    border: 2px solid var(--color-secondary);
     border-radius: 10px;
     position: relative;
     box-sizing: border-box;
     overflow: hidden; /* This MUST clip everything */
-    background-color: #d8efd3;
+    background-color: var(--color-background-secondary);
 
     .scrollable-content {
       /* Make this wider than parent and push scrollbar out */
@@ -41,7 +41,7 @@
       margin-right: -30px; /* Pull scrollbar outside visible area */
       padding-right: 30px; /* Add padding to compensate */
 
-      background-color: #d8efd3;
+      background-color: var(--color-background-secondary);
       list-style-type: none;
       padding-left: 0;
       padding-top: 0;
@@ -77,7 +77,7 @@
         transform: translateX(-50%);
         width: 90%;
         height: 3px;
-        background-color: #56ae9c80;
+        background-color: var(--color-secondary-half-tr);
       }
 
       &:last-child::after {
@@ -98,17 +98,18 @@
 
       span {
         display: flex;
-        width: 30px;
-        height: 30px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        
+        img {
+          width: 30px;
+          height: 30px;
+        }
       }
 
       .accept {
-        background: url("src/assets/svg/accept.svg") no-repeat center center;
         margin-right: 10px;
-      }
-
-      .decline {
-        background: url("src/assets/svg/decline.svg") no-repeat center center;
       }
     }
 
@@ -129,7 +130,7 @@
         transform: translateX(-50%);
         width: 90%;
         height: 3px;
-        background-color: #56ae9c80;
+        background-color: var(--color-secondary-half-tr);
       }
 
       &:last-child::after {
@@ -150,17 +151,18 @@
 
       span {
         display: flex;
-        width: 30px;
-        height: 30px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        
+        img {
+          width: 30px;
+          height: 30px;
+        }
       }
 
       .accept {
-        background: url("src/assets/svg/accept.svg") no-repeat center center;
         margin-right: 10px;
-      }
-
-      .decline {
-        background: url("src/assets/svg/decline.svg") no-repeat center center;
       }
     }
   }
@@ -181,10 +183,10 @@
     line-height: 1.5;
     margin: 0;
     font-size: 16px;
-    color: #021207;
+    color: var(--color-text-primary);
 
     strong {
-      color: #55ad9b;
+      color: var(--color-secondary);
       font-weight: 600;
     }
   }
@@ -208,11 +210,11 @@
     min-width: 120px;
 
     &--accept {
-      background-color: #55ad9b;
+      background-color: var(--color-secondary);
       color: white;
 
       &:hover {
-        background-color: #4a9d8e;
+        opacity: 0.9;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(85, 173, 155, 0.3);
       }
@@ -225,12 +227,13 @@
 
     &--cancel {
       background-color: transparent;
-      color: #55ad9b;
-      border: 2px solid #55ad9b;
+      color: var(--color-secondary);
+      border: 2px solid var(--color-secondary);
 
       &:hover {
-        background-color: #55ad9b;
+        background-color: var(--color-secondary);
         color: white;
+        border-color: transparent;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(85, 173, 155, 0.2);
       }
