@@ -5,7 +5,7 @@ namespace ChorukoAPI.Extensions;
 
 public static class VapidKeysChecker
 {
-    private const string VapidKeysFilePath = "vapid-keys.json";
+    private const string VapidKeysFilePath = "wwwroot/uploads/vapid-keys.json";
 
     public static bool CheckVapidKeys()
     {

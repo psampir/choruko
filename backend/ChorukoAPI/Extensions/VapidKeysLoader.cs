@@ -5,7 +5,7 @@ namespace ChorukoAPI.Extensions;
 
 public static class VapidKeysLoader
 {
-    private const string VapidKeysFilePath = "vapid-keys.json";
+    private const string VapidKeysFilePath = "wwwroot/uploads/vapid-keys.json";
 
     public static void LoadVapidKeys(IConfiguration configuration)
     {
@@ -31,7 +31,7 @@ public static class VapidKeysLoader
             configuration["VapidSettings:PrivateKey"] = vapidSettings.PrivateKey;
             configuration["VapidSettings:Subject"] = vapidSettings.Subject;
 
-            Console.WriteLine("VAPID keys loaded successfully from vapid-keys.json");
+            Console.WriteLine($"VAPID keys loaded successfully from {VapidKeysFilePath}");
         }
         catch (Exception ex)
         {
