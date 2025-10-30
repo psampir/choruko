@@ -1,6 +1,6 @@
 # PWA Push Notifications Implementation Progress
 
-**Last Updated:** 2025-10-29 (23:17 UTC)
+**Last Updated:** 2025-10-30 (09:14 UTC)
 
 ## Overview
 Implementing push notifications for the Choruko PWA to notify users about app events even when the app is closed.
@@ -61,26 +61,31 @@ Implementing push notifications for the Choruko PWA to notify users about app ev
 - [x] Add notification icons/badges configuration (defaults with override pattern)
 - [x] Add default notification options (fallback values)
 
-### Phase 3: Frontend - Application Logic
-**Task 3.1: Permission & Subscription Management**
-- [ ] Create `usePushNotifications` hook or service
-- [ ] Request notification permission from user
-- [ ] Subscribe to push notifications (browser API)
-- [ ] Send subscription to backend API
-- [ ] Handle subscription updates/refresh
-- [ ] Handle errors and edge cases
+### Phase 3: Frontend - Application Logic ⏳ IN PROGRESS
+**Task 3.1: Permission & Subscription Management** ✅ DONE (Test Page)
+- [x] Create `usePushNotifications` hook or service
+- [x] Request notification permission from user
+- [x] Subscribe to push notifications (browser API)
+- [x] Send subscription to backend API
+- [x] Handle subscription updates/refresh
+- [x] Handle errors and edge cases
+- [ ] **TODO:** Integrate into main app flow (auto-subscribe after login)
 
-**Task 3.2: UI Components**
-- [ ] Create notification permission prompt UI
-- [ ] Add toggle in user settings to enable/disable notifications
-- [ ] Show current notification permission status
-- [ ] Handle permission denied state gracefully
+**Task 3.2: UI Components** ⏳ PARTIALLY DONE
+- [x] Create notification permission prompt UI (test page only)
+- [ ] **TODO:** Add PushNotificationProvider to App.tsx
+- [ ] **TODO:** Request permission after successful login
+- [ ] **TODO:** Auto-subscribe when permission granted
+- [ ] **TODO:** Add toggle in user settings to enable/disable notifications
+- [ ] **TODO:** Show current notification permission status in settings
+- [ ] **TODO:** Handle permission denied state gracefully
+- [ ] **TODO:** Unsubscribe on logout
 
-**Task 3.3: Integration with API Service**
-- [ ] Add API methods in existing service layer
-- [ ] POST subscription to backend
-- [ ] DELETE subscription on logout/disable
-- [ ] GET VAPID public key
+**Task 3.3: Integration with API Service** ✅ DONE
+- [x] Add API methods in existing service layer
+- [x] POST subscription to backend
+- [x] DELETE subscription on logout/disable
+- [x] GET VAPID public key
 
 ### Phase 4: Business Logic Integration
 **Task 4.1: Identify Notification Triggers**
@@ -269,6 +274,80 @@ Start with **Phase 1: Backend Infrastructure** - Set up the database and VAPID k
 - ✅ Vite build successful
 - ✅ Service worker bundle generated: `dist/sw.js` (17.08 kB gzipped: 5.81 kB)
 
-#### Next Steps
-- **TODO:** Begin Phase 3: Frontend - Application Logic (hooks, UI components, API integration)
-- **TODO:** Test push notifications end-to-end with backend
+### Session 5 - 2025-10-30 (Morning)
+**Phase 3: Frontend Implementation & End-to-End Testing** ✅ COMPLETED
+
+#### Frontend Service Layer
+- Created `pushNotificationService.ts` with API methods:
+  - `getPublicKey()` - Fetches VAPID public key
+  - `subscribe()` - Sends subscription to backend
+  - `unsubscribe()` - Removes subscription from backend
+- Fixed API endpoint URLs (was `/api/push/*`, corrected to `/api/PushSubscription/*`)
+- Added error logging for debugging
+
+#### Context & Hook Implementation
+- Created `PushNotificationContext.tsx` following existing codebase pattern
+- Exported `usePushNotifications()` hook with full state management:
+  - Permission status tracking
+  - Subscription state management
+  - Loading and error states
+  - Browser API integration (request permission, subscribe, unsubscribe)
+- Implemented VAPID key conversion helper (`urlBase64ToUint8Array`)
+- Automatic subscription check on mount
+
+#### Test Page Implementation
+- Created `TestNotifications.tsx` comprehensive test UI at `/test-notifications`
+- Features: Step-by-step testing buttons, real-time terminal-style log, subscription status checks
+- Protected route requiring authentication
+- Used for debugging and validation during development
+
+#### Backend Fixes
+- **Critical Fix:** Added `Id = Guid.NewGuid().ToString()` to PushSubscription creation (was causing 500 error)
+- Added `LastUsedAt` initialization
+- Created test endpoint: `POST /api/PushSubscription/test` for manual push testing
+- Cleaned up `appsettings.json` - removed empty VAPID placeholders, added documentation comment
+
+#### End-to-End Testing Results ✅
+**Successfully tested complete push notification flow:**
+1. ✅ Browser support detection
+2. ✅ Permission request and grant
+3. ✅ VAPID key retrieval from backend
+4. ✅ Browser push subscription
+5. ✅ Subscription saved to database
+6. ✅ **Push notification sent and received!**
+7. ✅ Notification click handling (opens correct URL)
+8. ✅ Unsubscribe flow
+
+**Tested in:** Firefox on localhost
+**Push service:** Mozilla Push Service (updates.push.services.mozilla.com)
+
+#### Files Created/Modified
+- `frontend/ChorukoWeb/src/services/pushNotificationService.ts` - NEW
+- `frontend/ChorukoWeb/src/contexts/PushNotificationContext.tsx` - NEW
+- `frontend/ChorukoWeb/src/views/TestNotifications.tsx` - NEW
+- `frontend/ChorukoWeb/src/App.tsx` - Added test route
+- `backend/ChorukoAPI/Services/Implementation/PushNotificationService.cs` - Fixed ID generation
+- `backend/ChorukoAPI/Controllers/PushSubscriptionController.cs` - Added test endpoint
+- `backend/ChorukoAPI/appsettings.json` - Cleaned up
+
+#### Current Status
+✅ **Working:** Push notifications fully functional and tested end-to-end
+⚠️ **Limitation:** Only accessible via test page `/test-notifications`
+📝 **Next:** Integrate into main app flow
+
+#### Immediate Next Steps (Phase 3 Completion)
+1. **Add PushNotificationProvider to App.tsx** - wrap entire app
+2. **Integrate with login flow:**
+   - Request permission after successful login
+   - Auto-subscribe if permission granted
+3. **Add to settings page:**
+   - Notification toggle (enable/disable)
+   - Show current permission status
+   - Handle permission denied gracefully
+4. **Handle logout:**
+   - Unsubscribe from push notifications
+5. **Remove or hide test page** (optional - keep for debugging)
+
+#### Later Steps
+- **Phase 4:** Business Logic Integration (trigger notifications on app events)
+- **Phase 5:** Testing & Polish (multiple browsers, devices, error handling)
