@@ -122,6 +122,24 @@ const TestNotifications: React.FC = () => {
     }
   };
 
+  const sendTestNotification = async () => {
+    addLog('--- Sending test notification ---');
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/PushSubscription/test`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        addLog('✅ Test notification sent! Check your browser!');
+      } else {
+        addLog(`❌ Failed: ${response.status}`);
+      }
+    } catch (error) {
+      addLog(`ERROR: ${error}`);
+    }
+  };
+
   const unsubscribe = async () => {
     addLog('--- Unsubscribing ---');
     try {
@@ -153,6 +171,7 @@ const TestNotifications: React.FC = () => {
         <button onClick={requestPermission} style={buttonStyle}>2. Request Permission</button>
         <button onClick={getVapidKey} style={buttonStyle}>3. Get VAPID Key</button>
         <button onClick={subscribe} style={buttonStyle}>4. Subscribe</button>
+        <button onClick={sendTestNotification} style={{...buttonStyle, backgroundColor: '#28a745'}}>🔔 Send Test Push</button>
         <button onClick={checkSubscription} style={buttonStyle}>Check Status</button>
         <button onClick={unsubscribe} style={buttonStyle}>Unsubscribe</button>
         <button onClick={() => setLog([])} style={{...buttonStyle, backgroundColor: '#666'}}>Clear Log</button>
