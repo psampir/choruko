@@ -6,10 +6,17 @@ namespace ChorukoAPI.Extensions;
 
 public static class VapidKeysGenerator
 {
-    private const string VapidKeysFilePath = "vapid-keys.json";
+    private const string VapidKeysFilePath = "wwwroot/uploads/vapid-keys.json";
 
     public static void GenerateKeys(string subject = "mailto:admin@choruko.app")
     {
+        // Ensure the directory exists
+        var directory = Path.GetDirectoryName(VapidKeysFilePath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
         var vapidKeys = VapidHelper.GenerateVapidKeys();
 
         var vapidSettings = new VapidSettings
