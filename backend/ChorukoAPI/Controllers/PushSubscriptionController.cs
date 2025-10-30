@@ -49,4 +49,29 @@ public class PushSubscriptionController(IPushNotificationService pushService) : 
 
         return Ok(new { message = "Subscription removed." });
     }
+
+    [HttpPost("test")]
+    [Authorize]
+    public async Task<IActionResult> SendTestNotification()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "User ID not found in token." });
+        }
+
+        var payload = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            title = "🎉 Test Notification",
+            body = "This is a test push notification from Choruko!",
+            icon = "/icons/icon-192x192.png",
+            badge = "/icons/icon-96x96.png",
+            url = "/test-notifications"
+        });
+
+        await pushService.SendNotificationAsync(userId, payload);
+
+        return Ok(new { message = "Test notification sent!" });
+    }
 }
