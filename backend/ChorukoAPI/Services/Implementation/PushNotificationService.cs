@@ -31,11 +31,13 @@ public class PushNotificationService(
         {
             var newSubscription = new Models.PushSubscription
             {
+                Id = Guid.NewGuid().ToString(),
                 UserId = userId,
                 Endpoint = request.Endpoint,
                 P256dhKey = request.P256dhKey,
                 AuthKey = request.AuthKey,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                LastUsedAt = DateTime.UtcNow
             };
 
             await _context.PushSubscriptions.AddAsync(newSubscription);
