@@ -23,6 +23,7 @@ import Leaderboard from "./views/Household/Leaderboard/Leaderboard";
 import ManageAccount from "./views/Profile/ManageAccount/ManageAccount";
 import ManageHousehold from "./views/Profile/ManageHousehold/ManageHousehold";
 import Activities from "./views/Profile/ManageHousehold/Activities/Activities";
+import TestNotifications from "./views/TestNotifications";
 
 // Layout component for protected pages with top navbar
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -160,6 +161,18 @@ function AppRoutes() {
             <MainAppLayout>
               <Activities />
             </MainAppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Test route for push notifications */}
+      <Route
+        path="/test-notifications"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <TestNotifications />
+            </AppLayout>
           </ProtectedRoute>
         }
       />
