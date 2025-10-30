@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="30" xmlns="http://www.w3.org/2000/svg" height="30" id="screenshot-a231b381-413c-80d6-8006-3357b31bb295" viewBox="1668 6732 30 30" style="-webkit-print-color-adjust::exact" fill="none" version="1.1">
+  <g id="shape-a231b381-413c-80d6-8006-3357b31bb295" rx="0" ry="0">
+    <g id="shape-a231b381-413c-80d6-8006-3357b31bb296">
+      <g class="fills" id="fills-a231b381-413c-80d6-8006-3357b31bb296">
+        <rect rx="10" ry="10" x="1668" y="6732" transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)" width="30" height="30" style="fill-opacity: 1; fill: rgb(50, 114, 100);"/>
+      </g>
+    </g>
+    <g id="shape-a231b381-413c-80d6-8006-3357b31bb297">
+      <g class="frame-container-wrapper">
+        <g class="frame-container-blur">
+          <g class="frame-container-shadows">
+            <g fill="none">
+              <g class="fills" id="fills-a231b381-413c-80d6-8006-3357b31bb297">
+                <rect rx="0" ry="0" x="1672.0000000000036" y="6735.199999999999" width="23.999999999996362" height="25.600000000001273" transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)" class="frame-background" style=""/>
+              </g>
+              <g class="frame-children">
+                <g id="shape-a231b381-413c-80d6-8006-3357b31bb298" style="fill:#000000" rx="0" ry="0">
+                  <g id="shape-a231b381-413c-80d6-8006-3357b31bb299" style="display:none">
+                    <g class="fills" id="fills-a231b381-413c-80d6-8006-3357b31bb299">
+                      <rect rx="0" ry="0" x="1672.0000000000036" y="6735.199999999999" transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)" width="23.999999999996362" height="25.600000000001273" fill="none" style="fill:none"/>
+                    </g>
+                  </g>
+                  <g id="shape-a231b381-413c-80d6-8006-3357b31bb29a">
+                    <g class="fills" id="fills-a231b381-413c-80d6-8006-3357b31bb29a">
+                      <path d="M1681.375,6750.94140625L1690.5833740234375,6741L1692,6742.529296875L1681.375,6754L1675,6747.11767578125L1676.4166259765625,6745.58837890625L1681.375,6750.94140625Z" style="fill-opacity: 1; fill: rgb(30, 30, 30);"/>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

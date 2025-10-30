@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="30" xmlns="http://www.w3.org/2000/svg" height="30" id="screenshot-96bd6d15-2f98-80fc-8006-2ffd88623139" viewBox="-2572 5707 30 30" style="-webkit-print-color-adjust::exact" fill="none" version="1.1">
+  <g id="shape-96bd6d15-2f98-80fc-8006-2ffd88623139">
+    <g class="frame-container-wrapper">
+      <g class="frame-container-blur">
+        <g class="frame-container-shadows">
+          <g fill="none">
+            <g class="fills" id="fills-96bd6d15-2f98-80fc-8006-2ffd88623139">
+              <rect rx="0" ry="0" x="-2572" y="5707" width="30" height="30" transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)" class="frame-background"/>
+            </g>
+            <g class="frame-children">
+              <g id="shape-96bd6d15-2f98-80fc-8006-2ffd8862313b">
+                <g class="fills" id="fills-96bd6d15-2f98-80fc-8006-2ffd8862313b">
+                  <rect rx="10" ry="10" x="-2572" y="5707" transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)" width="30" height="30" style="fill-opacity: 1; fill: rgb(132, 55, 66);"/>
+                </g>
+              </g>
+              <g id="shape-96bd6d15-2f98-80fc-8006-2ffd88624096">
+                <g class="frame-container-wrapper" transform="matrix(1, 0, 0, 1, 0.001266, 0.005189)">
+                  <g class="frame-container-blur">
+                    <g class="frame-container-shadows">
+                      <g fill="none">
+                        <g class="fills" id="fills-96bd6d15-2f98-80fc-8006-2ffd88624096">
+                          <rect rx="0" ry="0" x="-2565.000000000001" y="5713.624999999999" width="16" height="17" transform="matrix(1.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000)" class="frame-background"/>
+                        </g>
+                        <g class="frame-children">
+                          <g id="shape-96bd6d15-2f98-80fc-8006-2ffd88624097" style="fill:#000000" rx="0" ry="0">
+                            <g id="shape-96bd6d15-2f98-80fc-8006-2ffd88624099">
+                              <g class="fills" id="fills-96bd6d15-2f98-80fc-8006-2ffd88624099">
+                                <path d="M-2557,5720.236328125L-2550.77783203125,5713.625L-2549,5715.513671875L-2555.22216796875,5722.125L-2549,5728.736328125L-2550.77783203125,5730.625L-2557,5724.01416015625L-2563.22216796875,5730.625L-2565,5728.736328125L-2558.77783203125,5722.125L-2565,5715.513671875L-2563.22216796875,5713.625L-2557,5720.236328125Z" style="fill-opacity: 1;"/>
+                              </g>
+                            </g>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

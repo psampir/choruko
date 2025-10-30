@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useHousehold } from "../../../contexts/HouseholdContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
+import { useIsDarkTheme } from "../../../utils/iconUtils";
 import householdService from "../../../services/householdService";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 import type { HouseholdParticipant } from "../../../services/householdService";
@@ -11,14 +12,23 @@ import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
 
-import householdDefaulIcon from "../../../assets/svg/householdDefault.svg";
-import profileDefaultIcon from "../../../assets/svg/profile-icon.svg";
-import arrowLeft from "../../../assets/svg/arrow-left.svg";
-import defineActivity from "../../../assets/svg/activities.svg";
-import delegateAdmin from "../../../assets/svg/star-emty.svg";
-import addParticipants from "../../../assets/svg/profile-icon-light.svg";
-import deleteHousehold from "../../../assets/svg/trash-bin.svg";
-import decline from "../../../assets/svg/decline.svg"
+import householdDefaultIconLight from "../../../assets/svg/light/householdDefault.svg";
+import profileDefaultIconLight from "../../../assets/svg/light/profile-icon.svg";
+import arrowLeftLight from "../../../assets/svg/light/arrow-left.svg";
+import defineActivityLight from "../../../assets/svg/light/activities.svg";
+import delegateAdminLight from "../../../assets/svg/light/star-emty.svg";
+import addParticipantsLight from "../../../assets/svg/light/profile-icon-light.svg";
+import deleteHouseholdLight from "../../../assets/svg/light/trash-bin.svg";
+import declineLight from "../../../assets/svg/light/decline.svg"
+
+import householdDefaultIconDark from "../../../assets/svg/dark/householdDefault.svg";
+import profileDefaultIconDark from "../../../assets/svg/dark/profile-icon.svg";
+import arrowLeftDark from "../../../assets/svg/dark/arrow-left.svg";
+import defineActivityDark from "../../../assets/svg/dark/activities.svg";
+import delegateAdminDark from "../../../assets/svg/dark/star-emty.svg";
+import addParticipantsDark from "../../../assets/svg/dark/profile-icon-light.svg";
+import deleteHouseholdDark from "../../../assets/svg/dark/trash-bin.svg";
+import declineDark from "../../../assets/svg/dark/decline.svg"
 
 const buttonActions = {
   defineActivity: "define_activity",
@@ -35,9 +45,21 @@ const ManageHousehold: React.FC = () => {
   const { householdInfo, participants, refreshHousehold, error: householdError, loading: householdLoading } = useHousehold();
   const { hasHousehold, checkAuth } = useAuth();
   const { user } = useUser();
+  const isDark = useIsDarkTheme();
+  
+  // Select themed icons
+  const householdDefaultIcon = isDark ? householdDefaultIconDark : householdDefaultIconLight;
+  const profileDefaultIcon = isDark ? profileDefaultIconDark : profileDefaultIconLight;
+  const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
+  const defineActivity = isDark ? defineActivityDark : defineActivityLight;
+  const delegateAdmin = isDark ? delegateAdminDark : delegateAdminLight;
+  const addParticipants = isDark ? addParticipantsDark : addParticipantsLight;
+  const deleteHousehold = isDark ? deleteHouseholdDark : deleteHouseholdLight;
+  const decline = isDark ? declineDark : declineLight;
+  
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<string>(householdDefaulIcon);
+  const [profileImage, setProfileImage] = useState<string>(householdDefaultIcon);
   const [clickedButton, setClickedButton] = useState<ButtonAction | null>(null);
   const [selectedParticipant, setSelectedParticipant] = useState<HouseholdParticipant | null>(null);
   const [selectedNewAdmin, setSelectedNewAdmin] = useState<HouseholdParticipant | null>(null);
@@ -76,7 +98,7 @@ const ManageHousehold: React.FC = () => {
   useEffect(() => {
     if (householdInfo) {
       setNameValue(householdInfo.name);
-      setProfileImage(householdInfo.profilePictureUrl || householdDefaulIcon);
+      setProfileImage(householdInfo.profilePictureUrl || householdDefaultIcon);
     }
   }, [householdInfo]);
 
@@ -136,11 +158,11 @@ const ManageHousehold: React.FC = () => {
         } else {
           showNotification(result.message || "Failed to change household picture", "error");
           // Revert preview on failure
-          setProfileImage(householdInfo?.profilePictureUrl || householdDefaulIcon);
+          setProfileImage(householdInfo?.profilePictureUrl || householdDefaultIcon);
         }
       } catch (error) {
         showNotification("An unexpected error occurred", "error");
-        setProfileImage(householdInfo?.profilePictureUrl || householdDefaulIcon);
+        setProfileImage(householdInfo?.profilePictureUrl || householdDefaultIcon);
       } finally {
         setLoading(false);
       }
