@@ -46,7 +46,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
     if (path.includes("/tasks")) return "tasks";
     if (path.includes("/expenses")) return "expenses";
     if (path.includes("/leaderboard")) return "leaderboard";
-    if (path.includes("/profile")) return "leaderboard";
+    if (path.includes("/profile")) return "profile";
     return activeTab || "leaderboard";
   };
 
