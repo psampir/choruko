@@ -35,6 +35,26 @@ const PushNotificationHandler: React.FC = () => {
       return;
     }
 
+    // Helper to trigger welcome notification
+    const triggerWelcomeNotification = async () => {
+      console.log('[PushNotificationHandler] ✅ Subscription successful! Requesting welcome notification...');
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/PushSubscription/welcome`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[PushNotificationHandler] Welcome notification response:', data);
+        } else {
+          console.error('[PushNotificationHandler] Welcome notification request failed:', response.status);
+        }
+      } catch (error) {
+        console.error('[PushNotificationHandler] Failed to request welcome notification:', error);
+      }
+    };
+
     // Auto-subscribe after login
     const attemptSubscription = async () => {
       hasTriedSubscription.current = true;
@@ -42,7 +62,14 @@ const PushNotificationHandler: React.FC = () => {
       // If permission already granted, just subscribe
       if (permission === 'granted') {
         console.log('[PushNotificationHandler] Permission already granted, subscribing...');
-        await subscribe();
+        const subscribed = await subscribe();
+        console.log('[PushNotificationHandler] Subscribe result (already granted):', subscribed);
+        
+        if (subscribed) {
+          await triggerWelcomeNotification();
+        } else {
+          console.error('[PushNotificationHandler] ❌ Subscription failed');
+        }
         return;
       }
 
@@ -58,7 +85,14 @@ const PushNotificationHandler: React.FC = () => {
       
       if (granted) {
         console.log('[PushNotificationHandler] Permission granted, subscribing...');
-        await subscribe();
+        const subscribed = await subscribe();
+        console.log('[PushNotificationHandler] Subscribe result:', subscribed);
+        
+        if (subscribed) {
+          await triggerWelcomeNotification();
+        } else {
+          console.error('[PushNotificationHandler] ❌ Subscription failed');
+        }
       } else {
         console.log('[PushNotificationHandler] Permission not granted');
       }
@@ -73,12 +107,18 @@ const PushNotificationHandler: React.FC = () => {
   }, [isAuthenticated, isSupported, permission, isSubscribed, requestPermission, subscribe]);
 
   // Handle logout - unsubscribe
+  const wasAuthenticatedRef = useRef(isAuthenticated);
+  
   useEffect(() => {
-    if (!isAuthenticated && isSubscribed) {
+    // Only unsubscribe if user WAS authenticated and is NOW not authenticated (logout)
+    if (wasAuthenticatedRef.current && !isAuthenticated && isSubscribed) {
       console.log('[PushNotificationHandler] User logged out, unsubscribing...');
       unsubscribe();
       hasTriedSubscription.current = false; // Reset for next login
     }
+    
+    // Update the ref
+    wasAuthenticatedRef.current = isAuthenticated;
   }, [isAuthenticated, isSubscribed, unsubscribe]);
 
   // This component doesn't render anything
