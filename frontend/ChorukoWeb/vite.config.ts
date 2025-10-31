@@ -62,12 +62,14 @@ export default defineConfig({
       // auto-inject a light SW registration; no offline caching
       injectRegister: 'auto',
       registerType: 'autoUpdate',
-      strategies: 'injectManifest',
+      // Use generateSW for development, injectManifest for production
+      strategies: process.env.NODE_ENV === 'development' ? 'generateSW' : 'injectManifest',
       srcDir: 'src',
       filename: 'sw.ts',
-      // Enable SW during dev so you can test installability without a full build
+      // Enable SW during dev with generateSW strategy
       devOptions: {
-        enabled: true,
+        enabled: false,
+        type: 'module',
         navigateFallback: '/' // ensure SPA routing works when offline logic added later
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],

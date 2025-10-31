@@ -1,5 +1,6 @@
-import React from 'react';
-import './Expenses.scss';
+import React from "react";
+import BottomNav from "../../../components/BottomNav/BottomNav";
+import "./Expenses.scss";
 
 const Expenses: React.FC = () => {
   return (
@@ -8,7 +9,7 @@ const Expenses: React.FC = () => {
         <h1>Household Expenses</h1>
         <p>Track and manage shared expenses</p>
       </div>
-      
+
       <div className="expenses-content">
         <div className="expenses-summary">
           <div className="summary-card">
@@ -20,7 +21,7 @@ const Expenses: React.FC = () => {
             <p className="amount">$617.28</p>
           </div>
         </div>
-        
+
         <div className="expenses-section">
           <h2>Recent Expenses</h2>
           <div className="expense-list">
@@ -32,7 +33,7 @@ const Expenses: React.FC = () => {
               </div>
               <span className="expense-amount">$85.42</span>
             </div>
-            
+
             <div className="expense-item">
               <span className="expense-icon">⚡</span>
               <div className="expense-info">
@@ -44,6 +45,8 @@ const Expenses: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <BottomNav />
     </div>
   );
 };

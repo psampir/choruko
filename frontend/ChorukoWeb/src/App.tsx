@@ -11,8 +11,9 @@ import { ActivityProvider } from "./contexts/ActivityContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
-import Tasks from "./views/Tasks/Tasks";
-import Expenses from "./views/Expenses/Expenses";
+import Tasks from "./views/Household/Tasks/Tasks";
+import AddTask from "./views/Household/Tasks/AddTask/AddTask";
+import Expenses from "./views/Household/Expenses/Expenses";
 import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
 import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
@@ -37,7 +38,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 // Layout component for main app pages with bottom navigation
 function MainAppLayout({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
-  
+
   return (
     <div className="app">
       <main className="main-content">{children}</main>
@@ -86,6 +87,15 @@ function AppRoutes() {
             <MainAppLayout>
               <Tasks />
             </MainAppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/tasks/add"
+        element={
+          <ProtectedRoute>
+            <AddTask />
           </ProtectedRoute>
         }
       />
@@ -155,7 +165,7 @@ function AppRoutes() {
         }
       />
 
-       <Route
+      <Route
         path="/activities"
         element={
           <ProtectedRoute>
