@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace ChorukoAPI.Controllers;
 [ApiController]
 [Route("api/[controller]")]
-public class PushSubscriptionController(IPushNotificationService pushService) : ControllerBase
+public class PushSubscriptionController(IPushNotificationService pushService, IServiceScopeFactory serviceScopeFactory) : ControllerBase
 {
     [HttpGet("public-key")]
     [AllowAnonymous]
@@ -73,5 +73,52 @@ public class PushSubscriptionController(IPushNotificationService pushService) : 
         await pushService.SendNotificationAsync(userId, payload);
 
         return Ok(new { message = "Test notification sent!" });
+    }
+
+    [HttpPost("welcome")]
+    [Authorize]
+    public async Task<IActionResult> SendWelcomeNotification()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { message = "User ID not found in token." });
+        }
+
+        Console.WriteLine($"[PushSubscription] Welcome notification requested for user: {userId}");
+        Console.WriteLine($"[PushSubscription] Notification will be sent in 30 seconds...");
+
+        // Schedule notification with proper scope management
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(30000); // 30 seconds
+            Console.WriteLine($"[PushSubscription] Sending welcome notification to user: {userId}");
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                title = "👋 Welcome to Choruko!",
+                body = "Thanks for logging in. Your notifications are now active!",
+                icon = "/icons/icon-192x192.png",
+                badge = "/icons/icon-96x96.png",
+                url = "/"
+            });
+
+            try
+            {
+                // Create new scope for background task
+                using var scope = serviceScopeFactory.CreateScope();
+                var scopedPushService = scope.ServiceProvider.GetRequiredService<IPushNotificationService>();
+                
+                await scopedPushService.SendNotificationAsync(userId, payload);
+                Console.WriteLine($"[PushSubscription] ✅ Welcome notification sent to user: {userId}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[PushSubscription] ❌ ERROR: {ex.Message}");
+            }
+        });
+
+        return Ok(new { message = "Welcome notification scheduled!" });
     }
 }
