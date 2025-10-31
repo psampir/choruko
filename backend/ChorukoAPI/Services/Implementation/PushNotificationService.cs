@@ -68,20 +68,36 @@ public class PushNotificationService(
 
     public async Task SendNotificationAsync(string receiverId, string payloadJson)
     {
+        _logger.LogInformation("🔔 SendNotificationAsync called for user: {ReceiverId}", receiverId);
+        
         var subscriptions = await _context.PushSubscriptions
             .Where(s => s.UserId == receiverId)
             .ToListAsync();
 
+        _logger.LogInformation("Found {Count} subscription(s) for user {ReceiverId}", subscriptions.Count, receiverId);
+
         if (!subscriptions.Any())
         {
-            _logger.LogWarning("No push subscriptions found for user {ReceiverId}", receiverId);
+            _logger.LogWarning("❌ No push subscriptions found for user {ReceiverId}", receiverId);
             return;
+        }
+
+        // Log subscription details
+        foreach (var sub in subscriptions)
+        {
+            _logger.LogInformation("  - Subscription: Endpoint={Endpoint}, Created={Created}", 
+                sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...", 
+                sub.CreatedAt);
         }
 
         var vapidDetails = new VapidDetails(
             _vapidSettings.Value.Subject,
             _vapidSettings.Value.PublicKey,
             _vapidSettings.Value.PrivateKey);
+
+        _logger.LogInformation("VAPID Details: Subject={Subject}, PublicKey={PublicKey}", 
+            _vapidSettings.Value.Subject, 
+            _vapidSettings.Value.PublicKey.Substring(0, 20) + "...");
 
         var webPushClient = new WebPushClient();
 
@@ -93,23 +109,33 @@ public class PushNotificationService(
                 var pushSubscription = new WebPush.PushSubscription(sub.Endpoint, sub.P256dhKey, sub.AuthKey);
                 try
                 {
+                    _logger.LogInformation("📤 Sending push to endpoint: {Endpoint}", sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...");
+                    
                     await webPushClient.SendNotificationAsync(pushSubscription, payloadJson, vapidDetails);
+
+                    _logger.LogInformation("✅ Successfully sent push to endpoint: {Endpoint}", sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...");
 
                     sub.LastUsedAt = DateTime.UtcNow;
                     _context.PushSubscriptions.Update(sub);
                 }
                 catch (WebPushException ex)
                 {
-                    _logger.LogError(ex, "WebPush error for endpoint {Endpoint}. Status: {StatusCode}", sub.Endpoint, ex.StatusCode);
+                    _logger.LogError(ex, "❌ WebPush error for endpoint {Endpoint}. Status: {StatusCode}, Message: {Message}", 
+                        sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...", 
+                        ex.StatusCode, 
+                        ex.Message);
 
                     if (ex.StatusCode == HttpStatusCode.Gone)
                     {
+                        _logger.LogWarning("🗑️ Subscription expired (410 Gone), will remove: {Endpoint}", sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...");
                         subscriptionsToRemove.Add(sub);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Generic error sending push to {Endpoint}", sub.Endpoint);
+                    _logger.LogError(ex, "❌ Generic error sending push to {Endpoint}: {Message}", 
+                        sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...", 
+                        ex.Message);
                 }
             })
         );
@@ -119,9 +145,10 @@ public class PushNotificationService(
         if (!subscriptionsToRemove.IsEmpty)
         {
             _context.PushSubscriptions.RemoveRange(subscriptionsToRemove);
-            _logger.LogInformation("Removed {Count} expired subscriptions.", subscriptionsToRemove.Count);
+            _logger.LogInformation("🗑️ Removed {Count} expired subscriptions.", subscriptionsToRemove.Count);
         }
 
         await _context.SaveChangesAsync();
+        _logger.LogInformation("✅ SendNotificationAsync completed for user: {ReceiverId}", receiverId);
     }
 }
