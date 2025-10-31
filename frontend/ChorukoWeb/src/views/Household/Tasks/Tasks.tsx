@@ -6,7 +6,7 @@ import BottomNav from "../../../components/BottomNav/BottomNav";
 import timerIcon from "../../../assets/svg/timer.svg";
 import Popup from "../../../components/Popup/Popup";
 import { useUser } from "../../../contexts/UserContext";
-import profileIcon from "../../../assets/svg/profile-icon.svg";
+import profileIcon from "../../../assets/svg/light/profile-icon.svg";
 import starIcon from "../../../assets/svg/star-black.svg";
 import timer from "../../../assets/svg/timer.svg";
 import pencilLight from "../../../assets/svg/pencil-light.svg";
@@ -302,6 +302,7 @@ const Tasks: React.FC = () => {
               )
             : [],
           timeLeft: timeLeft,
+          deadline: newTask.deadline,
           status: "todo",
           author:
             newTask.author && typeof newTask.author === "object"

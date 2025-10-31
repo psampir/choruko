@@ -5,11 +5,12 @@ import "./AddTask.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import NavbarMobile from "../../../../components/NavbarMobile";
-import arrowLeftIcon from "../../../../assets/svg/arrow-left.svg";
+import arrowLeftIcon from "../../../../assets/svg/light/arrow-left.svg";
 import Popup from "../../../../components/Popup/Popup";
+import ErrorMessage from "../../../../components/ErrorMessage";
 
-import checkIcon from "../../../../assets/svg/check.svg";
-import star from "../../../../assets/svg/star.svg";
+import checkIcon from "../../../../assets/svg/light/check.svg";
+import star from "../../../../assets/svg/light/star.svg";
 
 // Activity type definition
 interface Activity {
@@ -40,6 +41,7 @@ const AddTask: React.FC = () => {
   const [selectedAssignees, setSelectedAssignees] = useState<number[]>([]);
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Pre-fill form when in edit mode
   useEffect(() => {
@@ -130,12 +132,13 @@ const AddTask: React.FC = () => {
 
   const handleAddTask = () => {
     // Validate that required fields are filled
-    if (
-      !taskDescription ||
-      !selectedActivity ||
-      selectedAssignees.length === 0
-    ) {
-      console.log("Please fill all required fields");
+    const missingFields = [];
+    if (!taskDescription) missingFields.push("Task description");
+    if (!selectedActivity) missingFields.push("Activity");
+    if (selectedAssignees.length === 0) missingFields.push("Assignees");
+
+    if (missingFields.length > 0) {
+      setErrorMessage(`Please fill in: ${missingFields.join(", ")}`);
       return;
     }
 
@@ -158,6 +161,9 @@ const AddTask: React.FC = () => {
         author: editTask.author,
       };
 
+      // Clear error message on successful submission
+      setErrorMessage("");
+
       // Navigate back to tasks with the updated task data
       navigate("/tasks", { state: { updatedTask } });
     } else {
@@ -174,6 +180,9 @@ const AddTask: React.FC = () => {
             }
           : null,
       };
+
+      // Clear error message on successful submission
+      setErrorMessage("");
 
       // Navigate back to tasks with the new task data
       navigate("/tasks", { state: { newTask } });
@@ -194,6 +203,12 @@ const AddTask: React.FC = () => {
   return (
     <div className="add-task">
       <NavbarMobile />
+
+      <ErrorMessage
+        message={errorMessage}
+        onClose={() => setErrorMessage("")}
+        variant="overlay"
+      />
 
       <div className="add-task__container">
         {/* Header */}

@@ -98,6 +98,7 @@ const Input: React.FC<InputProps> = ({
             wrapperClassName="datepicker-wrapper"
             calendarClassName="datepicker-calendar"
             popperClassName="datepicker-popper"
+            popperPlacement="bottom"
           />
           <span
             className="input__date"
