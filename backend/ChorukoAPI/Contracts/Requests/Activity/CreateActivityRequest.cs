@@ -10,6 +10,6 @@ public class CreateActivityRequest
     public string Name { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Points awarded is required")]
-    [Range(1, 99, ErrorMessage = "Points awarded must be between {1} and {2}.")]
+    [Range(1, 100, ErrorMessage = "Points awarded must be at least {2} characters long.")]
     public int PointsAwarded { get; set; }
 }

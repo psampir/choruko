@@ -22,7 +22,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
     {
         var result = await _householdService.GetHouseholdInfoAsync();
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("User info");
     }
 
 
@@ -45,7 +45,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         
         var result = await _householdService.CreateHouseholdAsync(request, userId);
         
-        return result.ToCreatedApiResponse();
+        return result.ToCreatedApiResponse("Create household");
     }
     
     [HttpDelete("{userIdToDelete}/remove")]
@@ -61,7 +61,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         
         var result = await _householdService.DeleteUserFromHouseholdAsync(userIdToDelete, currentUserId);
         
-        return result.ToApiResponse();
+        return result.ToApiResponse("Delete participant");
     }
     
     [HttpPost("{userIdToAdd}/add")]
@@ -72,7 +72,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         
         var result = await _householdService.AddUserToHouseholdAsync(userIdToAdd, currentUserId);
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("Add participant");
     }
     
     [HttpDelete("delete")]
@@ -88,7 +88,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         var result = await _householdService.DeleteHouseholdAsync(userId);
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("Delete household");
     }
     
     [HttpPatch("rename")]
@@ -109,7 +109,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         var result = await _householdService.RenameHouseholdAsync(userId, request.NewName);
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("Rename household");
     }
     
     [HttpPost("leave")]
@@ -125,7 +125,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         var result = await _householdService.LeaveHouseholdAsync(userId);
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("Leave Household");
     }
     
     [HttpPatch("change-picture")]
@@ -146,7 +146,20 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         var result = await _householdService.ChangeHouseholdPictureAsync(request, userId);
 
-        return result.ToApiResponse();
+        if (!result.IsSuccessful && result.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+        
+        if (!result.IsSuccessful && (result.StatusCode == System.Net.HttpStatusCode.RequestEntityTooLarge 
+            || result.StatusCode == System.Net.HttpStatusCode.UnsupportedMediaType))
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+
+        return result.ToApiResponse("Change household picture");
     }
     
     [HttpPatch("{newAdminId}/set-admin")]
@@ -162,6 +175,6 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         
         var result = await _householdService.SetHouseholdAdminAsync(userId, newAdminId);
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("Set household admin");
     }
 }

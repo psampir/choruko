@@ -44,7 +44,7 @@
     }
 
     &--red {
-      background-color: #ffb9b9;
+      background-color: var(--color-error-bg-secondary);
     }
 
     .popup-title {
@@ -62,8 +62,7 @@
       right: var(--spacing-md);
       width: var(--spacing-3xl);
       height: var(--spacing-3xl);
-      background: url("../../assets/svg/close-icon.svg") no-repeat
-        center/contain;
+      background: url("../../assets/svg/close-icon.svg") no-repeat center/contain;
       cursor: pointer;
       transition: var(--transition-fast);
       border-radius: var(--border-radius-sm);
@@ -125,51 +124,17 @@
       &--primary {
         background-color: var(--color-secondary);
         color: var(--color-white);
-
-        &:hover:not(:disabled) {
-          background-color: var(--color-primary);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(85, 173, 155, 0.3);
-        }
-
-        &:active:not(:disabled) {
-          transform: translateY(0);
-          box-shadow: 0 2px 6px rgba(85, 173, 155, 0.3);
-        }
       }
 
       &--secondary {
         background-color: transparent;
         color: var(--color-secondary);
         border: 2px solid var(--color-secondary);
-
-        &:hover:not(:disabled) {
-          background-color: var(--color-secondary);
-          color: var(--color-white);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(85, 173, 155, 0.2);
-        }
-
-        &:active:not(:disabled) {
-          transform: translateY(0);
-          box-shadow: 0 2px 6px rgba(85, 173, 155, 0.2);
-        }
       }
 
       &--danger {
-        background-color: #ff4444;
+        background-color: var(--color-error-bg);
         color: var(--color-white);
-
-        &:hover:not(:disabled) {
-          background-color: #ff3333;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
-        }
-
-        &:active:not(:disabled) {
-          transform: translateY(0);
-          box-shadow: 0 2px 6px rgba(255, 68, 68, 0.3);
-        }
       }
     }
   }
@@ -178,7 +143,6 @@
 // Responsive design for smaller screens
 @media (max-width: 480px) {
   .popup-container .popup {
-
     .popup-actions {
       flex-direction: column;
       align-items: center;

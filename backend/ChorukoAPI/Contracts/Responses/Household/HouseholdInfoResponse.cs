@@ -8,4 +8,4 @@ public record HouseholdInfoResponse(
     string AdminLastName,
     int ParticipantsCount,
     string? ProfilePictureUrl,
-    List<HouseholdMemberResponse> Members);
+    List<HouseholdParticipantResponse> Participants);

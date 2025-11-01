@@ -23,7 +23,7 @@ public class UserController(IUserService _userService) : ControllerBase
     {
         var result = await _userService.GetUserInfoAsync();
 
-        return result.ToApiResponse();
+        return result.ToApiResponse("UserInfo");
     }
     
     [HttpPut("change-names")]
@@ -43,7 +43,7 @@ public class UserController(IUserService _userService) : ControllerBase
 
         var result = await _userService.ChangeUserNamesAsync(request, userId);
         
-        return result.ToApiResponse();
+        return result.ToApiResponse("NewName");
     }
     
     [HttpPut("change-picture")]
@@ -64,7 +64,20 @@ public class UserController(IUserService _userService) : ControllerBase
 
         var result = await _userService.ChangeUserProfilePictureAsync(request, userId);
         
-        return result.ToApiResponse();
+        if (!result.IsSuccessful && result.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+        
+        if (!result.IsSuccessful && (result.StatusCode == System.Net.HttpStatusCode.RequestEntityTooLarge 
+            || result.StatusCode == System.Net.HttpStatusCode.UnsupportedMediaType))
+        {
+            ModelState.AddModelError("ProfilePicture", result.Message);
+            return ValidationProblem(ModelState);
+        }
+        
+        return result.ToApiResponse("ProfilePicture");
     }
     
     [HttpDelete("delete-self")]
@@ -79,7 +92,7 @@ public class UserController(IUserService _userService) : ControllerBase
         
         var result = await _userService.DeleteSelfAsync(userId);
         
-        return result.ToApiResponse();
+        return result.ToApiResponse("Delete user");
     }
     
     [HttpPut("change-password")]
@@ -113,6 +126,6 @@ public class UserController(IUserService _userService) : ControllerBase
             }
         }
         
-        return result.ToApiResponse();
+        return result.ToApiResponse("NewPassword");
     }
 }

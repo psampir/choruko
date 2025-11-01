@@ -1,3 +1,5 @@
+import { parseErrorMessage } from "../utils/errorUtils";
+
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface ChangeNamesData {
@@ -85,7 +87,7 @@ class UserService {
         return { success: true, message: "Profile picture changed successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to change profile picture" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to change profile picture" };
       }
     } catch (error) {
       console.error("Error changing profile picture:", error);
