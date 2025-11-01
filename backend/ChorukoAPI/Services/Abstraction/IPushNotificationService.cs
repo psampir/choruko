@@ -1,14 +1,16 @@
-﻿using ChorukoAPI.Contracts.Requests.Notifications;
+﻿using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Requests.Notifications;
+using ChorukoAPI.Contracts.Responses;
 
 namespace ChorukoAPI.Services.Abstraction;
 
 public interface IPushNotificationService
 {
-    Task<string> GetPublicKeyAsync();
+    Task<ServiceResponse<string>> GetPublicKeyAsync();
 
-    Task SubscribeAsync(string userId, PushSubscriptionRequest request);
+    Task<ServiceResponse<OperationResultDto>> SubscribeAsync(string userId, PushSubscriptionRequest request);
 
-    Task UnsubscribeAsync(string userId, string endpoint);
+    Task<ServiceResponse<OperationResultDto>> UnsubscribeAsync(string userId, string endpoint);
 
-    Task SendNotificationAsync(string receiverId, string payloadJson);
+    Task<ServiceResponse<OperationResultDto>> SendNotificationAsync(string receiverId, string payloadJson);
 }

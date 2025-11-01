@@ -1,6 +1,8 @@
 ﻿using ChorukoAPI.Contracts;
 using ChorukoAPI.Contracts.Requests.Notifications;
+using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Data;
+using ChorukoAPI.Extensions;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +19,17 @@ public class PushNotificationService(
     IOptions<VapidSettings> _vapidSettings,
     ILogger<PushNotificationService> _logger) : IPushNotificationService
 {
-    public Task<string> GetPublicKeyAsync()
+    public Task<ServiceResponse<string>> GetPublicKeyAsync()
     {
-        return Task.FromResult(_vapidSettings.Value.PublicKey);
+        var result = _vapidSettings.Value.PublicKey;
+
+        if (string.IsNullOrEmpty(result))
+            return Task.FromResult(ServiceResponseFactory.Error("", "No keys were found"));
+
+        return Task.FromResult(ServiceResponseFactory.Success(result));
     }
 
-    public async Task SubscribeAsync(string userId, PushSubscriptionRequest request)
+    public async Task<ServiceResponse<OperationResultDto>> SubscribeAsync(string userId, PushSubscriptionRequest request)
     {
         var existingSubscription = await _context.PushSubscriptions
             .FirstOrDefaultAsync(s => s.Endpoint == request.Endpoint);
@@ -51,9 +58,21 @@ public class PushNotificationService(
         }
 
         await _context.SaveChangesAsync();
+
+        var result = new OperationResultDto
+        {
+            Operation = "Subscribe",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>()
+            {
+                { "UserId", userId },
+            }
+        };
+
+        return ServiceResponseFactory.Success(result, "User was successfully subscribed");
     }
 
-    public async Task UnsubscribeAsync(string userId, string endpoint)
+    public async Task<ServiceResponse<OperationResultDto>> UnsubscribeAsync(string userId, string endpoint)
     {
         var subscription = await _context.PushSubscriptions
             .FirstOrDefaultAsync(s => s.Endpoint == endpoint && s.UserId == userId);
@@ -64,9 +83,21 @@ public class PushNotificationService(
             await _context.SaveChangesAsync();
             _logger.LogInformation("Push subscription removed for user {UserId}", userId);
         }
+
+        var result = new OperationResultDto
+        {
+            Operation = "Unsubscribe",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>()
+            {
+                { "UserId", userId },
+            }
+        };
+
+        return ServiceResponseFactory.Success(result, "User was successfully unsubscribed");
     }
 
-    public async Task SendNotificationAsync(string receiverId, string payloadJson)
+    public async Task<ServiceResponse<OperationResultDto>> SendNotificationAsync(string receiverId, string payloadJson)
     {
         _logger.LogInformation("🔔 SendNotificationAsync called for user: {ReceiverId}", receiverId);
         
@@ -79,7 +110,7 @@ public class PushNotificationService(
         if (!subscriptions.Any())
         {
             _logger.LogWarning("❌ No push subscriptions found for user {ReceiverId}", receiverId);
-            return;
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "No push subscriptions found");
         }
 
         // Log subscription details
@@ -150,5 +181,17 @@ public class PushNotificationService(
 
         await _context.SaveChangesAsync();
         _logger.LogInformation("✅ SendNotificationAsync completed for user: {ReceiverId}", receiverId);
+
+        var result = new OperationResultDto
+        {
+            Operation = "Subscribe",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>()
+            {
+                { "ReceiverId", receiverId },
+            }
+        };
+
+        return ServiceResponseFactory.Success(result, "Notification was successfully sent");
     }
 }

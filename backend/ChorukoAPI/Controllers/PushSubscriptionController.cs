@@ -1,4 +1,5 @@
 ﻿using ChorukoAPI.Contracts.Requests.Notifications;
+using ChorukoAPI.Mappers;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +14,9 @@ public class PushSubscriptionController(IPushNotificationService pushService, IS
     [AllowAnonymous]
     public async Task<IActionResult> GetPublicKey()
     {
-        var publicKey = await pushService.GetPublicKeyAsync();
+        var result = await pushService.GetPublicKeyAsync();
 
-        return Ok(new { publicKey });
+        return result.ToApiResponse();
     }
 
     [HttpPost("subscribe")]
@@ -29,9 +30,9 @@ public class PushSubscriptionController(IPushNotificationService pushService, IS
             return Unauthorized(new { message = "User ID not found in token." });
         }
 
-        await pushService.SubscribeAsync(userId, dto);
+        var result = await pushService.SubscribeAsync(userId, dto);
 
-        return Ok(new { message = "Subscription saved." });
+        return result.ToApiResponse();
     }
 
     [HttpDelete("unsubscribe")]
@@ -45,9 +46,9 @@ public class PushSubscriptionController(IPushNotificationService pushService, IS
             return Unauthorized(new { message = "User ID not found in token." });
         }
 
-        await pushService.UnsubscribeAsync(userId, request.Endpoint);
+        var result = await pushService.UnsubscribeAsync(userId, request.Endpoint);
 
-        return Ok(new { message = "Subscription removed." });
+        return result.ToApiResponse();
     }
 
     [HttpPost("test")]
@@ -70,9 +71,9 @@ public class PushSubscriptionController(IPushNotificationService pushService, IS
             url = "/test-notifications"
         });
 
-        await pushService.SendNotificationAsync(userId, payload);
+        var result = await pushService.SendNotificationAsync(userId, payload);
 
-        return Ok(new { message = "Test notification sent!" });
+        return result.ToApiResponse();
     }
 
     [HttpPost("welcome")]
