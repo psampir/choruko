@@ -1,11 +1,22 @@
 import "./BottomNav.scss";
 import { useNavigate, useLocation } from "react-router-dom";
-import houseBlackIcon from "../../assets/svg/house-black.svg";
-import houseBlackFillIcon from "../../assets/svg/house-black-fill.svg";
-import taskIcon from "../../assets/svg/task.svg";
-import taskFillIcon from "../../assets/svg/task-fill.svg";
-import settlementsIcon from "../../assets/svg/expenses.svg";
-import settlementsFillIcon from "../../assets/svg/expenses-fill.svg";
+import { useIsDarkTheme } from "../../utils/iconUtils";
+
+// Light theme icons
+import houseBlackIconLight from "../../assets/svg/light/house-black.svg";
+import houseBlackFillIconLight from "../../assets/svg/light/house-black-fill.svg";
+import taskIconLight from "../../assets/svg/light/task.svg";
+import taskFillIconLight from "../../assets/svg/light/task-fill.svg";
+import settlementsIconLight from "../../assets/svg/light/expenses.svg";
+import settlementsFillIconLight from "../../assets/svg/light/expenses-fill.svg";
+
+// Dark theme icons
+import houseBlackIconDark from "../../assets/svg/dark/house-black.svg";
+import houseBlackFillIconDark from "../../assets/svg/dark/house-black-fill.svg";
+import taskIconDark from "../../assets/svg/dark/task.svg";
+import taskFillIconDark from "../../assets/svg/dark/task-fill.svg";
+import settlementsIconDark from "../../assets/svg/dark/expenses.svg";
+import settlementsFillIconDark from "../../assets/svg/dark/expenses-fill.svg";
 
 interface BottomNavProps {
   activeTab?: string;
@@ -15,14 +26,29 @@ interface BottomNavProps {
 const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isDark = useIsDarkTheme();
+
+  // Select themed icons
+  const houseBlackIcon = isDark ? houseBlackIconDark : houseBlackIconLight;
+  const houseBlackFillIcon = isDark
+    ? houseBlackFillIconDark
+    : houseBlackFillIconLight;
+  const taskIcon = isDark ? taskIconDark : taskIconLight;
+  const taskFillIcon = isDark ? taskFillIconDark : taskFillIconLight;
+  const settlementsIcon = isDark ? settlementsIconDark : settlementsIconLight;
+  const settlementsFillIcon = isDark
+    ? settlementsFillIconDark
+    : settlementsFillIconLight;
 
   // Determine active tab from current route
   const getCurrentTab = () => {
     const path = location.pathname;
     if (path.includes("/tasks")) return "tasks";
     if (path.includes("/settlements")) return "settlements";
-    if (path.includes("/profile")) return "home";
-    return activeTab || "home";
+    if (path.includes("/expenses")) return "settlements";
+    if (path.includes("/leaderboard")) return "leaderboard";
+    if (path.includes("/profile")) return "leaderboard";
+    return activeTab || "leaderboard";
   };
 
   const currentTab = getCurrentTab();
@@ -35,7 +61,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
       route: "/tasks",
     },
     {
-      id: "home",
+      id: "leaderboard",
       icon: houseBlackIcon,
       iconActive: houseBlackFillIcon,
       label: "Home",
@@ -45,7 +71,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
       id: "settlements",
       icon: settlementsIcon,
       iconActive: settlementsFillIcon,
-      label: "settlements",
+      label: "Settlements",
       route: "/settlements",
     },
   ];

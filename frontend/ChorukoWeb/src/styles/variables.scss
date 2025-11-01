@@ -1,6 +1,6 @@
 // Color Variables
 :root {
-  // Primary Colors
+  // Light Mode Colors
   --color-primary: #95d2b3;
   --color-secondary: #55ad9b;
   --color-secondary-half-tr: #56ae9c80;
@@ -11,8 +11,20 @@
   --color-white: #ffffff;
   --color-black: #000000;
   --color-error-bg: #ff7285;
-  --color-error-bg-secondary: #ffcaca;
-  --color-error-bg-tr: #ff7285b0;
+  --color-error-bg-secondary: #ffb9b9;
+
+  // Dark Mode Colors
+  --color-dark-primary: #397B5A;
+  --color-dark-secondary: #327264;
+  --color-dark-secondary-half-tr: #3272647b;
+  --color-dark-background: #000000;
+  --color-dark-background-secondary: #1E1E1E;
+  --color-dark-text-primary: #e8e9ea;
+  --color-dark-text-secondary: #c3c3c3;
+  --color-dark-white: #000000;
+  --color-dark-black: #ffffff;
+  --color-dark-error-bg: #843742;
+  --color-dark-error-bg-secondary: #4A1E24;
 
   // UI Colors
   --color-border: #e0e0e0;
@@ -55,7 +67,7 @@
   // Layout
   --navbar-height: 70px;
   --border-radius-sm: 8px;
-  --border-radius-standart: 10px;
+  --border-radius-standard: 10px;
   --border-radius-md: 12px;
   --border-radius-lg: 15px;
   --border-radius-xl: 20px;

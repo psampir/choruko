@@ -48,6 +48,14 @@ body {
     transform: translateY(0);
   }
 
+  &--error {
+    background: var(--color-error-bg) !important;
+  }
+
+  &--success {
+    background: var(--color-secondary) !important;
+  }
+
   span {
     display: block;
     color: var(--color-background);
@@ -65,7 +73,6 @@ body {
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-2xl);
-  min-height: 100vh;
 
   .input__wrapper {
     width: 280px;
@@ -80,9 +87,6 @@ body {
     font-size: var(--font-size-h4);
   }
 
-  & button {
-    width: 200px;
-  }
 
   &__title {
     font-size: var(--font-size-h2);

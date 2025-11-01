@@ -36,17 +36,9 @@
     height: 120px;
     border-radius: var(--border-radius-full);
     background: var(--color-white);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    object-fit: cover;
     margin-bottom: var(--spacing-lg);
-    overflow: hidden;
-
-    img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-    }
+    border: 2px solid var(--color-border);
   }
 
   .household-name {
@@ -68,25 +60,26 @@
 .time-filter {
   margin: 0 0 var(--spacing-4xl) 0;
   text-align: center;
+
   .dropdown__container {
     background: var(--color-background-secondary);
-    box-shadow: inset 3px 0 0 0 var(--color-secondary), inset -3px 0 0 0 var(--color-secondary); 
-    border-radius: var(--border-radius-standart);
+    box-shadow: inset 3px 0 0 0 var(--color-secondary), inset -3px 0 0 0 var(--color-secondary);
+    border-radius: var(--border-radius-standard);
 
     &--open {
-      border-radius: var(--border-radius-standart) var(--border-radius-standart)
-        0 0;
+      border-radius: var(--border-radius-standard) var(--border-radius-standard) 0 0;
     }
   }
+
   .dropdown {
     position: relative;
     background: var(--color-secondary);
-    border-radius: var(--border-radius-standart);
+    border-radius: var(--border-radius-standard);
     cursor: pointer;
     text-align: center;
 
     &--open {
-      border-radius: var(--border-radius-standart);
+      border-radius: var(--border-radius-standard);
     }
 
     &__selected {
@@ -126,7 +119,8 @@
       border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
       box-shadow: 0 4px 6px var(--color-shadow);
       z-index: var(--z-dropdown);
-      overflow: hidden; /* Clip rounded corners properly */
+      overflow: hidden;
+      /* Clip rounded corners properly */
     }
 
     &__option {
@@ -158,8 +152,7 @@
       }
 
       &:last-child {
-        border-radius: 0 0 var(--border-radius-standart)
-          var(--border-radius-standart);
+        border-radius: 0 0 var(--border-radius-standard) var(--border-radius-standard);
         border-bottom: 3px solid var(--color-secondary);
       }
 
@@ -182,9 +175,7 @@
   --dynamic-participant-height: 60px;
   --max-visible-participants: 3;
 
-  max-height: calc(
-    var(--dynamic-participant-height) * var(--max-visible-participants)
-  );
+  max-height: calc(var(--dynamic-participant-height) * var(--max-visible-participants));
 
 
 
@@ -206,34 +197,34 @@
     /* Better touch responsiveness */
     touch-action: pan-y;
 
-      overflow-y: auto;
-  scroll-behavior: smooth;
+    overflow-y: auto;
+    scroll-behavior: smooth;
 
-  /* Custom scrollbar styling */
-  &::-webkit-scrollbar {
-    width: 12px;
-    background-color: #f5f5f5;
-  }
+    /* Custom scrollbar styling */
+    &::-webkit-scrollbar {
+      width: 12px;
+      background-color: var(--color-background-secondary);
+    }
 
-  &::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    background-color: transparent;
-  }
+    &::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      background-color: transparent;
+    }
 
-  &::-webkit-scrollbar-thumb {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    background-color: #d62929;
-    border-radius: 10px;
-  }
+    &::-webkit-scrollbar-thumb {
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      background-color: var(--color-error-bg);
+      border-radius: 10px;
+    }
 
-  &::-webkit-scrollbar-corner {
-    display: none;
-  }
+    &::-webkit-scrollbar-corner {
+      display: none;
+    }
 
-  /* Firefox - hide track */
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-secondary) transparent;
+    /* Firefox - hide track */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-secondary) transparent;
 
     /* Enhanced scrollbar styling for touch */
     &::-webkit-scrollbar {
@@ -249,7 +240,8 @@
 
     &::-webkit-scrollbar-thumb {
       background-color: var(--color-secondary);
-      border-radius: 10px; /* Increased for more visible rounded corners */
+      border-radius: 10px;
+      /* Increased for more visible rounded corners */
 
       /* Remove border that might interfere with rounded corners */
       border: none;
@@ -277,11 +269,11 @@
     /* Firefox scrollbar styling */
     scrollbar-width: thin;
     scrollbar-color: var(--color-secondary) rgba(0, 0, 0, 0.1);
+
     .participant {
       display: flex;
       align-items: center;
       padding: var(--spacing-md) 0;
-      border-bottom: 1px solid var(--color-overlay-dark);
       position: relative;
 
       &::after {
@@ -346,6 +338,14 @@
           color: var(--color-background);
         }
       }
+    }
+
+    .loading-message,
+    .empty-message {
+      padding: var(--spacing-2xl);
+      text-align: center;
+      font-size: var(--font-size-body);
+      color: var(--color-text-secondary);
     }
   }
 }

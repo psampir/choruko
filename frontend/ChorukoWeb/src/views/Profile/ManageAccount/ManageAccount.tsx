@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
+import { useIsDarkTheme } from "../../../utils/iconUtils";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
-import ProfileDefaultIcon from "../../../assets/svg/profile-icon-light.svg";
-import arrowLeft from "../../../assets/svg/arrow-left.svg";
+import ProfileDefaultIconLight from "../../../assets/svg/light/profile-icon-light.svg";
+import arrowLeftLight from "../../../assets/svg/light/arrow-left.svg";
+import ProfileDefaultIconDark from "../../../assets/svg/dark/profile-icon-light.svg";
+import arrowLeftDark from "../../../assets/svg/dark/arrow-left.svg";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserNames, updatePassword, updateProfilePicture, deleteAccount, loading: userLoading } = useUser();
+  const isDark = useIsDarkTheme();
+  
+  const ProfileDefaultIcon = isDark ? ProfileDefaultIconDark : ProfileDefaultIconLight;
+  const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
+  
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
@@ -36,16 +44,18 @@ const ManageAccount: React.FC = () => {
   const [notification, setNotification] = useState<{
     message: string;
     isVisible: boolean;
+    type: "success" | "error";
   }>({
     message: "",
     isVisible: false,
+    type: "success",
   });
 
-  const showNotification = (message: string) => {
-    setNotification({ message, isVisible: true });
+  const showNotification = (message: string, type: "success" | "error" = "success") => {
+    setNotification({ message, isVisible: true, type });
 
     setTimeout(() => {
-      setNotification({ message: "", isVisible: false });
+      setNotification({ message: "", isVisible: false, type: "success" });
     }, 3000);
   };
 
@@ -54,16 +64,16 @@ const ManageAccount: React.FC = () => {
     e.stopPropagation();
 
     if (!firstNameValue.trim() || !lastNameValue.trim()) {
-      showNotification("Please enter both first and last name");
+      showNotification("Please enter both first and last name", "error");
       return;
     }
 
     const result = await updateUserNames(firstNameValue, lastNameValue);
     
     if (result.success) {
-      showNotification("Your name has been changed successfully");
+      showNotification("Your name has been changed successfully", "success");
     } else {
-      showNotification(result.message || "Failed to change name");
+      showNotification(result.message || "Failed to change name", "error");
     }
   };
 
@@ -72,24 +82,24 @@ const ManageAccount: React.FC = () => {
     e.stopPropagation();
 
     if (!newPassword || !confirmPassword) {
-      showNotification("Please fill in all password fields");
+      showNotification("Please fill in all password fields", "error");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      showNotification("New passwords do not match");
+      showNotification("New passwords do not match", "error");
       return;
     }
 
     const result = await updatePassword(newPassword, confirmPassword);
     
     if (result.success) {
-      showNotification("Your password has been changed successfully");
+      showNotification("Your password has been changed successfully", "success");
       // Clear password fields after successful change
       setNewPassword("");
       setConfirmPassword("");
     } else {
-      showNotification(result.message || "Failed to change password");
+      showNotification(result.message || "Failed to change password", "error");
     }
   };
 
@@ -107,9 +117,9 @@ const ManageAccount: React.FC = () => {
           setProfileImageSrc(result);
         };
         reader.readAsDataURL(file);
-        showNotification("Profile picture updated successfully");
+        showNotification("Profile picture updated successfully", "success");
       } else {
-        showNotification(result.message || "Failed to update profile picture");
+        showNotification(result.message || "Failed to update profile picture", "error");
       }
     }
   };
@@ -123,9 +133,9 @@ const ManageAccount: React.FC = () => {
     
     if (result.success) {
       // User will be logged out and redirected by the deleteAccount function
-      showNotification("Account deleted successfully");
+      showNotification("Account deleted successfully", "success");
     } else {
-      showNotification(result.message || "Failed to delete account");
+      showNotification(result.message || "Failed to delete account", "error");
       setOpenPopup(false);
     }
   };
@@ -139,7 +149,7 @@ const ManageAccount: React.FC = () => {
         onClick={() => navigate(-1)}
       />
       <div
-        className={`notification-bar ${notification.isVisible ? "notification-bar--visible" : ""
+        className={`notification-bar notification-bar--${notification.type} ${notification.isVisible ? "notification-bar--visible" : ""
           }`}
       >
         <span>{notification.message}</span>
