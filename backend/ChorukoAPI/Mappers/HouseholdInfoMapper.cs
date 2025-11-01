@@ -8,17 +8,17 @@ public class HouseholdInfoMapper : IMapper<Household, HouseholdInfoResponse>
 {
     public async Task<HouseholdInfoResponse> Map(Household source)
     {
-        var participants = source.Participants?
-            .Select(p => new HouseholdParticipantResponse(
+        var members = source.Participants?
+            .Select(p => new HouseholdMemberResponse(
                 p.Id,
                 p.FirstName,
                 p.LastName,
                 p.ProfilePicturePath,
-                0,
-                0,
-                0
+                p.PointsCurrentMonth,
+                p.PointsCurrentYear,
+                p.PointsAllTime
             ))
-            .ToList() ?? new List<HouseholdParticipantResponse>();
+            .ToList() ?? new List<HouseholdMemberResponse>();
 
         return new HouseholdInfoResponse(
             source.Id,
@@ -28,6 +28,6 @@ public class HouseholdInfoMapper : IMapper<Household, HouseholdInfoResponse>
             source.Admin.LastName,
             source.Participants?.Count ?? 0,
             source.ProfilePicturePath,
-            participants);
+            members);
     }
 }

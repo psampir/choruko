@@ -111,9 +111,6 @@ namespace ChorukoAPI.Migrations
                     b.Property<int>("ParticipantsAmount")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Reward")
-                        .HasColumnType("integer");
-
                     b.Property<byte>("Status")
                         .HasColumnType("smallint");
 

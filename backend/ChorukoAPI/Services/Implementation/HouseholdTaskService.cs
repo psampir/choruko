@@ -63,7 +63,6 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
                 Status = Models.TaskStatus.Unassigned,
                 ParticipantsAmount = request.ParticipantsAmount,
-                Reward = request.Reward,
                 Name = request.Name,
                 Description = request.Description
             };
@@ -111,7 +110,6 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             householdTask.ActivityId = request.ActivityId;
             householdTask.DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified);
             householdTask.ParticipantsAmount = request.ParticipantsAmount;
-            householdTask.Reward = request.Reward;
             householdTask.Name = request.Name;
             householdTask.Description = request.Description;
 
@@ -251,14 +249,15 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
     {
         var householdTask = await _context.HouseholdTasks
             .Include(t => t.Assignees) 
+            .Include(t => t.Activity)
             .FirstOrDefaultAsync(h => h.Id == taskId);
         
         if (householdTask == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
-
-        int rewardPoints = householdTask.Reward;
+        
+        int rewardPoints = householdTask.Activity.PointsAwarded;
         
         foreach (var assignee in householdTask.Assignees)
         {
@@ -270,7 +269,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         }
         
         householdTask.Status = Models.TaskStatus.Completed;
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         var response = new OperationResultDto
         {
@@ -290,6 +289,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
     {
         var householdTask = await _context.HouseholdTasks
             .Include(h => h.Assignees)
+            .Include(h => h.Activity)
             .FirstOrDefaultAsync(h => h.Id == taskId);
         
         if (householdTask == null)
@@ -302,7 +302,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             return ServiceResponseFactory.Error<OperationResultDto>(null, $"Task is not currently marked as completed.", HttpStatusCode.BadRequest);
         }
         
-        int rewardPoints = householdTask.Reward;
+        int rewardPoints = householdTask.Activity.PointsAwarded;
 
         if (householdTask.Assignees != null && householdTask.Assignees.Count > 0)
         {
