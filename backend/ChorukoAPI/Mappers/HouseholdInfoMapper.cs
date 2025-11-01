@@ -14,7 +14,9 @@ public class HouseholdInfoMapper : IMapper<Household, HouseholdInfoResponse>
                 p.FirstName,
                 p.LastName,
                 p.ProfilePicturePath,
-                0 // TODO: Calculate actual points from completed tasks/activities
+                p.PointsCurrentMonth,
+                p.PointsCurrentYear,
+                p.PointsAllTime
             ))
             .ToList() ?? new List<HouseholdMemberResponse>();
 

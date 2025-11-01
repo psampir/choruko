@@ -42,12 +42,7 @@ public class HouseholdTask
     [Range(1, 100)]
     [Column(TypeName = "integer")]
     public int ParticipantsAmount { get; set; }
-
-    [Required]
-    [Range(1, 100)]
-    [Column(TypeName = "integer")]
-    public int Reward { get; set; }
-
+    
     [Required]
     [StringLength(200)]
     [Column(TypeName = "varchar(200)")]
