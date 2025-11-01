@@ -8,6 +8,7 @@ using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.Net;
 
 namespace ChorukoAPI.Services.Implementation;
@@ -15,7 +16,8 @@ namespace ChorukoAPI.Services.Implementation;
 public class SettlementService(
     DataContext _context,
     IMapper<Settlement, SettlementResponse> _mapper,
-    IMapper<Settlement, SettlementWithoutUsersResponse> mapper) : ISettlementService
+    IMapper<Settlement, SettlementWithoutUsersResponse> mapper,
+    IPushNotificationService pushNotificationService) : ISettlementService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateSettlement(string householdId, CreateSettlementRequest request, string userId)
     {
@@ -85,6 +87,24 @@ public class SettlementService(
 
             _context.Settlements.Add(settlement);
             await _context.SaveChangesAsync();
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                title = "👋 You've been added to settlement!",
+                body = $"{request.Description}, amount:{request.Amount}!",
+                icon = "/icons/icon-192x192.png",
+                badge = "/icons/icon-96x96.png",
+                url = "/"
+            });
+
+            var notificationTasks = unsettledUsers
+                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                .ToList();
+
+            if (notificationTasks.Any())
+            {
+                await Task.WhenAll(notificationTasks);
+            }
 
             var result = new OperationResultDto
             {
@@ -187,8 +207,27 @@ public class SettlementService(
             settlement.UnsettledUsers = newUnsettled;
             settlement.SettledUsers = newSettled;
             settlement.Description = request.Description;
+            settlement.Amount = request.Amount;
 
             await _context.SaveChangesAsync();
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                title = "👋 You've been added to settlement!",
+                body = $"{request.Description}, amount:{request.Amount}!",
+                icon = "/icons/icon-192x192.png",
+                badge = "/icons/icon-96x96.png",
+                url = "/"
+            });
+
+            var notificationTasks = settlement.UnsettledUsers
+                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                .ToList();
+
+            if (notificationTasks.Any())
+            {
+                await Task.WhenAll(notificationTasks);
+            }
 
             var op = new OperationResultDto
             {
@@ -295,7 +334,10 @@ public class SettlementService(
     {
         try
         {
-            var settlement = await _context.Settlements.FirstOrDefaultAsync(s => s.Id == settlementId);
+            var settlement = await _context.Settlements
+                .Include(s => s.SettledUsers)
+                .Include(s => s.UnsettledUsers)
+                .FirstOrDefaultAsync(s => s.Id == settlementId);
 
             if (settlement == null)
             {
@@ -303,28 +345,51 @@ public class SettlementService(
             }
 
             settlement.Status = SettlementStatus.Completed;
-
             await _context.SaveChangesAsync();
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                title = "👋 Settlement was completed!",
+                body = $"{settlement.Description}, amount:{settlement.Amount}!",
+                icon = "/icons/icon-192x192.png",
+                badge = "/icons/icon-96x96.png",
+                url = "/"
+            });
+
+            var notificationTasks = new List<Task>();
+
+            if (settlement.SettledUsers != null)
+            {
+                notificationTasks.AddRange(
+                    settlement.SettledUsers.Select(receiver =>
+                        pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                );
+            }
+
+            if (settlement.UnsettledUsers != null)
+            {
+                notificationTasks.AddRange(
+                    settlement.UnsettledUsers.Select(receiver =>
+                        pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                );
+            }
+
+            if (notificationTasks.Any())
+            {
+                await Task.WhenAll(notificationTasks);
+            }
 
             var result = new OperationResultDto
             {
                 Operation = "MarkAsCompleted",
                 Timestamp = DateTime.UtcNow,
-                Metadata = new Dictionary<string, object>
-                {
-                    ["SettlementId"] = settlement.Id
-                }
+                Metadata = new Dictionary<string, object> { ["SettlementId"] = settlement.Id }
             };
 
-            return ServiceResponseFactory.Success(
-                result,
-                "Settlement marked as completed successfull",
-                HttpStatusCode.Created
-            );
+            return ServiceResponseFactory.Success(result, "Settlement marked as completed successful", HttpStatusCode.Created);
         }
         catch (Exception ex)
         {
-
             return ServiceResponseFactory.Error<OperationResultDto>(
                 null,
                 $"Failed to change settlement status: {ex.Message}",
@@ -337,7 +402,10 @@ public class SettlementService(
     {
         try
         {
-            var settlement = await _context.Settlements.FirstOrDefaultAsync(s => s.Id == settlementId);
+            var settlement = await _context.Settlements
+                .Include(s => s.SettledUsers)
+                .Include(s => s.UnsettledUsers)
+                .FirstOrDefaultAsync(s => s.Id == settlementId);
 
             if (settlement == null)
             {
@@ -345,8 +413,39 @@ public class SettlementService(
             }
 
             settlement.Status = SettlementStatus.Pending;
-
             await _context.SaveChangesAsync();
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                title = "👋 Settlement was opened",
+                body = $"{settlement.Description}, amount:{settlement.Amount}!",
+                icon = "/icons/icon-192x192.png",
+                badge = "/icons/icon-96x96.png",
+                url = "/"
+            });
+
+            var notificationTasks = new List<Task>();
+
+            if (settlement.SettledUsers != null)
+            {
+                notificationTasks.AddRange(
+                    settlement.SettledUsers.Select(receiver =>
+                        pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                );
+            }
+
+            if (settlement.UnsettledUsers != null)
+            {
+                notificationTasks.AddRange(
+                    settlement.UnsettledUsers.Select(receiver =>
+                        pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                );
+            }
+
+            if (notificationTasks.Any())
+            {
+                await Task.WhenAll(notificationTasks);
+            }
 
             var result = new OperationResultDto
             {
