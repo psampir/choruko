@@ -111,9 +111,6 @@ namespace ChorukoAPI.Migrations
                     b.Property<int>("ParticipantsAmount")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Reward")
-                        .HasColumnType("integer");
-
                     b.Property<byte>("Status")
                         .HasColumnType("smallint");
 
@@ -239,29 +236,6 @@ namespace ChorukoAPI.Migrations
                     b.ToTable("Settlements");
                 });
 
-            modelBuilder.Entity("ChorukoAPI.Models.TaskReward", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp");
-
-                    b.Property<int>("Points")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TaskRewards");
-                });
-
             modelBuilder.Entity("ChorukoAPI.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -325,6 +299,15 @@ namespace ChorukoAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
+
+                    b.Property<int>("PointsAllTime")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PointsCurrentMonth")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PointsCurrentYear")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ProfilePicturePath")
                         .HasColumnType("text");
@@ -646,17 +629,6 @@ namespace ChorukoAPI.Migrations
                     b.Navigation("Creator");
 
                     b.Navigation("Household");
-                });
-
-            modelBuilder.Entity("ChorukoAPI.Models.TaskReward", b =>
-                {
-                    b.HasOne("ChorukoAPI.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ChorukoAPI.Models.User", b =>

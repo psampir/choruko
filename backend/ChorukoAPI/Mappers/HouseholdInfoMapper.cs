@@ -14,9 +14,9 @@ public class HouseholdInfoMapper : IMapper<Household, HouseholdInfoResponse>
                 p.FirstName,
                 p.LastName,
                 p.ProfilePicturePath,
-                0,
-                0,
-                0
+                p.PointsCurrentMonth,
+                p.PointsCurrentYear,
+                p.PointsAllTime
             ))
             .ToList() ?? new List<HouseholdParticipantResponse>();
 
