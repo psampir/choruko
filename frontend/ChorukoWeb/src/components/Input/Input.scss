@@ -95,7 +95,7 @@
       transform: translateY(-50%);
       width: 24px;
       height: 24px;
-      background: url("../../assets/svg/eye.svg") no-repeat center/contain;
+      background: url("../../assets/svg/light/eye.svg") no-repeat center/contain;
       cursor: pointer;
       outline: none;
       -webkit-tap-highlight-color: transparent;
@@ -129,11 +129,12 @@
     }
 
     .input__pencil {
-      background: url("/src/assets/svg/pencil.svg") no-repeat center;
+      background: url("../../assets/svg/light/pencil.svg") no-repeat center;
     }
 
     .input__date {
-      background: url("/src/assets/svg/date.svg") no-repeat center/contain;
+      background: url("../../assets/svg/light/date.svg") no-repeat
+        center/contain;
       z-index: 1;
     }
 
@@ -157,7 +158,8 @@
 
     // When password is visible, show closed eye
     .input--password.active + .input__eye {
-      background: url("../../assets/svg/close-eye.svg") no-repeat center/contain;
+      background: url("../../assets/svg/light/close-eye.svg") no-repeat
+        center/contain;
     }
   }
 }

@@ -189,7 +189,6 @@ body {
       font-size: var(--font-size-h6);
       object-fit: cover;
 
-
       span {
         display: flex;
         align-items: center;
@@ -232,7 +231,7 @@ body {
 
     .participant__delegate-admin {
       &.admin-choose::before {
-        content: url(../../../assets/svg/check.svg);
+        content: url(../../../assets/svg/light/check.svg);
         position: absolute;
         right: var(--spacing-3xl);
         width: 30px;

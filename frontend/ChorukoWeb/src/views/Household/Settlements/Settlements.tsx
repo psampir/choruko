@@ -5,11 +5,11 @@ import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import { useUser } from "../../../contexts/UserContext";
-import profileIcon from "../../../assets/svg/profile-icon.svg";
-import starIcon from "../../../assets/svg/star-black.svg";
-import pencilLight from "../../../assets/svg/pencil-light.svg";
-import checkLight from "../../../assets/svg/check-light.svg";
-import settlementIcon from "../../../assets/svg/settlement.svg";
+import profileIcon from "../../../assets/svg/light/profile-icon.svg";
+import starIcon from "../../../assets/svg/dark/star.svg";
+import pencilLight from "../../../assets/svg/dark/pencil.svg";
+import checkLight from "../../../assets/svg/light/check.svg";
+import settlementIcon from "../../../assets/svg/light/expenses.svg";
 
 interface Assignee {
   name: string;

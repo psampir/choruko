@@ -428,6 +428,24 @@
       max-height: 200px;
       overflow-y: auto;
 
+      // Custom scrollbar styling
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: var(--color-secondary-half-tr);
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: var(--color-secondary);
+      }
+
       .activity {
         padding: 0 var(--spacing-md);
         border-radius: var(--border-radius-standard);
@@ -449,6 +467,7 @@
             height: 30px;
             border-radius: 50%;
             object-fit: cover;
+            margin: 0;
           }
 
           p {
@@ -487,8 +506,6 @@
         align-items: center;
         gap: var(--spacing-sm);
       }
-
-
     }
 
     &-icon {
