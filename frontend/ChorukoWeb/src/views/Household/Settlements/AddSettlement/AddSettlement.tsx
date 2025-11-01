@@ -5,9 +5,9 @@ import "./AddSettlement.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import NavbarMobile from "../../../../components/NavbarMobile";
-import arrowLeftIcon from "../../../../assets/svg/arrow-left.svg";
+import arrowLeftIcon from "../../../../assets/svg/light/arrow-left.svg";
 import Popup from "../../../../components/Popup/Popup";
-import checkIcon from "../../../../assets/svg/check.svg";
+import checkIcon from "../../../../assets/svg/light/check.svg";
 
 // Assignee type definition
 interface Assignee {
