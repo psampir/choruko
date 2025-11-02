@@ -7,7 +7,7 @@ import { usePushNotifications } from '../contexts/PushNotificationContext';
  * and unsubscription on logout.
  */
 const PushNotificationHandler: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, onBeforeLogout } = useAuth();
   const { 
     isSupported, 
     permission, 
@@ -106,20 +106,21 @@ const PushNotificationHandler: React.FC = () => {
     return () => clearTimeout(timer);
   }, [isAuthenticated, isSupported, permission, isSubscribed, requestPermission, subscribe]);
 
-  // Handle logout - unsubscribe
-  const wasAuthenticatedRef = useRef(isAuthenticated);
-  
+  // Handle logout - unsubscribe BEFORE logout completes
   useEffect(() => {
-    // Only unsubscribe if user WAS authenticated and is NOW not authenticated (logout)
-    if (wasAuthenticatedRef.current && !isAuthenticated && isSubscribed) {
-      console.log('[PushNotificationHandler] User logged out, unsubscribing...');
-      unsubscribe();
-      hasTriedSubscription.current = false; // Reset for next login
-    }
+    if (!isAuthenticated) return;
     
-    // Update the ref
-    wasAuthenticatedRef.current = isAuthenticated;
-  }, [isAuthenticated, isSubscribed, unsubscribe]);
+    const cleanup = onBeforeLogout(async () => {
+      if (isSubscribed) {
+        console.log('[PushNotificationHandler] Pre-logout: unsubscribing...');
+        await unsubscribe();
+        hasTriedSubscription.current = false; // Reset for next login
+        console.log('[PushNotificationHandler] Pre-logout: unsubscribe complete');
+      }
+    });
+    
+    return cleanup;
+  }, [isAuthenticated, isSubscribed, unsubscribe, onBeforeLogout]);
 
   // This component doesn't render anything
   return null;

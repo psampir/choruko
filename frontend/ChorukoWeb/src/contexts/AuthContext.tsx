@@ -33,6 +33,7 @@ interface AuthContextType {
   checkAuth: (showLoading?: boolean) => Promise<void>;
   error: string | null;
   clearError: () => void;
+  onBeforeLogout: (callback: () => Promise<void> | void) => () => void;
 }
 
 interface RegisterData {
@@ -65,6 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [beforeLogoutCallbacks] = useState<Set<() => Promise<void> | void>>(new Set());
 
   // Derived state
   const isAuthenticated = user !== null;
@@ -166,10 +168,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Register callback to be called before logout
+  const onBeforeLogout = (callback: () => Promise<void> | void) => {
+    beforeLogoutCallbacks.add(callback);
+    // Return cleanup function
+    return () => {
+      beforeLogoutCallbacks.delete(callback);
+    };
+  };
+
   // Logout function
   const logout = async () => {
     try {
       setLoading(true);
+      
+      // Call all registered callbacks before logout
+      console.log('🔄 Running pre-logout callbacks...');
+      const callbacks = Array.from(beforeLogoutCallbacks);
+      await Promise.all(callbacks.map(cb => Promise.resolve(cb())));
+      console.log('✅ Pre-logout callbacks completed');
+      
       await authService.logout();
       setUser(null);
       setError(null);
@@ -209,6 +227,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth,
     error,
     clearError,
+    onBeforeLogout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
