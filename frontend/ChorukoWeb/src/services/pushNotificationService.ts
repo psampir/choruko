@@ -16,7 +16,8 @@ class PushNotificationService {
 
       if (response.ok) {
         const data = await response.json();
-        return data.publicKey;
+        // Backend now returns ApiResponse with result field
+        return data.result || data.publicKey || null;
       }
       return null;
     } catch (error) {
@@ -39,9 +40,12 @@ class PushNotificationService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Subscribe failed: ${response.status} - ${errorText}`);
+        return false;
       }
 
-      return response.ok;
+      const data = await response.json();
+      console.log("Subscribe response:", data);
+      return data.isSuccessful !== false;
     } catch (error) {
       console.error("Error subscribing to push notifications:", error);
       return false;
