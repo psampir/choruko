@@ -26,6 +26,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-2xl);
+    min-height: calc(100vh - var(--navbar-height) * 2 - var(--spacing-2xl) * 2 - 100px);
   }
 
   &__section {
@@ -37,17 +38,23 @@
     border: 2px solid var(--color-secondary);
     border-radius: var(--border-radius-standard);
     background-color: var(--color-background-secondary);
+    flex: 1; // Allow sections to grow
 
     .settlements__list {
       padding-top: 33px;
+      flex: 1; // Allow list to grow within section
+      display: flex;
+      flex-direction: column;
     }
 
     &--collapsed {
       height: 30px;
       min-height: 30px;
+      flex: 0; // Don't grow when collapsed
 
       .settlements__list {
         display: none;
+        flex: 0; // Remove flex when hidden
       }
 
       .dropdown__arrow {
@@ -66,9 +73,14 @@
 
   &__list {
     width: 100%;
-    max-height: calc(2 * (var(--spacing-sm) * 2 + 72px));
     overflow-y: auto;
     border-radius: var(--border-radius-standard);
+    
+    // Empty sections don't grow
+    &:empty {
+      flex: 0;
+      min-height: 60px;
+    }
 
     &::-webkit-scrollbar {
       width: 6px;
