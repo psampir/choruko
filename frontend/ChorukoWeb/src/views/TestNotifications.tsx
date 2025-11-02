@@ -20,7 +20,7 @@ const TestNotifications: React.FC = () => {
 
   const requestPermission = async () => {
     addLog('--- Requesting notification permission ---');
-    
+
     if (!('Notification' in window)) {
       addLog('ERROR: Notifications not supported');
       return;
@@ -110,7 +110,7 @@ const TestNotifications: React.FC = () => {
     try {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
-      
+
       if (subscription) {
         addLog('✅ Subscribed!');
         addLog(`Endpoint: ${subscription.endpoint.substring(0, 50)}...`);
@@ -145,7 +145,7 @@ const TestNotifications: React.FC = () => {
     try {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
-      
+
       if (!subscription) {
         addLog('Already unsubscribed');
         return;
@@ -165,20 +165,20 @@ const TestNotifications: React.FC = () => {
   return (
     <div style={{ padding: '20px', fontFamily: 'monospace' }}>
       <h1>🔔 Push Notifications Test</h1>
-      
+
       <div style={{ marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
         <button onClick={checkSupport} style={buttonStyle}>1. Check Support</button>
         <button onClick={requestPermission} style={buttonStyle}>2. Request Permission</button>
         <button onClick={getVapidKey} style={buttonStyle}>3. Get VAPID Key</button>
         <button onClick={subscribe} style={buttonStyle}>4. Subscribe</button>
-        <button onClick={sendTestNotification} style={{...buttonStyle, backgroundColor: '#28a745'}}>🔔 Send Test Push</button>
+        <button onClick={sendTestNotification} style={{ ...buttonStyle, backgroundColor: '#28a745' }}>🔔 Send Test Push</button>
         <button onClick={checkSubscription} style={buttonStyle}>Check Status</button>
         <button onClick={unsubscribe} style={buttonStyle}>Unsubscribe</button>
-        <button onClick={() => setLog([])} style={{...buttonStyle, backgroundColor: '#666'}}>Clear Log</button>
+        <button onClick={() => setLog([])} style={{ ...buttonStyle, backgroundColor: '#666' }}>Clear Log</button>
       </div>
 
       <div style={{
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#fff',
         color: '#00ff00',
         padding: '15px',
         borderRadius: '5px',
