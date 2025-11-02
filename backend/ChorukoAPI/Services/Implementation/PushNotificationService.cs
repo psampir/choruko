@@ -6,6 +6,7 @@ using ChorukoAPI.Extensions;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
@@ -14,11 +15,22 @@ using WebPush;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class PushNotificationService(
-    DataContext _context,
-    IOptions<VapidSettings> _vapidSettings,
-    ILogger<PushNotificationService> _logger) : IPushNotificationService
+public class PushNotificationService : IPushNotificationService
 {
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IOptions<VapidSettings> _vapidSettings;
+    private readonly ILogger<PushNotificationService> _logger;
+
+    public PushNotificationService(
+        IServiceScopeFactory scopeFactory,
+        IOptions<VapidSettings> vapidSettings,
+        ILogger<PushNotificationService> logger)
+    {
+        _scopeFactory = scopeFactory;
+        _vapidSettings = vapidSettings;
+        _logger = logger;
+    }
+
     public Task<ServiceResponse<string>> GetPublicKeyAsync()
     {
         var result = _vapidSettings.Value.PublicKey;
@@ -31,6 +43,9 @@ public class PushNotificationService(
 
     public async Task<ServiceResponse<OperationResultDto>> SubscribeAsync(string userId, PushSubscriptionRequest request)
     {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var _context = scope.ServiceProvider.GetRequiredService<DataContext>();
+
         var existingSubscription = await _context.PushSubscriptions
             .FirstOrDefaultAsync(s => s.Endpoint == request.Endpoint);
 
@@ -74,6 +89,9 @@ public class PushNotificationService(
 
     public async Task<ServiceResponse<OperationResultDto>> UnsubscribeAsync(string userId, string endpoint)
     {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var _context = scope.ServiceProvider.GetRequiredService<DataContext>();
+
         var subscription = await _context.PushSubscriptions
             .FirstOrDefaultAsync(s => s.Endpoint == endpoint && s.UserId == userId);
 
@@ -100,7 +118,10 @@ public class PushNotificationService(
     public async Task<ServiceResponse<OperationResultDto>> SendNotificationAsync(string receiverId, string payloadJson)
     {
         _logger.LogInformation("🔔 SendNotificationAsync called for user: {ReceiverId}", receiverId);
-        
+
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var _context = scope.ServiceProvider.GetRequiredService<DataContext>();
+
         var subscriptions = await _context.PushSubscriptions
             .Where(s => s.UserId == receiverId)
             .ToListAsync();
@@ -113,26 +134,14 @@ public class PushNotificationService(
             return ServiceResponseFactory.Error<OperationResultDto>(null, "No push subscriptions found");
         }
 
-        // Log subscription details
-        foreach (var sub in subscriptions)
-        {
-            _logger.LogInformation("  - Subscription: Endpoint={Endpoint}, Created={Created}", 
-                sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...", 
-                sub.CreatedAt);
-        }
-
         var vapidDetails = new VapidDetails(
             _vapidSettings.Value.Subject,
             _vapidSettings.Value.PublicKey,
             _vapidSettings.Value.PrivateKey);
-
-        _logger.LogInformation("VAPID Details: Subject={Subject}, PublicKey={PublicKey}", 
-            _vapidSettings.Value.Subject, 
-            _vapidSettings.Value.PublicKey.Substring(0, 20) + "...");
-
         var webPushClient = new WebPushClient();
 
         var subscriptionsToRemove = new ConcurrentBag<Models.PushSubscription>();
+        var subscriptionsToUpdate = new ConcurrentBag<Models.PushSubscription>();
 
         var tasks = subscriptions.Select(sub =>
             Task.Run(async () =>
@@ -140,38 +149,42 @@ public class PushNotificationService(
                 var pushSubscription = new WebPush.PushSubscription(sub.Endpoint, sub.P256dhKey, sub.AuthKey);
                 try
                 {
-                    _logger.LogInformation("📤 Sending push to endpoint: {Endpoint}", sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...");
-                    
+                    _logger.LogInformation("📤 Sending push to endpoint: {Endpoint}");
+
                     await webPushClient.SendNotificationAsync(pushSubscription, payloadJson, vapidDetails);
 
-                    _logger.LogInformation("✅ Successfully sent push to endpoint: {Endpoint}", sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...");
+                    _logger.LogInformation("✅ Successfully sent push to endpoint: {Endpoint}");
 
-                    sub.LastUsedAt = DateTime.UtcNow;
-                    _context.PushSubscriptions.Update(sub);
+                    subscriptionsToUpdate.Add(sub);
                 }
                 catch (WebPushException ex)
                 {
-                    _logger.LogError(ex, "❌ WebPush error for endpoint {Endpoint}. Status: {StatusCode}, Message: {Message}", 
-                        sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...", 
-                        ex.StatusCode, 
-                        ex.Message);
+                    _logger.LogError(ex, "❌ WebPush error...", ex.StatusCode, ex.Message);
 
                     if (ex.StatusCode == HttpStatusCode.Gone)
                     {
-                        _logger.LogWarning("🗑️ Subscription expired (410 Gone), will remove: {Endpoint}", sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...");
+                        _logger.LogWarning("🗑️ Subscription expired (410 Gone)...");
                         subscriptionsToRemove.Add(sub);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "❌ Generic error sending push to {Endpoint}: {Message}", 
-                        sub.Endpoint.Substring(0, Math.Min(50, sub.Endpoint.Length)) + "...", 
-                        ex.Message);
+                    _logger.LogError(ex, "❌ Generic error sending push...", ex.Message);
                 }
             })
         );
 
         await Task.WhenAll(tasks);
+
+        if (!subscriptionsToUpdate.IsEmpty)
+        {
+            foreach (var subToUpdate in subscriptionsToUpdate)
+            {
+                subToUpdate.LastUsedAt = DateTime.UtcNow;
+                _context.PushSubscriptions.Update(subToUpdate);
+            }
+            _logger.LogInformation("🔄️ Updated {Count} 'LastUsedAt' timestamps.", subscriptionsToUpdate.Count);
+        }
 
         if (!subscriptionsToRemove.IsEmpty)
         {
@@ -184,7 +197,7 @@ public class PushNotificationService(
 
         var result = new OperationResultDto
         {
-            Operation = "Subscribe",
+            Operation = "SendNotification",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>()
             {
