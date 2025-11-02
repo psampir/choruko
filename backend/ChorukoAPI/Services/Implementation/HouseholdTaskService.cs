@@ -527,10 +527,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
     {
-        var isTaskNameTaken = await _context.HouseholdTasks.AnyAsync(t =>
-            t.HouseholdId == householdTask.HouseholdId &&
-            t.Name == householdTask.Name &&
-            t.Id != householdTask.Id);
+        var isTaskNameTaken = await _context.HouseholdTasks.AnyAsync(t => t.HouseholdId == householdTask.Household.Id && t.Name == householdTask.Name && t.Id != householdTask.Id);
 
         if (isTaskNameTaken)
         {
