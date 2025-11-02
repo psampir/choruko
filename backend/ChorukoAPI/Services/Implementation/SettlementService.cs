@@ -213,7 +213,7 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "👋 You've been added to settlement!",
+                title = "👋 Settlement was updated!",
                 body = $"{request.Description}, amount:{request.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
@@ -330,7 +330,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> MarkAsCompleted(string settlementId)
+    public async Task<ServiceResponse<OperationResultDto>> MarkAsPaid(string settlementId)
     {
         try
         {
@@ -381,7 +381,7 @@ public class SettlementService(
 
             var result = new OperationResultDto
             {
-                Operation = "MarkAsCompleted",
+                Operation = "MarkAsPaid",
                 Timestamp = DateTime.UtcNow,
                 Metadata = new Dictionary<string, object> { ["SettlementId"] = settlement.Id }
             };
@@ -398,7 +398,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> UnMarkAsCompleted(string settlementId)
+    public async Task<ServiceResponse<OperationResultDto>> MarkAsUnpaid(string settlementId)
     {
         try
         {
@@ -449,7 +449,7 @@ public class SettlementService(
 
             var result = new OperationResultDto
             {
-                Operation = "UnMarkAsCompleted",
+                Operation = "MarkAsUnpaid",
                 Timestamp = DateTime.UtcNow,
                 Metadata = new Dictionary<string, object>
                 {
