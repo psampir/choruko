@@ -534,7 +534,21 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             return ServiceResponseFactory.Error<OperationResultDto>(null, "A task with this name already exists in this household.", HttpStatusCode.BadRequest);
         }
 
+        if (!CheckParticipantAmount(householdTask))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, 
+                $"Too many participants assigned. The limit for this task is {householdTask.ParticipantsAmount}, but {householdTask.Assignees.Count} were provided.",
+                HttpStatusCode.BadRequest);
+        }
+
         return ServiceResponseFactory.Success<OperationResultDto>(null, "Task data is valid.");
+    }
+
+    private bool CheckParticipantAmount(HouseholdTask householdTask)
+    {
+        var assigneeCount = householdTask.Assignees?.Count ?? 0;
+
+        return assigneeCount <= householdTask.ParticipantsAmount;
     }
 }
 
