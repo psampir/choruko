@@ -537,21 +537,6 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             return ServiceResponseFactory.Error<OperationResultDto>(null, "A task with this name already exists in this household.", HttpStatusCode.BadRequest);
         }
 
-        if (!string.IsNullOrEmpty(householdTask.ActivityId))
-        {
-            var activityExists = await _context.Activities
-                .AnyAsync(a => a.Id == householdTask.ActivityId && a.HouseholdId == householdTask.HouseholdId);
-
-            if (!activityExists)
-            {
-                return ServiceResponseFactory.Error<OperationResultDto>(
-                    null,
-                    "The specified ActivityId is invalid or does not belong to this household.",
-                    System.Net.HttpStatusCode.BadRequest
-                );
-            }
-        }
-
         return ServiceResponseFactory.Success<OperationResultDto>(null, "Task data is valid.");
     }
 }
