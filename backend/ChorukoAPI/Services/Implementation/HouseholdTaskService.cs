@@ -53,20 +53,45 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                     );
                 }
             }
-            
-            var householdTask = new HouseholdTask
+
+            var assigneeIds = request.AssigneeIds ?? new List<string>();
+
+            var usersToAdd = household.Participants.Where(p => assigneeIds.Contains(p.Id)).ToList();
+
+            var householdTask = new HouseholdTask();
+            if (usersToAdd.Count == 0)
             {
-                Id = Guid.NewGuid().ToString(),
-                Household = household,
-                ActivityId = request.ActivityId,
-                CreatorId = userId,
-                CreationDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
-                DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
-                Status = Models.TaskStatus.Unassigned,
-                ParticipantsAmount = request.ParticipantsAmount,
-                Name = request.Name,
-                Description = request.Description
-            };
+                householdTask = new HouseholdTask
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Household = household,
+                    ActivityId = request.ActivityId,
+                    CreatorId = userId,
+                    CreationDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                    DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
+                    Status = Models.TaskStatus.Unassigned,
+                    ParticipantsAmount = request.ParticipantsAmount,
+                    Name = request.Name,
+                    Description = request.Description
+                };
+            }
+            else
+            {
+                householdTask = new HouseholdTask
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Household = household,
+                    ActivityId = request.ActivityId,
+                    CreatorId = userId,
+                    CreationDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                    DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
+                    Status = Models.TaskStatus.Assigned,
+                    ParticipantsAmount = request.ParticipantsAmount,
+                    Name = request.Name,
+                    Description = request.Description,
+                    Assignees = usersToAdd,
+                };
+            }
 
             var validationResult = await ValidateHouseholdTaskData(householdTask);
             if (validationResult.IsSuccessful == false)
@@ -126,11 +151,23 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
             }
 
+            var household = await _context.Households
+                .Include(h => h.Activities)
+                .Include(h => h.Participants)
+                .Include(h => h.Tasks)
+                .FirstOrDefaultAsync(h => h.Id == householdTask.HouseholdId);
+
+            var assigneeIds = request.AssigneeIds ?? new List<string>();
+
+            var usersToAdd = household.Participants.Where(p => assigneeIds.Contains(p.Id)).ToList();
+
+            householdTask.Assignees = usersToAdd;
             householdTask.ActivityId = request.ActivityId;
             householdTask.DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified);
             householdTask.ParticipantsAmount = request.ParticipantsAmount;
             householdTask.Name = request.Name;
             householdTask.Description = request.Description;
+            householdTask.Status = usersToAdd.Any() ? Models.TaskStatus.Assigned : Models.TaskStatus.Unassigned;
 
             var validationResult = await ValidateHouseholdTaskData(householdTask);
             if (validationResult.IsSuccessful == false)
