@@ -527,14 +527,32 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
     {
-        var isActivityExist = await _context.Activities.AnyAsync(a => a.HouseholdId == householdTask.HouseholdId && a.Name == householdTask.Name);
+        var isTaskNameTaken = await _context.HouseholdTasks.AnyAsync(t =>
+            t.HouseholdId == householdTask.HouseholdId &&
+            t.Name == householdTask.Name &&
+            t.Id != householdTask.Id);
 
-        if (isActivityExist)
+        if (isTaskNameTaken)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist.", HttpStatusCode.BadRequest);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "A task with this name already exists in this household.", HttpStatusCode.BadRequest);
         }
 
-        return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household.");
+        if (!string.IsNullOrEmpty(householdTask.ActivityId))
+        {
+            var activityExists = await _context.Activities
+                .AnyAsync(a => a.Id == householdTask.ActivityId && a.HouseholdId == householdTask.HouseholdId);
+
+            if (!activityExists)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(
+                    null,
+                    "The specified ActivityId is invalid or does not belong to this household.",
+                    System.Net.HttpStatusCode.BadRequest
+                );
+            }
+        }
+
+        return ServiceResponseFactory.Success<OperationResultDto>(null, "Task data is valid.");
     }
 }
 
