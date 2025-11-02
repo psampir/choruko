@@ -200,6 +200,44 @@ namespace ChorukoAPI.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("ChorukoAPI.Models.PushSubscription", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AuthKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("P256dhKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Endpoint")
+                        .IsUnique();
+
+                    b.ToTable("PushSubscriptions");
+                });
+
             modelBuilder.Entity("ChorukoAPI.Models.Settlement", b =>
                 {
                     b.Property<string>("Id")
@@ -234,6 +272,29 @@ namespace ChorukoAPI.Migrations
                     b.HasIndex("HouseholdId", "Status");
 
                     b.ToTable("Settlements");
+                });
+
+            modelBuilder.Entity("ChorukoAPI.Models.TaskReward", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(36)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TaskRewards");
                 });
 
             modelBuilder.Entity("ChorukoAPI.Models.User", b =>
@@ -629,6 +690,17 @@ namespace ChorukoAPI.Migrations
                     b.Navigation("Creator");
 
                     b.Navigation("Household");
+                });
+
+            modelBuilder.Entity("ChorukoAPI.Models.TaskReward", b =>
+                {
+                    b.HasOne("ChorukoAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ChorukoAPI.Models.User", b =>

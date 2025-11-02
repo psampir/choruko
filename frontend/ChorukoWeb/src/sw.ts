@@ -31,3 +31,86 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   event.respondWith(fetch(event.request));
 });
 // (If you add runtime caching, implement it here.)
+
+// Push notification handler
+self.addEventListener('push', (event: PushEvent) => {
+  console.log('Push notification received:', event);
+
+  let notificationData = {
+    title: 'Choruko',
+    body: 'You have a new notification',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-96x96.png',
+    data: {
+      url: '/'
+    }
+  };
+
+  // Parse push data if available
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      notificationData = {
+        title: payload.title || notificationData.title,
+        body: payload.body || notificationData.body,
+        icon: payload.icon || notificationData.icon,
+        badge: payload.badge || notificationData.badge,
+        data: {
+          url: payload.url || notificationData.data.url,
+          ...payload.data
+        }
+      };
+    } catch (error) {
+      console.error('Error parsing push data:', error);
+    }
+  }
+
+  const promiseChain = self.registration.showNotification(
+    notificationData.title,
+    {
+      body: notificationData.body,
+      icon: notificationData.icon,
+      badge: notificationData.badge,
+      data: notificationData.data,
+      tag: 'choruko-notification',
+      requireInteraction: false
+    }
+  );
+
+  event.waitUntil(promiseChain);
+});
+
+// Notification click handler
+self.addEventListener('notificationclick', (event: NotificationEvent) => {
+  console.log('Notification clicked:', event);
+  
+  event.notification.close();
+
+  const urlToOpen = event.notification.data?.url || '/';
+
+  const promiseChain = self.clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true
+  }).then((clientList) => {
+    // Check if there's already a window open
+    for (const client of clientList) {
+      if ('focus' in client) {
+        // Navigate to the URL and focus the window
+        return client.navigate(urlToOpen).then(client => client?.focus());
+      }
+    }
+    
+    // No window open, open a new one
+    if (self.clients.openWindow) {
+      return self.clients.openWindow(urlToOpen);
+    }
+  });
+
+  event.waitUntil(promiseChain);
+});
+
+// Notification close handler (optional, for analytics)
+self.addEventListener('notificationclose', (event: NotificationEvent) => {
+  console.log('Notification closed:', event);
+  // Could send analytics here if needed
+});

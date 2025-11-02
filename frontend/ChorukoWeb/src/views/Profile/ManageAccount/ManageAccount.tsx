@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
+import { useHousehold } from "../../../contexts/HouseholdContext";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
@@ -15,11 +16,12 @@ import { getProfilePictureUrl } from "../../../utils/imageUtils";
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserNames, updatePassword, updateProfilePicture, deleteAccount, loading: userLoading } = useUser();
+  const { refreshHousehold } = useHousehold();
   const isDark = useIsDarkTheme();
-  
+
   const ProfileDefaultIcon = isDark ? ProfileDefaultIconDark : ProfileDefaultIconLight;
   const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
-  
+
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
@@ -32,7 +34,7 @@ const ManageAccount: React.FC = () => {
     if (user) {
       setFirstNameValue(user.firstName);
       setLastNameValue(user.lastName);
-      
+
       // Load profile picture from backend if available
       const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
       if (pictureUrl) {
@@ -69,8 +71,9 @@ const ManageAccount: React.FC = () => {
     }
 
     const result = await updateUserNames(firstNameValue, lastNameValue);
-    
+
     if (result.success) {
+      await refreshHousehold();
       showNotification("Your name has been changed successfully", "success");
     } else {
       showNotification(result.message || "Failed to change name", "error");
@@ -92,7 +95,7 @@ const ManageAccount: React.FC = () => {
     }
 
     const result = await updatePassword(newPassword, confirmPassword);
-    
+
     if (result.success) {
       showNotification("Your password has been changed successfully", "success");
       // Clear password fields after successful change
@@ -108,7 +111,7 @@ const ManageAccount: React.FC = () => {
     if (file) {
       // Upload to server first
       const result = await updateProfilePicture(file);
-      
+
       if (result.success) {
         // Only update preview after successful upload
         const reader = new FileReader();
@@ -117,6 +120,7 @@ const ManageAccount: React.FC = () => {
           setProfileImageSrc(result);
         };
         reader.readAsDataURL(file);
+        await refreshHousehold();
         showNotification("Profile picture updated successfully", "success");
       } else {
         showNotification(result.message || "Failed to update profile picture", "error");
@@ -130,7 +134,7 @@ const ManageAccount: React.FC = () => {
 
   const handleDeleteAccount = async () => {
     const result = await deleteAccount();
-    
+
     if (result.success) {
       // User will be logged out and redirected by the deleteAccount function
       showNotification("Account deleted successfully", "success");
@@ -188,14 +192,14 @@ const ManageAccount: React.FC = () => {
           </Button>
         </div>
         <div className="manage-account__main-section change-password">
-          <Input 
-            variant="password" 
+          <Input
+            variant="password"
             placeholder="New Password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
-          <Input 
-            variant="password" 
+          <Input
+            variant="password"
             placeholder="Confirm New Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
