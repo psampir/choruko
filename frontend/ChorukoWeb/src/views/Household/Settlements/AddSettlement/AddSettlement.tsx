@@ -7,6 +7,7 @@ import Input from "../../../../components/Input";
 import NavbarMobile from "../../../../components/NavbarMobile";
 import arrowLeftIcon from "../../../../assets/svg/light/arrow-left.svg";
 import Popup from "../../../../components/Popup/Popup";
+import ErrorMessage from "../../../../components/ErrorMessage";
 import checkIcon from "../../../../assets/svg/light/check.svg";
 
 // Assignee type definition
@@ -29,8 +30,10 @@ const AddSettlement: React.FC = () => {
   const [selectedAssignees, setSelectedAssignees] = useState<number[]>([]);
   const [amountSpent, setAmountSpent] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Pre-fill form when in edit mode
+  // Currency symbol - can be made dynamic based on user preferences/household settings
+  const currencySymbol = "₴"; // Pre-fill form when in edit mode
   useEffect(() => {
     if (editSettlement) {
       setSettlementDescription(editSettlement.description || "");
@@ -93,12 +96,13 @@ const AddSettlement: React.FC = () => {
 
   const handleAddSettlement = () => {
     // Validate that required fields are filled
-    if (
-      !settlementDescription ||
-      selectedAssignees.length === 0 ||
-      !amountSpent
-    ) {
-      console.log("Please fill all required fields");
+    const missingFields = [];
+    if (!settlementDescription) missingFields.push("Settlement description");
+    if (selectedAssignees.length === 0) missingFields.push("Assignees");
+    if (!amountSpent) missingFields.push("Amount spent");
+
+    if (missingFields.length > 0) {
+      setErrorMessage(`Please fill in: ${missingFields.join(", ")}`);
       return;
     }
 
@@ -118,6 +122,9 @@ const AddSettlement: React.FC = () => {
         author: editSettlement.author,
       };
 
+      // Clear error message on successful submission
+      setErrorMessage("");
+
       // Navigate back to settlements with the updated settlement data
       navigate("/settlements", { state: { updatedSettlement } });
     } else {
@@ -134,6 +141,9 @@ const AddSettlement: React.FC = () => {
             }
           : null,
       };
+
+      // Clear error message on successful submission
+      setErrorMessage("");
 
       // Navigate back to settlements with the new settlement data
       navigate("/settlements", { state: { newSettlement } });
@@ -156,6 +166,12 @@ const AddSettlement: React.FC = () => {
   return (
     <div className="add-settlement">
       <NavbarMobile />
+
+      <ErrorMessage
+        message={errorMessage}
+        onClose={() => setErrorMessage("")}
+        variant="overlay"
+      />
 
       <div className="add-settlement__container">
         {/* Header */}
@@ -230,16 +246,33 @@ const AddSettlement: React.FC = () => {
         </div>
 
         {/* Amount Spent */}
-        <div className="add-settlement__section">
+        <div className="add-settlement__section add-settlement__section--no-margin">
           <Input
             type="number"
             variant="currency"
-            currencySymbol="₴"
+            currencySymbol={currencySymbol}
             placeholder="Amount spent"
             value={amountSpent}
-            onChange={(e) => setAmountSpent(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Allow only numbers and decimal point
+              if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                setAmountSpent(value);
+              }
+            }}
             className="add-settlement__input"
           />
+
+          {/* Amount per person calculation */}
+          {amountSpent && selectedAssignees.length > 0 && (
+            <p className="amount-per-person">
+              = {currencySymbol}
+              {(parseFloat(amountSpent) / selectedAssignees.length).toFixed(
+                2
+              )}{" "}
+              per person
+            </p>
+          )}
         </div>
 
         {/* Add/Save Button */}
