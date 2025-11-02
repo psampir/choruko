@@ -10,6 +10,7 @@ using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
@@ -17,7 +18,7 @@ using System.Security.Claims;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, HouseholdTaskResponse> _mapper) : IHouseholdTaskService
+public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, HouseholdTaskResponse> _mapper, IPushNotificationService pushNotificationService) : IHouseholdTaskService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdTaskAsync(string householdId, CreateHouseholdTaskRequest request, string userId)
     {
@@ -99,7 +100,25 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             }
 
             _context.HouseholdTasks.Add(householdTask);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                title = "👋 New task was created!",
+                body = $"{request.Description}, deadline:{request.DeadLine}!",
+                icon = "/icons/icon-192x192.png",
+                badge = "/icons/icon-96x96.png",
+                url = "/"
+            });
+
+            var notificationTasks = household.Participants
+                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                .ToList();
+
+            if (notificationTasks.Any())
+            {
+                await Task.WhenAll(notificationTasks);
+            }
 
             var response = new OperationResultDto
             {
@@ -125,7 +144,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
     {
         try
         {
-            var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(t => t.Id == taskId);
+            var householdTask = await _context.HouseholdTasks.Include(t => t.Assignees).FirstOrDefaultAsync(t => t.Id == taskId);
 
             if (householdTask == null)
             {
@@ -156,7 +175,25 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 return validationResult;
             }
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                title = "👋 Task info was edited!",
+                body = $"{request.Description}, deadline:{request.DeadLine}!",
+                icon = "/icons/icon-192x192.png",
+                badge = "/icons/icon-96x96.png",
+                url = "/"
+            });
+
+            var notificationTasks = householdTask.Assignees
+                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                .ToList();
+
+            if (notificationTasks.Any())
+            {
+                await Task.WhenAll(notificationTasks);
+            }
 
             var response = new OperationResultDto
             {
@@ -211,60 +248,110 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     public async Task<ServiceResponse<OperationResultDto>> AssignUserToTask(string taskId, string userId)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await _context.Users
+            .Include(u => u.AssignedTasks)
+            .FirstOrDefaultAsync(u => u.Id == userId);
 
-        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
-        if (householdTask == null)
+        if (user == null)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
         }
 
-        if (householdTask.Status == Models.TaskStatus.Assigned)
+        var householdTask = await _context.HouseholdTasks
+            .Include(t => t.Assignees)
+            .FirstOrDefaultAsync(t => t.Id == taskId);
+
+        if (householdTask == null)
         {
-            user.AssignedTasks.Add(householdTask);
-            _context.SaveChanges();
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Task not found.", HttpStatusCode.NotFound);
         }
 
         householdTask.Status = Models.TaskStatus.Assigned;
 
-        user.AssignedTasks.Add(householdTask);
-        _context.SaveChanges();
+        if (!user.AssignedTasks.Contains(householdTask))
+        {
+            user.AssignedTasks.Add(householdTask);
+        }
+
+        await _context.SaveChangesAsync();
+
+        var payload = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            title = "👋 New assignee in task!",
+            body = $"{householdTask.Description}, assignee:{user.FirstName} {user.LastName}!",
+            icon = "/icons/icon-192x192.png",
+            badge = "/icons/icon-96x96.png",
+            url = "/"
+        });
+
+        var notificationTasks = householdTask.Assignees
+            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+            .ToList();
+
+        if (notificationTasks.Any())
+        {
+            await Task.WhenAll(notificationTasks);
+        }
 
         var response = new OperationResultDto
         {
             Operation = "EditHouseholdTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
-                {
-                    { "TaskName", householdTask.Name},
-                    { "UserName", user.FirstName + " " + user.LastName },
-                    { "Assigned", true }
-                }
+            {
+                { "TaskName", householdTask.Name},
+                { "UserName", user.FirstName + " " + user.LastName },
+                { "Assigned", true }
+            }
         };
 
         return ServiceResponseFactory.Success(response, "User successfully assigned to household task.");
     }
-
     public async Task<ServiceResponse<OperationResultDto>> UnAssignUserFromTask(string taskId, string userId)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await _context.Users
+            .Include(u => u.AssignedTasks)
+            .FirstOrDefaultAsync(u => u.Id == userId);
 
-        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+        }
+
+        var householdTask = await _context.HouseholdTasks
+            .Include(t => t.Assignees)
+            .FirstOrDefaultAsync(t => t.Id == taskId);
+
         if (householdTask == null)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Task not found.", HttpStatusCode.NotFound);
         }
 
-        if (householdTask.Assignees.Count < 1)
+        user.AssignedTasks.Remove(householdTask);
+
+        if (householdTask.Assignees.Count == 0)
         {
             householdTask.Status = Models.TaskStatus.Unassigned;
-            user.AssignedTasks.Remove(householdTask);
-            _context.SaveChanges();
         }
-        else
+
+        await _context.SaveChangesAsync();
+
+        var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            user.AssignedTasks.Remove(householdTask);
-            _context.SaveChanges();
+            title = "👋 User left task!",
+            body = $"{householdTask.Description}, assignee:{user.FirstName} {user.LastName}!",
+            icon = "/icons/icon-192x192.png",
+            badge = "/icons/icon-96x96.png",
+            url = "/"
+        });
+
+        var notificationTasks = householdTask.Assignees
+            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+            .ToList();
+
+        if (notificationTasks.Any())
+        {
+            await Task.WhenAll(notificationTasks);
         }
 
         var response = new OperationResultDto
@@ -272,11 +359,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             Operation = "EditHouseholdTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
-                {
-                    { "TaskName", householdTask.Name},
-                    { "UserName", user.FirstName + " " + user.LastName },
-                    { "UnAssigned", true }
-                }
+            {
+                { "TaskName", householdTask.Name},
+                { "UserName", user.FirstName + " " + user.LastName },
+                { "UnAssigned", true }
+            }
         };
 
         return ServiceResponseFactory.Success(response, "User successfully unassigned from household task.");
@@ -307,6 +394,24 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         
         householdTask.Status = Models.TaskStatus.Completed;
         await _context.SaveChangesAsync();
+
+        var payload = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            title = "👋 Task was completed!",
+            body = $"{householdTask.Description}!",
+            icon = "/icons/icon-192x192.png",
+            badge = "/icons/icon-96x96.png",
+            url = "/"
+        });
+
+        var notificationTasks = householdTask.Assignees
+            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+            .ToList();
+
+        if (notificationTasks.Any())
+        {
+            await Task.WhenAll(notificationTasks);
+        }
 
         var response = new OperationResultDto
         {
@@ -356,13 +461,31 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         if (householdTask.Assignees == null || householdTask.Assignees.Count == 0)
         {
             householdTask.Status = Models.TaskStatus.Unassigned;
+            await _context.SaveChangesAsync();
         }
         else
         {
             householdTask.Status = Models.TaskStatus.Assigned;
+            await _context.SaveChangesAsync();
         }
-        
-        _context.SaveChanges();
+
+        var payload = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            title = "👋 Task was opened!",
+            body = $"{householdTask.Description}!",
+            icon = "/icons/icon-192x192.png",
+            badge = "/icons/icon-96x96.png",
+            url = "/"
+        });
+
+        var notificationTasks = householdTask.Assignees
+            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+            .ToList();
+
+        if (notificationTasks.Any())
+        {
+            await Task.WhenAll(notificationTasks);
+        }
 
         var response = new OperationResultDto
         {
@@ -380,14 +503,14 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     public async Task<ServiceResponse<OperationResultDto>> DeleteHouseholdTask(string taskId)
     {
-        var householdTask = await _context.HouseholdTasks.FirstOrDefaultAsync(h => h.Id == taskId);
+        var householdTask = await _context.HouseholdTasks.Include(t => t.Assignees).FirstOrDefaultAsync(t => t.Id == taskId);
         if (householdTask == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
 
         _context.HouseholdTasks.Remove(householdTask);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         var response = new OperationResultDto
         {
@@ -404,14 +527,32 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
     {
-        var isActivityExist = _context.Activities.Any(a => a.HouseholdId == householdTask.HouseholdId && a.Name == householdTask.Name);
+        var isTaskNameTaken = await _context.HouseholdTasks.AnyAsync(t =>
+            t.HouseholdId == householdTask.HouseholdId &&
+            t.Name == householdTask.Name &&
+            t.Id != householdTask.Id);
 
-        if (isActivityExist)
+        if (isTaskNameTaken)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist.", HttpStatusCode.BadRequest);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "A task with this name already exists in this household.", HttpStatusCode.BadRequest);
         }
 
-        return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household.");
+        if (!string.IsNullOrEmpty(householdTask.ActivityId))
+        {
+            var activityExists = await _context.Activities
+                .AnyAsync(a => a.Id == householdTask.ActivityId && a.HouseholdId == householdTask.HouseholdId);
+
+            if (!activityExists)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(
+                    null,
+                    "The specified ActivityId is invalid or does not belong to this household.",
+                    System.Net.HttpStatusCode.BadRequest
+                );
+            }
+        }
+
+        return ServiceResponseFactory.Success<OperationResultDto>(null, "Task data is valid.");
     }
 }
 
