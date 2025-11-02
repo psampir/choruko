@@ -530,23 +530,28 @@ const Tasks: React.FC = () => {
           }}
           title={selectedTask.name}
           variant={selectedTask.status === "overtime" ? "red" : "primary"}
-          actions={[
-            {
-              label: "Mark as done",
-              onClick: () => {
-                markTaskAsDone(selectedTask.id);
-                setShowPopup(false);
-                setSelectedTask(null);
-              },
-              variant:
-                selectedTask.status === "overtime" ? "danger" : "primary",
-            },
-          ]}
+          actions={
+            selectedTask.status !== "done"
+              ? [
+                  {
+                    label: "Mark as done",
+                    onClick: () => {
+                      markTaskAsDone(selectedTask.id);
+                      setShowPopup(false);
+                      setSelectedTask(null);
+                    },
+                    variant:
+                      selectedTask.status === "overtime" ? "danger" : "primary",
+                  },
+                ]
+              : []
+          }
           customActions={
-            // Show edit button only for task author
+            // Show edit button only for task author and not for done tasks
             user &&
             selectedTask.author?.name ===
-              `${user.firstName} ${user.lastName}` ? (
+              `${user.firstName} ${user.lastName}` &&
+            selectedTask.status !== "done" ? (
               <div
                 className="task-edit-button"
                 onClick={() => {

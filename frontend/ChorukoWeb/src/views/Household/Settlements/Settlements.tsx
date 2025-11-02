@@ -34,6 +34,9 @@ const Settlements: React.FC = () => {
   const location = useLocation();
   const { user } = useUser();
 
+  // Currency symbol - can be made dynamic based on user preferences/household settings
+  const currencySymbol = "₴";
+
   const [collapsedSections, setCollapsedSections] = useState({
     todo: false,
     done: false,
@@ -286,7 +289,7 @@ const Settlements: React.FC = () => {
           <div className="settlement__info">
             <p className="settlement__name">
               {settlement.amountSpent
-                ? `₴${settlement.amountSpent}`
+                ? `${currencySymbol}${settlement.amountSpent}`
                 : "No amount"}
             </p>
             <p className="settlement__description">{settlement.description}</p>
@@ -395,24 +398,47 @@ const Settlements: React.FC = () => {
             setShowPopup(false);
             setSelectedSettlement(null);
           }}
-          title={selectedSettlement.name}
+          title={
+            <div>
+              <div className="amount-per-person">
+                {currencySymbol}
+                {selectedSettlement.amountSpent &&
+                selectedSettlement.assignees.length > 0
+                  ? (
+                      parseFloat(selectedSettlement.amountSpent) /
+                      selectedSettlement.assignees.length
+                    ).toFixed(2)
+                  : "0.00"}{" "}
+                per person
+              </div>
+              <div className="total-amount">
+                Total of {currencySymbol}
+                {selectedSettlement.amountSpent || "0.00"}
+              </div>
+            </div>
+          }
           variant="primary"
-          actions={[
-            {
-              label: "Mark as done",
-              onClick: () => {
-                markSettlementAsDone(selectedSettlement.id);
-                setShowPopup(false);
-                setSelectedSettlement(null);
-              },
-              variant: "primary",
-            },
-          ]}
+          actions={
+            selectedSettlement.status !== "done"
+              ? [
+                  {
+                    label: "Mark as done",
+                    onClick: () => {
+                      markSettlementAsDone(selectedSettlement.id);
+                      setShowPopup(false);
+                      setSelectedSettlement(null);
+                    },
+                    variant: "primary",
+                  },
+                ]
+              : []
+          }
           customActions={
-            // Show edit button only for settlement author
+            // Show edit button only for settlement author and not for done settlements
             user &&
             selectedSettlement.author?.name ===
-              `${user.firstName} ${user.lastName}` ? (
+              `${user.firstName} ${user.lastName}` &&
+            selectedSettlement.status !== "done" ? (
               <div
                 className="settlement-edit-button"
                 onClick={() => {
@@ -424,6 +450,7 @@ const Settlements: React.FC = () => {
                         description: selectedSettlement.description,
                         assignees: selectedSettlement.assignees,
                         author: selectedSettlement.author,
+                        amountSpent: selectedSettlement.amountSpent,
                       },
                     },
                   });
