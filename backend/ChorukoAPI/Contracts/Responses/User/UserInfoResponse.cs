@@ -6,4 +6,8 @@ public record UserInfoResponse(
     string LastName, 
     string Email,
     string? HouseholdId,
-    string? ProfilePicturePath);
+    string? ProfilePicturePath,
+    int PointsCurrentMonth,
+    int PointsCurrentYear,
+    int PointsAllTime
+    );

@@ -64,7 +64,6 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
                 Status = Models.TaskStatus.Unassigned,
                 ParticipantsAmount = request.ParticipantsAmount,
-                Reward = request.Reward,
                 Name = request.Name,
                 Description = request.Description
             };
@@ -130,7 +129,6 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             householdTask.ActivityId = request.ActivityId;
             householdTask.DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified);
             householdTask.ParticipantsAmount = request.ParticipantsAmount;
-            householdTask.Reward = request.Reward;
             householdTask.Name = request.Name;
             householdTask.Description = request.Description;
 
@@ -336,12 +334,27 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     public async Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId)
     {
-        var householdTask = await _context.HouseholdTasks.Include(t => t.Assignees).FirstOrDefaultAsync(t => t.Id == taskId);
+        var householdTask = await _context.HouseholdTasks
+            .Include(t => t.Assignees) 
+            .Include(t => t.Activity)
+            .FirstOrDefaultAsync(h => h.Id == taskId);
+        
         if (householdTask == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
-
+        
+        int rewardPoints = householdTask.Activity.PointsAwarded;
+        
+        foreach (var assignee in householdTask.Assignees)
+        {
+            assignee.PointsCurrentMonth += rewardPoints;
+            assignee.PointsCurrentYear += rewardPoints;
+            assignee.PointsAllTime += rewardPoints;
+            
+            _context.Users.Update(assignee);
+        }
+        
         householdTask.Status = Models.TaskStatus.Completed;
         await _context.SaveChangesAsync();
 
@@ -379,13 +392,36 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     public async Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId)
     {
-        var householdTask = await _context.HouseholdTasks.Include(t => t.Assignees).FirstOrDefaultAsync(t => t.Id == taskId);
+        var householdTask = await _context.HouseholdTasks
+            .Include(h => h.Assignees)
+            .Include(h => h.Activity)
+            .FirstOrDefaultAsync(h => h.Id == taskId);
+        
         if (householdTask == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
         }
+        
+        if (householdTask.Status != Models.TaskStatus.Completed)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Task is not currently marked as completed.", HttpStatusCode.BadRequest);
+        }
+        
+        int rewardPoints = householdTask.Activity.PointsAwarded;
 
-        if (householdTask.Assignees.Count == 0)
+        if (householdTask.Assignees != null && householdTask.Assignees.Count > 0)
+        {
+            foreach (var assignee in householdTask.Assignees)
+            {
+                assignee.PointsCurrentMonth = Math.Max(0, assignee.PointsCurrentMonth - rewardPoints);
+                assignee.PointsCurrentYear = Math.Max(0, assignee.PointsCurrentYear - rewardPoints);
+                assignee.PointsAllTime = Math.Max(0, assignee.PointsAllTime - rewardPoints);
+                
+                _context.Users.Update(assignee);
+            }
+        }
+        
+        if (householdTask.Assignees == null || householdTask.Assignees.Count == 0)
         {
             householdTask.Status = Models.TaskStatus.Unassigned;
             await _context.SaveChangesAsync();

@@ -27,7 +27,6 @@ namespace ChorukoAPI.Mappers
                 DeadLine = source.DeadLine,
                 Status = source.Status,
                 ParticipantsAmount = source.ParticipantsAmount,
-                Reward = source.Reward,
                 Name = source.Name,
                 Description = source.Description,
                 Assignees = (await Task.WhenAll(source.Assignees.Select(x => userMapper.Map(x)))).ToList() ?? new List<UserInfoResponse>()

@@ -8,9 +8,9 @@ import starDark from "../../../assets/svg/dark/star.svg";
 import householdDefaultIconDark from "../../../assets/svg/dark/householdDefault.svg";
 import profileDefaultIconDark from "../../../assets/svg/dark/profile-icon.svg";
 import { useHousehold } from "../../../contexts/HouseholdContext";
-import { useAuth } from "../../../contexts/AuthContext";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 import type { HouseholdParticipant } from "../../../services/householdService";
+import BottomNav from "../../../components/BottomNav/BottomNav";
 import "./Leaderboard.scss";
 
 type TimeFilter = "CURRENT MONTH" | "CURRENT YEAR" | "ALL TIME";
@@ -20,13 +20,16 @@ const Leaderboard: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<TimeFilter>("ALL TIME");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { householdInfo, participants, loading, error } = useHousehold();
-  const { hasHousehold, checkAuth } = useAuth();
   const isDark = useIsDarkTheme();
-  
+
   const star = isDark ? starDark : starLight;
-  const householdDefaultIcon = isDark ? householdDefaultIconDark : householdDefaultIconLight;
-  const profileDefaultIcon = isDark ? profileDefaultIconDark : profileDefaultIconLight;
-  
+  const householdDefaultIcon = isDark
+    ? householdDefaultIconDark
+    : householdDefaultIconLight;
+  const profileDefaultIcon = isDark
+    ? profileDefaultIconDark
+    : profileDefaultIconLight;
+
   const participantsRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
   const participantRef = useRef<HTMLDivElement>(null);
@@ -72,23 +75,12 @@ const Leaderboard: React.FC = () => {
 
   // Check if user was removed from household
   useEffect(() => {
-    const checkHouseholdAccess = async () => {
-      // If there's an error indicating no household access
-      if (error && error.includes("not part of any household")) {
-        console.log("User no longer has household access, refreshing auth and redirecting...");
-        // Refresh auth state to update hasHousehold
-        await checkAuth(false);
-        navigate("/joinOrCreateHousehold", { replace: true });
-      }
-      // Also check hasHousehold flag directly
-      else if (!loading && !hasHousehold) {
-        console.log("User has no household, redirecting...");
-        navigate("/joinOrCreateHousehold", { replace: true });
-      }
-    };
-
-    checkHouseholdAccess();
-  }, [error, hasHousehold, loading, checkAuth, navigate]);
+    // Only redirect if there's a clear error about not having household access
+    if (!loading && error && error.includes("not part of any household")) {
+      console.log("User no longer has household access, redirecting...");
+      navigate("/joinOrCreateHousehold", { replace: true });
+    }
+  }, [error, loading, navigate]);
 
   // Calculate dynamic height after component mounts
   useEffect(() => {
@@ -156,7 +148,7 @@ const Leaderboard: React.FC = () => {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <div className="dropdown__selected">
-              <span className="dropdown__arrow">▼</span>
+              <span className="dropdown__arrow">&#9660;</span>
               <span className="dropdown__text">{activeFilter}</span>
             </div>
             {isDropdownOpen && (
@@ -197,7 +189,10 @@ const Leaderboard: React.FC = () => {
               >
                 <div className="participant__rank">#{participant.rank}</div>
                 <img
-                  src={getProfilePictureUrl(participant.profilePicturePath) || profileDefaultIcon}
+                  src={
+                    getProfilePictureUrl(participant.profilePicturePath) ||
+                    profileDefaultIcon
+                  }
                   alt={`${participant.firstName} ${participant.lastName}`}
                   className="participant__avatar"
                 />
@@ -215,6 +210,8 @@ const Leaderboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      <BottomNav />
     </div>
   );
 };

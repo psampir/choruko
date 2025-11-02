@@ -2,18 +2,17 @@
 
 .leaderboard {
   background: var(--color-background);
-  padding: 0;
+  padding: var(--spacing-2xl);
   font-family: var(--font-family-base);
-  overflow-y: auto;
-  /* Allow page scroll if content is too tall */
+  min-height: calc(100vh - calc(var(--navbar-height) * 2)); // Account for both top and bottom navbar
 }
 
 .leaderboard__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-2xl);
-  padding-top: var(--spacing-2xl);
+  padding: 0;
+  margin-bottom: var(--spacing-2xl);
 
   .sun-icon {
     font-size: var(--font-size-h3);
@@ -59,7 +58,7 @@
 }
 
 .time-filter {
-  margin: 0 var(--spacing-2xl) var(--spacing-4xl) var(--spacing-2xl);
+  margin: 0 0 var(--spacing-4xl) 0;
   text-align: center;
 
   .dropdown__container {
@@ -168,7 +167,6 @@
 .participants {
   border: 3px solid var(--color-secondary);
   background: var(--color-background-secondary);
-  margin: 0 var(--spacing-2xl);
   border-radius: var(--border-radius-md);
   padding: 0;
   overflow: hidden;
