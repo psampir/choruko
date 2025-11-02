@@ -98,7 +98,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
             return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
         }
 
-        var result = await settlementService.MarkAsCompleted(settlementId);
+        var result = await settlementService.MarkAsPaid(settlementId);
 
         return result.ToCreatedApiResponse("Settlement complete");
     }
@@ -115,7 +115,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
             return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
         }
 
-        var result = await settlementService.UnMarkAsCompleted(settlementId);
+        var result = await settlementService.MarkAsUnpaid(settlementId);
 
         return result.ToCreatedApiResponse("Settlement uncomplete");
     }
