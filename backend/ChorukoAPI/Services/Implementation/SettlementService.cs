@@ -47,9 +47,7 @@ public class SettlementService(
 
             var allParticipants = household.Participants ?? new List<User>();
 
-            var requestedUnsettledIds = (request.UnsettledUsers == null || request.UnsettledUsers.Count == 0
-                    ? allParticipants.Select(p => p.Id)
-                    : request.UnsettledUsers)
+            var requestedUnsettledIds = request.UnsettledUsers
                 .Where(id => id != userId)
                 .ToHashSet();
 
