@@ -279,13 +279,13 @@
     // First avatar positioning
     &:first-child {
       left: 0;
-      z-index: 3;
+      z-index: 2;
     }
 
-    // Second avatar positioning (when there are 2 or less)
+    // Second avatar positioning (when there are 2 or less) - to the LEFT of first
     &:nth-child(2) {
-      left: 20px;
-      z-index: 2;
+      right: 20px;
+      z-index: 3;
     }
 
     // Counter span styling
@@ -293,7 +293,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      left: 20px;
+      right: 20px;
       background-color: var(--color-error-bg);
       font-size: var(--font-size-h5);
       color: var(--color-background);
