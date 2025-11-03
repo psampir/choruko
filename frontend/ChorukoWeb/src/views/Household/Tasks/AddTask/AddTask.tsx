@@ -32,7 +32,7 @@ const AddTask: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { createTask, editTask: editTaskContext, deleteTask } = useTask();
-  const { activities, loading: activitiesLoading, refreshActivities } = useActivity();
+  const { activities, loading: activitiesLoading } = useActivity();
   const { participants } = useHousehold();
   const themeDir = useThemeDir();
 
@@ -54,11 +54,6 @@ const AddTask: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Load activities on mount
-  useEffect(() => {
-    refreshActivities();
-  }, []);
 
   // Pre-fill form when in edit mode
   useEffect(() => {
