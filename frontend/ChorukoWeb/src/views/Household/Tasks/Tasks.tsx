@@ -319,6 +319,7 @@ const Tasks: React.FC = () => {
   const doneTasks = tasks.filter((task) => task.status === "done");
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedBackendTask, setSelectedBackendTask] = useState<HouseholdTask | null>(null);
   const [showPopup, setShowPopup] = useState(false);
 
   const renderTask = (task: Task, isLast: boolean, isFirst: boolean) => {
@@ -335,7 +336,10 @@ const Tasks: React.FC = () => {
         }`}
         key={task.id}
         onClick={() => {
+          // Find the corresponding backend task
+          const backendTask = backendTasks.find(bt => parseInt(bt.id) === task.id);
           setSelectedTask(task);
+          setSelectedBackendTask(backendTask || null);
           setShowPopup(true);
         }}
         style={{ cursor: "pointer" }}
@@ -511,48 +515,38 @@ const Tasks: React.FC = () => {
           onClose={() => {
             setShowPopup(false);
             setSelectedTask(null);
+            setSelectedBackendTask(null);
           }}
           title={selectedTask.name}
           variant={selectedTask.status === "overtime" ? "red" : "primary"}
-          actions={
-            selectedTask.status !== "done"
-              ? [
-                  {
-                    label: "Mark as done",
-                    onClick: () => {
-                      markTaskAsDone(selectedTask.id);
-                      setShowPopup(false);
-                      setSelectedTask(null);
-                    },
-                    variant:
-                      selectedTask.status === "overtime" ? "danger" : "primary",
-                  },
-                ]
-              : []
-          }
+          actions={[
+            {
+              label: "Mark as done",
+              onClick: () => {
+                markTaskAsDone(selectedTask.id);
+                setShowPopup(false);
+                setSelectedTask(null);
+              },
+              variant:
+                selectedTask.status === "overtime" ? "danger" : "primary",
+            },
+          ]}
           customActions={
-            // Show edit button only for task author and not for done tasks
+            // Show edit button only for task author
             user &&
             selectedTask.author?.name ===
-              `${user.firstName} ${user.lastName}` &&
-            selectedTask.status !== "done" ? (
+              `${user.firstName} ${user.lastName}` && selectedBackendTask ? (
               <div
                 className="task-edit-button"
                 onClick={() => {
                   navigate("/tasks/add", {
                     state: {
-                      editTask: {
-                        id: selectedTask.id,
-                        name: selectedTask.name,
-                        description: selectedTask.description,
-                        assignees: selectedTask.assignees,
-                        deadline: selectedTask.deadline,
-                        author: selectedTask.author,
-                      },
+                      editTask: selectedBackendTask,
                     },
                   });
                   setShowPopup(false);
                   setSelectedTask(null);
+                  setSelectedBackendTask(null);
                 }}
               >
                 <img src={pencilIcon} alt="Edit task" />
