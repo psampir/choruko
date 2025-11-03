@@ -53,20 +53,45 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                     );
                 }
             }
-            
-            var householdTask = new HouseholdTask
+
+            var assigneeIds = request.AssigneeIds ?? new List<string>();
+
+            var usersToAdd = household.Participants.Where(p => assigneeIds.Contains(p.Id)).ToList();
+
+            var householdTask = new HouseholdTask();
+            if (usersToAdd.Count == 0)
             {
-                Id = Guid.NewGuid().ToString(),
-                Household = household,
-                ActivityId = request.ActivityId,
-                CreatorId = userId,
-                CreationDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
-                DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
-                Status = Models.TaskStatus.Unassigned,
-                ParticipantsAmount = request.ParticipantsAmount,
-                Name = request.Name,
-                Description = request.Description
-            };
+                householdTask = new HouseholdTask
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Household = household,
+                    ActivityId = request.ActivityId,
+                    CreatorId = userId,
+                    CreationDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                    DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
+                    Status = Models.TaskStatus.Unassigned,
+                    ParticipantsAmount = request.ParticipantsAmount,
+                    Name = request.Name,
+                    Description = request.Description
+                };
+            }
+            else
+            {
+                householdTask = new HouseholdTask
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Household = household,
+                    ActivityId = request.ActivityId,
+                    CreatorId = userId,
+                    CreationDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                    DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
+                    Status = Models.TaskStatus.Assigned,
+                    ParticipantsAmount = request.ParticipantsAmount,
+                    Name = request.Name,
+                    Description = request.Description,
+                    Assignees = usersToAdd,
+                };
+            }
 
             var validationResult = await ValidateHouseholdTaskData(householdTask);
             if (validationResult.IsSuccessful == false)
@@ -126,11 +151,23 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
             }
 
+            var household = await _context.Households
+                .Include(h => h.Activities)
+                .Include(h => h.Participants)
+                .Include(h => h.Tasks)
+                .FirstOrDefaultAsync(h => h.Id == householdTask.HouseholdId);
+
+            var assigneeIds = request.AssigneeIds ?? new List<string>();
+
+            var usersToAdd = household.Participants.Where(p => assigneeIds.Contains(p.Id)).ToList();
+
+            householdTask.Assignees = usersToAdd;
             householdTask.ActivityId = request.ActivityId;
             householdTask.DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified);
             householdTask.ParticipantsAmount = request.ParticipantsAmount;
             householdTask.Name = request.Name;
             householdTask.Description = request.Description;
+            householdTask.Status = usersToAdd.Any() ? Models.TaskStatus.Assigned : Models.TaskStatus.Unassigned;
 
             var validationResult = await ValidateHouseholdTaskData(householdTask);
             if (validationResult.IsSuccessful == false)
@@ -490,14 +527,28 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
     {
-        var isActivityExist = await _context.Activities.AnyAsync(a => a.HouseholdId == householdTask.HouseholdId && a.Name == householdTask.Name);
+        var isTaskNameTaken = await _context.HouseholdTasks.AnyAsync(t => t.HouseholdId == householdTask.Household.Id && t.Name == householdTask.Name && t.Id != householdTask.Id);
 
-        if (isActivityExist)
+        if (isTaskNameTaken)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Activity with this name already exist.", HttpStatusCode.BadRequest);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "A task with this name already exists in this household.", HttpStatusCode.BadRequest);
         }
 
-        return ServiceResponseFactory.Success<OperationResultDto>(null, "Activity is valid for household.");
+        if (!CheckParticipantAmount(householdTask))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, 
+                $"Too many participants assigned. The limit for this task is {householdTask.ParticipantsAmount}, but {householdTask.Assignees.Count} were provided.",
+                HttpStatusCode.BadRequest);
+        }
+
+        return ServiceResponseFactory.Success<OperationResultDto>(null, "Task data is valid.");
+    }
+
+    private bool CheckParticipantAmount(HouseholdTask householdTask)
+    {
+        var assigneeCount = householdTask.Assignees?.Count ?? 0;
+
+        return assigneeCount <= householdTask.ParticipantsAmount;
     }
 }
 

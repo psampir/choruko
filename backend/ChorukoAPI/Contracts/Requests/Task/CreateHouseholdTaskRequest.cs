@@ -19,5 +19,7 @@ namespace ChorukoAPI.Contracts.Requests.Task
 
         [Required]
         public string Description { get; set; }
+
+        public List<string> AssigneeIds { get; set; }
     }
 }
