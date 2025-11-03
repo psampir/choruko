@@ -270,7 +270,7 @@
 
     // Second avatar positioning (when there are 2 or less)
     &:nth-child(2) {
-      left: 3px;
+      left: 20px;
       z-index: 2;
     }
 
@@ -279,7 +279,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      left: -29px;
+      left: 20px;
       background-color: var(--color-error-bg);
       font-size: var(--font-size-h5);
       color: var(--color-background);
