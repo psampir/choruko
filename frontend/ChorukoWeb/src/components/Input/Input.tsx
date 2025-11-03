@@ -2,6 +2,10 @@ import React, { useState, useRef, type InputHTMLAttributes } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./Input.scss";
+import { useThemeDir } from "../../utils/iconUtils";
+
+import dateIconLight from "../../assets/svg/light/date.svg";
+import dateIconDark from "../../assets/svg/dark/date.svg";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   variant?: "primary" | "password" | "email" | "edit" | "datetime" | "currency";
@@ -23,6 +27,9 @@ const Input: React.FC<InputProps> = ({
   onDateChange,
   ...props
 }) => {
+  const themeDir = useThemeDir();
+  const dateIcon = themeDir === "dark" ? dateIconDark : dateIconLight;
+
   // Detect password either by variant or incoming type for convenience
   const isPassword = variant === "password" || props.type === "password";
 
@@ -106,7 +113,9 @@ const Input: React.FC<InputProps> = ({
             aria-label="Select date and time"
             tabIndex={0}
             role="button"
-          />
+          >
+            <img src={dateIcon} alt="calendar icon" />
+          </span>
           {children}
         </div>
       ) : variant === "currency" ? (
