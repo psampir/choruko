@@ -198,7 +198,18 @@ public class SettlementService(
                 await Task.WhenAll(notificationTasks);
             }
 
-            var op = new OperationResultDto { /* ... */ };
+            var op = new OperationResultDto
+            {
+                Operation = "EditSettlement",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    ["SettlementId"] = settlement.Id,
+                    ["UnsettledCount"] = newUnsettled.Count,
+                    ["SettledCount"] = settlement.SettledUsers.Count
+                }
+            };
+
             return ServiceResponseFactory.Success(op, "Settlement updated successfully", HttpStatusCode.OK);
         }
         catch (Exception ex)
