@@ -5,10 +5,10 @@ import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import { useUser } from "../../../contexts/UserContext";
-import { useHousehold } from "../../../contexts/HouseholdContext";
+import { useTask } from "../../../contexts/TaskContext";
 import { useThemeDir } from "../../../utils/iconUtils";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
-import taskService, { type HouseholdTask } from "../../../services/taskService";
+import type { HouseholdTask } from "../../../services/taskService";
 
 import timerIconLight from "../../../assets/svg/light/timer.svg";
 import timerIconDark from "../../../assets/svg/dark/timer.svg";
@@ -42,7 +42,7 @@ const Tasks: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
-  const { householdInfo } = useHousehold();
+  const { tasks: backendTasks, loading, error, refreshTasks } = useTask();
   const themeDir = useThemeDir();
 
   // Theme-aware icon selection
@@ -58,44 +58,6 @@ const Tasks: React.FC = () => {
   });
 
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Fetch tasks from backend
-  const fetchTasks = async () => {
-    if (!householdInfo?.id) return;
-
-    setLoading(true);
-    setError(null);
-
-    const result = await taskService.getAllTasks(householdInfo.id);
-
-    if (result.success && result.data) {
-      const convertedTasks: Task[] = result.data.map((backendTask: HouseholdTask) => {
-        return {
-          id: parseInt(backendTask.id) || 0,
-          name: backendTask.name,
-          description: backendTask.description,
-          assignees: backendTask.assignees.map(a => ({
-            name: `${a.firstName} ${a.lastName}`,
-            avatar: getProfilePictureUrl(a.profilePicturePath) || profileIcon,
-          })),
-          timeLeft: formatTimeLeft(backendTask.deadLine),
-          deadline: backendTask.deadLine,
-          status: determineTaskStatus(backendTask),
-          author: {
-            name: `${backendTask.creator.firstName} ${backendTask.creator.lastName}`,
-            avatar: getProfilePictureUrl(backendTask.creator.profilePicturePath),
-          },
-        };
-      });
-      setTasks(convertedTasks);
-    } else {
-      setError(result.message || "Failed to fetch tasks");
-    }
-
-    setLoading(false);
-  };
 
   // Determine task status based on backend status and deadline
   const determineTaskStatus = (backendTask: HouseholdTask): "overtime" | "todo" | "done" => {
@@ -113,10 +75,33 @@ const Tasks: React.FC = () => {
     return "todo";
   };
 
-  // Fetch tasks on mount and when household changes
+  // Convert backend tasks to UI format
   useEffect(() => {
-    fetchTasks();
-  }, [householdInfo?.id]);
+    const convertedTasks: Task[] = backendTasks.map((backendTask: HouseholdTask) => {
+      return {
+        id: parseInt(backendTask.id) || 0,
+        name: backendTask.name,
+        description: backendTask.description,
+        assignees: backendTask.assignees.map(a => ({
+          name: `${a.firstName} ${a.lastName}`,
+          avatar: getProfilePictureUrl(a.profilePicturePath) || profileIcon,
+        })),
+        timeLeft: formatTimeLeft(backendTask.deadLine),
+        deadline: backendTask.deadLine,
+        status: determineTaskStatus(backendTask),
+        author: {
+          name: `${backendTask.creator.firstName} ${backendTask.creator.lastName}`,
+          avatar: getProfilePictureUrl(backendTask.creator.profilePicturePath),
+        },
+      };
+    });
+    setTasks(convertedTasks);
+  }, [backendTasks]);
+
+  // Fetch tasks on mount
+  useEffect(() => {
+    refreshTasks();
+  }, []);
 
   const [, setCurrentTime] = useState(Date.now());
 
@@ -412,7 +397,7 @@ const Tasks: React.FC = () => {
       {error && (
         <div className="tasks__error">
           <p>Error: {error}</p>
-          <Button variant="primary" onClick={fetchTasks}>
+          <Button variant="primary" onClick={refreshTasks}>
             Retry
           </Button>
         </div>
