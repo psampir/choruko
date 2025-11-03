@@ -10,7 +10,7 @@ public interface ISettlementService
     Task<ServiceResponse<List<SettlementWithoutUsersResponse>>> GetAllSettlements(string householdId);
     Task<ServiceResponse<SettlementResponse>> GetSettlement(string settlementId);
     Task<ServiceResponse<OperationResultDto>> CreateSettlement(string householdId, CreateSettlementRequest request, string userId);
-    Task<ServiceResponse<OperationResultDto>> EditSettlement(string settlementId, EditSettlementRequest request);
+    Task<ServiceResponse<OperationResultDto>> EditSettlement(string settlementId, EditSettlementRequest request, string userId);
     Task<ServiceResponse<OperationResultDto>> SettlementPaid(string settlementId, string userId);
     Task<ServiceResponse<OperationResultDto>> MarkAsDone(string settlementId);
     Task<ServiceResponse<OperationResultDto>> UnMarkAsDone(string settlementId);
