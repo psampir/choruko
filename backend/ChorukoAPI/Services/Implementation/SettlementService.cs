@@ -45,6 +45,9 @@ public class SettlementService(
                 );
             }
 
+            if (request.UnsettledUsers.Contains(userId))
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Creator cannot assign himself to settlement", HttpStatusCode.BadRequest);
+
             var allParticipants = household.Participants ?? new List<User>();
 
             var requestedUnsettledIds = request.UnsettledUsers
@@ -128,7 +131,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> EditSettlement(string settlementId, EditSettlementRequest request)
+    public async Task<ServiceResponse<OperationResultDto>> EditSettlement(string settlementId, EditSettlementRequest request, string userId)
     {
         try
         {
@@ -140,6 +143,13 @@ public class SettlementService(
 
             if (settlement is null)
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "Settlement not found", HttpStatusCode.NotFound);
+
+            if (settlement.CreatorId != userId)
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a creator of the settlement", HttpStatusCode.NotFound);
+
+
+            if (request.UnsettledUsers.Contains(userId))
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Creator cannot assign himself to settlement", HttpStatusCode.BadRequest);
 
             var participants = settlement.Household?.Participants ?? new List<User>();
             var participantIds = participants.Select(p => p.Id).ToHashSet(StringComparer.Ordinal);
@@ -445,7 +455,6 @@ public class SettlementService(
     {
         try
         {
-
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)

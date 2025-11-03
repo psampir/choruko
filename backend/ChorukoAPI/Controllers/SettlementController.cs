@@ -80,7 +80,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
             return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
         }
 
-        var result = await settlementService.EditSettlement(settlementId, request);
+        var result = await settlementService.EditSettlement(settlementId, request, userId);
 
         return result.ToCreatedApiResponse("EditSettlement");
     }
