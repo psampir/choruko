@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useHousehold } from "./HouseholdContext";
 import taskService from "../services/taskService";
@@ -241,6 +241,15 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
       setLoading(false);
     }
   };
+
+  // Fetch tasks when household info changes
+  useEffect(() => {
+    if (householdInfo?.id) {
+      refreshTasks();
+    } else {
+      setTasks([]);
+    }
+  }, [householdInfo?.id, refreshTasks]);
 
   const value: TaskContextType = {
     tasks,

@@ -98,11 +98,6 @@ const Tasks: React.FC = () => {
     setTasks(convertedTasks);
   }, [backendTasks]);
 
-  // Fetch tasks on mount
-  useEffect(() => {
-    refreshTasks();
-  }, []);
-
   const [, setCurrentTime] = useState(Date.now());
 
   // Dynamic interval updates based on closest deadline
