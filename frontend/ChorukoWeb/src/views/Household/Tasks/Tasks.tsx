@@ -496,7 +496,9 @@ const Tasks: React.FC = () => {
                 <span className="task-details-footer-value">
                   {formatTimeLeft(selectedTask.deadline)}
                 </span>
-                <div className="task-details-footer-value">5 pts</div>
+                <div className="task-details-footer-value">
+                  {selectedBackendTask?.activity?.pointsAwarded || 0} pts
+                </div>
               </div>
             </div>
           </div>
