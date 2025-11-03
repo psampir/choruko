@@ -3,13 +3,18 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./Tasks.scss";
 import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
-import timerIcon from "../../../assets/svg/timer.svg";
 import Popup from "../../../components/Popup/Popup";
 import { useUser } from "../../../contexts/UserContext";
-import profileIcon from "../../../assets/svg/light/profile-icon.svg";
-import starIcon from "../../../assets/svg/star-black.svg";
-import timer from "../../../assets/svg/timer.svg";
-import pencilLight from "../../../assets/svg/pencil-light.svg";
+import { useThemeDir } from "../../../utils/iconUtils";
+
+import timerIconLight from "../../../assets/svg/light/timer.svg";
+import timerIconDark from "../../../assets/svg/dark/timer.svg";
+import profileIconLight from "../../../assets/svg/light/profile-icon.svg";
+import profileIconDark from "../../../assets/svg/dark/profile-icon.svg";
+import starIconLight from "../../../assets/svg/light/star-black.svg";
+import starIconDark from "../../../assets/svg/dark/star-black.svg";
+import pencilLight from "../../../assets/svg/light/pencil-light.svg";
+import pencilDark from "../../../assets/svg/dark/pencil-light.svg";
 
 interface Assignee {
   name: string;
@@ -34,6 +39,13 @@ const Tasks: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
+  const themeDir = useThemeDir();
+
+  // Theme-aware icon selection
+  const timerIcon = themeDir === "dark" ? timerIconDark : timerIconLight;
+  const profileIcon = themeDir === "dark" ? profileIconDark : profileIconLight;
+  const starIcon = themeDir === "dark" ? starIconDark : starIconLight;
+  const pencilIcon = themeDir === "dark" ? pencilDark : pencilLight;
 
   const [collapsedSections, setCollapsedSections] = useState({
     overtime: false,
@@ -566,7 +578,7 @@ const Tasks: React.FC = () => {
                   setSelectedTask(null);
                 }}
               >
-                <img src={pencilLight} alt="Edit task" />
+                <img src={pencilIcon} alt="Edit task" />
               </div>
             ) : null
           }
@@ -612,7 +624,7 @@ const Tasks: React.FC = () => {
               <div className="task-details-footer-item first">
                 <div>
                   <span className="task-details-footer-icon">
-                    <img src={timer} alt="date icon" />
+                    <img src={timerIcon} alt="date icon" />
                   </span>
                   <span className="task-details-footer-label">DEADLINE</span>
                 </div>
