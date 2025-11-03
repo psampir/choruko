@@ -68,7 +68,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                     ActivityId = request.ActivityId,
                     CreatorId = userId,
                     CreationDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
-                    DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
+                    DeadLine = DateTime.SpecifyKind(request.DeadLine, DateTimeKind.Unspecified),
                     Status = Models.TaskStatus.Unassigned,
                     ParticipantsAmount = request.ParticipantsAmount,
                     Name = request.Name,
@@ -84,7 +84,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                     ActivityId = request.ActivityId,
                     CreatorId = userId,
                     CreationDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
-                    DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified),
+                    DeadLine = DateTime.SpecifyKind(request.DeadLine, DateTimeKind.Unspecified),
                     Status = Models.TaskStatus.Assigned,
                     ParticipantsAmount = request.ParticipantsAmount,
                     Name = request.Name,
@@ -163,7 +163,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
             householdTask.Assignees = usersToAdd;
             householdTask.ActivityId = request.ActivityId;
-            householdTask.DeadLine = DateTime.SpecifyKind(request.DeadLine.Date, DateTimeKind.Unspecified);
+            householdTask.DeadLine = DateTime.SpecifyKind(request.DeadLine, DateTimeKind.Unspecified);
             householdTask.ParticipantsAmount = request.ParticipantsAmount;
             householdTask.Name = request.Name;
             householdTask.Description = request.Description;
