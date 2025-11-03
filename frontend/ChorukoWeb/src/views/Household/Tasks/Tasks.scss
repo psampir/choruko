@@ -517,6 +517,15 @@
     }
   }
 
+  .task-details-assign-section {
+    width: 100%;
+    padding: var(--spacing-lg) 0 0 0;
+    
+    .button {
+      width: 100%;
+    }
+  }
+
   .task-edit-button {
     width: 40px;
     height: 40px;
