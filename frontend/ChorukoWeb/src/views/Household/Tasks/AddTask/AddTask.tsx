@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useUser } from "../../../../contexts/UserContext";
+import { useTask } from "../../../../contexts/TaskContext";
+import { useActivity } from "../../../../contexts/ActivityContext";
+import { useHousehold } from "../../../../contexts/HouseholdContext";
 import "./AddTask.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
@@ -8,6 +10,7 @@ import NavbarMobile from "../../../../components/NavbarMobile";
 import Popup from "../../../../components/Popup/Popup";
 import ErrorMessage from "../../../../components/ErrorMessage";
 import { useThemeDir } from "../../../../utils/iconUtils";
+import { getProfilePictureUrl } from "../../../../utils/imageUtils";
 
 import arrowLeftIconLight from "../../../../assets/svg/light/arrow-left.svg";
 import arrowLeftIconDark from "../../../../assets/svg/dark/arrow-left.svg";
@@ -15,69 +18,68 @@ import checkIconLight from "../../../../assets/svg/light/check.svg";
 import checkIconDark from "../../../../assets/svg/dark/check.svg";
 import starLight from "../../../../assets/svg/light/star.svg";
 import starDark from "../../../../assets/svg/dark/star.svg";
+import profileDefaultIconLight from "../../../../assets/svg/light/profile-icon.svg";
+import profileDefaultIconDark from "../../../../assets/svg/dark/profile-icon.svg";
 
-// Activity type definition
-interface Activity {
-  id: number;
-  name: string;
-  info: string;
-  points: number;
-}
-
-// Assignee type definition
+// Assignee type definition (from household participants)
 interface Assignee {
-  id: number;
+  id: string;
   name: string;
-  avatar: string;
+  avatar: string | null;
 }
 
 const AddTask: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useUser();
+  const { createTask, editTask: editTaskContext, deleteTask } = useTask();
+  const { activities, loading: activitiesLoading, refreshActivities } = useActivity();
+  const { participants } = useHousehold();
   const themeDir = useThemeDir();
 
   // Theme-aware icon selection
   const arrowLeftIcon = themeDir === "dark" ? arrowLeftIconDark : arrowLeftIconLight;
   const checkIcon = themeDir === "dark" ? checkIconDark : checkIconLight;
   const star = themeDir === "dark" ? starDark : starLight;
+  const profileDefaultIcon = themeDir === "dark" ? profileDefaultIconDark : profileDefaultIconLight;
 
   // Check if we're in edit mode
   const editTask = location.state?.editTask;
   const isEditMode = !!editTask;
 
+  const [taskName, setTaskName] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
-  const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
-  const [selectedAssignees, setSelectedAssignees] = useState<number[]>([]);
+  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load activities on mount
+  useEffect(() => {
+    refreshActivities();
+  }, []);
 
   // Pre-fill form when in edit mode
   useEffect(() => {
     if (editTask) {
+      setTaskName(editTask.name || "");
       setTaskDescription(editTask.description || "");
-      // Convert deadline string to Date object
-      if (editTask.deadline) {
-        setDeadline(new Date(editTask.deadline));
+      
+      // Convert deadline string to Date object (backend uses 'deadLine' not 'deadline')
+      const deadlineValue = editTask.deadLine || editTask.deadline;
+      if (deadlineValue) {
+        setDeadline(new Date(deadlineValue));
       }
 
-      // Find and select the activity by name
-      const activity = activities.find((a) => a.name === editTask.name);
-      if (activity) {
-        setSelectedActivity(activity.id);
+      // Set selected activity
+      if (editTask.activityId) {
+        setSelectedActivity(editTask.activityId);
       }
 
-      // Select assignees by matching both name AND avatar
+      // Set selected assignees
       if (editTask.assignees && Array.isArray(editTask.assignees)) {
-        const assigneeIds = assignees
-          .filter((assignee) =>
-            editTask.assignees.some(
-              (ea: any) =>
-                ea.name === assignee.name && ea.avatar === assignee.avatar
-            )
-          )
-          .map((assignee) => assignee.id);
+        const assigneeIds = editTask.assignees.map((a: any) => a.id);
         setSelectedAssignees(assigneeIds);
       }
     }
@@ -97,42 +99,18 @@ const AddTask: React.FC = () => {
     }));
   };
 
-  // Mock data for activities
-  const activities: Activity[] = [
-    {
-      id: 1,
-      name: "Vacuuming the floor",
-      info: "Vacuuming the floor",
-      points: 64,
-    },
-    { id: 2, name: "Clean dishes", info: "Clean dishes", points: 64 },
-    { id: 3, name: "Make breakfast", info: "Make breakfast", points: 64 },
-  ];
+  // Convert participants to assignees format
+  const assignees: Assignee[] = participants.map((p) => ({
+    id: p.id,
+    name: `${p.firstName} ${p.lastName}`,
+    avatar: getProfilePictureUrl(p.profilePicturePath),
+  }));
 
-  // Mock data for assignees
-  const assignees: Assignee[] = [
-    {
-      id: 1,
-      name: "Andreas Toretto",
-      avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-    },
-    {
-      id: 2,
-      name: "Andreas Toretto",
-      avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-    },
-    {
-      id: 3,
-      name: "Andreas Toretto",
-      avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-    },
-  ];
-
-  const handleActivitySelect = (activityId: number) => {
+  const handleActivitySelect = (activityId: string) => {
     setSelectedActivity(activityId);
   };
 
-  const handleAssigneeToggle = (assigneeId: number) => {
+  const handleAssigneeToggle = (assigneeId: string) => {
     setSelectedAssignees((prev) =>
       prev.includes(assigneeId)
         ? prev.filter((id) => id !== assigneeId)
@@ -140,69 +118,77 @@ const AddTask: React.FC = () => {
     );
   };
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     // Validate that required fields are filled
     const missingFields = [];
+    if (!taskName) missingFields.push("Task name");
     if (!taskDescription) missingFields.push("Task description");
     if (!selectedActivity) missingFields.push("Activity");
-    if (selectedAssignees.length === 0) missingFields.push("Assignees");
+    if (!deadline) missingFields.push("Deadline");
 
     if (missingFields.length > 0) {
       setErrorMessage(`Please fill in: ${missingFields.join(", ")}`);
       return;
     }
 
-    // Get the selected activity details
-    const activity = activities.find((a) => a.id === selectedActivity);
+    setIsSubmitting(true);
+    setErrorMessage("");
 
-    // Get the selected assignees' objects
-    const selectedAssigneeObjs = assignees.filter((assignee) =>
-      selectedAssignees.includes(assignee.id)
-    );
+    try {
+      if (isEditMode && editTask) {
+        // Update existing task
+        const result = await editTaskContext(editTask.id, {
+          name: taskName,
+          description: taskDescription,
+          activityId: selectedActivity!,
+          deadLine: deadline!.toISOString(),
+          participantsAmount: selectedAssignees.length || 1,
+          assigneeIds: selectedAssignees,
+        });
 
-    if (isEditMode && editTask) {
-      // Update existing task
-      const updatedTask = {
-        id: editTask.id,
-        name: activity?.name || taskDescription,
-        description: taskDescription,
-        assignees: selectedAssigneeObjs,
-        deadline: deadline ? deadline.toISOString() : "",
-        author: editTask.author,
-      };
+        if (result.success) {
+          navigate("/tasks");
+        } else {
+          setErrorMessage(result.message || "Failed to update task");
+        }
+      } else {
+        // Create new task
+        const result = await createTask({
+          name: taskName,
+          description: taskDescription,
+          activityId: selectedActivity!,
+          deadLine: deadline!.toISOString(),
+          participantsAmount: selectedAssignees.length || 1,
+          assigneeIds: selectedAssignees,
+        });
 
-      // Clear error message on successful submission
-      setErrorMessage("");
-
-      // Navigate back to tasks with the updated task data
-      navigate("/tasks", { state: { updatedTask } });
-    } else {
-      // Create new task
-      const newTask = {
-        name: activity?.name || taskDescription,
-        description: taskDescription,
-        assignees: selectedAssigneeObjs,
-        deadline: deadline ? deadline.toISOString() : "",
-        author: user
-          ? {
-              name: `${user.firstName} ${user.lastName}`,
-              avatar: user.profilePicturePath || null,
-            }
-          : null,
-      };
-
-      // Clear error message on successful submission
-      setErrorMessage("");
-
-      // Navigate back to tasks with the new task data
-      navigate("/tasks", { state: { newTask } });
+        if (result.success) {
+          navigate("/tasks");
+        } else {
+          setErrorMessage(result.message || "Failed to create task");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving task:", error);
+      setErrorMessage("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleDeleteTask = () => {
+  const handleDeleteTask = async () => {
     if (editTask) {
-      // Navigate back with delete flag
-      navigate("/tasks", { state: { deleteTaskId: editTask.id } });
+      console.log("Deleting task with ID:", editTask.id);
+      setIsSubmitting(true);
+      const result = await deleteTask(editTask.id);
+      
+      if (result.success) {
+        navigate("/tasks");
+      } else {
+        console.error("Delete failed:", result.message);
+        setErrorMessage(result.message || "Failed to delete task");
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -235,6 +221,17 @@ const AddTask: React.FC = () => {
           </h1>
         </div>
 
+        {/* Task Name */}
+        <div className="add-task__section">
+          <Input
+            variant="edit"
+            placeholder="Task name"
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+            className="add-task__input"
+          />
+        </div>
+
         {/* Task Description */}
         <div className="add-task__section">
           <Input
@@ -247,7 +244,9 @@ const AddTask: React.FC = () => {
         </div>
 
         {/* Choose Activity Section */}
-        {activities && (
+        {activitiesLoading ? (
+          <div className="add-task__loading">Loading activities...</div>
+        ) : activities && activities.length > 0 ? (
           <div
             className={`participants-list ${
               collapsedSections.activities ? "participants-list--collapsed" : ""
@@ -275,9 +274,9 @@ const AddTask: React.FC = () => {
                     <div className="activity-data">
                       <span className="points">
                         <img src={star} alt="star" />
-                        {activity.points}
+                        {activity.pointsAwarded}
                       </span>
-                      <p>{activity.info}</p>
+                      <p>{activity.name}</p>
                     </div>
                     {selectedActivity === activity.id && (
                       <img
@@ -290,6 +289,10 @@ const AddTask: React.FC = () => {
                 ))}
               </div>
             )}
+          </div>
+        ) : (
+          <div className="add-task__no-activities">
+            <p>No activities available. Please create activities first.</p>
           </div>
         )}
 
@@ -320,7 +323,7 @@ const AddTask: React.FC = () => {
                 >
                   <div className="activity-data">
                     <img
-                      src={assignee.avatar}
+                      src={assignee.avatar || profileDefaultIcon}
                       alt={assignee.name}
                       className="assignee-avatar"
                     />
@@ -352,14 +355,23 @@ const AddTask: React.FC = () => {
 
         {/* Add/Save Button */}
         <div className="add-task__footer">
-          <Button variant="primary" onClick={handleAddTask}>
-            {isEditMode ? "Save Changes" : "Add"}
+          <Button 
+            variant="primary" 
+            onClick={handleAddTask}
+            disabled={isSubmitting}
+          >
+            {isSubmitting 
+              ? "Saving..." 
+              : isEditMode 
+                ? "Save Changes" 
+                : "Add"}
           </Button>
           {isEditMode && (
             <Button
               variant="red"
               onClick={() => setShowDeleteConfirm(true)}
               className="add-task__delete-btn"
+              disabled={isSubmitting}
             >
               Delete task
             </Button>
