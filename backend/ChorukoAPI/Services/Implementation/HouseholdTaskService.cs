@@ -151,6 +151,12 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
             }
 
+            // Prevent editing completed tasks
+            if (householdTask.Status == Models.TaskStatus.Completed)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, $"Cannot edit a completed task. Please mark it as uncompleted first.", HttpStatusCode.BadRequest);
+            }
+
             var household = await _context.Households
                 .Include(h => h.Activities)
                 .Include(h => h.Participants)
@@ -266,6 +272,12 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Task not found.", HttpStatusCode.NotFound);
         }
 
+        // Prevent assigning to completed tasks
+        if (householdTask.Status == Models.TaskStatus.Completed)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot assign to a completed task. Please mark it as uncompleted first.", HttpStatusCode.BadRequest);
+        }
+
         householdTask.Status = Models.TaskStatus.Assigned;
 
         if (!user.AssignedTasks.Contains(householdTask))
@@ -325,6 +337,12 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         if (householdTask == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Task not found.", HttpStatusCode.NotFound);
+        }
+
+        // Prevent unassigning from completed tasks
+        if (householdTask.Status == Models.TaskStatus.Completed)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot unassign from a completed task. Please mark it as uncompleted first.", HttpStatusCode.BadRequest);
         }
 
         user.AssignedTasks.Remove(householdTask);
@@ -507,6 +525,12 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         if (householdTask == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, $"No tasks were found.", HttpStatusCode.NotFound);
+        }
+
+        // Prevent deleting completed tasks
+        if (householdTask.Status == Models.TaskStatus.Completed)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot delete a completed task. Please mark it as uncompleted first.", HttpStatusCode.BadRequest);
         }
 
         _context.HouseholdTasks.Remove(householdTask);
