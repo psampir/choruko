@@ -190,11 +190,12 @@ const Tasks: React.FC = () => {
   const [showPopup, setShowPopup] = useState(false);
 
   const renderTask = (task: Task, isLast: boolean, isFirst: boolean) => {
-    const visibleAvatars = getVisibleAvatars(
-      task.assignees.map((a) => a.avatar)
-    );
-    const hiddenCount =
-      task.assignees.length > 2 ? task.assignees.length - 1 : 0;
+    // Only show avatars if there are assignees
+    const hasAssignees = task.assignees.length > 0;
+    const visibleAvatars = hasAssignees 
+      ? getVisibleAvatars(task.assignees.map((a) => a.avatar))
+      : [];
+    const hiddenCount = task.assignees.length > 2 ? task.assignees.length - 1 : 0;
 
     return (
       <div
@@ -226,22 +227,28 @@ const Tasks: React.FC = () => {
         <div className="task__meta">
           <div className="task__assignees">
             <div className="task__assignees-avatars">
-              {visibleAvatars.map((avatar, idx) => (
-                <img
-                  key={idx}
-                  className={`task__assignee-avatar ${
-                    avatar.isActive ? "task__assignee-avatar--active" : ""
-                  }`}
-                  src={avatar.src}
-                  alt={`assignee ${idx + 1}`}
-                />
-              ))}
-              {hiddenCount > 0 && (
-                <span
-                  className={`task__assignee-avatar task__assignee-avatar--active task__assignee-avatar--counter task__assignee-avatar--counter-${task.status}`}
-                >
-                  +{hiddenCount}
-                </span>
+              {hasAssignees ? (
+                <>
+                  {visibleAvatars.map((avatar, idx) => (
+                    <img
+                      key={idx}
+                      className={`task__assignee-avatar ${
+                        avatar.isActive ? "task__assignee-avatar--active" : ""
+                      }`}
+                      src={avatar.src}
+                      alt={`assignee ${idx + 1}`}
+                    />
+                  ))}
+                  {hiddenCount > 0 && (
+                    <span
+                      className={`task__assignee-avatar task__assignee-avatar--active task__assignee-avatar--counter task__assignee-avatar--counter-${task.status}`}
+                    >
+                      +{hiddenCount}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="task__no-assignees">No assignees</span>
               )}
             </div>
             <div className="task__time-left">
