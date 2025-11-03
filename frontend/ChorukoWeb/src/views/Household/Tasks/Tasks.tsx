@@ -66,14 +66,14 @@ const Tasks: React.FC = () => {
     if (backendTask.status === "Completed") {
       return "done";
     }
-    
+
     const deadline = new Date(backendTask.deadLine);
     const now = new Date();
-    
+
     if (deadline < now) {
       return "overtime";
     }
-    
+
     return "todo";
   };
 
@@ -203,16 +203,15 @@ const Tasks: React.FC = () => {
   const renderTask = (task: Task, isLast: boolean, isFirst: boolean) => {
     // Only show avatars if there are assignees
     const hasAssignees = task.assignees.length > 0;
-    const visibleAvatars = hasAssignees 
+    const visibleAvatars = hasAssignees
       ? getVisibleAvatars(task.assignees.map((a) => a.avatar))
       : [];
     const hiddenCount = task.assignees.length > 2 ? task.assignees.length - 1 : 0;
 
     return (
       <div
-        className={`task ${isFirst ? "task--first" : ""} ${
-          isLast ? "task--last" : ""
-        }`}
+        className={`task ${isFirst ? "task--first" : ""} ${isLast ? "task--last" : ""
+          }`}
         key={task.id}
         onClick={() => {
           // Find the corresponding backend task using the stored GUID
@@ -243,9 +242,8 @@ const Tasks: React.FC = () => {
                   {visibleAvatars.map((avatar, idx) => (
                     <img
                       key={idx}
-                      className={`task__assignee-avatar ${
-                        avatar.isActive ? "task__assignee-avatar--active" : ""
-                      }`}
+                      className={`task__assignee-avatar ${avatar.isActive ? "task__assignee-avatar--active" : ""
+                        }`}
                       src={avatar.src}
                       alt={`assignee ${idx + 1}`}
                     />
@@ -263,12 +261,25 @@ const Tasks: React.FC = () => {
               )}
             </div>
             <div className="task__time-left">
-              <p className="task__time-left-amount">
-                {formatTimeLeft(task.deadline)}
-              </p>
-              <span>
-                <img src={timerIcon} alt="timer icon" />
-              </span>
+              {task.status === "done" ? (
+                <>
+                  <p className="task__time-left-amount">
+                    {selectedBackendTask?.activity?.pointsAwarded || backendTasks.find(bt => bt.id === task.backendId)?.activity?.pointsAwarded || 0}
+                  </p>
+                  <span>
+                    <img src={starIcon} alt="star icon" />
+                  </span>
+                </>
+              ) : (
+                <>
+                  <p className="task__time-left-amount">
+                    {formatTimeLeft(task.deadline)}
+                  </p>
+                  <span>
+                    <img src={timerIcon} alt="timer icon" />
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -301,104 +312,101 @@ const Tasks: React.FC = () => {
       )}
 
       {!loading && !error && (
-      <div className="tasks__content">
-        {/* Overtime Section */}
-        <div
-          className={`tasks__section tasks__section--overtime ${
-            collapsedSections.overtime ? "tasks__section--collapsed" : ""
-          }`}
-        >
-          <h2
-            className="tasks__section-title"
-            onClick={() => toggleSection("overtime")}
+        <div className="tasks__content">
+          {/* Overtime Section */}
+          <div
+            className={`tasks__section tasks__section--overtime ${collapsedSections.overtime ? "tasks__section--collapsed" : ""
+              }`}
           >
-            OVERTIME
-          </h2>
-          <span
-            className="dropdown__arrow"
-            onClick={() => toggleSection("overtime")}
-          >
-            &#9660;
-          </span>
-          {!collapsedSections.overtime && (
-            <div className="tasks__list">
-              {overtimeTasks.length > 0 ? (
-                overtimeTasks.map((task, index) =>
-                  renderTask(
-                    task,
-                    index === overtimeTasks.length - 1,
-                    index === 0
+            <h2
+              className="tasks__section-title"
+              onClick={() => toggleSection("overtime")}
+            >
+              OVERTIME
+            </h2>
+            <span
+              className="dropdown__arrow"
+              onClick={() => toggleSection("overtime")}
+            >
+              &#9660;
+            </span>
+            {!collapsedSections.overtime && (
+              <div className="tasks__list">
+                {overtimeTasks.length > 0 ? (
+                  overtimeTasks.map((task, index) =>
+                    renderTask(
+                      task,
+                      index === overtimeTasks.length - 1,
+                      index === 0
+                    )
                   )
-                )
-              ) : (
-                <p className="tasks__empty-message">No overtime tasks</p>
-              )}
-            </div>
-          )}
-        </div>
+                ) : (
+                  <p className="tasks__empty-message">No overtime tasks</p>
+                )}
+              </div>
+            )}
+          </div>
 
-        {/* To-Do Section */}
-        <div
-          className={`tasks__section tasks__section--todo ${
-            collapsedSections.todo ? "tasks__section--collapsed" : ""
-          }`}
-        >
-          <h2
-            className="tasks__section-title"
-            onClick={() => toggleSection("todo")}
+          {/* To-Do Section */}
+          <div
+            className={`tasks__section tasks__section--todo ${collapsedSections.todo ? "tasks__section--collapsed" : ""
+              }`}
           >
-            TO DO
-          </h2>
-          <span
-            className="dropdown__arrow"
-            onClick={() => toggleSection("todo")}
-          >
-            &#9660;
-          </span>
-          {!collapsedSections.todo && (
-            <div className="tasks__list">
-              {todoTasks.length > 0 ? (
-                todoTasks.map((task, index) =>
-                  renderTask(task, index === todoTasks.length - 1, index === 0)
-                )
-              ) : (
-                <p className="tasks__empty-message">No tasks to do</p>
-              )}
-            </div>
-          )}
-        </div>
+            <h2
+              className="tasks__section-title"
+              onClick={() => toggleSection("todo")}
+            >
+              TO DO
+            </h2>
+            <span
+              className="dropdown__arrow"
+              onClick={() => toggleSection("todo")}
+            >
+              &#9660;
+            </span>
+            {!collapsedSections.todo && (
+              <div className="tasks__list">
+                {todoTasks.length > 0 ? (
+                  todoTasks.map((task, index) =>
+                    renderTask(task, index === todoTasks.length - 1, index === 0)
+                  )
+                ) : (
+                  <p className="tasks__empty-message">No tasks to do</p>
+                )}
+              </div>
+            )}
+          </div>
 
-        {/* Done Section */}
-        <div
-          className={`tasks__section tasks__section--done ${
-            collapsedSections.done ? "tasks__section--collapsed" : ""
-          }`}
-        >
-          <h2
-            className="tasks__section-title"
-            onClick={() => toggleSection("done")}
+          {/* Done Section */}
+          <div
+            className={`tasks__section tasks__section--done ${collapsedSections.done ? "tasks__section--collapsed" : ""
+              }`}
           >
-            DONE
-          </h2>
-          <span
-            className="dropdown__arrow"
-            onClick={() => toggleSection("done")}
-          >
-            &#9660;
-          </span>
-          {!collapsedSections.done && (
-            <div className="tasks__list">
-              {doneTasks.length > 0 ? (
-                doneTasks.map((task, index) =>
-                  renderTask(task, index === doneTasks.length - 1, index === 0)
-                )
-              ) : (
-                <p className="tasks__empty-message">No completed tasks</p>
-              )}
-            </div>
-          )}
+            <h2
+              className="tasks__section-title"
+              onClick={() => toggleSection("done")}
+            >
+              DONE
+            </h2>
+            <span
+              className="dropdown__arrow"
+              onClick={() => toggleSection("done")}
+            >
+              &#9660;
+            </span>
+            {!collapsedSections.done && (
+              <div className="tasks__list">
+                {doneTasks.length > 0 ? (
+                  doneTasks.map((task, index) =>
+                    renderTask(task, index === doneTasks.length - 1, index === 0)
+                  )
+                ) : (
+                  <p className="tasks__empty-message">No completed tasks</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       )}
 
       {/* Task Details Popup */}
@@ -432,9 +440,9 @@ const Tasks: React.FC = () => {
             },
           ]}
           customActions={
-            // Show edit button only for task author (compare user ID with creator ID)
+            // Show edit button only for task author and not for done tasks
             (() => {
-              const canEdit = user && selectedBackendTask && user.id === selectedBackendTask.creatorId;
+              const canEdit = user && selectedBackendTask && user.id === selectedBackendTask.creatorId && selectedTask.status !== "done";
               console.log('Edit button check:', {
                 userId: user?.id,
                 creatorId: selectedBackendTask?.creatorId,
@@ -497,14 +505,14 @@ const Tasks: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                
-                {/* Assign/Unassign button */}
-                {(() => {
+
+                {/* Assign/Unassign button - hide for done tasks */}
+                {selectedTask.status !== "done" && (() => {
                   const isAssigned = selectedBackendTask?.assignees?.some(a => a.id === user?.id);
                   const currentAssignees = selectedBackendTask?.assignees?.length || 0;
                   const maxAssignees = selectedBackendTask?.participantsAmount || 1;
                   const isMaxReached = currentAssignees >= maxAssignees;
-                  
+
                   if (isAssigned) {
                     return (
                       <Button
