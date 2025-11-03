@@ -146,7 +146,7 @@ const AddTask: React.FC = () => {
       setErrorMessage(`Please fill in: ${missingFields.join(", ")}`);
       return;
     }
-    
+
     const participantsCountNum = parseInt(participantsCount);
     if (participantsCountNum < 1 || isNaN(participantsCountNum)) {
       setErrorMessage("Maximum assignees must be at least 1");
@@ -164,7 +164,7 @@ const AddTask: React.FC = () => {
 
     try {
       const localDeadline = formatLocalDateTime(deadline!);
-      
+
       if (isEditMode && editTask) {
         // Update existing task
         const result = await editTaskContext(editTask.id, {
@@ -285,7 +285,7 @@ const AddTask: React.FC = () => {
               className="participants-list__header"
               onClick={() => toggleSection("activities")}
             >
-              ACTIVITIES
+              SELECT AN ACTIVITY
               <span className="dropdown__arrow">&#9660;</span>
             </div>
             {!collapsedSections.activities && (
@@ -293,8 +293,8 @@ const AddTask: React.FC = () => {
                 {activities.map((activity) => (
                   <div
                     className={`activity ${selectedActivity === activity.id
-                        ? "activity--selected"
-                        : ""
+                      ? "activity--selected"
+                      : ""
                       }`}
                     key={activity.id}
                     onClick={() => handleActivitySelect(activity.id)}
@@ -365,8 +365,8 @@ const AddTask: React.FC = () => {
                 <div
                   key={assignee.id}
                   className={`activity ${selectedAssignees.includes(assignee.id)
-                      ? "activity--selected"
-                      : ""
+                    ? "activity--selected"
+                    : ""
                     }`}
                   onClick={() => handleAssigneeToggle(assignee.id)}
                 >
