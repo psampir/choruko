@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useHousehold } from "./HouseholdContext";
 import activityService from "../services/activityService";
@@ -149,6 +149,15 @@ export const ActivityProvider: React.FC<ActivityProviderProps> = ({ children }) 
       setLoading(false);
     }
   };
+
+  // Fetch activities when household info changes
+  useEffect(() => {
+    if (householdInfo?.id) {
+      refreshActivities();
+    } else {
+      setActivities([]);
+    }
+  }, [householdInfo?.id, refreshActivities]);
 
   const value: ActivityContextType = {
     activities,
