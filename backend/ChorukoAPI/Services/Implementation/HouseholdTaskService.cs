@@ -522,7 +522,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 }
         };
 
-        return ServiceResponseFactory.Success(response, "Activity was successfully created.");
+        return ServiceResponseFactory.Success(response, "Activity was successfully deleted.");
     }
 
     private async Task<ServiceResponse<OperationResultDto>> ValidateHouseholdTaskData(HouseholdTask householdTask)
