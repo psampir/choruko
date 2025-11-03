@@ -44,7 +44,7 @@ const Tasks: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { tasks: backendTasks, loading, error, refreshTasks, markTaskAsCompleted, markTaskAsUncompleted, assignToTask, unassignFromTask } = useTask();
-  const { refreshHousehold } = useHousehold();
+  const { refreshHousehold, householdInfo } = useHousehold();
   const themeDir = useThemeDir();
 
   // Theme-aware icon selection
@@ -77,10 +77,14 @@ const Tasks: React.FC = () => {
     return "todo";
   };
 
-  // Refresh household info when component mounts
+  // Refresh household info and tasks when component mounts
   useEffect(() => {
-    refreshHousehold();
-  }, [refreshHousehold]);
+    const refreshData = async () => {
+      await refreshHousehold();
+      await refreshTasks();
+    };
+    refreshData();
+  }, [refreshHousehold, refreshTasks]);
 
   // Convert backend tasks to UI format
   useEffect(() => {
@@ -104,7 +108,7 @@ const Tasks: React.FC = () => {
       };
     });
     setTasks(convertedTasks);
-  }, [backendTasks]);
+  }, [backendTasks, householdInfo]);
 
   const [, setCurrentTime] = useState(Date.now());
 
