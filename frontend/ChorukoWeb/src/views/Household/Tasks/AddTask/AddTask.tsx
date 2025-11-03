@@ -50,6 +50,7 @@ const AddTask: React.FC = () => {
   const [taskDescription, setTaskDescription] = useState("");
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
+  const [participantsCount, setParticipantsCount] = useState<string>("");
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -73,6 +74,11 @@ const AddTask: React.FC = () => {
       // Set selected activity
       if (editTask.activityId) {
         setSelectedActivity(editTask.activityId);
+      }
+
+      // Set participants count
+      if (editTask.participantsAmount) {
+        setParticipantsCount(editTask.participantsAmount.toString());
       }
 
       // Set selected assignees
@@ -134,9 +140,22 @@ const AddTask: React.FC = () => {
     if (!taskDescription) missingFields.push("Task description");
     if (!selectedActivity) missingFields.push("Activity");
     if (!deadline) missingFields.push("Deadline");
+    if (!participantsCount || participantsCount === '') missingFields.push("Maximum assignees");
 
     if (missingFields.length > 0) {
       setErrorMessage(`Please fill in: ${missingFields.join(", ")}`);
+      return;
+    }
+    
+    const participantsCountNum = parseInt(participantsCount);
+    if (participantsCountNum < 1 || isNaN(participantsCountNum)) {
+      setErrorMessage("Maximum assignees must be at least 1");
+      return;
+    }
+
+    // Validate that selected assignees don't exceed maximum
+    if (selectedAssignees.length > participantsCountNum) {
+      setErrorMessage(`You have selected ${selectedAssignees.length} assignees, but maximum is ${participantsCountNum}`);
       return;
     }
 
@@ -153,7 +172,7 @@ const AddTask: React.FC = () => {
           description: taskDescription,
           activityId: selectedActivity!,
           deadLine: localDeadline,
-          participantsAmount: selectedAssignees.length || 1,
+          participantsAmount: participantsCountNum,
           assigneeIds: selectedAssignees,
         });
 
@@ -169,7 +188,7 @@ const AddTask: React.FC = () => {
           description: taskDescription,
           activityId: selectedActivity!,
           deadLine: localDeadline,
-          participantsAmount: selectedAssignees.length || 1,
+          participantsAmount: participantsCountNum,
           assigneeIds: selectedAssignees,
         });
 
@@ -304,6 +323,29 @@ const AddTask: React.FC = () => {
             <p>No activities available. Please create activities first.</p>
           </div>
         )}
+
+        {/* Participants Count */}
+        <div className="add-task__section">
+          <div className="input__wrapper">
+            <input
+              type="number"
+              min="1"
+              placeholder="Maximum assignees"
+              value={participantsCount}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Allow empty or valid positive numbers
+                if (value === '' || (parseInt(value) >= 1 && !isNaN(parseInt(value)))) {
+                  setParticipantsCount(value);
+                }
+              }}
+              className="input input--edit add-task__input"
+            />
+            <span className="input__date">
+              <img src={profileDefaultIcon} alt="participants icon" />
+            </span>
+          </div>
+        </div>
 
         {/* Select Assignees Section */}
         <div
