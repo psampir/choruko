@@ -1,8 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import BottomNav from "../../../components/BottomNav/BottomNav";
+import { useHousehold } from "../../../contexts/HouseholdContext";
 import "./Expenses.scss";
 
 const Expenses: React.FC = () => {
+  const { refreshHousehold } = useHousehold();
+
+  // Refresh household info when component mounts
+  useEffect(() => {
+    refreshHousehold();
+  }, [refreshHousehold]);
+
   return (
     <div className="expenses-container">
       <div className="page-header">

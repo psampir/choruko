@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "./AuthContext";
 import householdService from "../services/householdService";
@@ -44,7 +44,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
   };
 
   // Fetch household data from the server
-  const refreshHousehold = async () => {
+  const refreshHousehold = useCallback(async () => {
     if (!hasHousehold) {
       setHouseholdInfo(null);
       return;
@@ -74,7 +74,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
     } finally {
       setLoading(false);
     }
-  };
+  }, [hasHousehold, checkAuth]);
 
   // Fetch household data when user has a household
   useEffect(() => {

@@ -6,6 +6,7 @@ import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import { useUser } from "../../../contexts/UserContext";
 import { useTask } from "../../../contexts/TaskContext";
+import { useHousehold } from "../../../contexts/HouseholdContext";
 import { useThemeDir } from "../../../utils/iconUtils";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 import type { HouseholdTask } from "../../../services/taskService";
@@ -43,6 +44,7 @@ const Tasks: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { tasks: backendTasks, loading, error, refreshTasks, markTaskAsCompleted, markTaskAsUncompleted, assignToTask, unassignFromTask } = useTask();
+  const { refreshHousehold } = useHousehold();
   const themeDir = useThemeDir();
 
   // Theme-aware icon selection
@@ -74,6 +76,11 @@ const Tasks: React.FC = () => {
     
     return "todo";
   };
+
+  // Refresh household info when component mounts
+  useEffect(() => {
+    refreshHousehold();
+  }, [refreshHousehold]);
 
   // Convert backend tasks to UI format
   useEffect(() => {
