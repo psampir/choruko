@@ -65,11 +65,14 @@ const AddTask: React.FC = () => {
     if (editTask) {
       setTaskName(editTask.name || "");
       setTaskDescription(editTask.description || "");
-      
+
       // Convert deadline string to Date object (backend uses 'deadLine' not 'deadline')
       const deadlineValue = editTask.deadLine || editTask.deadline;
       if (deadlineValue) {
-        setDeadline(new Date(deadlineValue));
+        // Parse ISO string as local time (backend sends without timezone)
+        // If the string has 'T' but no timezone, treat it as local
+        const deadlineDate = new Date(deadlineValue);
+        setDeadline(deadlineDate);
       }
 
       // Set selected activity
@@ -118,6 +121,17 @@ const AddTask: React.FC = () => {
     );
   };
 
+  // Format date as local ISO string (without timezone conversion)
+  const formatLocalDateTime = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  };
+
   const handleAddTask = async () => {
     // Validate that required fields are filled
     const missingFields = [];
@@ -135,13 +149,15 @@ const AddTask: React.FC = () => {
     setErrorMessage("");
 
     try {
+      const localDeadline = formatLocalDateTime(deadline!);
+      
       if (isEditMode && editTask) {
         // Update existing task
         const result = await editTaskContext(editTask.id, {
           name: taskName,
           description: taskDescription,
           activityId: selectedActivity!,
-          deadLine: deadline!.toISOString(),
+          deadLine: localDeadline,
           participantsAmount: selectedAssignees.length || 1,
           assigneeIds: selectedAssignees,
         });
@@ -157,7 +173,7 @@ const AddTask: React.FC = () => {
           name: taskName,
           description: taskDescription,
           activityId: selectedActivity!,
-          deadLine: deadline!.toISOString(),
+          deadLine: localDeadline,
           participantsAmount: selectedAssignees.length || 1,
           assigneeIds: selectedAssignees,
         });
@@ -181,7 +197,7 @@ const AddTask: React.FC = () => {
       console.log("Deleting task with ID:", editTask.id);
       setIsSubmitting(true);
       const result = await deleteTask(editTask.id);
-      
+
       if (result.success) {
         navigate("/tasks");
       } else {
@@ -248,9 +264,8 @@ const AddTask: React.FC = () => {
           <div className="add-task__loading">Loading activities...</div>
         ) : activities && activities.length > 0 ? (
           <div
-            className={`participants-list ${
-              collapsedSections.activities ? "participants-list--collapsed" : ""
-            }`}
+            className={`participants-list ${collapsedSections.activities ? "participants-list--collapsed" : ""
+              }`}
           >
             <div
               className="participants-list__header"
@@ -263,11 +278,10 @@ const AddTask: React.FC = () => {
               <div className="participants-list__content">
                 {activities.map((activity) => (
                   <div
-                    className={`activity ${
-                      selectedActivity === activity.id
+                    className={`activity ${selectedActivity === activity.id
                         ? "activity--selected"
                         : ""
-                    }`}
+                      }`}
                     key={activity.id}
                     onClick={() => handleActivitySelect(activity.id)}
                   >
@@ -298,9 +312,8 @@ const AddTask: React.FC = () => {
 
         {/* Select Assignees Section */}
         <div
-          className={`participants-list ${
-            collapsedSections.assignees ? "participants-list--collapsed" : ""
-          }`}
+          className={`participants-list ${collapsedSections.assignees ? "participants-list--collapsed" : ""
+            }`}
         >
           <div
             className="participants-list__header"
@@ -314,11 +327,10 @@ const AddTask: React.FC = () => {
               {assignees.map((assignee) => (
                 <div
                   key={assignee.id}
-                  className={`activity ${
-                    selectedAssignees.includes(assignee.id)
+                  className={`activity ${selectedAssignees.includes(assignee.id)
                       ? "activity--selected"
                       : ""
-                  }`}
+                    }`}
                   onClick={() => handleAssigneeToggle(assignee.id)}
                 >
                   <div className="activity-data">
@@ -355,15 +367,15 @@ const AddTask: React.FC = () => {
 
         {/* Add/Save Button */}
         <div className="add-task__footer">
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             onClick={handleAddTask}
             disabled={isSubmitting}
           >
-            {isSubmitting 
-              ? "Saving..." 
-              : isEditMode 
-                ? "Save Changes" 
+            {isSubmitting
+              ? "Saving..."
+              : isEditMode
+                ? "Save Changes"
                 : "Add"}
           </Button>
           {isEditMode && (
