@@ -5,7 +5,10 @@ import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import { useUser } from "../../../contexts/UserContext";
+import { useHousehold } from "../../../contexts/HouseholdContext";
 import { useThemeDir } from "../../../utils/iconUtils";
+import { getProfilePictureUrl } from "../../../utils/imageUtils";
+import taskService, { type HouseholdTask } from "../../../services/taskService";
 
 import timerIconLight from "../../../assets/svg/light/timer.svg";
 import timerIconDark from "../../../assets/svg/dark/timer.svg";
@@ -39,6 +42,7 @@ const Tasks: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
+  const { householdInfo } = useHousehold();
   const themeDir = useThemeDir();
 
   // Theme-aware icon selection
@@ -53,100 +57,66 @@ const Tasks: React.FC = () => {
     done: false,
   });
 
-  // Load tasks from localStorage or return default tasks
-  const getInitialTasks = (): Task[] => {
-    const saved = localStorage.getItem("choruko-tasks");
-    if (saved) {
-      return JSON.parse(saved);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch tasks from backend
+  const fetchTasks = async () => {
+    if (!householdInfo?.id) return;
+
+    setLoading(true);
+    setError(null);
+
+    const result = await taskService.getAllTasks(householdInfo.id);
+
+    if (result.success && result.data) {
+      const convertedTasks: Task[] = result.data.map((backendTask: HouseholdTask) => {
+        return {
+          id: parseInt(backendTask.id) || 0,
+          name: backendTask.name,
+          description: backendTask.description,
+          assignees: backendTask.assignees.map(a => ({
+            name: `${a.firstName} ${a.lastName}`,
+            avatar: getProfilePictureUrl(a.profilePicturePath) || profileIcon,
+          })),
+          timeLeft: formatTimeLeft(backendTask.deadLine),
+          deadline: backendTask.deadLine,
+          status: determineTaskStatus(backendTask),
+          author: {
+            name: `${backendTask.creator.firstName} ${backendTask.creator.lastName}`,
+            avatar: getProfilePictureUrl(backendTask.creator.profilePicturePath),
+          },
+        };
+      });
+      setTasks(convertedTasks);
+    } else {
+      setError(result.message || "Failed to fetch tasks");
     }
-    return [
-      {
-        id: 1,
-        name: "Activity name",
-        description: "Activity description",
-        assignees: [
-          {
-            name: "Andreas Toretto",
-            avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-          },
-          {
-            name: "John Doe",
-            avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-          },
-          {
-            name: "Jane Smith",
-            avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-          },
-          {
-            name: "Anna Lee",
-            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-          },
-        ],
-        timeLeft: "-4h",
-        deadline: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        status: "overtime",
-        author: {
-          name: "Andreas Toretto",
-          avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        },
-      },
-      {
-        id: 2,
-        name: "Second task",
-        description: "Another task description",
-        assignees: [
-          {
-            name: "Anna Lee",
-            avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-          },
-        ],
-        timeLeft: "2h",
-        deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-        status: "todo",
-        author: {
-          name: "Gabby Mayers",
-          avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-        },
-      },
-      {
-        id: 3,
-        name: "Activity name",
-        description: "Activity description",
-        assignees: [
-          {
-            name: "Andreas Toretto",
-            avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-          },
-          {
-            name: "John Doe",
-            avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-          },
-          {
-            name: "Jane Smith",
-            avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-          },
-          {
-            name: "Anna Lee",
-            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-          },
-        ],
-        timeLeft: "-4h",
-        deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-        status: "overtime",
-        author: {
-          name: "Ann Huang",
-          avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        },
-      },
-    ];
+
+    setLoading(false);
   };
 
-  const [tasks, setTasks] = useState<Task[]>(getInitialTasks());
+  // Determine task status based on backend status and deadline
+  const determineTaskStatus = (backendTask: HouseholdTask): "overtime" | "todo" | "done" => {
+    if (backendTask.status === "Completed") {
+      return "done";
+    }
+    
+    const deadline = new Date(backendTask.deadLine);
+    const now = new Date();
+    
+    if (deadline < now) {
+      return "overtime";
+    }
+    
+    return "todo";
+  };
 
-  // Persist tasks to localStorage on every change
+  // Fetch tasks on mount and when household changes
   useEffect(() => {
-    localStorage.setItem("choruko-tasks", JSON.stringify(tasks));
-  }, [tasks]);
+    fetchTasks();
+  }, [householdInfo?.id]);
 
   const [, setCurrentTime] = useState(Date.now());
 
@@ -433,6 +403,22 @@ const Tasks: React.FC = () => {
         </Button>
       </div>
 
+      {loading && (
+        <div className="tasks__loading">
+          <p>Loading tasks...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="tasks__error">
+          <p>Error: {error}</p>
+          <Button variant="primary" onClick={fetchTasks}>
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {!loading && !error && (
       <div className="tasks__content">
         {/* Overtime Section */}
         <div
@@ -531,6 +517,7 @@ const Tasks: React.FC = () => {
           )}
         </div>
       </div>
+      )}
 
       {/* Task Details Popup */}
       {showPopup && selectedTask && (
