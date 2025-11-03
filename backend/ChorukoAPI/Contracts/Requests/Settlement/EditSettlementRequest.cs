@@ -12,5 +12,4 @@ public class EditSettlementRequest
 
     public List<string>? UnsettledUsers { get; set; }
 
-    public List<string>? SettledUsers { get; set; }
 }

@@ -68,10 +68,6 @@ public class SettlementService(
                 .Where(u => requestedUnsettledIds.Contains(u.Id))
                 .ToList();
 
-            var settledUsers = allParticipants
-                .Where(u => !requestedUnsettledIds.Contains(u.Id) && u.Id != userId)
-                .ToList();
-
             var settlement = new Settlement
             {
                 Id = Guid.NewGuid().ToString(),
@@ -82,7 +78,7 @@ public class SettlementService(
                 Amount = request.Amount,
                 Status = SettlementStatus.Pending,
                 UnsettledUsers = unsettledUsers,
-                SettledUsers = settledUsers
+                SettledUsers = new List<User>()
             };
 
             _context.Settlements.Add(settlement);
@@ -114,7 +110,7 @@ public class SettlementService(
                 {
                     ["SettlementId"] = settlement.Id,
                     ["UnsettledCount"] = unsettledUsers.Count,
-                    ["SettledCount"] = settledUsers.Count
+                    ["SettledCount"] = settlement.SettledUsers.Count
                 }
             };
 
@@ -134,9 +130,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> EditSettlement(
-    string settlementId,
-    EditSettlementRequest request)
+    public async Task<ServiceResponse<OperationResultDto>> EditSettlement(string settlementId, EditSettlementRequest request)
     {
         try
         {
@@ -150,66 +144,41 @@ public class SettlementService(
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "Settlement not found", HttpStatusCode.NotFound);
 
             var participants = settlement.Household?.Participants ?? new List<User>();
+            var participantIds = participants.Select(p => p.Id).ToHashSet(StringComparer.Ordinal);
+            var creatorId = settlement.CreatorId;
 
             var reqUnsettled = request.UnsettledUsers?.ToHashSet(StringComparer.Ordinal);
-            var reqSettled = request.SettledUsers?.ToHashSet(StringComparer.Ordinal);
-
-            if (reqUnsettled is not null && reqSettled is not null)
-            {
-                var overlap = reqUnsettled.Intersect(reqSettled).ToList();
-                if (overlap.Count > 0)
-                    return ServiceResponseFactory.Error<OperationResultDto>(null,
-                        $"Users duplicated in both Unsettled and Settled: {string.Join(", ", overlap)}",
-                        HttpStatusCode.BadRequest);
-            }
-
-            var participantIds = participants.Select(p => p.Id).ToHashSet(StringComparer.Ordinal);
 
             HashSet<string> targetUnsettled;
-            HashSet<string> targetSettled;
 
-            if (reqUnsettled is not null && reqSettled is not null)
+            if (reqUnsettled is not null)
             {
                 targetUnsettled = reqUnsettled;
-                targetSettled = reqSettled;
-            }
-            else if (reqUnsettled is not null)
-            {
-                targetUnsettled = reqUnsettled;
-                targetSettled = participantIds.Except(targetUnsettled).ToHashSet(StringComparer.Ordinal);
-            }
-            else if (reqSettled is not null)
-            {
-                targetSettled = reqSettled;
-                targetUnsettled = participantIds.Except(targetSettled).ToHashSet(StringComparer.Ordinal);
+
+                var invalid = targetUnsettled.Where(id => !participantIds.Contains(id)).Distinct().ToList();
+                if (invalid.Count > 0)
+                    return ServiceResponseFactory.Error<OperationResultDto>(null,
+                        $"Some users are not participants of the household: {string.Join(", ", invalid)}",
+                        HttpStatusCode.BadRequest);
+
+                var currentSettledIds = settlement.SettledUsers
+                    .Select(u => u.Id)
+                    .ToHashSet(StringComparer.Ordinal);
             }
             else
             {
                 targetUnsettled = settlement.UnsettledUsers?.Select(u => u.Id).ToHashSet(StringComparer.Ordinal)
-                                  ?? new HashSet<string>(StringComparer.Ordinal);
-                targetSettled = settlement.SettledUsers?.Select(u => u.Id).ToHashSet(StringComparer.Ordinal)
-                                  ?? new HashSet<string>(StringComparer.Ordinal);
+                                    ?? new HashSet<string>(StringComparer.Ordinal);
             }
 
-            var creatorId = settlement.CreatorId;
-            targetUnsettled.Remove(creatorId);
-            targetSettled.Remove(creatorId);
-
-            var invalid = targetUnsettled.Concat(targetSettled).Where(id => !participantIds.Contains(id)).Distinct().ToList();
-            if (invalid.Count > 0)
-                return ServiceResponseFactory.Error<OperationResultDto>(null,
-                    $"Some users are not participants of the household: {string.Join(", ", invalid)}",
-                    HttpStatusCode.BadRequest);
-
             var newUnsettled = participants.Where(p => targetUnsettled.Contains(p.Id)).ToList();
-            var newSettled = participants.Where(p => targetSettled.Contains(p.Id)).ToList();
 
             settlement.UnsettledUsers = newUnsettled;
-            settlement.SettledUsers = newSettled;
             settlement.Description = request.Description;
             settlement.Amount = request.Amount;
 
             await _context.SaveChangesAsync();
+
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
@@ -229,18 +198,7 @@ public class SettlementService(
                 await Task.WhenAll(notificationTasks);
             }
 
-            var op = new OperationResultDto
-            {
-                Operation = "EditSettlement",
-                Timestamp = DateTime.UtcNow,
-                Metadata = new Dictionary<string, object>
-                {
-                    ["SettlementId"] = settlement.Id,
-                    ["UnsettledCount"] = newUnsettled.Count,
-                    ["SettledCount"] = newSettled.Count
-                }
-            };
-
+            var op = new OperationResultDto { /* ... */ };
             return ServiceResponseFactory.Success(op, "Settlement updated successfully", HttpStatusCode.OK);
         }
         catch (Exception ex)
