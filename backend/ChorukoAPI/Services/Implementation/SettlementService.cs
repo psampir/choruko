@@ -174,6 +174,7 @@ public class SettlementService(
             settlement.UnsettledUsers = newUnsettled;
             settlement.Description = request.Description;
             settlement.Amount = request.Amount;
+            settlement.SettledUsers = new List<User>();
 
             await _context.SaveChangesAsync();
 
