@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Tasks.scss";
 import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
@@ -29,6 +29,7 @@ interface Author {
 }
 interface Task {
   id: number;
+  backendId: string; // Store the original backend GUID
   name: string;
   description: string;
   assignees: Assignee[];
@@ -40,9 +41,8 @@ interface Task {
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useUser();
-  const { tasks: backendTasks, loading, error, refreshTasks } = useTask();
+  const { tasks: backendTasks, loading, error, refreshTasks, markTaskAsCompleted } = useTask();
   const themeDir = useThemeDir();
 
   // Theme-aware icon selection
@@ -77,9 +77,10 @@ const Tasks: React.FC = () => {
 
   // Convert backend tasks to UI format
   useEffect(() => {
-    const convertedTasks: Task[] = backendTasks.map((backendTask: HouseholdTask) => {
+    const convertedTasks: Task[] = backendTasks.map((backendTask: HouseholdTask, index: number) => {
       return {
-        id: parseInt(backendTask.id) || 0,
+        id: index, // Use array index for UI display key
+        backendId: backendTask.id, // Store original GUID
         name: backendTask.name,
         description: backendTask.description,
         assignees: backendTask.assignees.map(a => ({
@@ -161,139 +162,10 @@ const Tasks: React.FC = () => {
     return diffHours > 0 ? `${diffHours}h` : `${diffHours}h`;
   };
 
-  const hasAddedTaskRef = useRef(false);
-  const hasUpdatedTaskRef = useRef(false);
-  const hasDeletedTaskRef = useRef(false);
 
-  // Handle task operations from AddTask page via navigation state
-  useEffect(() => {
-    const state = location.state as {
-      newTask?: {
-        name: string;
-        description: string;
-        assignees: string[];
-        deadline: string;
-        author?: string;
-      };
-      updatedTask?: {
-        id: number;
-        name: string;
-        description: string;
-        assignees: any[];
-        deadline: string;
-        author?: any;
-      };
-      deleteTaskId?: number;
-    };
-
-    if (state?.deleteTaskId && !hasDeletedTaskRef.current) {
-      hasDeletedTaskRef.current = true;
-      setTasks((prevTasks) =>
-        prevTasks.filter((task) => task.id !== state.deleteTaskId)
-      );
-      navigate(location.pathname, { replace: true, state: {} });
-    }
-
-    if (state?.updatedTask && !hasUpdatedTaskRef.current) {
-      hasUpdatedTaskRef.current = true;
-      const { updatedTask } = state;
-
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => {
-          if (task.id === updatedTask.id) {
-            return {
-              ...task,
-              name: updatedTask.name,
-              description: updatedTask.description,
-              assignees: Array.isArray(updatedTask.assignees)
-                ? updatedTask.assignees.map((a: any) =>
-                    typeof a === "object"
-                      ? { name: a.name, avatar: a.avatar }
-                      : { name: a, avatar: a }
-                  )
-                : [],
-              deadline: updatedTask.deadline,
-              status: task.status,
-              timeLeft: task.timeLeft,
-              author: updatedTask.author || task.author,
-            };
-          }
-          return task;
-        })
-      );
-      navigate(location.pathname, { replace: true, state: {} });
-    }
-
-    if (state?.newTask && !hasAddedTaskRef.current) {
-      hasAddedTaskRef.current = true;
-      const { newTask } = state;
-
-      const calculateTimeLeft = (deadline: string) => {
-        if (!deadline) return "0h";
-
-        const deadlineDate = new Date(deadline);
-        const now = new Date();
-        const diffMs = deadlineDate.getTime() - now.getTime();
-        const diffHours = Math.round(diffMs / (1000 * 60 * 60));
-
-        if (Math.abs(diffHours) > 24) {
-          const day = deadlineDate.getDate().toString().padStart(2, "0");
-          const month = (deadlineDate.getMonth() + 1)
-            .toString()
-            .padStart(2, "0");
-          const hours = deadlineDate.getHours().toString().padStart(2, "0");
-          const minutes = deadlineDate.getMinutes().toString().padStart(2, "0");
-          return `${day}.${month} ${hours}:${minutes}`;
-        }
-
-        return diffHours > 0 ? `${diffHours}h` : `${diffHours}h`;
-      };
-
-      const timeLeft = calculateTimeLeft(newTask.deadline);
-
-      setTasks((prevTasks) => {
-        const taskToAdd: Task = {
-          id: prevTasks.length + 1,
-          name: newTask.name,
-          description: newTask.description,
-          assignees: Array.isArray(newTask.assignees)
-            ? newTask.assignees.map((a: any) =>
-                typeof a === "object"
-                  ? { name: a.name, avatar: a.avatar }
-                  : { name: a, avatar: a }
-              )
-            : [],
-          timeLeft: timeLeft,
-          deadline: newTask.deadline,
-          status: "todo",
-          author:
-            newTask.author && typeof newTask.author === "object"
-              ? (newTask.author as Author)
-              : undefined,
-        };
-        return [...prevTasks, taskToAdd];
-      });
-
-      navigate(location.pathname, { replace: true, state: {} });
-    }
-
-    if (!state?.newTask && !state?.updatedTask && !state?.deleteTaskId) {
-      hasAddedTaskRef.current = false;
-      hasUpdatedTaskRef.current = false;
-      hasDeletedTaskRef.current = false;
-    }
-  }, [location.state, navigate, location.pathname]);
 
   const addTask = () => {
     navigate("/tasks/add");
-  };
-
-  const markTaskAsDone = (taskId: number) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, status: "done" as const } : task
-      )
-    );
   };
 
   const getVisibleAvatars = (avatars: string[]) => {
@@ -331,8 +203,16 @@ const Tasks: React.FC = () => {
         }`}
         key={task.id}
         onClick={() => {
-          // Find the corresponding backend task
-          const backendTask = backendTasks.find(bt => parseInt(bt.id) === task.id);
+          // Find the corresponding backend task using the stored GUID
+          const backendTask = backendTasks.find(bt => bt.id === task.backendId);
+          console.log('Task clicked:', {
+            taskId: task.id,
+            backendId: task.backendId,
+            taskName: task.name,
+            backendTask: backendTask,
+            backendTaskId: backendTask?.id,
+            creatorId: backendTask?.creatorId
+          });
           setSelectedTask(task);
           setSelectedBackendTask(backendTask || null);
           setShowPopup(true);
@@ -517,20 +397,31 @@ const Tasks: React.FC = () => {
           actions={[
             {
               label: "Mark as done",
-              onClick: () => {
-                markTaskAsDone(selectedTask.id);
+              onClick: async () => {
+                if (selectedBackendTask) {
+                  await markTaskAsCompleted(selectedBackendTask.id);
+                }
                 setShowPopup(false);
                 setSelectedTask(null);
+                setSelectedBackendTask(null);
               },
               variant:
                 selectedTask.status === "overtime" ? "danger" : "primary",
             },
           ]}
           customActions={
-            // Show edit button only for task author
-            user &&
-            selectedTask.author?.name ===
-              `${user.firstName} ${user.lastName}` && selectedBackendTask ? (
+            // Show edit button only for task author (compare user ID with creator ID)
+            (() => {
+              const canEdit = user && selectedBackendTask && user.id === selectedBackendTask.creatorId;
+              console.log('Edit button check:', {
+                userId: user?.id,
+                creatorId: selectedBackendTask?.creatorId,
+                canEdit,
+                user,
+                selectedBackendTask
+              });
+              return canEdit;
+            })() ? (
               <div
                 className="task-edit-button"
                 onClick={() => {
