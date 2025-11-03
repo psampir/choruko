@@ -42,7 +42,7 @@ interface Task {
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { tasks: backendTasks, loading, error, refreshTasks, markTaskAsCompleted } = useTask();
+  const { tasks: backendTasks, loading, error, refreshTasks, markTaskAsCompleted, markTaskAsUncompleted } = useTask();
   const themeDir = useThemeDir();
 
   // Theme-aware icon selection
@@ -396,10 +396,14 @@ const Tasks: React.FC = () => {
           variant={selectedTask.status === "overtime" ? "red" : "primary"}
           actions={[
             {
-              label: "Mark as done",
+              label: selectedTask.status === "done" ? "Mark as undone" : "Mark as done",
               onClick: async () => {
                 if (selectedBackendTask) {
-                  await markTaskAsCompleted(selectedBackendTask.id);
+                  if (selectedTask.status === "done") {
+                    await markTaskAsUncompleted(selectedBackendTask.id);
+                  } else {
+                    await markTaskAsCompleted(selectedBackendTask.id);
+                  }
                 }
                 setShowPopup(false);
                 setSelectedTask(null);
