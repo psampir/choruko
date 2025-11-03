@@ -394,81 +394,25 @@ const Tasks: React.FC = () => {
           }}
           title={selectedTask.name}
           variant={selectedTask.status === "overtime" ? "red" : "primary"}
-          actions={
-            (() => {
-              const actions = [];
-              
-              // Check if user is assigned to this task
-              const isAssigned = selectedBackendTask?.assignees?.some(a => a.id === user?.id);
-              
-              // Assign/Unassign button
-              if (isAssigned) {
-                actions.push({
-                  label: "Unassign",
-                  onClick: async () => {
-                    if (selectedBackendTask) {
-                      const result = await unassignFromTask(selectedBackendTask.id);
-                      if (!result.success) {
-                        alert(result.message || "Failed to unassign from task");
-                        return;
-                      }
-                    }
-                    setShowPopup(false);
-                    setSelectedTask(null);
-                    setSelectedBackendTask(null);
-                  },
-                  variant: selectedTask.status === "overtime" ? ("danger" as const) : ("primary" as const),
-                });
-              } else {
-                actions.push({
-                  label: "Assign",
-                  onClick: async () => {
-                    if (selectedBackendTask) {
-                      // Check if maximum assignees reached
-                      const currentAssignees = selectedBackendTask.assignees?.length || 0;
-                      const maxAssignees = selectedBackendTask.participantsAmount;
-                      
-                      if (currentAssignees >= maxAssignees) {
-                        alert(`Cannot assign: Maximum ${maxAssignees} assignees already reached`);
-                        return;
-                      }
-                      
-                      const result = await assignToTask(selectedBackendTask.id);
-                      if (!result.success) {
-                        alert(result.message || "Failed to assign to task");
-                        return;
-                      }
-                    }
-                    setShowPopup(false);
-                    setSelectedTask(null);
-                    setSelectedBackendTask(null);
-                  },
-                  variant: selectedTask.status === "overtime" ? ("danger" as const) : ("primary" as const),
-                });
-              }
-              
-              // Mark as done/undone button
-              actions.push({
-                label: selectedTask.status === "done" ? "Mark as undone" : "Mark as done",
-                onClick: async () => {
-                  if (selectedBackendTask) {
-                    if (selectedTask.status === "done") {
-                      await markTaskAsUncompleted(selectedBackendTask.id);
-                    } else {
-                      await markTaskAsCompleted(selectedBackendTask.id);
-                    }
+          actions={[
+            {
+              label: selectedTask.status === "done" ? "Mark as undone" : "Mark as done",
+              onClick: async () => {
+                if (selectedBackendTask) {
+                  if (selectedTask.status === "done") {
+                    await markTaskAsUncompleted(selectedBackendTask.id);
+                  } else {
+                    await markTaskAsCompleted(selectedBackendTask.id);
                   }
-                  setShowPopup(false);
-                  setSelectedTask(null);
-                  setSelectedBackendTask(null);
-                },
-                variant:
-                  selectedTask.status === "overtime" ? ("danger" as const) : ("primary" as const),
-              });
-              
-              return actions;
-            })()
-          }
+                }
+                setShowPopup(false);
+                setSelectedTask(null);
+                setSelectedBackendTask(null);
+              },
+              variant:
+                selectedTask.status === "overtime" ? ("danger" as const) : ("primary" as const),
+            },
+          ]}
           customActions={
             // Show edit button only for task author (compare user ID with creator ID)
             (() => {
@@ -535,6 +479,61 @@ const Tasks: React.FC = () => {
                     </div>
                   </div>
                 ))}
+                
+                {/* Assign/Unassign button */}
+                {(() => {
+                  const isAssigned = selectedBackendTask?.assignees?.some(a => a.id === user?.id);
+                  const currentAssignees = selectedBackendTask?.assignees?.length || 0;
+                  const maxAssignees = selectedBackendTask?.participantsAmount || 1;
+                  const isMaxReached = currentAssignees >= maxAssignees;
+                  
+                  if (isAssigned) {
+                    return (
+                      <Button
+                        variant={selectedTask.status === "overtime" ? "red" : "primary"}
+                        onClick={async () => {
+                          if (selectedBackendTask) {
+                            const result = await unassignFromTask(selectedBackendTask.id);
+                            if (!result.success) {
+                              alert(result.message || "Failed to unassign from task");
+                              return;
+                            }
+                          }
+                          setShowPopup(false);
+                          setSelectedTask(null);
+                          setSelectedBackendTask(null);
+                        }}
+                        className="task-assign-button"
+                      >
+                        Unassign yourself
+                      </Button>
+                    );
+                  } else if (!isMaxReached) {
+                    // Only show assign button if maximum not reached
+                    return (
+                      <Button
+                        variant={selectedTask.status === "overtime" ? "red" : "primary"}
+                        onClick={async () => {
+                          if (selectedBackendTask) {
+                            const result = await assignToTask(selectedBackendTask.id);
+                            if (!result.success) {
+                              alert(result.message || "Failed to assign to task");
+                              return;
+                            }
+                          }
+                          setShowPopup(false);
+                          setSelectedTask(null);
+                          setSelectedBackendTask(null);
+                        }}
+                        className="task-assign-button"
+                      >
+                        Assign yourself
+                      </Button>
+                    );
+                  }
+                  // Don't show anything if not assigned and max reached
+                  return null;
+                })()}
               </div>
             </div>
             <div className="task-details-footer">
