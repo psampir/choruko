@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Tasks.scss";
 import Button from "../../../components/Button";
@@ -63,7 +63,7 @@ const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   // Determine task status based on backend status and deadline
-  const determineTaskStatus = (backendTask: HouseholdTask): "overtime" | "todo" | "done" => {
+  const determineTaskStatus = useCallback((backendTask: HouseholdTask): "overtime" | "todo" | "done" => {
     if (backendTask.status === "Completed") {
       return "done";
     }
@@ -76,7 +76,7 @@ const Tasks: React.FC = () => {
     }
 
     return "todo";
-  };
+  }, []);
 
   // Refresh household info and tasks when component mounts
   useEffect(() => {
@@ -110,7 +110,7 @@ const Tasks: React.FC = () => {
       };
     });
     setTasks(convertedTasks);
-  }, [backendTasks, householdInfo]);
+  }, [backendTasks, profileIcon, determineTaskStatus]);
 
   const [, setCurrentTime] = useState(Date.now());
 
