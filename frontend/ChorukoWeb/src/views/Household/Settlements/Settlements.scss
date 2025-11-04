@@ -332,6 +332,29 @@
     background-color: var(--color-secondary);
     overflow: hidden;
 
+    &.unsettled-list {
+      background-color: var(--color-error-bg-secondary);
+
+      .participants-list__header {
+        background-color: var(--color-error-bg-secondary);
+      }
+
+      .activity {
+        background-color: var(--color-error-bg-secondary);
+      }
+
+      .participants-list__content {
+        scrollbar-color: var(--color-error-bg) transparent;
+        &::-webkit-scrollbar-thumb {
+          background: var(--color-error-bg);
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+          background: var(--color-error);
+        }
+      }
+    }
+
     &.assignor-list {
       background-color: var(--color-primary);
 
@@ -341,6 +364,18 @@
 
       .activity {
         background-color: var(--color-primary);
+      }
+
+      .participants-list__content {
+        scrollbar-color: var(--color-primary-dark) transparent; // Firefox
+
+        &::-webkit-scrollbar-thumb {
+          background: var(--color-primary-dark);
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+          background: var(--color-black);
+        }
       }
     }
 
@@ -355,25 +390,32 @@
 
     &__content {
       padding: 0 var(--spacing-sm);
-      max-height: 200px;
+      max-height: 105px;
       overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-background-secondary) transparent;
 
-      // Custom scrollbar styling
       &::-webkit-scrollbar {
-        width: 6px;
+        width: 8px;
+        -webkit-appearance: none;
+        background: transparent;
       }
 
       &::-webkit-scrollbar-track {
         background: transparent;
       }
 
+      &::-webkit-scrollbar-track-piece {
+        background: transparent;
+      }
+
       &::-webkit-scrollbar-thumb {
-        background: var(--color-secondary-half-tr);
-        border-radius: 3px;
+        background: var(--color-background-secondary);
+        border-radius: 4px;
       }
 
       &::-webkit-scrollbar-thumb:hover {
-        background: var(--color-secondary);
+        background: var(--color-text-secondary);
       }
 
       .activity {

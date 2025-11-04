@@ -27,6 +27,7 @@ interface Settlement {
   status: "todo" | "done";
   author?: Author;
   amountSpent?: string;
+  paidBy?: string[]; // Array of assignee names who have paid
 }
 
 const Settlements: React.FC = () => {
@@ -69,6 +70,7 @@ const Settlements: React.FC = () => {
           avatar: "https://randomuser.me/api/portraits/men/1.jpg",
         },
         amountSpent: "150.50",
+        paidBy: ["Andreas Toretto"], // John Doe hasn't paid yet
       },
       {
         id: 2,
@@ -86,6 +88,7 @@ const Settlements: React.FC = () => {
           avatar: "https://randomuser.me/api/portraits/women/2.jpg",
         },
         amountSpent: "85.00",
+        paidBy: ["Anna Lee"], // Anna Lee has paid
       },
       {
         id: 3,
@@ -111,6 +114,7 @@ const Settlements: React.FC = () => {
           avatar: "https://randomuser.me/api/portraits/women/1.jpg",
         },
         amountSpent: "1200.00",
+        paidBy: ["Andreas Toretto", "John Doe"], // Jane Smith hasn't paid yet
       },
     ];
   };
@@ -469,7 +473,7 @@ const Settlements: React.FC = () => {
               {selectedSettlement.description}
             </div>
             <div className="participants-list assignor-list">
-              <div className="participants-list__header">ASSIGNOR</div>
+              <div className="participants-list__header">BUYER</div>
               <div className="participants-list__content">
                 <div className="activity activity--selected">
                   <div className="activity-data">
@@ -483,23 +487,64 @@ const Settlements: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="participants-list assignees-list">
-              <div className="participants-list__header">ASSIGNEES</div>
-              <div className="participants-list__content">
-                {selectedSettlement.assignees.map((a, idx) => (
-                  <div className="activity activity--selected" key={idx}>
-                    <div className="activity-data">
-                      <img
-                        src={a.avatar}
-                        alt={a.name}
-                        className="assignee-avatar"
-                      />
-                      <p>{a.name}</p>
-                    </div>
+            {/* Unsettled Section - Show assignees who haven't paid yet (excluding buyer) */}
+            {(() => {
+              const paidBy = selectedSettlement.paidBy || [];
+              const buyerName = selectedSettlement.author?.name;
+              const unsettledAssignees = selectedSettlement.assignees.filter(
+                (assignee) =>
+                  !paidBy.includes(assignee.name) && assignee.name !== buyerName
+              );
+
+              return unsettledAssignees.length > 0 ? (
+                <div className="participants-list unsettled-list">
+                  <div className="participants-list__header">UNSETTLED</div>
+                  <div className="participants-list__content">
+                    {unsettledAssignees.map((a, idx) => (
+                      <div className="activity activity--selected" key={idx}>
+                        <div className="activity-data">
+                          <img
+                            src={a.avatar}
+                            alt={a.name}
+                            className="assignee-avatar"
+                          />
+                          <p>{a.name}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              ) : null;
+            })()}
+            {/* Settled Section - Show assignees who have paid (excluding buyer) */}
+            {(() => {
+              const paidBy = selectedSettlement.paidBy || [];
+              const buyerName = selectedSettlement.author?.name;
+              const settledAssignees = selectedSettlement.assignees.filter(
+                (assignee) =>
+                  paidBy.includes(assignee.name) && assignee.name !== buyerName
+              );
+
+              return settledAssignees.length > 0 ? (
+                <div className="participants-list assignees-list">
+                  <div className="participants-list__header">SETTLED</div>
+                  <div className="participants-list__content">
+                    {settledAssignees.map((a, idx) => (
+                      <div className="activity activity--selected" key={idx}>
+                        <div className="activity-data">
+                          <img
+                            src={a.avatar}
+                            alt={a.name}
+                            className="assignee-avatar"
+                          />
+                          <p>{a.name}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
             <div className="settlement-details-footer">
               <div className="settlement-details-footer-item first">
                 <div>
