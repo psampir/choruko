@@ -218,14 +218,6 @@ const Tasks: React.FC = () => {
         onClick={() => {
           // Find the corresponding backend task using the stored GUID
           const backendTask = backendTasks.find(bt => bt.id === task.backendId);
-          console.log('Task clicked:', {
-            taskId: task.id,
-            backendId: task.backendId,
-            taskName: task.name,
-            backendTask: backendTask,
-            backendTaskId: backendTask?.id,
-            creatorId: backendTask?.creatorId
-          });
           setSelectedTask(task);
           setSelectedBackendTask(backendTask || null);
           setShowPopup(true);
@@ -445,13 +437,6 @@ const Tasks: React.FC = () => {
             // Show edit button only for task author and not for done tasks
             (() => {
               const canEdit = user && selectedBackendTask && user.id === selectedBackendTask.creatorId && selectedTask.status !== "done";
-              console.log('Edit button check:', {
-                userId: user?.id,
-                creatorId: selectedBackendTask?.creatorId,
-                canEdit,
-                user,
-                selectedBackendTask
-              });
               return canEdit;
             })() ? (
               <div

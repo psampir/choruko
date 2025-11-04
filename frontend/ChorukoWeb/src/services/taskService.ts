@@ -174,20 +174,17 @@ class TaskService {
   async deleteTask(taskId: string) {
     try {
       console.log(`Attempting to delete task with ID: ${taskId}`);
-      console.log(`DELETE URL: ${apiBaseUrl}/HouseholdTask/delete/${taskId}`);
       
       const response = await fetch(`${apiBaseUrl}/HouseholdTask/delete/${taskId}`, {
         method: "DELETE",
         credentials: "include",
       });
 
-      console.log(`Delete response status: ${response.status}`);
 
       if (response.ok) {
         return { success: true, message: "Task deleted successfully" };
       } else {
         const errorText = await response.text();
-        console.error(`Delete error response: ${errorText}`);
         return { success: false, message: parseErrorMessage(errorText) || "Failed to delete task" };
       }
     } catch (error) {
