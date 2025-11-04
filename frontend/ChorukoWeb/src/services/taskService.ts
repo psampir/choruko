@@ -187,7 +187,6 @@ class TaskService {
         return { success: true, message: "Task deleted successfully" };
       } else {
         const errorText = await response.text();
-        console.error(`Delete error response: ${errorText}`);
         return { success: false, message: parseErrorMessage(errorText) || "Failed to delete task" };
       }
     } catch (error) {
