@@ -140,7 +140,7 @@ const AddTask: React.FC = () => {
     if (!taskDescription) missingFields.push("Task description");
     if (!selectedActivity) missingFields.push("Activity");
     if (!deadline) missingFields.push("Deadline");
-    if (!participantsCount || participantsCount === '') missingFields.push("Maximum assignees");
+    if (!participantsCount) missingFields.push("Maximum assignees");
 
     if (missingFields.length > 0) {
       setErrorMessage(`Please fill in: ${missingFields.join(", ")}`);
