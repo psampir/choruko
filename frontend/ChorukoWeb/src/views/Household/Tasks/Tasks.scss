@@ -532,6 +532,7 @@
         width: 20px !important;
         height: 20px !important;
         margin: 0 !important;
+        border: none !important;
       }
     }
 
@@ -551,7 +552,7 @@
   .task-details-assign-section {
     width: 100%;
     padding: var(--spacing-lg) 0 0 0;
-    
+
     .button {
       width: 100%;
     }
