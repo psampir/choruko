@@ -249,7 +249,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     } else {
       setTasks([]);
     }
-  }, [householdInfo?.id, refreshTasks]);
+  }, [householdInfo?.id]);
 
   const value: TaskContextType = {
     tasks,
