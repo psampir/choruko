@@ -516,7 +516,6 @@ const Tasks: React.FC = () => {
                   if (isAssigned) {
                     return (
                       <Button
-                        style={{ marginBottom: 12, backgroundColor: "var(--color-text-primary)", color: "var(--color-background)", fontSize: "var(--font-size-body)", fontWeight: "var(--font-weight-semibold)" }}
                         onClick={async () => {
                           if (selectedBackendTask) {
                             const result = await unassignFromTask(selectedBackendTask.id);
@@ -538,7 +537,6 @@ const Tasks: React.FC = () => {
                     // Only show assign button if maximum not reached
                     return (
                       <Button
-                        style={{ marginBottom: 12, backgroundColor: "var(--color-text-primary)", color: "var(--color-background)", fontSize: "var(--font-size-body)", fontWeight: "var(--font-weight-semibold)" }}
                         onClick={async () => {
                           if (selectedBackendTask) {
                             const result = await assignToTask(selectedBackendTask.id);
