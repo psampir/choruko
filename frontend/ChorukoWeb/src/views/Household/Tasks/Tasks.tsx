@@ -38,6 +38,7 @@ interface Task {
   deadline?: string;
   status: "overtime" | "todo" | "done";
   author?: Author;
+  pointsAwarded: number;
 }
 
 const Tasks: React.FC = () => {
@@ -105,6 +106,7 @@ const Tasks: React.FC = () => {
           name: `${backendTask.creator.firstName} ${backendTask.creator.lastName}`,
           avatar: getProfilePictureUrl(backendTask.creator.profilePicturePath),
         },
+        pointsAwarded: backendTask.activity?.pointsAwarded || 0,
       };
     });
     setTasks(convertedTasks);
@@ -264,7 +266,7 @@ const Tasks: React.FC = () => {
               {task.status === "done" ? (
                 <>
                   <p className="task__time-left-amount">
-                    {selectedBackendTask?.activity?.pointsAwarded || backendTasks.find(bt => bt.id === task.backendId)?.activity?.pointsAwarded || 0}
+                    {task.pointsAwarded}
                   </p>
                   <span>
                     <img src={starIcon} alt="star icon" />
