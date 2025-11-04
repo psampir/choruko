@@ -285,6 +285,12 @@ const Tasks: React.FC = () => {
 
   return (
     <div className="tasks">
+      <ErrorMessage
+        message={errorMessage}
+        onClose={() => setErrorMessage("")}
+        variant="overlay"
+      />
+
       <div className="tasks__header">
         <h1 className="tasks__title">Tasks</h1>
         <Button variant="primary" onClick={addTask}>
