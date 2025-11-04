@@ -216,14 +216,6 @@ const Tasks: React.FC = () => {
         onClick={() => {
           // Find the corresponding backend task using the stored GUID
           const backendTask = backendTasks.find(bt => bt.id === task.backendId);
-          console.log('Task clicked:', {
-            taskId: task.id,
-            backendId: task.backendId,
-            taskName: task.name,
-            backendTask: backendTask,
-            backendTaskId: backendTask?.id,
-            creatorId: backendTask?.creatorId
-          });
           setSelectedTask(task);
           setSelectedBackendTask(backendTask || null);
           setShowPopup(true);
