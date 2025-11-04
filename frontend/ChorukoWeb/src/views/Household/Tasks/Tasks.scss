@@ -577,4 +577,12 @@
       height: 20px;
     }
   }
+
+  .task-assign-button {
+    margin-bottom: 12px;
+    background-color: var(--color-text-primary);
+    color: var(--color-background);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
+  }
 }
