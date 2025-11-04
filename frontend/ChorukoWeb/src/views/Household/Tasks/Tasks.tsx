@@ -4,6 +4,7 @@ import "./Tasks.scss";
 import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
+import ErrorMessage from "../../../components/ErrorMessage";
 import { useUser } from "../../../contexts/UserContext";
 import { useTask } from "../../../contexts/TaskContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
@@ -61,6 +62,7 @@ const Tasks: React.FC = () => {
   });
 
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Determine task status based on backend status and deadline
   const determineTaskStatus = useCallback((backendTask: HouseholdTask): "overtime" | "todo" | "done" => {
@@ -509,7 +511,7 @@ const Tasks: React.FC = () => {
                         if (selectedBackendTask) {
                           const result = await unassignFromTask(selectedBackendTask.id);
                           if (!result.success) {
-                            alert(result.message || "Failed to unassign from task");
+                            setErrorMessage(result.message || "Failed to unassign from task");
                             return;
                           }
                         }
@@ -530,7 +532,7 @@ const Tasks: React.FC = () => {
                         if (selectedBackendTask) {
                           const result = await assignToTask(selectedBackendTask.id);
                           if (!result.success) {
-                            alert(result.message || "Failed to assign to task");
+                            setErrorMessage(result.message || "Failed to assign to task");
                             return;
                           }
                         }
