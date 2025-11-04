@@ -445,13 +445,6 @@ const Tasks: React.FC = () => {
             // Show edit button only for task author and not for done tasks
             (() => {
               const canEdit = user && selectedBackendTask && user.id === selectedBackendTask.creatorId && selectedTask.status !== "done";
-              console.log('Edit button check:', {
-                userId: user?.id,
-                creatorId: selectedBackendTask?.creatorId,
-                canEdit,
-                user,
-                selectedBackendTask
-              });
               return canEdit;
             })() ? (
               <div
