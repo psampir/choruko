@@ -469,6 +469,16 @@ public class SettlementService(
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "No Settlement found.", HttpStatusCode.NotFound);
             }
 
+            if (settlement.UnsettledUsers.Contains(user))
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User does not participate in settlement.", HttpStatusCode.NotFound);
+            }
+
+            if (settlement.CreatorId == userId)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Creator already paid for settlement.", HttpStatusCode.NotFound);
+            }
+
             settlement.UnsettledUsers.Remove(user);
             settlement.SettledUsers.Add(user);
 
@@ -515,6 +525,16 @@ public class SettlementService(
             if (user == null)
             {
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "No Settlement found.", HttpStatusCode.NotFound);
+            }
+
+            if (settlement.UnsettledUsers.Contains(user))
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User does not participate in settlement.", HttpStatusCode.NotFound);
+            }
+
+            if(settlement.CreatorId == userId)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Creator already paid for settlement.", HttpStatusCode.NotFound);
             }
 
             settlement.SettledUsers.Remove(user);
