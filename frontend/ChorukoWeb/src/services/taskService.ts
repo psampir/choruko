@@ -181,7 +181,6 @@ class TaskService {
         credentials: "include",
       });
 
-      console.log(`Delete response status: ${response.status}`);
 
       if (response.ok) {
         return { success: true, message: "Task deleted successfully" };
