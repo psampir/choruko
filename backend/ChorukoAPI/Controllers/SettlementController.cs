@@ -96,9 +96,25 @@ public class SettlementController(ISettlementService settlementService) : Contro
             return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
         }
 
-        var result = await settlementService.SettlementPaid(settlementId, userId);
+        var result = await settlementService.MarkAsPaid(settlementId, userId);
 
         return result.ToCreatedApiResponse("PaySettlement");
+    }
+
+    [HttpPut("unPay/{settlementId}")]
+    [Authorize(Roles = "HouseholdAdmin,Participant")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> SettlementUnPaid([FromRoute] string settlementId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await settlementService.MarAsUnPaid(settlementId, userId);
+
+        return result.ToCreatedApiResponse("UnPaySettlement");
     }
 
     [HttpPut("markDone/{settlementId}")]

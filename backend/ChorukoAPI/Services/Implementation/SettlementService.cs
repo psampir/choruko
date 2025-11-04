@@ -451,7 +451,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> SettlementPaid(string settlementId, string userId)
+    public async Task<ServiceResponse<OperationResultDto>> MarkAsPaid(string settlementId, string userId)
     {
         try
         {
@@ -476,7 +476,7 @@ public class SettlementService(
 
             var result = new OperationResultDto
             {
-                Operation = "SettlementPaid",
+                Operation = "MarkAsPaid",
                 Timestamp = DateTime.UtcNow,
                 Metadata = new Dictionary<string, object>
             {
@@ -489,6 +489,54 @@ public class SettlementService(
             return ServiceResponseFactory.Success(result, "Settlement was successfully paid");
         }
         catch(Exception ex)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null,
+                $"Failed to change settlement status: {ex.Message}",
+                HttpStatusCode.InternalServerError
+            );
+        }
+    }
+
+
+    public async Task<ServiceResponse<OperationResultDto>> MarAsUnPaid(string settlementId, string userId)
+    {
+        try
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+            }
+
+            var settlement = await _context.Settlements.Include(s => s.SettledUsers).Include(s => s.UnsettledUsers).FirstOrDefaultAsync(s => s.Id == settlementId);
+
+            if (user == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No Settlement found.", HttpStatusCode.NotFound);
+            }
+
+            settlement.SettledUsers.Remove(user);
+            settlement.UnsettledUsers.Add(user);
+
+            await _context.SaveChangesAsync();
+
+            var result = new OperationResultDto
+            {
+                Operation = "MarkAsUnpaid",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+            {
+                { "Settlement description", settlement.Description},
+                { "User fist name", user.FirstName },
+                { "User last name", user.LastName }
+            }
+            };
+
+            return ServiceResponseFactory.Success(result, "Settlement was successfully unpaid");
+        }
+        catch (Exception ex)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(
                 null,
