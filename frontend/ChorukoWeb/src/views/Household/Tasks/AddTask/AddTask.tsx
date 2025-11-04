@@ -334,8 +334,9 @@ const AddTask: React.FC = () => {
               value={participantsCount}
               onChange={(e) => {
                 const value = e.target.value;
+                const num = parseInt(value);
                 // Allow empty or valid positive numbers
-                if (value === '' || (parseInt(value) >= 1 && !isNaN(parseInt(value)))) {
+                if (value === '' || (num >= 1 && !isNaN(num))) {
                   setParticipantsCount(value);
                 }
               }}
