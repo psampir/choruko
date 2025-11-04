@@ -505,60 +505,61 @@ const Tasks: React.FC = () => {
                     </div>
                   </div>
                 ))}
-
-                {/* Assign/Unassign button - hide for done tasks */}
-                {selectedTask.status !== "done" && (() => {
-                  const isAssigned = selectedBackendTask?.assignees?.some(a => a.id === user?.id);
-                  const currentAssignees = selectedBackendTask?.assignees?.length || 0;
-                  const maxAssignees = selectedBackendTask?.participantsAmount || 1;
-                  const isMaxReached = currentAssignees >= maxAssignees;
-
-                  if (isAssigned) {
-                    return (
-                      <Button
-                        onClick={async () => {
-                          if (selectedBackendTask) {
-                            const result = await unassignFromTask(selectedBackendTask.id);
-                            if (!result.success) {
-                              alert(result.message || "Failed to unassign from task");
-                              return;
-                            }
-                          }
-                          setShowPopup(false);
-                          setSelectedTask(null);
-                          setSelectedBackendTask(null);
-                        }}
-                        className="task-assign-button"
-                      >
-                        Unassign yourself
-                      </Button>
-                    );
-                  } else if (!isMaxReached) {
-                    // Only show assign button if maximum not reached
-                    return (
-                      <Button
-                        onClick={async () => {
-                          if (selectedBackendTask) {
-                            const result = await assignToTask(selectedBackendTask.id);
-                            if (!result.success) {
-                              alert(result.message || "Failed to assign to task");
-                              return;
-                            }
-                          }
-                          setShowPopup(false);
-                          setSelectedTask(null);
-                          setSelectedBackendTask(null);
-                        }}
-                        className="task-assign-button"
-                      >
-                        Assign yourself
-                      </Button>
-                    );
-                  }
-                  // Don't show anything if not assigned and max reached
-                  return null;
-                })()}
               </div>
+            </div>
+            <div className="assign-button">
+              {/* Assign/Unassign button - hide for done tasks */}
+              {selectedTask.status !== "done" && (() => {
+                const isAssigned = selectedBackendTask?.assignees?.some(a => a.id === user?.id);
+                const currentAssignees = selectedBackendTask?.assignees?.length || 0;
+                const maxAssignees = selectedBackendTask?.participantsAmount || 1;
+                const isMaxReached = currentAssignees >= maxAssignees;
+
+                if (isAssigned) {
+                  return (
+                    <Button
+                      onClick={async () => {
+                        if (selectedBackendTask) {
+                          const result = await unassignFromTask(selectedBackendTask.id);
+                          if (!result.success) {
+                            alert(result.message || "Failed to unassign from task");
+                            return;
+                          }
+                        }
+                        setShowPopup(false);
+                        setSelectedTask(null);
+                        setSelectedBackendTask(null);
+                      }}
+                      className="task-assign-button"
+                    >
+                      Unassign yourself
+                    </Button>
+                  );
+                } else if (!isMaxReached) {
+                  // Only show assign button if maximum not reached
+                  return (
+                    <Button
+                      onClick={async () => {
+                        if (selectedBackendTask) {
+                          const result = await assignToTask(selectedBackendTask.id);
+                          if (!result.success) {
+                            alert(result.message || "Failed to assign to task");
+                            return;
+                          }
+                        }
+                        setShowPopup(false);
+                        setSelectedTask(null);
+                        setSelectedBackendTask(null);
+                      }}
+                      className="task-assign-button"
+                    >
+                      Assign yourself
+                    </Button>
+                  );
+                }
+                // Don't show anything if not assigned and max reached
+                return null;
+              })()}
             </div>
             <div className="task-details-footer">
               <div className="task-details-footer-item first">
