@@ -45,11 +45,12 @@ public class SettlementService(
                 );
             }
 
+            if (request.UnsettledUsers.Contains(userId))
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Creator cannot assign himself to settlement", HttpStatusCode.BadRequest);
+
             var allParticipants = household.Participants ?? new List<User>();
 
-            var requestedUnsettledIds = (request.UnsettledUsers == null || request.UnsettledUsers.Count == 0
-                    ? allParticipants.Select(p => p.Id)
-                    : request.UnsettledUsers)
+            var requestedUnsettledIds = request.UnsettledUsers
                 .Where(id => id != userId)
                 .ToHashSet();
 
@@ -68,10 +69,6 @@ public class SettlementService(
                 .Where(u => requestedUnsettledIds.Contains(u.Id))
                 .ToList();
 
-            var settledUsers = allParticipants
-                .Where(u => !requestedUnsettledIds.Contains(u.Id) && u.Id != userId)
-                .ToList();
-
             var settlement = new Settlement
             {
                 Id = Guid.NewGuid().ToString(),
@@ -82,7 +79,7 @@ public class SettlementService(
                 Amount = request.Amount,
                 Status = SettlementStatus.Pending,
                 UnsettledUsers = unsettledUsers,
-                SettledUsers = settledUsers
+                SettledUsers = new List<User>()
             };
 
             _context.Settlements.Add(settlement);
@@ -114,7 +111,7 @@ public class SettlementService(
                 {
                     ["SettlementId"] = settlement.Id,
                     ["UnsettledCount"] = unsettledUsers.Count,
-                    ["SettledCount"] = settledUsers.Count
+                    ["SettledCount"] = settlement.SettledUsers.Count
                 }
             };
 
@@ -134,9 +131,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> EditSettlement(
-    string settlementId,
-    EditSettlementRequest request)
+    public async Task<ServiceResponse<OperationResultDto>> EditSettlement(string settlementId, EditSettlementRequest request, string userId)
     {
         try
         {
@@ -149,67 +144,59 @@ public class SettlementService(
             if (settlement is null)
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "Settlement not found", HttpStatusCode.NotFound);
 
+            if (settlement.CreatorId != userId)
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a creator of the settlement", HttpStatusCode.NotFound);
+
+
+            if (request.UnsettledUsers.Contains(userId))
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Creator cannot assign himself to settlement", HttpStatusCode.BadRequest);
+
+            if (request.Amount <= 0)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(
+                    null,
+                    "Amount must be greater than 0",
+                    HttpStatusCode.BadRequest
+                );
+            }
+
             var participants = settlement.Household?.Participants ?? new List<User>();
+            var participantIds = participants.Select(p => p.Id).ToHashSet(StringComparer.Ordinal);
+            var creatorId = settlement.CreatorId;
 
             var reqUnsettled = request.UnsettledUsers?.ToHashSet(StringComparer.Ordinal);
-            var reqSettled = request.SettledUsers?.ToHashSet(StringComparer.Ordinal);
-
-            if (reqUnsettled is not null && reqSettled is not null)
-            {
-                var overlap = reqUnsettled.Intersect(reqSettled).ToList();
-                if (overlap.Count > 0)
-                    return ServiceResponseFactory.Error<OperationResultDto>(null,
-                        $"Users duplicated in both Unsettled and Settled: {string.Join(", ", overlap)}",
-                        HttpStatusCode.BadRequest);
-            }
-
-            var participantIds = participants.Select(p => p.Id).ToHashSet(StringComparer.Ordinal);
 
             HashSet<string> targetUnsettled;
-            HashSet<string> targetSettled;
 
-            if (reqUnsettled is not null && reqSettled is not null)
+            if (reqUnsettled is not null)
             {
                 targetUnsettled = reqUnsettled;
-                targetSettled = reqSettled;
-            }
-            else if (reqUnsettled is not null)
-            {
-                targetUnsettled = reqUnsettled;
-                targetSettled = participantIds.Except(targetUnsettled).ToHashSet(StringComparer.Ordinal);
-            }
-            else if (reqSettled is not null)
-            {
-                targetSettled = reqSettled;
-                targetUnsettled = participantIds.Except(targetSettled).ToHashSet(StringComparer.Ordinal);
+
+                var invalid = targetUnsettled.Where(id => !participantIds.Contains(id)).Distinct().ToList();
+                if (invalid.Count > 0)
+                    return ServiceResponseFactory.Error<OperationResultDto>(null,
+                        $"Some users are not participants of the household: {string.Join(", ", invalid)}",
+                        HttpStatusCode.BadRequest);
+
+                var currentSettledIds = settlement.SettledUsers
+                    .Select(u => u.Id)
+                    .ToHashSet(StringComparer.Ordinal);
             }
             else
             {
                 targetUnsettled = settlement.UnsettledUsers?.Select(u => u.Id).ToHashSet(StringComparer.Ordinal)
-                                  ?? new HashSet<string>(StringComparer.Ordinal);
-                targetSettled = settlement.SettledUsers?.Select(u => u.Id).ToHashSet(StringComparer.Ordinal)
-                                  ?? new HashSet<string>(StringComparer.Ordinal);
+                                    ?? new HashSet<string>(StringComparer.Ordinal);
             }
 
-            var creatorId = settlement.CreatorId;
-            targetUnsettled.Remove(creatorId);
-            targetSettled.Remove(creatorId);
-
-            var invalid = targetUnsettled.Concat(targetSettled).Where(id => !participantIds.Contains(id)).Distinct().ToList();
-            if (invalid.Count > 0)
-                return ServiceResponseFactory.Error<OperationResultDto>(null,
-                    $"Some users are not participants of the household: {string.Join(", ", invalid)}",
-                    HttpStatusCode.BadRequest);
-
             var newUnsettled = participants.Where(p => targetUnsettled.Contains(p.Id)).ToList();
-            var newSettled = participants.Where(p => targetSettled.Contains(p.Id)).ToList();
 
             settlement.UnsettledUsers = newUnsettled;
-            settlement.SettledUsers = newSettled;
             settlement.Description = request.Description;
             settlement.Amount = request.Amount;
+            settlement.SettledUsers = new List<User>();
 
             await _context.SaveChangesAsync();
+
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
@@ -237,7 +224,7 @@ public class SettlementService(
                 {
                     ["SettlementId"] = settlement.Id,
                     ["UnsettledCount"] = newUnsettled.Count,
-                    ["SettledCount"] = newSettled.Count
+                    ["SettledCount"] = settlement.SettledUsers.Count
                 }
             };
 
@@ -330,7 +317,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> MarkAsPaid(string settlementId)
+    public async Task<ServiceResponse<OperationResultDto>> MarkAsDone(string settlementId, string userId)
     {
         try
         {
@@ -343,6 +330,9 @@ public class SettlementService(
             {
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "No settlement found", HttpStatusCode.NotFound);
             }
+
+            if (settlement.CreatorId != userId)
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a creator of the settlement", HttpStatusCode.NotFound);
 
             settlement.Status = SettlementStatus.Completed;
             await _context.SaveChangesAsync();
@@ -381,7 +371,7 @@ public class SettlementService(
 
             var result = new OperationResultDto
             {
-                Operation = "MarkAsPaid",
+                Operation = "MarkAsDone",
                 Timestamp = DateTime.UtcNow,
                 Metadata = new Dictionary<string, object> { ["SettlementId"] = settlement.Id }
             };
@@ -398,7 +388,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> MarkAsUnpaid(string settlementId)
+    public async Task<ServiceResponse<OperationResultDto>> UnMarkAsDone(string settlementId, string userId)
     {
         try
         {
@@ -411,6 +401,9 @@ public class SettlementService(
             {
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "No settlement found", HttpStatusCode.NotFound);
             }
+
+            if (settlement.CreatorId != userId)
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a creator of the settlement", HttpStatusCode.NotFound);
 
             settlement.Status = SettlementStatus.Pending;
             await _context.SaveChangesAsync();
@@ -449,7 +442,7 @@ public class SettlementService(
 
             var result = new OperationResultDto
             {
-                Operation = "MarkAsUnpaid",
+                Operation = "UnMarkAsDone",
                 Timestamp = DateTime.UtcNow,
                 Metadata = new Dictionary<string, object>
                 {
@@ -465,7 +458,121 @@ public class SettlementService(
         }
         catch (Exception ex)
         {
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null,
+                $"Failed to change settlement status: {ex.Message}",
+                HttpStatusCode.InternalServerError
+            );
+        }
+    }
 
+    public async Task<ServiceResponse<OperationResultDto>> MarkAsPaid(string settlementId, string userId)
+    {
+        try
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+            }
+
+            var settlement = await _context.Settlements.Include(s => s.SettledUsers).Include(s => s.UnsettledUsers).FirstOrDefaultAsync(s => s.Id == settlementId);
+
+            if (user == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No Settlement found.", HttpStatusCode.NotFound);
+            }
+
+            if (!settlement.UnsettledUsers.Contains(user))
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User does not participate in settlement.", HttpStatusCode.NotFound);
+            }
+
+            if (settlement.CreatorId == userId)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Creator already paid for settlement.", HttpStatusCode.NotFound);
+            }
+
+            settlement.UnsettledUsers.Remove(user);
+            settlement.SettledUsers.Add(user);
+
+            await _context.SaveChangesAsync();
+
+            var result = new OperationResultDto
+            {
+                Operation = "MarkAsPaid",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+            {
+                { "Settlement description", settlement.Description},
+                { "User fist name", user.FirstName },
+                { "User last name", user.LastName }
+            }
+            };
+
+            return ServiceResponseFactory.Success(result, "Settlement was successfully paid");
+        }
+        catch(Exception ex)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(
+                null,
+                $"Failed to change settlement status: {ex.Message}",
+                HttpStatusCode.InternalServerError
+            );
+        }
+    }
+
+
+    public async Task<ServiceResponse<OperationResultDto>> MarAsUnPaid(string settlementId, string userId)
+    {
+        try
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+            }
+
+            var settlement = await _context.Settlements.Include(s => s.SettledUsers).Include(s => s.UnsettledUsers).FirstOrDefaultAsync(s => s.Id == settlementId);
+
+            if (user == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No Settlement found.", HttpStatusCode.NotFound);
+            }
+
+            if (settlement.UnsettledUsers.Contains(user))
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User does not participate in settlement.", HttpStatusCode.NotFound);
+            }
+
+            if(settlement.CreatorId == userId)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Creator already paid for settlement.", HttpStatusCode.NotFound);
+            }
+
+            settlement.SettledUsers.Remove(user);
+            settlement.UnsettledUsers.Add(user);
+
+            await _context.SaveChangesAsync();
+
+            var result = new OperationResultDto
+            {
+                Operation = "MarkAsUnpaid",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+            {
+                { "Settlement description", settlement.Description},
+                { "User fist name", user.FirstName },
+                { "User last name", user.LastName }
+            }
+            };
+
+            return ServiceResponseFactory.Success(result, "Settlement was successfully unpaid");
+        }
+        catch (Exception ex)
+        {
             return ServiceResponseFactory.Error<OperationResultDto>(
                 null,
                 $"Failed to change settlement status: {ex.Message}",

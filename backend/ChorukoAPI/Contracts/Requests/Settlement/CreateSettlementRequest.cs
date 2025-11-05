@@ -10,5 +10,6 @@ public class CreateSettlementRequest
 
     public decimal Amount { get; set; }
 
-    public List<string>? UnsettledUsers { get; set; }
+    [MinLength(1, ErrorMessage = "At least one participant must be added to the settlement.")]
+    public List<string>? UnsettledUsers { get; set; } = [];
 }

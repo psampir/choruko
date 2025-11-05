@@ -73,7 +73,6 @@ public class SettlementController(ISettlementService settlementService) : Contro
     [Authorize(Roles = "HouseholdAdmin,Participant")]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> EditSettlement([FromRoute] string settlementId, EditSettlementRequest request)
     {
-
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userId))
@@ -81,14 +80,46 @@ public class SettlementController(ISettlementService settlementService) : Contro
             return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
         }
 
-        var result = await settlementService.EditSettlement(settlementId, request);
+        var result = await settlementService.EditSettlement(settlementId, request, userId);
 
         return result.ToCreatedApiResponse("EditSettlement");
     }
 
-    [HttpPut("markComplete/{settlementId}")]
+    [HttpPut("pay/{settlementId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> MarkAsCompleted([FromRoute] string settlementId)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> SettlementPaid([FromRoute] string settlementId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await settlementService.MarkAsPaid(settlementId, userId);
+
+        return result.ToCreatedApiResponse("PaySettlement");
+    }
+
+    [HttpPut("unPay/{settlementId}")]
+    [Authorize(Roles = "HouseholdAdmin,Participant")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> SettlementUnPaid([FromRoute] string settlementId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await settlementService.MarAsUnPaid(settlementId, userId);
+
+        return result.ToCreatedApiResponse("UnPaySettlement");
+    }
+
+    [HttpPut("markDone/{settlementId}")]
+    [Authorize(Roles = "HouseholdAdmin,Participant")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> MarkAsDone([FromRoute] string settlementId)
     {
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -98,14 +129,14 @@ public class SettlementController(ISettlementService settlementService) : Contro
             return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
         }
 
-        var result = await settlementService.MarkAsPaid(settlementId);
+        var result = await settlementService.MarkAsDone(settlementId, userId);
 
         return result.ToCreatedApiResponse("Settlement complete");
     }
 
-    [HttpPut("unmarkComplete/{settlementId}")]
+    [HttpPut("unmarkDone/{settlementId}")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> UnMarkAsCompleted([FromRoute] string settlementId)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> UnMarkAsDone([FromRoute] string settlementId)
     {
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -115,7 +146,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
             return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
         }
 
-        var result = await settlementService.MarkAsUnpaid(settlementId);
+        var result = await settlementService.UnMarkAsDone(settlementId, userId);
 
         return result.ToCreatedApiResponse("Settlement uncomplete");
     }
