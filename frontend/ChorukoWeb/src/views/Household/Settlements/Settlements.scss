@@ -64,11 +64,11 @@
       }
     }
 
-    &--todo {
+    &--unpaid {
       border-color: var(--color-secondary);
     }
 
-    &--done {
+    &--paid {
       border-color: var(--color-primary);
     }
   }
