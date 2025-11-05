@@ -57,10 +57,28 @@
   &--password {
     @extend .input--primary;
     
-    // Hide Firefox's native password reveal button
+    // Hide all native password reveal buttons (IE/Edge/Firefox)
     &::-ms-reveal,
     &::-ms-clear {
       display: none;
+      width: 0;
+      height: 0;
+    }
+    
+    // Firefox specific
+    &::-moz-reveal {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    
+    // Webkit (Chrome/Safari/Edge)
+    &::-webkit-credentials-auto-fill-button,
+    &::-webkit-textfield-decoration-container {
+      visibility: hidden;
+      pointer-events: none;
+      position: absolute;
+      right: 0;
     }
   }
 
