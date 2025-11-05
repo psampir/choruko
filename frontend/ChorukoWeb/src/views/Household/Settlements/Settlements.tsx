@@ -5,11 +5,17 @@ import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import { useUser } from "../../../contexts/UserContext";
-import profileIcon from "../../../assets/svg/light/profile-icon.svg";
-import starIcon from "../../../assets/svg/dark/star.svg";
-import pencilLight from "../../../assets/svg/dark/pencil.svg";
+import { useIsDarkTheme } from "../../../utils/iconUtils";
+import profileIconLight from "../../../assets/svg/light/profile-icon.svg";
+import profileIconDark from "../../../assets/svg/dark/profile-icon.svg";
+import starIconLight from "../../../assets/svg/light/star.svg";
+import starIconDark from "../../../assets/svg/dark/star.svg";
+import pencilLight from "../../../assets/svg/light/pencil.svg";
+import pencilDark from "../../../assets/svg/dark/pencil.svg";
 import checkLight from "../../../assets/svg/light/check.svg";
-import settlementIcon from "../../../assets/svg/light/expenses.svg";
+import checkDark from "../../../assets/svg/dark/check.svg";
+import settlementIconLight from "../../../assets/svg/light/expenses.svg";
+import settlementIconDark from "../../../assets/svg/dark/expenses.svg";
 
 interface Assignee {
   name: string;
@@ -34,6 +40,13 @@ const Settlements: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
+  const isDark = useIsDarkTheme();
+
+  const profileIcon = isDark ? profileIconDark : profileIconLight;
+  const starIcon = isDark ? starIconDark : starIconLight;
+  const pencilIcon = isDark ? pencilDark : pencilLight;
+  const checkIcon = isDark ? checkDark : checkLight;
+  const settlementIcon = isDark ? settlementIconDark : settlementIconLight;
 
   // Currency symbol - can be made dynamic based on user preferences/household settings
   const currencySymbol = "₴";
@@ -300,8 +313,8 @@ const Settlements: React.FC = () => {
           </div>
           <span className="settlement__icon-container">
             <img
-              src={settlement.status === "todo" ? settlementIcon : checkLight}
-              alt="Check light icon"
+              src={settlement.status === "todo" ? settlementIcon : checkIcon}
+              alt="Settlement status icon"
             />
           </span>
         </div>
@@ -462,7 +475,7 @@ const Settlements: React.FC = () => {
                   setSelectedSettlement(null);
                 }}
               >
-                <img src={pencilLight} alt="Edit settlement" />
+                <img src={pencilIcon} alt="Edit settlement" />
               </div>
             ) : null
           }
