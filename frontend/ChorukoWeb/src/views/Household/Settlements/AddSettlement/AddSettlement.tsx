@@ -143,9 +143,9 @@ const AddSettlement: React.FC = () => {
         amountSpent: amountSpent,
         author: user
           ? {
-              name: `${user.firstName} ${user.lastName}`,
-              avatar: user.profilePicturePath || null,
-            }
+            name: `${user.firstName} ${user.lastName}`,
+            avatar: user.profilePicturePath || null,
+          }
           : null,
       };
 
@@ -208,15 +208,14 @@ const AddSettlement: React.FC = () => {
 
         {/* Select Assignees Section */}
         <div
-          className={`participants-list ${
-            collapsedSections.assignees ? "participants-list--collapsed" : ""
-          }`}
+          className={`participants-list ${collapsedSections.assignees ? "participants-list--collapsed" : ""
+            }`}
         >
           <div
             className="participants-list__header"
             onClick={() => toggleSection("assignees")}
           >
-            SELECT ASSIGNEES
+            SELECT PAYERS
             <span className="dropdown__arrow">&#9660;</span>
           </div>
           {!collapsedSections.assignees && (
@@ -224,11 +223,10 @@ const AddSettlement: React.FC = () => {
               {assignees.map((assignee) => (
                 <div
                   key={assignee.id}
-                  className={`activity ${
-                    selectedAssignees.includes(assignee.id)
-                      ? "activity--selected"
-                      : ""
-                  }`}
+                  className={`activity ${selectedAssignees.includes(assignee.id)
+                    ? "activity--selected"
+                    : ""
+                    }`}
                   onClick={() => handleAssigneeToggle(assignee.id)}
                 >
                   <div className="activity-data">
