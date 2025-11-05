@@ -16,14 +16,15 @@
   }
 
   &__header {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: var(--spacing-md);
+    justify-content: center;
     margin-bottom: var(--spacing-md);
   }
 
   &__back-btn {
+    position: absolute;
     left: 0;
     background: none;
     border: none;
@@ -42,9 +43,6 @@
   &__title {
     margin: 0;
     color: var(--color-text-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     text-align: center;
   }
 
