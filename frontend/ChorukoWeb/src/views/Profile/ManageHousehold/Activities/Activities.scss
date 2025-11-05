@@ -87,7 +87,6 @@ body {
     font-size: var(--font-size-h4);
   }
 
-
   &__title {
     font-size: var(--font-size-h2);
     font-weight: var(--font-weight-semibold);
@@ -265,7 +264,7 @@ body {
 
     .participant__delegate-admin {
       &.admin-choose::before {
-        content: url(../../../../assets/svg/edit-box.svg);
+        content: url(../../../../assets/svg/light/edit-box.svg);
         position: absolute;
         right: var(--spacing-3xl);
         width: 30px;

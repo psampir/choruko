@@ -9,9 +9,10 @@ interface PopupAction {
   disabled?: boolean;
 }
 
-interface PopupProps extends React.HTMLAttributes<HTMLDivElement> {
+interface PopupProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   variant?: "primary" | "red";
-  title?: string;
+  title?: string | React.ReactNode;
   className?: string;
   open?: boolean;
   onClose?: () => void;

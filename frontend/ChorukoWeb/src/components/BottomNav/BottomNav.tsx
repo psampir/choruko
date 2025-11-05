@@ -7,16 +7,16 @@ import houseBlackIconLight from "../../assets/svg/light/house-black.svg";
 import houseBlackFillIconLight from "../../assets/svg/light/house-black-fill.svg";
 import taskIconLight from "../../assets/svg/light/task.svg";
 import taskFillIconLight from "../../assets/svg/light/task-fill.svg";
-import expensesIconLight from "../../assets/svg/light/expenses.svg";
-import expensesFillIconLight from "../../assets/svg/light/expenses-fill.svg";
+import settlementsIconLight from "../../assets/svg/light/expenses.svg";
+import settlementsFillIconLight from "../../assets/svg/light/expenses-fill.svg";
 
 // Dark theme icons
 import houseBlackIconDark from "../../assets/svg/dark/house-black.svg";
 import houseBlackFillIconDark from "../../assets/svg/dark/house-black-fill.svg";
 import taskIconDark from "../../assets/svg/dark/task.svg";
 import taskFillIconDark from "../../assets/svg/dark/task-fill.svg";
-import expensesIconDark from "../../assets/svg/dark/expenses.svg";
-import expensesFillIconDark from "../../assets/svg/dark/expenses-fill.svg";
+import settlementsIconDark from "../../assets/svg/dark/expenses.svg";
+import settlementsFillIconDark from "../../assets/svg/dark/expenses-fill.svg";
 
 interface BottomNavProps {
   activeTab?: string;
@@ -35,18 +35,19 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
     : houseBlackFillIconLight;
   const taskIcon = isDark ? taskIconDark : taskIconLight;
   const taskFillIcon = isDark ? taskFillIconDark : taskFillIconLight;
-  const expensesIcon = isDark ? expensesIconDark : expensesIconLight;
-  const expensesFillIcon = isDark
-    ? expensesFillIconDark
-    : expensesFillIconLight;
+  const settlementsIcon = isDark ? settlementsIconDark : settlementsIconLight;
+  const settlementsFillIcon = isDark
+    ? settlementsFillIconDark
+    : settlementsFillIconLight;
 
   // Determine active tab from current route
   const getCurrentTab = () => {
     const path = location.pathname;
     if (path.includes("/tasks")) return "tasks";
-    if (path.includes("/expenses")) return "expenses";
+    if (path.includes("/settlements")) return "settlements";
+    if (path.includes("/expenses")) return "settlements";
     if (path.includes("/leaderboard")) return "leaderboard";
-    if (path.includes("/profile")) return "profile";
+    if (path.includes("/profile")) return "leaderboard";
     return activeTab || "leaderboard";
   };
 
@@ -67,11 +68,11 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
       route: "/leaderboard",
     },
     {
-      id: "expenses",
-      icon: expensesIcon,
-      iconActive: expensesFillIcon,
-      label: "Expenses",
-      route: "/expenses",
+      id: "settlements",
+      icon: settlementsIcon,
+      iconActive: settlementsFillIcon,
+      label: "Settlements",
+      route: "/settlements",
     },
   ];
 

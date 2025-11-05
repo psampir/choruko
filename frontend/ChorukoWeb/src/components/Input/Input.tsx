@@ -12,7 +12,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   className?: string;
   children?: React.ReactNode;
   onEditClick?: () => void;
-  currencySymbol?: string;
+  currencySymbol?: string; // Custom symbol for currency variant (default: "#")
   dateValue?: Date | null;
   onDateChange?: (date: Date | null) => void;
 }
