@@ -5,12 +5,16 @@ import "./AddTask.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import NavbarMobile from "../../../../components/NavbarMobile";
-import arrowLeftIcon from "../../../../assets/svg/light/arrow-left.svg";
 import Popup from "../../../../components/Popup/Popup";
 import ErrorMessage from "../../../../components/ErrorMessage";
+import { useThemeDir } from "../../../../utils/iconUtils";
 
-import checkIcon from "../../../../assets/svg/light/check.svg";
-import star from "../../../../assets/svg/light/star.svg";
+import arrowLeftIconLight from "../../../../assets/svg/light/arrow-left.svg";
+import arrowLeftIconDark from "../../../../assets/svg/dark/arrow-left.svg";
+import checkIconLight from "../../../../assets/svg/light/check.svg";
+import checkIconDark from "../../../../assets/svg/dark/check.svg";
+import starLight from "../../../../assets/svg/light/star.svg";
+import starDark from "../../../../assets/svg/dark/star.svg";
 
 // Activity type definition
 interface Activity {
@@ -31,6 +35,12 @@ const AddTask: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
+  const themeDir = useThemeDir();
+
+  // Theme-aware icon selection
+  const arrowLeftIcon = themeDir === "dark" ? arrowLeftIconDark : arrowLeftIconLight;
+  const checkIcon = themeDir === "dark" ? checkIconDark : checkIconLight;
+  const star = themeDir === "dark" ? starDark : starLight;
 
   // Check if we're in edit mode
   const editTask = location.state?.editTask;
