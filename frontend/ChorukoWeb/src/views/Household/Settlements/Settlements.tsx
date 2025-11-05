@@ -189,10 +189,10 @@ const Settlements: React.FC = () => {
               description: updatedSettlement.description,
               assignees: Array.isArray(updatedSettlement.assignees)
                 ? updatedSettlement.assignees.map((a: any) =>
-                    typeof a === "object"
-                      ? { name: a.name, avatar: a.avatar }
-                      : { name: a, avatar: a }
-                  )
+                  typeof a === "object"
+                    ? { name: a.name, avatar: a.avatar }
+                    : { name: a, avatar: a }
+                )
                 : [],
               status: settlement.status,
               author: updatedSettlement.author || settlement.author,
@@ -217,10 +217,10 @@ const Settlements: React.FC = () => {
           description: newSettlement.description,
           assignees: Array.isArray(newSettlement.assignees)
             ? newSettlement.assignees.map((a: any) =>
-                typeof a === "object"
-                  ? { name: a.name, avatar: a.avatar }
-                  : { name: a, avatar: a }
-              )
+              typeof a === "object"
+                ? { name: a.name, avatar: a.avatar }
+                : { name: a, avatar: a }
+            )
             : [],
           status: "todo",
           author:
@@ -257,7 +257,7 @@ const Settlements: React.FC = () => {
     navigate("/settlements/add");
   };
 
-  const markSettlementAsDone = (settlementId: number) => {
+  const markSettlementAsPaid = (settlementId: number) => {
     setSettlements((prevSettlements) =>
       prevSettlements.map((settlement) =>
         settlement.id === settlementId
@@ -285,9 +285,8 @@ const Settlements: React.FC = () => {
   ) => {
     return (
       <div
-        className={`settlement ${isFirst ? "settlement--first" : ""} ${
-          isLast ? "settlement--last" : ""
-        }`}
+        className={`settlement ${isFirst ? "settlement--first" : ""} ${isLast ? "settlement--last" : ""
+          }`}
         key={settlement.id}
         onClick={() => {
           setSelectedSettlement(settlement);
@@ -334,9 +333,8 @@ const Settlements: React.FC = () => {
       <div className="settlements__content">
         {/* To-Do Section */}
         <div
-          className={`settlements__section settlements__section--todo ${
-            collapsedSections.todo ? "settlements__section--collapsed" : ""
-          }`}
+          className={`settlements__section settlements__section--todo ${collapsedSections.todo ? "settlements__section--collapsed" : ""
+            }`}
         >
           <h2
             className="settlements__section-title"
@@ -371,9 +369,8 @@ const Settlements: React.FC = () => {
 
         {/* Done Section */}
         <div
-          className={`settlements__section settlements__section--done ${
-            collapsedSections.done ? "settlements__section--collapsed" : ""
-          }`}
+          className={`settlements__section settlements__section--done ${collapsedSections.done ? "settlements__section--collapsed" : ""
+            }`}
         >
           <h2
             className="settlements__section-title"
@@ -420,11 +417,11 @@ const Settlements: React.FC = () => {
               <div className="amount-per-person">
                 {currencySymbol}
                 {selectedSettlement.amountSpent &&
-                selectedSettlement.assignees.length > 0
+                  selectedSettlement.assignees.length > 0
                   ? (
-                      parseFloat(selectedSettlement.amountSpent) /
-                      selectedSettlement.assignees.length
-                    ).toFixed(2)
+                    parseFloat(selectedSettlement.amountSpent) /
+                    selectedSettlement.assignees.length
+                  ).toFixed(2)
                   : "0.00"}{" "}
                 per person
               </div>
@@ -438,24 +435,24 @@ const Settlements: React.FC = () => {
           actions={
             selectedSettlement.status !== "done"
               ? [
-                  {
-                    label: "Mark as done",
-                    onClick: () => {
-                      markSettlementAsDone(selectedSettlement.id);
-                      setShowPopup(false);
-                      setSelectedSettlement(null);
-                    },
-                    variant: "primary",
+                {
+                  label: "Mark as paid",
+                  onClick: () => {
+                    markSettlementAsPaid(selectedSettlement.id);
+                    setShowPopup(false);
+                    setSelectedSettlement(null);
                   },
-                ]
+                  variant: "primary",
+                },
+              ]
               : []
           }
           customActions={
             // Show edit button only for settlement author and not for done settlements
             user &&
-            selectedSettlement.author?.name ===
+              selectedSettlement.author?.name ===
               `${user.firstName} ${user.lastName}` &&
-            selectedSettlement.status !== "done" ? (
+              selectedSettlement.status !== "done" ? (
               <div
                 className="settlement-edit-button"
                 onClick={() => {
@@ -558,21 +555,6 @@ const Settlements: React.FC = () => {
                 </div>
               ) : null;
             })()}
-            <div className="settlement-details-footer">
-              <div className="settlement-details-footer-item first">
-                <div>
-                  <span className="settlement-details-footer-icon">
-                    <img src={starIcon} alt="star icon" />
-                  </span>
-                  <span className="settlement-details-footer-label">
-                    POINTS
-                  </span>
-                </div>
-              </div>
-              <div className="settlement-details-footer-item second">
-                <div className="settlement-details-footer-value">5 pts</div>
-              </div>
-            </div>
           </div>
         </Popup>
       )}
