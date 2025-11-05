@@ -376,7 +376,7 @@ const Settlements: React.FC = () => {
             className="settlements__section-title"
             onClick={() => toggleSection("paid")}
           >
-            AMOUNTS
+            AMOUNTS PAID
           </h2>
           <span
             className="dropdown__arrow"
