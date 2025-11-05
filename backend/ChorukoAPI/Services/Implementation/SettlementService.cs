@@ -151,6 +151,15 @@ public class SettlementService(
             if (request.UnsettledUsers.Contains(userId))
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "Creator cannot assign himself to settlement", HttpStatusCode.BadRequest);
 
+            if (request.Amount <= 0)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(
+                    null,
+                    "Amount must be greater than 0",
+                    HttpStatusCode.BadRequest
+                );
+            }
+
             var participants = settlement.Household?.Participants ?? new List<User>();
             var participantIds = participants.Select(p => p.Id).ToHashSet(StringComparer.Ordinal);
             var creatorId = settlement.CreatorId;
@@ -308,7 +317,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> MarkAsDone(string settlementId)
+    public async Task<ServiceResponse<OperationResultDto>> MarkAsDone(string settlementId, string userId)
     {
         try
         {
@@ -321,6 +330,9 @@ public class SettlementService(
             {
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "No settlement found", HttpStatusCode.NotFound);
             }
+
+            if (settlement.CreatorId != userId)
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a creator of the settlement", HttpStatusCode.NotFound);
 
             settlement.Status = SettlementStatus.Completed;
             await _context.SaveChangesAsync();
@@ -376,7 +388,7 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> UnMarkAsDone(string settlementId)
+    public async Task<ServiceResponse<OperationResultDto>> UnMarkAsDone(string settlementId, string userId)
     {
         try
         {
@@ -389,6 +401,9 @@ public class SettlementService(
             {
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "No settlement found", HttpStatusCode.NotFound);
             }
+
+            if (settlement.CreatorId != userId)
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a creator of the settlement", HttpStatusCode.NotFound);
 
             settlement.Status = SettlementStatus.Pending;
             await _context.SaveChangesAsync();
@@ -469,7 +484,7 @@ public class SettlementService(
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "No Settlement found.", HttpStatusCode.NotFound);
             }
 
-            if (settlement.UnsettledUsers.Contains(user))
+            if (!settlement.UnsettledUsers.Contains(user))
             {
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "User does not participate in settlement.", HttpStatusCode.NotFound);
             }

@@ -13,7 +13,7 @@ public interface ISettlementService
     Task<ServiceResponse<OperationResultDto>> EditSettlement(string settlementId, EditSettlementRequest request, string userId);
     Task<ServiceResponse<OperationResultDto>> MarkAsPaid(string settlementId, string userId);
     Task<ServiceResponse<OperationResultDto>> MarAsUnPaid(string settlementId, string userId);
-    Task<ServiceResponse<OperationResultDto>> MarkAsDone(string settlementId);
-    Task<ServiceResponse<OperationResultDto>> UnMarkAsDone(string settlementId);
+    Task<ServiceResponse<OperationResultDto>> MarkAsDone(string settlementId, string userId);
+    Task<ServiceResponse<OperationResultDto>> UnMarkAsDone(string settlementId, string userId);
     Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string settlementId);
 }
