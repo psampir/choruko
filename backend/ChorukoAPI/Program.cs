@@ -4,6 +4,7 @@ using ChorukoAPI.Contracts.Responses.Settlement;
 using ChorukoAPI.Contracts.Responses.Task;
 using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Data;
+using ChorukoAPI.Extensions;
 using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using ChorukoAPI.Services.Background;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +98,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.Configure<ImageSettings>(
     builder.Configuration.GetSection(ImageSettings.SectionName));
 
+builder.Services.Configure<VapidSettings>(
+    builder.Configuration.GetSection("VapidSettings"));
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthorization();
@@ -122,6 +127,9 @@ builder.Services.AddScoped<IMapper<Household, HouseholdInfoResponse>, HouseholdI
 builder.Services.AddScoped<IMapper<Settlement, SettlementWithoutUsersResponse>, SettlementWithoutUsersMapper>();
 
 builder.Services.AddScoped<ISettlementService, SettlementService>();
+builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
+
+builder.Services.AddHostedService<PointsResetService>();
 
 builder.Services.AddControllers();
 
@@ -139,6 +147,19 @@ builder.Services.AddCors(options =>
                 .AllowCredentials(); // Required for cookies
         });
 });
+
+// Generate VAPID keys if they don't exist
+if (!VapidKeysChecker.CheckVapidKeys())
+{
+    VapidKeysGenerator.GenerateKeys();
+}
+else
+{
+    Console.WriteLine("VAPID keys already configured.");
+}
+
+// Load VAPID keys from file into configuration
+VapidKeysLoader.LoadVapidKeys(builder.Configuration);
 
 var app = builder.Build();
 

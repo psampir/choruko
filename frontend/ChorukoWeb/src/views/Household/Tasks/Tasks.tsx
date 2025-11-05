@@ -1,15 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Tasks.scss";
 import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
-import timerIcon from "../../../assets/svg/timer.svg";
 import Popup from "../../../components/Popup/Popup";
+import ErrorMessage from "../../../components/ErrorMessage";
 import { useUser } from "../../../contexts/UserContext";
-import profileIcon from "../../../assets/svg/light/profile-icon.svg";
-import starIcon from "../../../assets/svg/star-black.svg";
-import timer from "../../../assets/svg/timer.svg";
-import pencilLight from "../../../assets/svg/pencil-light.svg";
+import { useTask } from "../../../contexts/TaskContext";
+import { useHousehold } from "../../../contexts/HouseholdContext";
+import { useThemeDir } from "../../../utils/iconUtils";
+import { getProfilePictureUrl } from "../../../utils/imageUtils";
+import type { HouseholdTask } from "../../../services/taskService";
+
+import timerIconLight from "../../../assets/svg/light/timer.svg";
+import timerIconDark from "../../../assets/svg/dark/timer.svg";
+import profileIconLight from "../../../assets/svg/light/profile-icon.svg";
+import profileIconDark from "../../../assets/svg/dark/profile-icon.svg";
+import starIconLight from "../../../assets/svg/light/star-black.svg";
+import starIconDark from "../../../assets/svg/dark/star-black.svg";
+import pencilLight from "../../../assets/svg/light/pencil-light.svg";
+import pencilDark from "../../../assets/svg/dark/pencil-light.svg";
 
 interface Assignee {
   name: string;
@@ -21,6 +31,7 @@ interface Author {
 }
 interface Task {
   id: number;
+  backendId: string; // Store the original backend GUID
   name: string;
   description: string;
   assignees: Assignee[];
@@ -28,12 +39,21 @@ interface Task {
   deadline?: string;
   status: "overtime" | "todo" | "done";
   author?: Author;
+  pointsAwarded: number;
 }
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useUser();
+  const { tasks: backendTasks, loading, error, refreshTasks, markTaskAsCompleted, markTaskAsUncompleted, assignToTask, unassignFromTask } = useTask();
+  const { refreshHousehold } = useHousehold();
+  const themeDir = useThemeDir();
+
+  // Theme-aware icon selection
+  const timerIcon = themeDir === "dark" ? timerIconDark : timerIconLight;
+  const profileIcon = themeDir === "dark" ? profileIconDark : profileIconLight;
+  const starIcon = themeDir === "dark" ? starIconDark : starIconLight;
+  const pencilIcon = themeDir === "dark" ? pencilDark : pencilLight;
 
   const [collapsedSections, setCollapsedSections] = useState({
     overtime: false,
@@ -41,100 +61,58 @@ const Tasks: React.FC = () => {
     done: false,
   });
 
-  // Load tasks from localStorage or return default tasks
-  const getInitialTasks = (): Task[] => {
-    const saved = localStorage.getItem("choruko-tasks");
-    if (saved) {
-      return JSON.parse(saved);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Determine task status based on backend status and deadline
+  const determineTaskStatus = useCallback((backendTask: HouseholdTask): "overtime" | "todo" | "done" => {
+    if (backendTask.status === "Completed") {
+      return "done";
     }
-    return [
-      {
-        id: 1,
-        name: "Activity name",
-        description: "Activity description",
-        assignees: [
-          {
-            name: "Andreas Toretto",
-            avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-          },
-          {
-            name: "John Doe",
-            avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-          },
-          {
-            name: "Jane Smith",
-            avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-          },
-          {
-            name: "Anna Lee",
-            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-          },
-        ],
-        timeLeft: "-4h",
-        deadline: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        status: "overtime",
-        author: {
-          name: "Andreas Toretto",
-          avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        },
-      },
-      {
-        id: 2,
-        name: "Second task",
-        description: "Another task description",
-        assignees: [
-          {
-            name: "Anna Lee",
-            avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-          },
-        ],
-        timeLeft: "2h",
-        deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-        status: "todo",
-        author: {
-          name: "Gabby Mayers",
-          avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-        },
-      },
-      {
-        id: 3,
-        name: "Activity name",
-        description: "Activity description",
-        assignees: [
-          {
-            name: "Andreas Toretto",
-            avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-          },
-          {
-            name: "John Doe",
-            avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-          },
-          {
-            name: "Jane Smith",
-            avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-          },
-          {
-            name: "Anna Lee",
-            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-          },
-        ],
-        timeLeft: "-4h",
-        deadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-        status: "overtime",
-        author: {
-          name: "Ann Huang",
-          avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        },
-      },
-    ];
-  };
 
-  const [tasks, setTasks] = useState<Task[]>(getInitialTasks());
+    const deadline = new Date(backendTask.deadLine);
+    const now = new Date();
 
-  // Persist tasks to localStorage on every change
+    if (deadline < now) {
+      return "overtime";
+    }
+
+    return "todo";
+  }, []);
+
+  // Refresh household info and tasks when component mounts
   useEffect(() => {
-    localStorage.setItem("choruko-tasks", JSON.stringify(tasks));
-  }, [tasks]);
+    const refreshData = async () => {
+      await refreshHousehold();
+      await refreshTasks();
+    };
+    refreshData();
+  }, [refreshHousehold, refreshTasks]);
+
+  // Convert backend tasks to UI format
+  useEffect(() => {
+    const convertedTasks: Task[] = backendTasks.map((backendTask: HouseholdTask, index: number) => {
+      return {
+        id: index, // Use array index for UI display key
+        backendId: backendTask.id, // Store original GUID
+        name: backendTask.name,
+        description: backendTask.description,
+        assignees: backendTask.assignees.map(a => ({
+          name: `${a.firstName} ${a.lastName}`,
+          avatar: getProfilePictureUrl(a.profilePicturePath) || profileIcon,
+        })),
+        timeLeft: formatTimeLeft(backendTask.deadLine),
+        deadline: backendTask.deadLine,
+        status: determineTaskStatus(backendTask),
+        author: {
+          name: `${backendTask.creator.firstName} ${backendTask.creator.lastName}`,
+          avatar: getProfilePictureUrl(backendTask.creator.profilePicturePath),
+        },
+        pointsAwarded: backendTask.activity?.pointsAwarded || 0,
+      };
+    });
+    setTasks(convertedTasks);
+  }, [backendTasks, profileIcon, determineTaskStatus]);
 
   const [, setCurrentTime] = useState(Date.now());
 
@@ -199,139 +177,10 @@ const Tasks: React.FC = () => {
     return diffHours > 0 ? `${diffHours}h` : `${diffHours}h`;
   };
 
-  const hasAddedTaskRef = useRef(false);
-  const hasUpdatedTaskRef = useRef(false);
-  const hasDeletedTaskRef = useRef(false);
 
-  // Handle task operations from AddTask page via navigation state
-  useEffect(() => {
-    const state = location.state as {
-      newTask?: {
-        name: string;
-        description: string;
-        assignees: string[];
-        deadline: string;
-        author?: string;
-      };
-      updatedTask?: {
-        id: number;
-        name: string;
-        description: string;
-        assignees: any[];
-        deadline: string;
-        author?: any;
-      };
-      deleteTaskId?: number;
-    };
-
-    if (state?.deleteTaskId && !hasDeletedTaskRef.current) {
-      hasDeletedTaskRef.current = true;
-      setTasks((prevTasks) =>
-        prevTasks.filter((task) => task.id !== state.deleteTaskId)
-      );
-      navigate(location.pathname, { replace: true, state: {} });
-    }
-
-    if (state?.updatedTask && !hasUpdatedTaskRef.current) {
-      hasUpdatedTaskRef.current = true;
-      const { updatedTask } = state;
-
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => {
-          if (task.id === updatedTask.id) {
-            return {
-              ...task,
-              name: updatedTask.name,
-              description: updatedTask.description,
-              assignees: Array.isArray(updatedTask.assignees)
-                ? updatedTask.assignees.map((a: any) =>
-                    typeof a === "object"
-                      ? { name: a.name, avatar: a.avatar }
-                      : { name: a, avatar: a }
-                  )
-                : [],
-              deadline: updatedTask.deadline,
-              status: task.status,
-              timeLeft: task.timeLeft,
-              author: updatedTask.author || task.author,
-            };
-          }
-          return task;
-        })
-      );
-      navigate(location.pathname, { replace: true, state: {} });
-    }
-
-    if (state?.newTask && !hasAddedTaskRef.current) {
-      hasAddedTaskRef.current = true;
-      const { newTask } = state;
-
-      const calculateTimeLeft = (deadline: string) => {
-        if (!deadline) return "0h";
-
-        const deadlineDate = new Date(deadline);
-        const now = new Date();
-        const diffMs = deadlineDate.getTime() - now.getTime();
-        const diffHours = Math.round(diffMs / (1000 * 60 * 60));
-
-        if (Math.abs(diffHours) > 24) {
-          const day = deadlineDate.getDate().toString().padStart(2, "0");
-          const month = (deadlineDate.getMonth() + 1)
-            .toString()
-            .padStart(2, "0");
-          const hours = deadlineDate.getHours().toString().padStart(2, "0");
-          const minutes = deadlineDate.getMinutes().toString().padStart(2, "0");
-          return `${day}.${month} ${hours}:${minutes}`;
-        }
-
-        return diffHours > 0 ? `${diffHours}h` : `${diffHours}h`;
-      };
-
-      const timeLeft = calculateTimeLeft(newTask.deadline);
-
-      setTasks((prevTasks) => {
-        const taskToAdd: Task = {
-          id: prevTasks.length + 1,
-          name: newTask.name,
-          description: newTask.description,
-          assignees: Array.isArray(newTask.assignees)
-            ? newTask.assignees.map((a: any) =>
-                typeof a === "object"
-                  ? { name: a.name, avatar: a.avatar }
-                  : { name: a, avatar: a }
-              )
-            : [],
-          timeLeft: timeLeft,
-          deadline: newTask.deadline,
-          status: "todo",
-          author:
-            newTask.author && typeof newTask.author === "object"
-              ? (newTask.author as Author)
-              : undefined,
-        };
-        return [...prevTasks, taskToAdd];
-      });
-
-      navigate(location.pathname, { replace: true, state: {} });
-    }
-
-    if (!state?.newTask && !state?.updatedTask && !state?.deleteTaskId) {
-      hasAddedTaskRef.current = false;
-      hasUpdatedTaskRef.current = false;
-      hasDeletedTaskRef.current = false;
-    }
-  }, [location.state, navigate, location.pathname]);
 
   const addTask = () => {
     navigate("/tasks/add");
-  };
-
-  const markTaskAsDone = (taskId: number) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, status: "done" as const } : task
-      )
-    );
   };
 
   const getVisibleAvatars = (avatars: string[]) => {
@@ -352,23 +201,27 @@ const Tasks: React.FC = () => {
   const doneTasks = tasks.filter((task) => task.status === "done");
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedBackendTask, setSelectedBackendTask] = useState<HouseholdTask | null>(null);
   const [showPopup, setShowPopup] = useState(false);
 
   const renderTask = (task: Task, isLast: boolean, isFirst: boolean) => {
-    const visibleAvatars = getVisibleAvatars(
-      task.assignees.map((a) => a.avatar)
-    );
-    const hiddenCount =
-      task.assignees.length > 2 ? task.assignees.length - 1 : 0;
+    // Only show avatars if there are assignees
+    const hasAssignees = task.assignees.length > 0;
+    const visibleAvatars = hasAssignees
+      ? getVisibleAvatars(task.assignees.map((a) => a.avatar))
+      : [];
+    const hiddenCount = task.assignees.length > 2 ? task.assignees.length - 1 : 0;
 
     return (
       <div
-        className={`task ${isFirst ? "task--first" : ""} ${
-          isLast ? "task--last" : ""
-        }`}
+        className={`task ${isFirst ? "task--first" : ""} ${isLast ? "task--last" : ""
+          }`}
         key={task.id}
         onClick={() => {
+          // Find the corresponding backend task using the stored GUID
+          const backendTask = backendTasks.find(bt => bt.id === task.backendId);
           setSelectedTask(task);
+          setSelectedBackendTask(backendTask || null);
           setShowPopup(true);
         }}
         style={{ cursor: "pointer" }}
@@ -380,31 +233,49 @@ const Tasks: React.FC = () => {
         <div className="task__meta">
           <div className="task__assignees">
             <div className="task__assignees-avatars">
-              {visibleAvatars.map((avatar, idx) => (
-                <img
-                  key={idx}
-                  className={`task__assignee-avatar ${
-                    avatar.isActive ? "task__assignee-avatar--active" : ""
-                  }`}
-                  src={avatar.src}
-                  alt={`assignee ${idx + 1}`}
-                />
-              ))}
-              {hiddenCount > 0 && (
-                <span
-                  className={`task__assignee-avatar task__assignee-avatar--active task__assignee-avatar--counter task__assignee-avatar--counter-${task.status}`}
-                >
-                  +{hiddenCount}
-                </span>
+              {hasAssignees ? (
+                <>
+                  {visibleAvatars.map((avatar, idx) => (
+                    <img
+                      key={idx}
+                      className={`task__assignee-avatar ${avatar.isActive ? "task__assignee-avatar--active" : ""
+                        }`}
+                      src={avatar.src}
+                      alt={`assignee ${idx + 1}`}
+                    />
+                  ))}
+                  {hiddenCount > 0 && (
+                    <span
+                      className={`task__assignee-avatar task__assignee-avatar--active task__assignee-avatar--counter task__assignee-avatar--counter-${task.status}`}
+                    >
+                      +{hiddenCount}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="task__no-assignees">No assignees</span>
               )}
             </div>
             <div className="task__time-left">
-              <p className="task__time-left-amount">
-                {formatTimeLeft(task.deadline)}
-              </p>
-              <span>
-                <img src={timerIcon} alt="timer icon" />
-              </span>
+              {task.status === "done" ? (
+                <>
+                  <p className="task__time-left-amount">
+                    {task.pointsAwarded}
+                  </p>
+                  <span>
+                    <img src={starIcon} alt="star icon" />
+                  </span>
+                </>
+              ) : (
+                <>
+                  <p className="task__time-left-amount">
+                    {formatTimeLeft(task.deadline)}
+                  </p>
+                  <span>
+                    <img src={timerIcon} alt="timer icon" />
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -414,6 +285,12 @@ const Tasks: React.FC = () => {
 
   return (
     <div className="tasks">
+      <ErrorMessage
+        message={errorMessage}
+        onClose={() => setErrorMessage("")}
+        variant="overlay"
+      />
+
       <div className="tasks__header">
         <h1 className="tasks__title">Tasks</h1>
         <Button variant="primary" onClick={addTask}>
@@ -421,104 +298,118 @@ const Tasks: React.FC = () => {
         </Button>
       </div>
 
-      <div className="tasks__content">
-        {/* Overtime Section */}
-        <div
-          className={`tasks__section tasks__section--overtime ${
-            collapsedSections.overtime ? "tasks__section--collapsed" : ""
-          }`}
-        >
-          <h2
-            className="tasks__section-title"
-            onClick={() => toggleSection("overtime")}
+      {loading && (
+        <div className="tasks__loading">
+          <p>Loading tasks...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="tasks__error">
+          <p>Error: {error}</p>
+          <Button variant="primary" onClick={refreshTasks}>
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="tasks__content">
+          {/* Overtime Section */}
+          <div
+            className={`tasks__section tasks__section--overtime ${collapsedSections.overtime ? "tasks__section--collapsed" : ""
+              }`}
           >
-            OVERTIME
-          </h2>
-          <span
-            className="dropdown__arrow"
-            onClick={() => toggleSection("overtime")}
-          >
-            &#9660;
-          </span>
-          {!collapsedSections.overtime && (
-            <div className="tasks__list">
-              {overtimeTasks.length > 0 ? (
-                overtimeTasks.map((task, index) =>
-                  renderTask(
-                    task,
-                    index === overtimeTasks.length - 1,
-                    index === 0
+            <h2
+              className="tasks__section-title"
+              onClick={() => toggleSection("overtime")}
+            >
+              OVERTIME
+            </h2>
+            <span
+              className="dropdown__arrow"
+              onClick={() => toggleSection("overtime")}
+            >
+              &#9660;
+            </span>
+            {!collapsedSections.overtime && (
+              <div className="tasks__list">
+                {overtimeTasks.length > 0 ? (
+                  overtimeTasks.map((task, index) =>
+                    renderTask(
+                      task,
+                      index === overtimeTasks.length - 1,
+                      index === 0
+                    )
                   )
-                )
-              ) : (
-                <p className="tasks__empty-message">No overtime tasks</p>
-              )}
-            </div>
-          )}
-        </div>
+                ) : (
+                  <p className="tasks__empty-message">No overtime tasks</p>
+                )}
+              </div>
+            )}
+          </div>
 
-        {/* To-Do Section */}
-        <div
-          className={`tasks__section tasks__section--todo ${
-            collapsedSections.todo ? "tasks__section--collapsed" : ""
-          }`}
-        >
-          <h2
-            className="tasks__section-title"
-            onClick={() => toggleSection("todo")}
+          {/* To-Do Section */}
+          <div
+            className={`tasks__section tasks__section--todo ${collapsedSections.todo ? "tasks__section--collapsed" : ""
+              }`}
           >
-            TO DO
-          </h2>
-          <span
-            className="dropdown__arrow"
-            onClick={() => toggleSection("todo")}
-          >
-            &#9660;
-          </span>
-          {!collapsedSections.todo && (
-            <div className="tasks__list">
-              {todoTasks.length > 0 ? (
-                todoTasks.map((task, index) =>
-                  renderTask(task, index === todoTasks.length - 1, index === 0)
-                )
-              ) : (
-                <p className="tasks__empty-message">No tasks to do</p>
-              )}
-            </div>
-          )}
-        </div>
+            <h2
+              className="tasks__section-title"
+              onClick={() => toggleSection("todo")}
+            >
+              TO DO
+            </h2>
+            <span
+              className="dropdown__arrow"
+              onClick={() => toggleSection("todo")}
+            >
+              &#9660;
+            </span>
+            {!collapsedSections.todo && (
+              <div className="tasks__list">
+                {todoTasks.length > 0 ? (
+                  todoTasks.map((task, index) =>
+                    renderTask(task, index === todoTasks.length - 1, index === 0)
+                  )
+                ) : (
+                  <p className="tasks__empty-message">No tasks to do</p>
+                )}
+              </div>
+            )}
+          </div>
 
-        {/* Done Section */}
-        <div
-          className={`tasks__section tasks__section--done ${
-            collapsedSections.done ? "tasks__section--collapsed" : ""
-          }`}
-        >
-          <h2
-            className="tasks__section-title"
-            onClick={() => toggleSection("done")}
+          {/* Done Section */}
+          <div
+            className={`tasks__section tasks__section--done ${collapsedSections.done ? "tasks__section--collapsed" : ""
+              }`}
           >
-            DONE
-          </h2>
-          <span
-            className="dropdown__arrow"
-            onClick={() => toggleSection("done")}
-          >
-            &#9660;
-          </span>
-          {!collapsedSections.done && (
-            <div className="tasks__list">
-              {doneTasks.length > 0 ? (
-                doneTasks.map((task, index) =>
-                  renderTask(task, index === doneTasks.length - 1, index === 0)
-                )
-              ) : (
-                <p className="tasks__empty-message">No completed tasks</p>
-              )}
-            </div>
-          )}
+            <h2
+              className="tasks__section-title"
+              onClick={() => toggleSection("done")}
+            >
+              DONE
+            </h2>
+            <span
+              className="dropdown__arrow"
+              onClick={() => toggleSection("done")}
+            >
+              &#9660;
+            </span>
+            {!collapsedSections.done && (
+              <div className="tasks__list">
+                {doneTasks.length > 0 ? (
+                  doneTasks.map((task, index) =>
+                    renderTask(task, index === doneTasks.length - 1, index === 0)
+                  )
+                ) : (
+                  <p className="tasks__empty-message">No completed tasks</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Task Details Popup */}
       {showPopup && selectedTask && (
@@ -527,51 +418,49 @@ const Tasks: React.FC = () => {
           onClose={() => {
             setShowPopup(false);
             setSelectedTask(null);
+            setSelectedBackendTask(null);
           }}
           title={selectedTask.name}
           variant={selectedTask.status === "overtime" ? "red" : "primary"}
-          actions={
-            selectedTask.status !== "done"
-              ? [
-                  {
-                    label: "Mark as done",
-                    onClick: () => {
-                      markTaskAsDone(selectedTask.id);
-                      setShowPopup(false);
-                      setSelectedTask(null);
-                    },
-                    variant:
-                      selectedTask.status === "overtime" ? "danger" : "primary",
-                  },
-                ]
-              : []
-          }
+          actions={[
+            {
+              label: selectedTask.status === "done" ? "Mark as undone" : "Mark as done",
+              onClick: async () => {
+                if (selectedBackendTask) {
+                  if (selectedTask.status === "done") {
+                    await markTaskAsUncompleted(selectedBackendTask.id);
+                  } else {
+                    await markTaskAsCompleted(selectedBackendTask.id);
+                  }
+                }
+                setShowPopup(false);
+                setSelectedTask(null);
+                setSelectedBackendTask(null);
+              },
+              variant:
+                selectedTask.status === "overtime" ? ("danger" as const) : ("primary" as const),
+            },
+          ]}
           customActions={
             // Show edit button only for task author and not for done tasks
-            user &&
-            selectedTask.author?.name ===
-              `${user.firstName} ${user.lastName}` &&
-            selectedTask.status !== "done" ? (
+            (() => {
+              const canEdit = user && selectedBackendTask && user.id === selectedBackendTask.creatorId && selectedTask.status !== "done";
+              return canEdit;
+            })() ? (
               <div
                 className="task-edit-button"
                 onClick={() => {
                   navigate("/tasks/add", {
                     state: {
-                      editTask: {
-                        id: selectedTask.id,
-                        name: selectedTask.name,
-                        description: selectedTask.description,
-                        assignees: selectedTask.assignees,
-                        deadline: selectedTask.deadline,
-                        author: selectedTask.author,
-                      },
+                      editTask: selectedBackendTask,
                     },
                   });
                   setShowPopup(false);
                   setSelectedTask(null);
+                  setSelectedBackendTask(null);
                 }}
               >
-                <img src={pencilLight} alt="Edit task" />
+                <img src={pencilIcon} alt="Edit task" />
               </div>
             ) : null
           }
@@ -613,11 +502,65 @@ const Tasks: React.FC = () => {
                 ))}
               </div>
             </div>
+            <div className="assign-button">
+              {/* Assign/Unassign button - hide for done tasks */}
+              {selectedTask.status !== "done" && (() => {
+                const isAssigned = selectedBackendTask?.assignees?.some(a => a.id === user?.id);
+                const currentAssignees = selectedBackendTask?.assignees?.length || 0;
+                const maxAssignees = selectedBackendTask?.participantsAmount || 1;
+                const isMaxReached = currentAssignees >= maxAssignees;
+
+                if (isAssigned) {
+                  return (
+                    <Button
+                      onClick={async () => {
+                        if (selectedBackendTask) {
+                          const result = await unassignFromTask(selectedBackendTask.id);
+                          if (!result.success) {
+                            setErrorMessage(result.message || "Failed to unassign from task");
+                            return;
+                          }
+                        }
+                        setShowPopup(false);
+                        setSelectedTask(null);
+                        setSelectedBackendTask(null);
+                      }}
+                      className="task-assign-button"
+                    >
+                      Unassign yourself
+                    </Button>
+                  );
+                } else if (!isMaxReached) {
+                  // Only show assign button if maximum not reached
+                  return (
+                    <Button
+                      onClick={async () => {
+                        if (selectedBackendTask) {
+                          const result = await assignToTask(selectedBackendTask.id);
+                          if (!result.success) {
+                            setErrorMessage(result.message || "Failed to assign to task");
+                            return;
+                          }
+                        }
+                        setShowPopup(false);
+                        setSelectedTask(null);
+                        setSelectedBackendTask(null);
+                      }}
+                      className="task-assign-button"
+                    >
+                      Assign yourself
+                    </Button>
+                  );
+                }
+                // Don't show anything if not assigned and max reached
+                return null;
+              })()}
+            </div>
             <div className="task-details-footer">
               <div className="task-details-footer-item first">
                 <div>
                   <span className="task-details-footer-icon">
-                    <img src={timer} alt="date icon" />
+                    <img src={timerIcon} alt="date icon" />
                   </span>
                   <span className="task-details-footer-label">DEADLINE</span>
                 </div>
@@ -632,7 +575,9 @@ const Tasks: React.FC = () => {
                 <span className="task-details-footer-value">
                   {formatTimeLeft(selectedTask.deadline)}
                 </span>
-                <div className="task-details-footer-value">5 pts</div>
+                <div className="task-details-footer-value">
+                  {selectedBackendTask?.activity?.pointsAwarded || 0} pts
+                </div>
               </div>
             </div>
           </div>

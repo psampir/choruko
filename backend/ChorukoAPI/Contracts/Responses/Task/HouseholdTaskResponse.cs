@@ -22,9 +22,7 @@ namespace ChorukoAPI.Contracts.Responses.Task
         public Models.TaskStatus Status { get; set; }
 
         public int ParticipantsAmount { get; set; }
-
-        public int Reward { get; set; }
-
+        
         public string Name { get; set; }
 
         public string Description { get; set; }

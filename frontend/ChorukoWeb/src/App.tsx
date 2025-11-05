@@ -8,7 +8,9 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import { HouseholdProvider } from "./contexts/HouseholdContext";
 import { ActivityProvider } from "./contexts/ActivityContext";
+import { TaskProvider } from "./contexts/TaskContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { PushNotificationProvider } from "./contexts/PushNotificationContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import AuthContainer from "./views/Auth/AuthContainer";
 import Tasks from "./views/Household/Tasks/Tasks";
@@ -25,6 +27,8 @@ import Leaderboard from "./views/Household/Leaderboard/Leaderboard";
 import ManageAccount from "./views/Profile/ManageAccount/ManageAccount";
 import ManageHousehold from "./views/Profile/ManageHousehold/ManageHousehold";
 import Activities from "./views/Profile/ManageHousehold/Activities/Activities";
+import TestNotifications from "./views/TestNotifications";
+import PushNotificationHandler from "./components/PushNotificationHandler";
 
 // Layout component for protected pages with top navbar
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -195,6 +199,18 @@ function AppRoutes() {
         }
       />
 
+      {/* Test route for push notifications */}
+      <Route
+        path="/test-notifications"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <TestNotifications />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Smart default redirect */}
       <Route path="/" element={<RootRedirect />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
@@ -209,9 +225,14 @@ function App() {
         <UserProvider>
           <HouseholdProvider>
             <ActivityProvider>
-              <Router>
-                <AppRoutes />
-              </Router>
+              <TaskProvider>
+                <PushNotificationProvider>
+                  <Router>
+                    <PushNotificationHandler />
+                    <AppRoutes />
+                  </Router>
+                </PushNotificationProvider>
+              </TaskProvider>
             </ActivityProvider>
           </HouseholdProvider>
         </UserProvider>

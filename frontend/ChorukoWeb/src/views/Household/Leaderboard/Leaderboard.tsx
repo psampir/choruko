@@ -19,7 +19,7 @@ const Leaderboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<TimeFilter>("ALL TIME");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { householdInfo, participants, loading, error } = useHousehold();
+  const { householdInfo, participants, loading, error, refreshHousehold } = useHousehold();
   const isDark = useIsDarkTheme();
 
   const star = isDark ? starDark : starLight;
@@ -33,6 +33,11 @@ const Leaderboard: React.FC = () => {
   const participantsRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
   const participantRef = useRef<HTMLDivElement>(null);
+
+  // Refresh household info when component mounts
+  useEffect(() => {
+    refreshHousehold();
+  }, [refreshHousehold]);
 
   const handleFilterChange = (filter: TimeFilter) => {
     setActiveFilter(filter);

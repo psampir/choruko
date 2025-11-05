@@ -22,4 +22,10 @@ public class User : IdentityUser
     public string? ProfilePicturePath { get; set; }
 
     public virtual List<HouseholdTask>? AssignedTasks { get; set; }
+    
+    public int PointsCurrentMonth { get; set; }
+    
+    public int PointsCurrentYear { get; set; }
+    
+    public int PointsAllTime { get; set; }
 }
