@@ -223,11 +223,6 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
     {
         var householdTasks = await _context.HouseholdTasks.Where(t => t.HouseholdId == householdId).ToListAsync();
 
-        if (householdTasks.Count == 0)
-        {
-            return ServiceResponseFactory.Error<List<HouseholdTaskResponse>>(null, $"No tasks were found.", HttpStatusCode.NotFound);
-        }
-
         var response = new List<HouseholdTaskResponse>();
 
         foreach (var householdTask in householdTasks)
