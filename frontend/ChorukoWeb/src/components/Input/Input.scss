@@ -56,6 +56,12 @@
   // Password input variant (inherits from primary)
   &--password {
     @extend .input--primary;
+    
+    // Hide Firefox's native password reveal button
+    &::-ms-reveal,
+    &::-ms-clear {
+      display: none;
+    }
   }
 
   // Email input variant (inherits from primary)
