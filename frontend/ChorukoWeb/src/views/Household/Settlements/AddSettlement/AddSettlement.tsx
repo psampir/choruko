@@ -191,7 +191,7 @@ const AddSettlement: React.FC = () => {
             <img src={arrowLeftIcon} alt="Back" />
           </button>
           <h1 className="add-settlement__title">
-            {isEditMode ? "Edit settlement" : "Add a new settlement"}
+            {isEditMode ? "Edit settlement" : "Add a settlement"}
           </h1>
         </div>
 
