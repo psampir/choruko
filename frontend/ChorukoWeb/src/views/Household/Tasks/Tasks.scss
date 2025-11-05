@@ -265,13 +265,13 @@
     // First avatar positioning
     &:first-child {
       left: 0;
-      z-index: 3;
+      z-index: 2;
     }
 
-    // Second avatar positioning (when there are 2 or less)
+    // Second avatar positioning (when there are 2 or less) - to the LEFT of first
     &:nth-child(2) {
-      left: 3px;
-      z-index: 2;
+      right: 20px;
+      z-index: 3;
     }
 
     // Counter span styling
@@ -279,7 +279,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      left: -29px;
+      right: 20px;
       background-color: var(--color-error-bg);
       font-size: var(--font-size-h5);
       color: var(--color-background);
@@ -501,6 +501,7 @@
         width: 20px !important;
         height: 20px !important;
         margin: 0 !important;
+        border: none !important;
       }
     }
 
@@ -514,6 +515,15 @@
       font-size: var(--font-size-body2);
       font-weight: var(--font-weight-semibold);
       color: var(--color-text-primary);
+    }
+  }
+
+  .task-details-assign-section {
+    width: 100%;
+    padding: var(--spacing-lg) 0 0 0;
+
+    .button {
+      width: 100%;
     }
   }
 
@@ -536,5 +546,13 @@
       width: 20px;
       height: 20px;
     }
+  }
+
+  .task-assign-button {
+    margin-bottom: 12px;
+    background-color: var(--color-text-primary);
+    color: var(--color-background);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semibold);
   }
 }
