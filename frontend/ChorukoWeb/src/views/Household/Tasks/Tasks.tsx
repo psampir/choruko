@@ -46,7 +46,7 @@ const Tasks: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { tasks: backendTasks, loading, error, refreshTasks, markTaskAsCompleted, markTaskAsUncompleted, assignToTask, unassignFromTask } = useTask();
-  const { refreshHousehold, householdInfo } = useHousehold();
+  const { refreshHousehold } = useHousehold();
   const themeDir = useThemeDir();
 
   // Theme-aware icon selection
