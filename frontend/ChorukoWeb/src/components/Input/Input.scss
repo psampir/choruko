@@ -104,6 +104,10 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      
+      :root[data-theme="dark"] & {
+        background: url("../../assets/svg/dark/eye.svg") no-repeat center/contain;
+      }
 
       // Remove any focus styles
       &:focus {
@@ -130,6 +134,10 @@
 
     .input__pencil {
       background: url("../../assets/svg/light/pencil.svg") no-repeat center;
+      
+      :root[data-theme="dark"] & {
+        background: url("../../assets/svg/dark/pencil.svg") no-repeat center;
+      }
     }
 
     .input__date {
@@ -165,6 +173,11 @@
     .input--password.active + .input__eye {
       background: url("../../assets/svg/light/close-eye.svg") no-repeat
         center/contain;
+      
+      :root[data-theme="dark"] & {
+        background: url("../../assets/svg/dark/close-eye.svg") no-repeat
+          center/contain;
+      }
     }
   }
 }

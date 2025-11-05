@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../../../../contexts/UserContext";
+import { useIsDarkTheme } from "../../../../utils/iconUtils";
 import "./AddSettlement.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import NavbarMobile from "../../../../components/NavbarMobile";
-import arrowLeftIcon from "../../../../assets/svg/light/arrow-left.svg";
+import arrowLeftIconLight from "../../../../assets/svg/light/arrow-left.svg";
+import arrowLeftIconDark from "../../../../assets/svg/dark/arrow-left.svg";
 import Popup from "../../../../components/Popup/Popup";
 import ErrorMessage from "../../../../components/ErrorMessage";
-import checkIcon from "../../../../assets/svg/light/check.svg";
+import checkIconLight from "../../../../assets/svg/light/check.svg";
+import checkIconDark from "../../../../assets/svg/dark/check.svg";
 
 // Assignee type definition
 interface Assignee {
@@ -21,6 +24,10 @@ const AddSettlement: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
+  const isDark = useIsDarkTheme();
+
+  const arrowLeftIcon = isDark ? arrowLeftIconDark : arrowLeftIconLight;
+  const checkIcon = isDark ? checkIconDark : checkIconLight;
 
   // Check if we're in edit mode
   const editSettlement = location.state?.editSettlement;
