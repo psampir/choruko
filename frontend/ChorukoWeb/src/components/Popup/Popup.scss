@@ -67,6 +67,11 @@
       cursor: pointer;
       transition: var(--transition-fast);
       border-radius: var(--border-radius-sm);
+      
+      :root[data-theme="dark"] & {
+        background: url("../../assets/svg/dark/close-icon.svg") no-repeat
+          center/contain;
+      }
     }
 
     .popup-content {
