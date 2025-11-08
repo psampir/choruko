@@ -155,6 +155,8 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 return ServiceResponseFactory.Error<OperationResultDto>(null, $"Cannot edit a completed task. Please mark it as uncompleted first.", HttpStatusCode.BadRequest);
             }
 
+            var oldAssigneeIds = householdTask.Assignees.Select(a => a.Id).ToHashSet();
+
             var household = await _context.Households
                 .Include(h => h.Activities)
                 .Include(h => h.Participants)
@@ -181,21 +183,51 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
             await _context.SaveChangesAsync();
 
-            var payload = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                title = "👋 Task info was edited!",
-                body = $"{request.Name}, deadline:{request.DeadLine}!",
-                icon = "/icons/icon-192x192.png",
-                badge = "/icons/icon-96x96.png",
-                url = "/"
-            });
+            var creatorId = householdTask.CreatorId;
+            var creatorName = household.Participants.FirstOrDefault(p => p.Id == creatorId)?.FirstName ?? "Someone";
 
-            var receivers = householdTask.Assignees
-                .Where(receiver => receiver.Id != householdTask.CreatorId)
-                .Select(receiver => receiver.Id)
+            var newlyAddedAssignees = usersToAdd
+                .Where(u => !oldAssigneeIds.Contains(u.Id) && u.Id != creatorId)
+                .Select(u => u.Id)
                 .ToList();
 
-            await NotificationHandler.SendNotificationAsync(receivers, payload);
+            var existingAssignees = usersToAdd
+                .Where(u => oldAssigneeIds.Contains(u.Id) && u.Id != creatorId)
+                .Select(u => u.Id)
+                .ToList();
+
+            var notificationTasks = new List<Task>();
+
+            if (newlyAddedAssignees.Any())
+            {
+                var newAssigneePayload = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    title = "🔔 You've been added to a task!",
+                    body = $"You were added to '{householdTask.Name}' by {creatorName}.",
+                    icon = "/icons/icon-192x192.png",
+                    badge = "/icons/icon-96x96.png",
+                    url = $"/tasks/{householdTask.Id}"
+                });
+                notificationTasks.Add(NotificationHandler.SendNotificationAsync(newlyAddedAssignees, newAssigneePayload));
+            }
+
+            if (existingAssignees.Any())
+            {
+                var editedPayload = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    title = "👋 Task info was edited!",
+                    body = $"{request.Name}, deadline:{request.DeadLine.ToShortDateString()}!",
+                    icon = "/icons/icon-192x192.png",
+                    badge = "/icons/icon-96x96.png",
+                    url = $"/tasks/{householdTask.Id}"
+                });
+                notificationTasks.Add(NotificationHandler.SendNotificationAsync(existingAssignees, editedPayload));
+            }
+
+            if (notificationTasks.Any())
+            {
+                await Task.WhenAll(notificationTasks);
+            }
 
             var response = new OperationResultDto
             {
