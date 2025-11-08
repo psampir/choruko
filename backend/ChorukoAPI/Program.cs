@@ -192,5 +192,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+NotificationHandler.Initialize(app.Services);
 
 app.Run();

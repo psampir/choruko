@@ -94,14 +94,7 @@ public class SettlementService(
                 url = "/"
             });
 
-            var notificationTasks = unsettledUsers
-                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-                .ToList();
-
-            if (notificationTasks.Any())
-            {
-                await Task.WhenAll(notificationTasks);
-            }
+            await NotificationHandler.SendNotificationAsync(unsettledUsers.Select(receiver => receiver.Id).ToList(), payload);
 
             var result = new OperationResultDto
             {
