@@ -319,7 +319,10 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             url = "/"
         });
 
-        await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+        if (userId != householdTask.CreatorId)
+        {
+            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+        }
 
         var response = new OperationResultDto
         {
@@ -379,7 +382,10 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             url = "/"
         });
 
-        await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+        if (userId != householdTask.CreatorId)
+        {
+            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+        }
 
         var response = new OperationResultDto
         {
