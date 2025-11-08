@@ -281,7 +281,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var response = new OperationResultDto
         {
-            Operation = "EditHouseholdTask",
+            Operation = "AssignUserToTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
             {
@@ -341,7 +341,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var response = new OperationResultDto
         {
-            Operation = "EditHouseholdTask",
+            Operation = "UnAssignUserFromTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
             {
@@ -391,9 +391,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         await NotificationHandler.SendNotificationAsync(householdTask.Assignees.Select(receiver => receiver.Id).ToList(), payload);
 
+        await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+
         var response = new OperationResultDto
         {
-            Operation = "EditHouseholdTask",
+            Operation = "CompleteHouseholdTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
                 {
@@ -458,9 +460,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         await NotificationHandler.SendNotificationAsync(householdTask.Assignees.Select(receiver => receiver.Id).ToList(), payload);
 
+        await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+
         var response = new OperationResultDto
         {
-            Operation = "EditHouseholdTask",
+            Operation = "CompleteHouseholdTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
                 {
