@@ -109,9 +109,14 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
                 url = "/"
-            });
+            }); 
+            
+            var receivers = household.Participants
+                .Where(receiver => receiver.Id != userId)
+                .Select(receiver => receiver.Id)
+                .ToList();
 
-            await NotificationHandler.SendNotificationAsync(household.Participants.Select(receiver => receiver.Id).ToList(), payload);
+            await NotificationHandler.SendNotificationAsync(receivers, payload);
 
             var response = new OperationResultDto
             {
@@ -185,7 +190,12 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 url = "/"
             });
 
-            await NotificationHandler.SendNotificationAsync(householdTask.Assignees.Select(receiver => receiver.Id).ToList(), payload);
+            var receivers = householdTask.Assignees
+                .Where(receiver => receiver.Id != householdTask.CreatorId)
+                .Select(receiver => receiver.Id)
+                .ToList();
+
+            await NotificationHandler.SendNotificationAsync(receivers, payload);
 
             var response = new OperationResultDto
             {
