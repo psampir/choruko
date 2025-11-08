@@ -8,8 +8,6 @@ import { useUser } from "../../../contexts/UserContext";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
 import profileIconLight from "../../../assets/svg/light/profile-icon.svg";
 import profileIconDark from "../../../assets/svg/dark/profile-icon.svg";
-import starIconLight from "../../../assets/svg/light/star.svg";
-import starIconDark from "../../../assets/svg/dark/star.svg";
 import pencilLight from "../../../assets/svg/light/pencil-light.svg";
 import pencilDark from "../../../assets/svg/dark/pencil-light.svg";
 import checkLight from "../../../assets/svg/light/check.svg";
@@ -43,7 +41,6 @@ const Settlements: React.FC = () => {
   const isDark = useIsDarkTheme();
 
   const profileIcon = isDark ? profileIconDark : profileIconLight;
-  const starIcon = isDark ? starIconDark : starIconLight;
   const pencilIcon = isDark ? pencilDark : pencilLight;
   const checkIcon = isDark ? checkDark : checkLight;
   const settlementIcon = isDark ? settlementIconDark : settlementIconLight;
