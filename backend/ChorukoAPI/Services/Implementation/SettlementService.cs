@@ -200,14 +200,7 @@ public class SettlementService(
                 url = "/"
             });
 
-            var notificationTasks = settlement.UnsettledUsers
-                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-                .ToList();
-
-            if (notificationTasks.Any())
-            {
-                await Task.WhenAll(notificationTasks);
-            }
+            await NotificationHandler.SendNotificationAsync(settlement.UnsettledUsers.Select(receiver => receiver.Id).ToList(), payload);
 
             var op = new OperationResultDto
             {
@@ -492,6 +485,17 @@ public class SettlementService(
 
             await _context.SaveChangesAsync();
 
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                title = $"👋 {user.UserName} completed the payment",
+                body = $"{settlement.Description}, amount:{settlement.Amount}!",
+                icon = "/icons/icon-192x192.png",
+                badge = "/icons/icon-96x96.png",
+                url = "/"
+            });
+
+            await pushNotificationService.SendNotificationAsync(settlement.CreatorId, payload);
+
             var result = new OperationResultDto
             {
                 Operation = "MarkAsPaid",
@@ -549,6 +553,18 @@ public class SettlementService(
             settlement.UnsettledUsers.Add(user);
 
             await _context.SaveChangesAsync();
+
+
+            var payload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                title = $"👋 {user.UserName} cancelled the payment",
+                body = $"{settlement.Description}, amount:{settlement.Amount}!",
+                icon = "/icons/icon-192x192.png",
+                badge = "/icons/icon-96x96.png",
+                url = "/"
+            });
+
+            await pushNotificationService.SendNotificationAsync(settlement.CreatorId, payload);
 
             var result = new OperationResultDto
             {
