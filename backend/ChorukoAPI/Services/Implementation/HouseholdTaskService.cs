@@ -396,7 +396,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         return ServiceResponseFactory.Success(response, "User successfully unassigned from household task.");
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId)
+    public async Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId, string userId)
     {
         var householdTask = await _context.HouseholdTasks
             .Include(t => t.Assignees) 
@@ -431,9 +431,17 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             url = "/"
         });
 
-        await NotificationHandler.SendNotificationAsync(householdTask.Assignees.Select(receiver => receiver.Id).ToList(), payload);
+        var receivers = householdTask.Assignees
+            .Where(receiver => receiver.Id != userId)
+            .Select(receiver => receiver.Id)
+            .ToList();
 
-        await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+        await NotificationHandler.SendNotificationAsync(receivers, payload);
+
+        if (userId != householdTask.CreatorId)
+        {
+            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+        }
 
         var response = new OperationResultDto
         {
@@ -449,7 +457,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         return ServiceResponseFactory.Success(response, "Task successfully completed.");
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId)
+    public async Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId, string userId)
     {
         var householdTask = await _context.HouseholdTasks
             .Include(h => h.Assignees)
@@ -500,9 +508,17 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             url = "/"
         });
 
-        await NotificationHandler.SendNotificationAsync(householdTask.Assignees.Select(receiver => receiver.Id).ToList(), payload);
+        var receivers = householdTask.Assignees
+            .Where(receiver => receiver.Id != userId)
+            .Select(receiver => receiver.Id)
+            .ToList();
 
-        await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+        await NotificationHandler.SendNotificationAsync(receivers, payload);
+
+        if (userId != householdTask.CreatorId)
+        {
+            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+        }
 
         var response = new OperationResultDto
         {
