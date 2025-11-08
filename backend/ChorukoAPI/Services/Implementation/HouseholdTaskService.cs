@@ -507,7 +507,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 Task was opened!",
+            title = "👋 Task was reopened!",
             body = $"{householdTask.Name}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
