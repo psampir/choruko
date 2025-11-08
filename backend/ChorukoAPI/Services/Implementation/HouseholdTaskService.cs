@@ -111,14 +111,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 url = "/"
             });
 
-            var notificationTasks = household.Participants
-                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-                .ToList();
-
-            if (notificationTasks.Any())
-            {
-                await Task.WhenAll(notificationTasks);
-            }
+            await NotificationHandler.SendNotificationAsync(household.Participants.Select(receiver => receiver.Id).ToList(), payload);
 
             var response = new OperationResultDto
             {
@@ -192,14 +185,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 url = "/"
             });
 
-            var notificationTasks = householdTask.Assignees
-                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-                .ToList();
-
-            if (notificationTasks.Any())
-            {
-                await Task.WhenAll(notificationTasks);
-            }
+            await NotificationHandler.SendNotificationAsync(householdTask.Assignees.Select(receiver => receiver.Id).ToList(), payload);
 
             var response = new OperationResultDto
             {
@@ -291,14 +277,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             url = "/"
         });
 
-        var notificationTasks = householdTask.Assignees
-            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-            .ToList();
-
-        if (notificationTasks.Any())
-        {
-            await Task.WhenAll(notificationTasks);
-        }
+        await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
 
         var response = new OperationResultDto
         {
@@ -358,14 +337,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             url = "/"
         });
 
-        var notificationTasks = householdTask.Assignees
-            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-            .ToList();
-
-        if (notificationTasks.Any())
-        {
-            await Task.WhenAll(notificationTasks);
-        }
+        await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
 
         var response = new OperationResultDto
         {
@@ -417,14 +389,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             url = "/"
         });
 
-        var notificationTasks = householdTask.Assignees
-            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-            .ToList();
-
-        if (notificationTasks.Any())
-        {
-            await Task.WhenAll(notificationTasks);
-        }
+        await NotificationHandler.SendNotificationAsync(householdTask.Assignees.Select(receiver => receiver.Id).ToList(), payload);
 
         var response = new OperationResultDto
         {
@@ -491,14 +456,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             url = "/"
         });
 
-        var notificationTasks = householdTask.Assignees
-            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-            .ToList();
-
-        if (notificationTasks.Any())
-        {
-            await Task.WhenAll(notificationTasks);
-        }
+        await NotificationHandler.SendNotificationAsync(householdTask.Assignees.Select(receiver => receiver.Id).ToList(), payload);
 
         var response = new OperationResultDto
         {
