@@ -50,7 +50,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
     
     [HttpDelete("{userIdToDelete}/remove")]
     [Authorize(Roles="HouseholdAdmin")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteUserFromHousehold(string userIdToDelete)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteUserFromHousehold([FromRoute] string userIdToDelete)
     {
         var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
@@ -66,7 +66,7 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
     
     [HttpPost("{userIdToAdd}/add")]
     [Authorize(Roles="HouseholdAdmin")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> AddUserToHousehold(string userIdToAdd)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> AddUserToHousehold([FromRoute] string userIdToAdd)
     {
         var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
@@ -74,7 +74,23 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
 
         return result.ToApiResponse("Add participant");
     }
-    
+
+    [HttpPost("{householdId}/invite")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> InviteUserToHousehold([FromRoute] string householdId, string userIdToAdd)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.InviteUserToHousehold(userId, householdId, userIdToAdd);
+
+        return result.ToApiResponse("Invite participant)");
+    }
+
     [HttpDelete("delete")]
     [Authorize(Roles="HouseholdAdmin")]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteHousehold()
