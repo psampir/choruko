@@ -9,6 +9,7 @@ import { UserProvider, useUser } from "./contexts/UserContext";
 import { HouseholdProvider } from "./contexts/HouseholdContext";
 import { ActivityProvider } from "./contexts/ActivityContext";
 import { TaskProvider } from "./contexts/TaskContext";
+import { SettlementProvider } from "./contexts/SettlementContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PushNotificationProvider } from "./contexts/PushNotificationContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
@@ -226,12 +227,14 @@ function App() {
           <HouseholdProvider>
             <ActivityProvider>
               <TaskProvider>
-                <PushNotificationProvider>
-                  <Router>
-                    <PushNotificationHandler />
-                    <AppRoutes />
-                  </Router>
-                </PushNotificationProvider>
+                <SettlementProvider>
+                  <PushNotificationProvider>
+                    <Router>
+                      <PushNotificationHandler />
+                      <AppRoutes />
+                    </Router>
+                  </PushNotificationProvider>
+                </SettlementProvider>
               </TaskProvider>
             </ActivityProvider>
           </HouseholdProvider>
