@@ -35,26 +35,6 @@ const PushNotificationHandler: React.FC = () => {
       return;
     }
 
-    // Helper to trigger welcome notification
-    const triggerWelcomeNotification = async () => {
-      console.log('[PushNotificationHandler] ✅ Subscription successful! Requesting welcome notification...');
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/PushSubscription/welcome`, {
-          method: 'POST',
-          credentials: 'include',
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('[PushNotificationHandler] Welcome notification response:', data);
-        } else {
-          console.error('[PushNotificationHandler] Welcome notification request failed:', response.status);
-        }
-      } catch (error) {
-        console.error('[PushNotificationHandler] Failed to request welcome notification:', error);
-      }
-    };
-
     // Auto-subscribe after login
     const attemptSubscription = async () => {
       hasTriedSubscription.current = true;
@@ -65,9 +45,7 @@ const PushNotificationHandler: React.FC = () => {
         const subscribed = await subscribe();
         console.log('[PushNotificationHandler] Subscribe result (already granted):', subscribed);
         
-        if (subscribed) {
-          await triggerWelcomeNotification();
-        } else {
+        if (!subscribed) {
           console.error('[PushNotificationHandler] ❌ Subscription failed');
         }
         return;
@@ -88,9 +66,7 @@ const PushNotificationHandler: React.FC = () => {
         const subscribed = await subscribe();
         console.log('[PushNotificationHandler] Subscribe result:', subscribed);
         
-        if (subscribed) {
-          await triggerWelcomeNotification();
-        } else {
+        if (!subscribed) {
           console.error('[PushNotificationHandler] ❌ Subscription failed');
         }
       } else {
