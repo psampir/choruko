@@ -108,7 +108,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 body = $"{request.Name}, deadline:{request.DeadLine}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/tasks"
             }); 
             
             var receivers = household.Participants
@@ -206,7 +206,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                     body = $"You were added to '{householdTask.Name}' by {creatorName}.",
                     icon = "/icons/icon-192x192.png",
                     badge = "/icons/icon-96x96.png",
-                    url = $"/tasks/{householdTask.Id}"
+                    url = "/tasks"
                 });
                 notificationTasks.Add(NotificationHandler.SendNotificationAsync(newlyAddedAssignees, newAssigneePayload));
             }
@@ -219,7 +219,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                     body = $"{request.Name}, deadline:{request.DeadLine.ToShortDateString()}!",
                     icon = "/icons/icon-192x192.png",
                     badge = "/icons/icon-96x96.png",
-                    url = $"/tasks/{householdTask.Id}"
+                    url = "/tasks"
                 });
                 notificationTasks.Add(NotificationHandler.SendNotificationAsync(existingAssignees, editedPayload));
             }
@@ -316,7 +316,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             body = $"{householdTask.Name}, assignee:{user.FirstName} {user.LastName}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
-            url = "/"
+            url = "/tasks"
         });
 
         if (userId != householdTask.CreatorId)
@@ -379,7 +379,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             body = $"{householdTask.Name}, assignee:{user.FirstName} {user.LastName}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
-            url = "/"
+            url = "/tasks"
         });
 
         if (userId != householdTask.CreatorId)
@@ -434,7 +434,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             body = $"{householdTask.Name}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
-            url = "/"
+            url = "/tasks"
         });
 
         var receivers = householdTask.Assignees
@@ -511,7 +511,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             body = $"{householdTask.Name}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
-            url = "/"
+            url = "/tasks"
         });
 
         var receivers = householdTask.Assignees
