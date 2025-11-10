@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../../../../contexts/UserContext";
+import { useSettlement } from "../../../../contexts/SettlementContext";
+import { useHousehold } from "../../../../contexts/HouseholdContext";
 import { useIsDarkTheme } from "../../../../utils/iconUtils";
+import { getProfilePictureUrl } from "../../../../utils/imageUtils";
 import "./AddSettlement.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
@@ -12,51 +15,51 @@ import Popup from "../../../../components/Popup/Popup";
 import ErrorMessage from "../../../../components/ErrorMessage";
 import checkIconLight from "../../../../assets/svg/light/check.svg";
 import checkIconDark from "../../../../assets/svg/dark/check.svg";
+import profileDefaultIconLight from "../../../../assets/svg/light/profile-icon.svg";
+import profileDefaultIconDark from "../../../../assets/svg/dark/profile-icon.svg";
 
+// Assignee type definition (from household participants)
 interface Assignee {
-  id: number;
+  id: string;
   name: string;
-  avatar: string;
+  avatar: string | null;
 }
 
-// Create or edit settlement with assignee selection and amount calculation
 const AddSettlement: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
+  const { createSettlement, editSettlement: editSettlementContext, deleteSettlement } = useSettlement();
+  const { participants } = useHousehold();
   const isDark = useIsDarkTheme();
 
   const arrowLeftIcon = isDark ? arrowLeftIconDark : arrowLeftIconLight;
   const checkIcon = isDark ? checkIconDark : checkIconLight;
+  const profileDefaultIcon = isDark ? profileDefaultIconDark : profileDefaultIconLight;
 
-  // Determine if editing existing settlement
+  // Check if we're in edit mode
   const editSettlement = location.state?.editSettlement;
   const isEditMode = !!editSettlement;
 
   const [settlementDescription, setSettlementDescription] = useState("");
-  const [selectedAssignees, setSelectedAssignees] = useState<number[]>([]);
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
   const [amountSpent, setAmountSpent] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Currency symbol - can be made dynamic based on user preferences/household settings
   const currencySymbol = "₴";
 
-  // Pre-fill form when editing
+  // Pre-fill form when in edit mode
   useEffect(() => {
     if (editSettlement) {
       setSettlementDescription(editSettlement.description || "");
-      setAmountSpent(editSettlement.amountSpent || "");
+      setAmountSpent(editSettlement.amount?.toString() || "");
 
-      // Match assignees by name and avatar to handle duplicates
-      if (editSettlement.assignees && Array.isArray(editSettlement.assignees)) {
-        const assigneeIds = assignees
-          .filter((assignee) =>
-            editSettlement.assignees.some(
-              (ea: any) =>
-                ea.name === assignee.name && ea.avatar === assignee.avatar
-            )
-          )
-          .map((assignee) => assignee.id);
+      // Set selected assignees (unsettled users)
+      if (editSettlement.unsettledUsers && Array.isArray(editSettlement.unsettledUsers)) {
+        const assigneeIds = editSettlement.unsettledUsers.map((u: any) => u.id);
         setSelectedAssignees(assigneeIds);
       }
     }
@@ -75,26 +78,16 @@ const AddSettlement: React.FC = () => {
     }));
   };
 
-  // Mock data for assignees
-  const assignees: Assignee[] = [
-    {
-      id: 1,
-      name: "Andreas Toretto",
-      avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-    },
-    {
-      id: 2,
-      name: "Andreas Toretto",
-      avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-    },
-    {
-      id: 3,
-      name: "Andreas Toretto",
-      avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-    },
-  ];
+  // Get assignees from household participants (excluding current user - creator pays upfront)
+  const assignees: Assignee[] = (participants || [])
+    .filter(p => p.id !== user?.id) // Exclude creator
+    .map(p => ({
+      id: p.id,
+      name: `${p.firstName} ${p.lastName}`,
+      avatar: getProfilePictureUrl(p.profilePicturePath),
+    }));
 
-  const handleAssigneeToggle = (assigneeId: number) => {
+  const handleAssigneeToggle = (assigneeId: string) => {
     setSelectedAssignees((prev) =>
       prev.includes(assigneeId)
         ? prev.filter((id) => id !== assigneeId)
@@ -102,8 +95,8 @@ const AddSettlement: React.FC = () => {
     );
   };
 
-  const handleAddSettlement = () => {
-    // Validate required fields before submission
+  const handleAddSettlement = async () => {
+    // Validate that required fields are filled
     const missingFields = [];
     if (!settlementDescription) missingFields.push("Settlement description");
     if (selectedAssignees.length === 0) missingFields.push("Assignees");
@@ -114,51 +107,64 @@ const AddSettlement: React.FC = () => {
       return;
     }
 
-    // Get selected assignee objects
-    const selectedAssigneeObjs = assignees.filter((assignee) =>
-      selectedAssignees.includes(assignee.id)
-    );
+    // Validate amount
+    const amountNum = parseFloat(amountSpent);
+    if (amountNum <= 0 || isNaN(amountNum)) {
+      setErrorMessage("Amount must be greater than 0");
+      return;
+    }
 
-    if (isEditMode && editSettlement) {
-      const updatedSettlement = {
-        id: editSettlement.id,
-        name: settlementDescription,
-        description: settlementDescription,
-        assignees: selectedAssigneeObjs,
-        amountSpent: amountSpent,
-        author: editSettlement.author,
-      };
+    setIsSubmitting(true);
+    setErrorMessage("");
 
-      setErrorMessage("");
+    try {
+      if (isEditMode && editSettlement) {
+        // Update existing settlement
+        const result = await editSettlementContext(editSettlement.id, {
+          description: settlementDescription,
+          amount: amountNum,
+          unsettledUsers: selectedAssignees,
+        });
 
-      // Navigate back with updated settlement
-      navigate("/settlements", { state: { updatedSettlement } });
-    } else {
-      const newSettlement = {
-        name: settlementDescription,
-        description: settlementDescription,
-        assignees: selectedAssigneeObjs,
-        amountSpent: amountSpent,
-        author: user
-          ? {
-              name: `${user.firstName} ${user.lastName}`,
-              avatar: user.profilePicturePath || null,
-            }
-          : null,
-      };
+        if (result.success) {
+          navigate("/settlements");
+        } else {
+          setErrorMessage(result.message || "Failed to update settlement");
+        }
+      } else {
+        // Create new settlement
+        const result = await createSettlement({
+          description: settlementDescription,
+          amount: amountNum,
+          unsettledUsers: selectedAssignees,
+        });
 
-      setErrorMessage("");
-
-      navigate("/settlements", { state: { newSettlement } });
+        if (result.success) {
+          navigate("/settlements");
+        } else {
+          setErrorMessage(result.message || "Failed to create settlement");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving settlement:", error);
+      setErrorMessage("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Navigate back with delete ID to remove settlement
-  const handleDeleteSettlement = () => {
+  const handleDeleteSettlement = async () => {
     if (editSettlement) {
-      navigate("/settlements", {
-        state: { deleteSettlementId: editSettlement.id },
-      });
+      setIsSubmitting(true);
+      const result = await deleteSettlement(editSettlement.id);
+
+      if (result.success) {
+        navigate("/settlements");
+      } else {
+        console.error("Delete failed:", result.message);
+        setErrorMessage(result.message || "Failed to delete settlement");
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -204,9 +210,8 @@ const AddSettlement: React.FC = () => {
 
         {/* Select Assignees Section */}
         <div
-          className={`participants-list ${
-            collapsedSections.assignees ? "participants-list--collapsed" : ""
-          }`}
+          className={`participants-list ${collapsedSections.assignees ? "participants-list--collapsed" : ""
+            }`}
         >
           <div
             className="participants-list__header"
@@ -220,16 +225,15 @@ const AddSettlement: React.FC = () => {
               {assignees.map((assignee) => (
                 <div
                   key={assignee.id}
-                  className={`activity ${
-                    selectedAssignees.includes(assignee.id)
-                      ? "activity--selected"
-                      : ""
-                  }`}
+                  className={`activity ${selectedAssignees.includes(assignee.id)
+                    ? "activity--selected"
+                    : ""
+                    }`}
                   onClick={() => handleAssigneeToggle(assignee.id)}
                 >
                   <div className="activity-data">
                     <img
-                      src={assignee.avatar}
+                      src={assignee.avatar || profileDefaultIcon}
                       alt={assignee.name}
                       className="assignee-avatar"
                     />
@@ -280,8 +284,12 @@ const AddSettlement: React.FC = () => {
 
         {/* Add/Save Button */}
         <div className="add-settlement__footer">
-          <Button variant="primary" onClick={handleAddSettlement}>
-            {isEditMode ? "Save Changes" : "Add"}
+          <Button 
+            variant="primary" 
+            onClick={handleAddSettlement}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Saving..." : (isEditMode ? "Save Changes" : "Add")}
           </Button>
           {isEditMode && (
             <Button
