@@ -93,7 +93,7 @@ public class SettlementService(
                 body = $"{request.Description}, amount: {request.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             await NotificationHandler.SendNotificationAsync(unsettledUsers.Select(receiver => receiver.Id).ToList(), payload);
@@ -199,7 +199,7 @@ public class SettlementService(
                 body = $"{request.Description}, amount: {request.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             await NotificationHandler.SendNotificationAsync(settlement.UnsettledUsers.Select(receiver => receiver.Id).ToList(), payload);
@@ -331,7 +331,7 @@ public class SettlementService(
                 body = $"{settlement.Description}, amount: {settlement.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             var notificationTasks = new List<Task>();
@@ -402,7 +402,7 @@ public class SettlementService(
                 body = $"{settlement.Description}, amount: {settlement.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             var notificationTasks = new List<Task>();
@@ -493,7 +493,7 @@ public class SettlementService(
                 body = $"{settlement.Description}, amount: {settlement.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             await pushNotificationService.SendNotificationAsync(settlement.CreatorId, payload);
@@ -563,7 +563,7 @@ public class SettlementService(
                 body = $"{settlement.Description}, amount: {settlement.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             await pushNotificationService.SendNotificationAsync(settlement.CreatorId, payload);
