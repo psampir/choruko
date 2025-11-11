@@ -1,4 +1,4 @@
-using ChorukoAPI.Contracts;
+﻿using ChorukoAPI.Contracts;
 using ChorukoAPI.Contracts.Requests.Household;
 using ChorukoAPI.Contracts.Responses.Household;
 using ChorukoAPI.Data;
@@ -23,7 +23,8 @@ public class HouseholdService(DataContext _context,
     SignInManager<User> _signInManager,
     IOptions<ImageSettings> _options,
     IHttpContextAccessor _contextAccessor,
-    IMapper<Household, HouseholdInfoResponse> _mapper) : IHouseholdService
+    IMapper<Household, HouseholdInfoResponse> _mapper,
+    IPushNotificationService pushNotificationService) : IHouseholdService
 {
     public async Task<ServiceResponse<HouseholdInfoResponse>> GetHouseholdInfoAsync()
     {
@@ -362,7 +363,7 @@ public class HouseholdService(DataContext _context,
             HttpStatusCode.OK
         );
     }
-    
+
     public async Task<ServiceResponse<OperationResultDto>> AddUserToHouseholdAsync(string userIdToAdd, string currentUserId)
     {
         var currentUser = await _userManager.FindByIdAsync(currentUserId);
@@ -371,16 +372,16 @@ public class HouseholdService(DataContext _context,
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user not found.", HttpStatusCode.NotFound);
         }
 
-        var userToAdd = await _userManager.FindByIdAsync(userIdToAdd);
-        if (userToAdd == null)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "User to add not found.", HttpStatusCode.NotFound);
-        }
-        
         var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
         if (currentUser.HouseholdId == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user does not belong to a household.", HttpStatusCode.BadRequest);
+        }
+
+        var userToAdd = await _userManager.FindByIdAsync(userIdToAdd);
+        if (userToAdd == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User to add not found.", HttpStatusCode.NotFound);
         }
         
         var household = await _context.Households

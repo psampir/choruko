@@ -134,7 +134,7 @@ namespace ChorukoAPI.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(36)");
 
-                    b.Property<string>("RecieverEmail")
+                    b.Property<string>("ReceiverId")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
@@ -152,6 +152,8 @@ namespace ChorukoAPI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("HouseholdId");
+
+                    b.HasIndex("ReceiverId");
 
                     b.HasIndex("SenderId");
 
@@ -633,6 +635,12 @@ namespace ChorukoAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ChorukoAPI.Models.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ChorukoAPI.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
@@ -640,6 +648,8 @@ namespace ChorukoAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Household");
+
+                    b.Navigation("Receiver");
 
                     b.Navigation("Sender");
                 });
