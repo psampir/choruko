@@ -8,4 +8,5 @@ public interface IInvitationService
 {
     Task<ServiceResponse<OperationResultDto>> CreateHouseholdInvitation(string userId, string householdId, string userIdToAdd);
     Task<ServiceResponse<List<InvitationResponse>>> GetAllInvitations(string userId);
+    Task<ServiceResponse<InvitationResponse>> GetInvitation(string invitationId);
 }
