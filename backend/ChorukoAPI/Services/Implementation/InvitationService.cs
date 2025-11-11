@@ -8,6 +8,7 @@ using System.Net;
 using ChorukoAPI.Data;
 using ChorukoAPI.Contracts.Responses.Invitation;
 using ChorukoAPI.Mappers;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ChorukoAPI.Services.Implementation;
 
@@ -106,6 +107,31 @@ public class InvitationService(DataContext context, IPushNotificationService pus
         catch (Exception ex)
         {
             return ServiceResponseFactory.Error<List<InvitationResponse>>(null, $"Failed while retrieving invitation: {ex.Message}.", HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<ServiceResponse<InvitationResponse>> GetInvitation(string invitationId)
+    {
+        try
+        {
+            var invitation = await context.Invitations
+                .Include(i => i.Receiver)
+                .Include(i => i.Sender)
+                .Include(i => i.Household)
+                .FirstOrDefaultAsync(i => i.Id == invitationId);
+
+            if (invitation == null)
+            {
+                return ServiceResponseFactory.Error<InvitationResponse>(null, "No invitation were found", HttpStatusCode.NotFound);
+            }
+
+            var result = await mapper.Map(invitation);
+
+            return ServiceResponseFactory.Success(result, "Successful retrieval of the invitation");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponseFactory.Error<InvitationResponse>(null, $"Failed while retrieving invitation: {ex.Message}.", HttpStatusCode.InternalServerError);
         }
     }
 }
