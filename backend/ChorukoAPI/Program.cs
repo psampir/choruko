@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using ChorukoAPI.Services.Background;
+using ChorukoAPI.Contracts.Responses.Invitation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -117,6 +118,8 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 
 builder.Services.AddScoped<IHouseholdTaskService, HouseholdTaskService>();
 
+builder.Services.AddScoped<IInvitationService, InvitationService>();
+
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
@@ -124,6 +127,8 @@ builder.Services.AddScoped<IMapper<UserPasswordResetData, AdminResetPasswordResp
 builder.Services.AddScoped<IMapper<User, UserInfoResponse>, UserInfoMapper>();
 builder.Services.AddScoped<IMapper<Settlement, SettlementResponse>, SettlementMapper>();
 builder.Services.AddScoped<IMapper<Household, HouseholdInfoResponse>, HouseholdInfoMapper>();
+builder.Services.AddScoped<IMapper<Settlement, SettlementWithoutUsersResponse>, SettlementWithoutUsersMapper>();
+builder.Services.AddScoped<IMapper<Invitation, InvitationResponse>, InvitationMapper>();
 
 builder.Services.AddScoped<ISettlementService, SettlementService>();
 builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
