@@ -9,10 +9,14 @@ using ChorukoAPI.Data;
 using ChorukoAPI.Contracts.Responses.Invitation;
 using ChorukoAPI.Mappers;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.AspNetCore.Identity;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class InvitationService(DataContext context, IPushNotificationService pushNotificationService, IMapper<Invitation, InvitationResponse> mapper) : IInvitationService
+public class InvitationService(DataContext context,
+    IPushNotificationService pushNotificationService,
+    IMapper<Invitation, InvitationResponse> mapper,
+    UserManager<User> userManager) : IInvitationService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdInvitation(string userId, string householdId, string userIdToAdd)
     {
@@ -131,7 +135,92 @@ public class InvitationService(DataContext context, IPushNotificationService pus
         }
         catch (Exception ex)
         {
-            return ServiceResponseFactory.Error<InvitationResponse>(null, $"Failed while retrieving invitation: {ex.Message}.", HttpStatusCode.InternalServerError);
+            return ServiceResponseFactory.Error<InvitationResponse>(null, $"Failed while retrieving invitation info: {ex.Message}.", HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<ServiceResponse<OperationResultDto>> AcceptInvitation(string invitationId)
+    {
+        try
+        {
+            var invitation = await context.Invitations
+                .Include(i => i.Receiver)
+                .Include(i => i.Sender)
+                .Include(i => i.Household)
+                .FirstOrDefaultAsync(i => i.Id == invitationId);
+
+            if (invitation == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No invitation were found", HttpStatusCode.NotFound);
+            }
+
+            var household = await context.Households.FirstOrDefaultAsync(h => h.Id == invitation.HouseholdId);
+
+            if (household == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No household were found. Maybe it was deleted, or does not exist", HttpStatusCode.NotFound);
+            }
+
+            var newParticipant = await context.Users.FirstOrDefaultAsync(u => u.Id == invitation.ReceiverId);
+
+            if (newParticipant == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Error retrieving your data", HttpStatusCode.NotFound);
+            }
+
+            if (newParticipant.HouseholdId != null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "You already belong to a household.", HttpStatusCode.Conflict);
+            }
+
+            var userToAddRoles = await userManager.GetRolesAsync(newParticipant);
+            if (!userToAddRoles.Contains("None"))
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Only users with the 'None' role can be added to a household.", HttpStatusCode.Forbidden);
+            }
+
+            var removeRoleResult = await userManager.RemoveFromRoleAsync(newParticipant, "None");
+            if (!removeRoleResult.Succeeded)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to remove 'None' role from user.", HttpStatusCode.InternalServerError);
+            }
+
+            var addRoleResult = await userManager.AddToRoleAsync(newParticipant, "Participant");
+            if (!addRoleResult.Succeeded)
+            {
+                await userManager.AddToRoleAsync(newParticipant, "None");
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to assign 'Participant' role to user.", HttpStatusCode.InternalServerError);
+            }
+
+            newParticipant.Household = household;
+            household.Participants.Add(newParticipant);
+
+            context.Users.Update(newParticipant);
+
+            await context.SaveChangesAsync();
+
+            var response = new OperationResultDto
+            {
+                Operation = "AcceptInvitation",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "HouseholdId", household.Id },
+                    { "UserId", newParticipant.Id },
+                    { "UserName", newParticipant.FirstName + " " + newParticipant.LastName }
+                }
+            };
+
+            return ServiceResponseFactory.Success(
+                response,
+                "User was successfully added to the household.",
+                HttpStatusCode.OK
+            );
+
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while accepting invitation: {ex.Message}.", HttpStatusCode.InternalServerError);
         }
     }
 }
