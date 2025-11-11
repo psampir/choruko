@@ -192,6 +192,7 @@ public class InvitationService(DataContext context,
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to assign 'Participant' role to user.", HttpStatusCode.InternalServerError);
             }
 
+            invitation.Status = InvitationStatus.Accepted;
             newParticipant.Household = household;
             household.Participants.Add(newParticipant);
 
@@ -223,4 +224,53 @@ public class InvitationService(DataContext context,
             return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while accepting invitation: {ex.Message}.", HttpStatusCode.InternalServerError);
         }
     }
+
+    public async Task<ServiceResponse<OperationResultDto>> DeclineInvitation(string invitationId)
+    {
+        try
+        {
+            var invitation = await context.Invitations
+                .Include(i => i.Receiver)
+                .Include(i => i.Sender)
+                .Include(i => i.Household)
+                .FirstOrDefaultAsync(i => i.Id == invitationId);
+
+            if (invitation == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No invitation were found", HttpStatusCode.NotFound);
+            }
+
+            if (invitation.Status == InvitationStatus.Accepted)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "You accepted this invitation", HttpStatusCode.BadRequest);
+            }
+
+            invitation.Status = InvitationStatus.Declined;
+
+            await context.SaveChangesAsync();
+
+            var response = new OperationResultDto
+            {
+                Operation = "DeclineInvitation",
+                Timestamp = DateTime.UtcNow,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "InvitationId", invitation.Id },
+                    { "UserId", invitation.ReceiverId },
+                    { "UserName", invitation.Receiver.FirstName + " " + invitation.Receiver.LastName }
+                }
+            };
+
+            return ServiceResponseFactory.Success(
+                response,
+                "User successfully declined the invitation.",
+                HttpStatusCode.OK
+            );
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while declining invitation: {ex.Message}.", HttpStatusCode.InternalServerError);
+        }
+    }
+
 }

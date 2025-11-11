@@ -10,4 +10,5 @@ public interface IInvitationService
     Task<ServiceResponse<List<InvitationResponse>>> GetAllInvitations(string userId);
     Task<ServiceResponse<InvitationResponse>> GetInvitation(string invitationId);
     Task<ServiceResponse<OperationResultDto>> AcceptInvitation(string invitationId);
+    Task<ServiceResponse<OperationResultDto>> DeclineInvitation(string invitationId);
 }

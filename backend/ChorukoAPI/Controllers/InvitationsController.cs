@@ -75,7 +75,24 @@ public class InvitationsController(IInvitationService invitationService) : Contr
 
         var result = await invitationService.AcceptInvitation(invitationId);
 
-        return result.ToApiResponse("Invite participant");
+        return result.ToApiResponse("AcceptInvitation");
+
+    }
+
+    [HttpPut("{invitationId}/decline")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeclineInvitation([FromRoute] string invitationId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await invitationService.DeclineInvitation(invitationId);
+
+        return result.ToApiResponse("DeclineInvitation");
 
     }
 }
