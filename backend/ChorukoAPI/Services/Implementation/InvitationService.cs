@@ -6,10 +6,12 @@ using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using ChorukoAPI.Data;
+using ChorukoAPI.Contracts.Responses.Invitation;
+using ChorukoAPI.Mappers;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class InvitationService(DataContext context, IPushNotificationService pushNotificationService) : IInvitationService
+public class InvitationService(DataContext context, IPushNotificationService pushNotificationService, IMapper<Invitation, InvitationResponse> mapper) : IInvitationService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdInvitation(string userId, string householdId, string userIdToAdd)
     {
@@ -19,18 +21,24 @@ public class InvitationService(DataContext context, IPushNotificationService pus
 
             if (userToAdd == null)
             {
-                ServiceResponseFactory.Error<OperationResultDto>(null, "No users were found", HttpStatusCode.NotFound);
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No users were found", HttpStatusCode.NotFound);
             }
 
             var household = await context.Households.FirstOrDefaultAsync(h => h.Id == householdId);
 
+            if (household == null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No households were found", HttpStatusCode.NotFound);
+            }
+
             var invitation = new Invitation
             {
+                Id = Guid.NewGuid().ToString(),
                 SenderId = userId,
                 Receiver = userToAdd,
                 Household = household,
                 Status = InvitationStatus.Pending,
-                SentAt = DateTime.UtcNow,
+                SentAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
             };
 
             context.Invitations.Add(invitation);
@@ -71,8 +79,33 @@ public class InvitationService(DataContext context, IPushNotificationService pus
         }
         catch (Exception ex)
         {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while creating task: {ex.Message}.", HttpStatusCode.InternalServerError);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, $"Failed while creating invitation: {ex.Message}.", HttpStatusCode.InternalServerError);
         }
     }
 
+    public async Task<ServiceResponse<List<InvitationResponse>>> GetAllInvitations(string userId)
+    {
+        try
+        {
+            var invitations = await context.Invitations
+                .Include(i => i.Receiver)
+                .Include(i => i.Sender)
+                .Include(i => i.Household)
+                .Where(i => i.ReceiverId == userId)
+                .ToListAsync();
+
+            var result = new List<InvitationResponse>();
+
+            foreach (var invitation in invitations)
+            {
+                result.Add(await mapper.Map(invitation));
+            }
+
+            return ServiceResponseFactory.Success(result, "Successful retrieval of the invitation");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResponseFactory.Error<List<InvitationResponse>>(null, $"Failed while retrieving invitation: {ex.Message}.", HttpStatusCode.InternalServerError);
+        }
+    }
 }
