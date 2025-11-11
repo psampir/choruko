@@ -31,6 +31,7 @@ public class InvitationsController(IInvitationService invitationService) : Contr
     }
 
     [HttpGet("all")]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<List<InvitationResponse>>>> GetAllInvitations()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -42,11 +43,12 @@ public class InvitationsController(IInvitationService invitationService) : Contr
 
         var result = await invitationService.GetAllInvitations(userId);
 
-        return result.ToApiResponse("Invite participant)");
+        return result.ToApiResponse("GetAllInvitations");
     }
 
     [HttpGet("{invitationId}")]
-    public async Task<ActionResult<ApiResponse<List<InvitationResponse>>>> GetAllInvitations([FromRoute] string invitationId)
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<InvitationResponse>>> GetInvitationsInfo([FromRoute] string invitationId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -57,6 +59,23 @@ public class InvitationsController(IInvitationService invitationService) : Contr
 
         var result = await invitationService.GetInvitation(invitationId);
 
-        return result.ToApiResponse("Invite participant)");
+        return result.ToApiResponse("GetInvitationsInfo");
+    }
+
+    [HttpPut("{invitationId}/accept")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> AcceptInvitation([FromRoute] string invitationId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await invitationService.AcceptInvitation(invitationId);
+
+        return result.ToApiResponse("Invite participant");
+
     }
 }

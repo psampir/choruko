@@ -372,16 +372,16 @@ public class HouseholdService(DataContext _context,
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user not found.", HttpStatusCode.NotFound);
         }
 
-        var userToAdd = await _userManager.FindByIdAsync(userIdToAdd);
-        if (userToAdd == null)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "User to add not found.", HttpStatusCode.NotFound);
-        }
-        
         var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
         if (currentUser.HouseholdId == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user does not belong to a household.", HttpStatusCode.BadRequest);
+        }
+
+        var userToAdd = await _userManager.FindByIdAsync(userIdToAdd);
+        if (userToAdd == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "User to add not found.", HttpStatusCode.NotFound);
         }
         
         var household = await _context.Households
