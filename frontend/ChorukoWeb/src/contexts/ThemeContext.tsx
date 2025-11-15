@@ -21,6 +21,9 @@ const applyTheme = (theme: ThemeType) => {
 
   const effectiveTheme = theme === "system" ? getSystemTheme() : theme;
 
+  // Set data-theme attribute for CSS selectors
+  root.setAttribute("data-theme", effectiveTheme);
+
   if (effectiveTheme === "dark") {
     root.style.setProperty("--color-primary", "var(--color-dark-primary)");
     root.style.setProperty("--color-secondary", "var(--color-dark-secondary)");

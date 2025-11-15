@@ -56,6 +56,30 @@
   // Password input variant (inherits from primary)
   &--password {
     @extend .input--primary;
+    
+    // Hide all native password reveal buttons (IE/Edge/Firefox)
+    &::-ms-reveal,
+    &::-ms-clear {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    
+    // Firefox specific
+    &::-moz-reveal {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    
+    // Webkit (Chrome/Safari/Edge)
+    &::-webkit-credentials-auto-fill-button,
+    &::-webkit-textfield-decoration-container {
+      visibility: hidden;
+      pointer-events: none;
+      position: absolute;
+      right: 0;
+    }
   }
 
   // Email input variant (inherits from primary)
@@ -104,6 +128,10 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      
+      :root[data-theme="dark"] & {
+        background: url("../../assets/svg/dark/eye.svg") no-repeat center/contain;
+      }
 
       // Remove any focus styles
       &:focus {
@@ -130,6 +158,10 @@
 
     .input__pencil {
       background: url("../../assets/svg/light/pencil.svg") no-repeat center;
+      
+      :root[data-theme="dark"] & {
+        background: url("../../assets/svg/dark/pencil.svg") no-repeat center;
+      }
     }
 
     .input__date {
@@ -165,6 +197,11 @@
     .input--password.active + .input__eye {
       background: url("../../assets/svg/light/close-eye.svg") no-repeat
         center/contain;
+      
+      :root[data-theme="dark"] & {
+        background: url("../../assets/svg/dark/close-eye.svg") no-repeat
+          center/contain;
+      }
     }
   }
 }

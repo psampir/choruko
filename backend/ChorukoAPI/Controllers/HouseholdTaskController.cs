@@ -96,7 +96,14 @@ namespace ChorukoAPI.Controllers
         [Authorize(Roles = "HouseholdAdmin,Participant")]
         public async Task<ActionResult<ApiResponse<OperationResultDto>>> MarkTaskAsCompleted([FromRoute] string taskId)
         {
-            var result = await householdTaskService.MarkTaskAsCompleted(taskId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
+            }
+
+            var result = await householdTaskService.MarkTaskAsCompleted(taskId, userId);
 
             return result.ToApiResponse("Complete task");
         }
@@ -105,7 +112,14 @@ namespace ChorukoAPI.Controllers
         [Authorize(Roles = "HouseholdAdmin,Participant")]
         public async Task<ActionResult<ApiResponse<OperationResultDto>>> UnMarkTaskAsCompleted([FromRoute] string taskId)
         {
-            var result = await householdTaskService.UnMarkTaskAsCompleted(taskId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
+            }
+
+            var result = await householdTaskService.UnMarkTaskAsCompleted(taskId, userId);
 
             return result.ToApiResponse("Uncomplete task");
         }

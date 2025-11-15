@@ -105,20 +105,18 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
                 title = "👋 New task was created!",
-                body = $"{request.Description}, deadline:{request.DeadLine}!",
+                body = $"{request.Name}, deadline:{request.DeadLine}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
                 url = "/"
-            });
-
-            var notificationTasks = household.Participants
-                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+            }); 
+            
+            var receivers = household.Participants
+                .Where(receiver => receiver.Id != userId)
+                .Select(receiver => receiver.Id)
                 .ToList();
 
-            if (notificationTasks.Any())
-            {
-                await Task.WhenAll(notificationTasks);
-            }
+            await NotificationHandler.SendNotificationAsync(receivers, payload);
 
             var response = new OperationResultDto
             {
@@ -157,6 +155,8 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 return ServiceResponseFactory.Error<OperationResultDto>(null, $"Cannot edit a completed task. Please mark it as uncompleted first.", HttpStatusCode.BadRequest);
             }
 
+            var oldAssigneeIds = householdTask.Assignees.Select(a => a.Id).ToHashSet();
+
             var household = await _context.Households
                 .Include(h => h.Activities)
                 .Include(h => h.Participants)
@@ -183,18 +183,46 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
             await _context.SaveChangesAsync();
 
-            var payload = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                title = "👋 Task info was edited!",
-                body = $"{request.Description}, deadline:{request.DeadLine}!",
-                icon = "/icons/icon-192x192.png",
-                badge = "/icons/icon-96x96.png",
-                url = "/"
-            });
+            var creatorId = householdTask.CreatorId;
+            var creatorName = household.Participants.FirstOrDefault(p => p.Id == creatorId)?.FirstName ?? "Someone";
 
-            var notificationTasks = householdTask.Assignees
-                .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+            var newlyAddedAssignees = usersToAdd
+                .Where(u => !oldAssigneeIds.Contains(u.Id) && u.Id != creatorId)
+                .Select(u => u.Id)
                 .ToList();
+
+            var existingAssignees = usersToAdd
+                .Where(u => oldAssigneeIds.Contains(u.Id) && u.Id != creatorId)
+                .Select(u => u.Id)
+                .ToList();
+
+            var notificationTasks = new List<Task>();
+
+            if (newlyAddedAssignees.Any())
+            {
+                var newAssigneePayload = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    title = "🔔 You've been added to a task!",
+                    body = $"You were added to '{householdTask.Name}' by {creatorName}.",
+                    icon = "/icons/icon-192x192.png",
+                    badge = "/icons/icon-96x96.png",
+                    url = $"/tasks/{householdTask.Id}"
+                });
+                notificationTasks.Add(NotificationHandler.SendNotificationAsync(newlyAddedAssignees, newAssigneePayload));
+            }
+
+            if (existingAssignees.Any())
+            {
+                var editedPayload = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    title = "👋 Task info was edited!",
+                    body = $"{request.Name}, deadline:{request.DeadLine.ToShortDateString()}!",
+                    icon = "/icons/icon-192x192.png",
+                    badge = "/icons/icon-96x96.png",
+                    url = $"/tasks/{householdTask.Id}"
+                });
+                notificationTasks.Add(NotificationHandler.SendNotificationAsync(existingAssignees, editedPayload));
+            }
 
             if (notificationTasks.Any())
             {
@@ -285,24 +313,20 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
             title = "👋 New assignee in task!",
-            body = $"{householdTask.Description}, assignee:{user.FirstName} {user.LastName}!",
+            body = $"{householdTask.Name}, assignee:{user.FirstName} {user.LastName}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
             url = "/"
         });
 
-        var notificationTasks = householdTask.Assignees
-            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-            .ToList();
-
-        if (notificationTasks.Any())
+        if (userId != householdTask.CreatorId)
         {
-            await Task.WhenAll(notificationTasks);
+            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
         }
 
         var response = new OperationResultDto
         {
-            Operation = "EditHouseholdTask",
+            Operation = "AssignUserToTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
             {
@@ -352,24 +376,20 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
             title = "👋 User left task!",
-            body = $"{householdTask.Description}, assignee:{user.FirstName} {user.LastName}!",
+            body = $"{householdTask.Name}, assignee:{user.FirstName} {user.LastName}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
             url = "/"
         });
 
-        var notificationTasks = householdTask.Assignees
-            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
-            .ToList();
-
-        if (notificationTasks.Any())
+        if (userId != householdTask.CreatorId)
         {
-            await Task.WhenAll(notificationTasks);
+            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
         }
 
         var response = new OperationResultDto
         {
-            Operation = "EditHouseholdTask",
+            Operation = "UnAssignUserFromTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
             {
@@ -382,7 +402,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         return ServiceResponseFactory.Success(response, "User successfully unassigned from household task.");
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId)
+    public async Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId, string userId)
     {
         var householdTask = await _context.HouseholdTasks
             .Include(t => t.Assignees) 
@@ -411,24 +431,27 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
             title = "👋 Task was completed!",
-            body = $"{householdTask.Description}!",
+            body = $"{householdTask.Name}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
             url = "/"
         });
 
-        var notificationTasks = householdTask.Assignees
-            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+        var receivers = householdTask.Assignees
+            .Where(receiver => receiver.Id != userId)
+            .Select(receiver => receiver.Id)
             .ToList();
 
-        if (notificationTasks.Any())
+        await NotificationHandler.SendNotificationAsync(receivers, payload);
+
+        if (userId != householdTask.CreatorId)
         {
-            await Task.WhenAll(notificationTasks);
+            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
         }
 
         var response = new OperationResultDto
         {
-            Operation = "EditHouseholdTask",
+            Operation = "CompleteHouseholdTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
                 {
@@ -440,7 +463,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         return ServiceResponseFactory.Success(response, "Task successfully completed.");
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId)
+    public async Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId, string userId)
     {
         var householdTask = await _context.HouseholdTasks
             .Include(h => h.Assignees)
@@ -484,25 +507,28 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 Task was opened!",
-            body = $"{householdTask.Description}!",
+            title = "👋 Task was reopened!",
+            body = $"{householdTask.Name}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
             url = "/"
         });
 
-        var notificationTasks = householdTask.Assignees
-            .Select(receiver => pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+        var receivers = householdTask.Assignees
+            .Where(receiver => receiver.Id != userId)
+            .Select(receiver => receiver.Id)
             .ToList();
 
-        if (notificationTasks.Any())
+        await NotificationHandler.SendNotificationAsync(receivers, payload);
+
+        if (userId != householdTask.CreatorId)
         {
-            await Task.WhenAll(notificationTasks);
+            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
         }
 
         var response = new OperationResultDto
         {
-            Operation = "EditHouseholdTask",
+            Operation = "CompleteHouseholdTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
                 {

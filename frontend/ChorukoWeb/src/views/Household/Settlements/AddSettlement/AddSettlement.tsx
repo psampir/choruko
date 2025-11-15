@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../../../../contexts/UserContext";
+import { useIsDarkTheme } from "../../../../utils/iconUtils";
 import "./AddSettlement.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import NavbarMobile from "../../../../components/NavbarMobile";
-import arrowLeftIcon from "../../../../assets/svg/light/arrow-left.svg";
+import arrowLeftIconLight from "../../../../assets/svg/light/arrow-left.svg";
+import arrowLeftIconDark from "../../../../assets/svg/dark/arrow-left.svg";
 import Popup from "../../../../components/Popup/Popup";
 import ErrorMessage from "../../../../components/ErrorMessage";
-import checkIcon from "../../../../assets/svg/light/check.svg";
+import checkIconLight from "../../../../assets/svg/light/check.svg";
+import checkIconDark from "../../../../assets/svg/dark/check.svg";
 
 // Assignee type definition
 interface Assignee {
@@ -21,6 +24,10 @@ const AddSettlement: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
+  const isDark = useIsDarkTheme();
+
+  const arrowLeftIcon = isDark ? arrowLeftIconDark : arrowLeftIconLight;
+  const checkIcon = isDark ? checkIconDark : checkIconLight;
 
   // Check if we're in edit mode
   const editSettlement = location.state?.editSettlement;
@@ -136,9 +143,9 @@ const AddSettlement: React.FC = () => {
         amountSpent: amountSpent,
         author: user
           ? {
-              name: `${user.firstName} ${user.lastName}`,
-              avatar: user.profilePicturePath || null,
-            }
+            name: `${user.firstName} ${user.lastName}`,
+            avatar: user.profilePicturePath || null,
+          }
           : null,
       };
 
@@ -184,7 +191,7 @@ const AddSettlement: React.FC = () => {
             <img src={arrowLeftIcon} alt="Back" />
           </button>
           <h1 className="add-settlement__title">
-            {isEditMode ? "Edit settlement" : "Add a new settlement"}
+            {isEditMode ? "Edit settlement" : "Add a settlement"}
           </h1>
         </div>
 
@@ -201,15 +208,14 @@ const AddSettlement: React.FC = () => {
 
         {/* Select Assignees Section */}
         <div
-          className={`participants-list ${
-            collapsedSections.assignees ? "participants-list--collapsed" : ""
-          }`}
+          className={`participants-list ${collapsedSections.assignees ? "participants-list--collapsed" : ""
+            }`}
         >
           <div
             className="participants-list__header"
             onClick={() => toggleSection("assignees")}
           >
-            SELECT ASSIGNEES
+            SELECT PAYERS
             <span className="dropdown__arrow">&#9660;</span>
           </div>
           {!collapsedSections.assignees && (
@@ -217,11 +223,10 @@ const AddSettlement: React.FC = () => {
               {assignees.map((assignee) => (
                 <div
                   key={assignee.id}
-                  className={`activity ${
-                    selectedAssignees.includes(assignee.id)
-                      ? "activity--selected"
-                      : ""
-                  }`}
+                  className={`activity ${selectedAssignees.includes(assignee.id)
+                    ? "activity--selected"
+                    : ""
+                    }`}
                   onClick={() => handleAssigneeToggle(assignee.id)}
                 >
                   <div className="activity-data">
