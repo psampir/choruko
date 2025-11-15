@@ -6,7 +6,6 @@ import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import { useUser } from "../../../contexts/UserContext";
 import profileIcon from "../../../assets/svg/light/profile-icon.svg";
-import starIcon from "../../../assets/svg/dark/star.svg";
 import pencilLight from "../../../assets/svg/dark/pencil.svg";
 import checkLight from "../../../assets/svg/light/check.svg";
 import settlementIcon from "../../../assets/svg/light/expenses.svg";
@@ -27,7 +26,7 @@ interface Settlement {
   status: "todo" | "done";
   author?: Author;
   amountSpent?: string;
-  paidBy?: string[]; // Array of assignee names who have paid
+  paidBy?: string[];
 }
 
 const Settlements: React.FC = () => {
@@ -42,6 +41,8 @@ const Settlements: React.FC = () => {
     todo: false,
     done: false,
   });
+
+  const [viewMode, setViewMode] = useState<"all" | "my">("all");
 
   // Load settlements from localStorage or return default settlements
   const getInitialSettlements = (): Settlement[] => {
@@ -261,6 +262,23 @@ const Settlements: React.FC = () => {
     (settlement) => settlement.status === "done"
   );
 
+  // Filter settlements based on view mode
+  const getFilteredSettlements = (settlementList: Settlement[]) => {
+    if (viewMode === "all") {
+      return settlementList;
+    }
+    // "my" view - show only settlements where user is assignee or author
+    const userFullName = user ? `${user.firstName} ${user.lastName}` : "";
+    return settlementList.filter(
+      (settlement) =>
+        settlement.author?.name === userFullName ||
+        settlement.assignees.some((assignee) => assignee.name === userFullName)
+    );
+  };
+
+  const filteredTodoSettlements = getFilteredSettlements(todoSettlements);
+  const filteredDoneSettlements = getFilteredSettlements(doneSettlements);
+
   const [selectedSettlement, setSelectedSettlement] =
     useState<Settlement | null>(null);
   const [showPopup, setShowPopup] = useState(false);
@@ -318,6 +336,26 @@ const Settlements: React.FC = () => {
         </Button>
       </div>
 
+      {/* View Toggle */}
+      <div className="settlements__view-toggle">
+        <button
+          className={`settlements__view-button ${
+            viewMode === "my" ? "settlements__view-button--active" : ""
+          }`}
+          onClick={() => setViewMode("my")}
+        >
+          My Payments
+        </button>
+        <button
+          className={`settlements__view-button ${
+            viewMode === "all" ? "settlements__view-button--active" : ""
+          }`}
+          onClick={() => setViewMode("all")}
+        >
+          All Payments
+        </button>
+      </div>
+
       <div className="settlements__content">
         {/* To-Do Section */}
         <div
@@ -339,17 +377,19 @@ const Settlements: React.FC = () => {
           </span>
           {!collapsedSections.todo && (
             <div className="settlements__list">
-              {todoSettlements.length > 0 ? (
-                todoSettlements.map((settlement, index) =>
+              {filteredTodoSettlements.length > 0 ? (
+                filteredTodoSettlements.map((settlement, index) =>
                   renderSettlement(
                     settlement,
-                    index === todoSettlements.length - 1,
+                    index === filteredTodoSettlements.length - 1,
                     index === 0
                   )
                 )
               ) : (
                 <p className="settlements__empty-message">
-                  No settlements to do
+                  {viewMode === "my"
+                    ? "No settlements assigned to you"
+                    : "No settlements to do"}
                 </p>
               )}
             </div>
@@ -376,17 +416,19 @@ const Settlements: React.FC = () => {
           </span>
           {!collapsedSections.done && (
             <div className="settlements__list">
-              {doneSettlements.length > 0 ? (
-                doneSettlements.map((settlement, index) =>
+              {filteredDoneSettlements.length > 0 ? (
+                filteredDoneSettlements.map((settlement, index) =>
                   renderSettlement(
                     settlement,
-                    index === doneSettlements.length - 1,
+                    index === filteredDoneSettlements.length - 1,
                     index === 0
                   )
                 )
               ) : (
                 <p className="settlements__empty-message">
-                  No completed settlements
+                  {viewMode === "my"
+                    ? "No completed settlements assigned to you"
+                    : "No completed settlements"}
                 </p>
               )}
             </div>
@@ -545,21 +587,6 @@ const Settlements: React.FC = () => {
                 </div>
               ) : null;
             })()}
-            <div className="settlement-details-footer">
-              <div className="settlement-details-footer-item first">
-                <div>
-                  <span className="settlement-details-footer-icon">
-                    <img src={starIcon} alt="star icon" />
-                  </span>
-                  <span className="settlement-details-footer-label">
-                    POINTS
-                  </span>
-                </div>
-              </div>
-              <div className="settlement-details-footer-item second">
-                <div className="settlement-details-footer-value">5 pts</div>
-              </div>
-            </div>
           </div>
         </Popup>
       )}
