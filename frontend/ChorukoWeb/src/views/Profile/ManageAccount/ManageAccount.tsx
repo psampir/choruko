@@ -2,32 +2,50 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
+import { useIsDarkTheme } from "../../../utils/iconUtils";
 import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
-import ProfileDefaultIcon from "../../../assets/svg/profile-icon-light.svg";
-import arrowLeft from "../../../assets/svg/arrow-left.svg";
+import ProfileDefaultIconLight from "../../../assets/svg/light/profile-icon-light.svg";
+import arrowLeftLight from "../../../assets/svg/light/arrow-left.svg";
+import ProfileDefaultIconDark from "../../../assets/svg/dark/profile-icon-light.svg";
+import arrowLeftDark from "../../../assets/svg/dark/arrow-left.svg";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 
+// User account management - update name, password, and profile picture
 const ManageAccount: React.FC = () => {
   const navigate = useNavigate();
-  const { user, updateUserNames, updatePassword, updateProfilePicture, deleteAccount, loading: userLoading } = useUser();
+  const {
+    user,
+    updateUserNames,
+    updatePassword,
+    updateProfilePicture,
+    deleteAccount,
+    loading: userLoading,
+  } = useUser();
   const { refreshHousehold } = useHousehold();
+  const isDark = useIsDarkTheme();
+
+  const ProfileDefaultIcon = isDark
+    ? ProfileDefaultIconDark
+    : ProfileDefaultIconLight;
+  const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
+
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [firstNameValue, setFirstNameValue] = useState<string>("");
   const [lastNameValue, setLastNameValue] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [profileImageSrc, setProfileImageSrc] = useState<string>(ProfileDefaultIcon);
+  const [profileImageSrc, setProfileImageSrc] =
+    useState<string>(ProfileDefaultIcon);
 
-  // Initialize name values and profile picture from user data
+  // Initialize form values and profile picture from user data
   useEffect(() => {
     if (user) {
       setFirstNameValue(user.firstName);
       setLastNameValue(user.lastName);
-      
-      // Load profile picture from backend if available
+
       const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
       if (pictureUrl) {
         setProfileImageSrc(pictureUrl);
@@ -45,7 +63,10 @@ const ManageAccount: React.FC = () => {
     type: "success",
   });
 
-  const showNotification = (message: string, type: "success" | "error" = "success") => {
+  const showNotification = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
     setNotification({ message, isVisible: true, type });
 
     setTimeout(() => {
@@ -63,7 +84,7 @@ const ManageAccount: React.FC = () => {
     }
 
     const result = await updateUserNames(firstNameValue, lastNameValue);
-    
+
     if (result.success) {
       await refreshHousehold();
       showNotification("Your name has been changed successfully", "success");
@@ -72,7 +93,9 @@ const ManageAccount: React.FC = () => {
     }
   };
 
-  const handlePasswordChange = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handlePasswordChange = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -87,9 +110,12 @@ const ManageAccount: React.FC = () => {
     }
 
     const result = await updatePassword(newPassword, confirmPassword);
-    
+
     if (result.success) {
-      showNotification("Your password has been changed successfully", "success");
+      showNotification(
+        "Your password has been changed successfully",
+        "success"
+      );
       // Clear password fields after successful change
       setNewPassword("");
       setConfirmPassword("");
@@ -98,12 +124,14 @@ const ManageAccount: React.FC = () => {
     }
   };
 
-  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       // Upload to server first
       const result = await updateProfilePicture(file);
-      
+
       if (result.success) {
         // Only update preview after successful upload
         const reader = new FileReader();
@@ -115,7 +143,10 @@ const ManageAccount: React.FC = () => {
         await refreshHousehold();
         showNotification("Profile picture updated successfully", "success");
       } else {
-        showNotification(result.message || "Failed to update profile picture", "error");
+        showNotification(
+          result.message || "Failed to update profile picture",
+          "error"
+        );
       }
     }
   };
@@ -126,7 +157,7 @@ const ManageAccount: React.FC = () => {
 
   const handleDeleteAccount = async () => {
     const result = await deleteAccount();
-    
+
     if (result.success) {
       // User will be logged out and redirected by the deleteAccount function
       showNotification("Account deleted successfully", "success");
@@ -145,8 +176,9 @@ const ManageAccount: React.FC = () => {
         onClick={() => navigate(-1)}
       />
       <div
-        className={`notification-bar notification-bar--${notification.type} ${notification.isVisible ? "notification-bar--visible" : ""
-          }`}
+        className={`notification-bar notification-bar--${notification.type} ${
+          notification.isVisible ? "notification-bar--visible" : ""
+        }`}
       >
         <span>{notification.message}</span>
       </div>
@@ -179,24 +211,34 @@ const ManageAccount: React.FC = () => {
             value={lastNameValue}
             onChange={(e) => setLastNameValue(e.target.value)}
           />
-          <Button variant="primary" type="button" onClick={handleNameChange} disabled={userLoading}>
+          <Button
+            variant="primary"
+            type="button"
+            onClick={handleNameChange}
+            disabled={userLoading}
+          >
             {userLoading ? "Changing..." : "Change Name"}
           </Button>
         </div>
         <div className="manage-account__main-section change-password">
-          <Input 
-            variant="password" 
+          <Input
+            variant="password"
             placeholder="New Password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
-          <Input 
-            variant="password" 
+          <Input
+            variant="password"
             placeholder="Confirm New Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <Button variant="primary" type="button" onClick={handlePasswordChange} disabled={userLoading}>
+          <Button
+            variant="primary"
+            type="button"
+            onClick={handlePasswordChange}
+            disabled={userLoading}
+          >
             {userLoading ? "Changing..." : "Change Password"}
           </Button>
         </div>
@@ -212,8 +254,16 @@ const ManageAccount: React.FC = () => {
         <Popup variant="red" title="" onClose={() => setOpenPopup(false)}>
           <p>Are you sure you want to delete your account?</p>
           <img src={profileImageSrc} alt="Profile Image" />
-          <p>{user ? `${user.firstName} ${user.lastName}` : `${firstNameValue} ${lastNameValue}`}</p>
-          <Button variant="red" onClick={handleDeleteAccount} disabled={userLoading}>
+          <p>
+            {user
+              ? `${user.firstName} ${user.lastName}`
+              : `${firstNameValue} ${lastNameValue}`}
+          </p>
+          <Button
+            variant="red"
+            onClick={handleDeleteAccount}
+            disabled={userLoading}
+          >
             {userLoading ? "Deleting..." : "Delete"}
           </Button>
         </Popup>

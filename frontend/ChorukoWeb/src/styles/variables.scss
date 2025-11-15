@@ -1,6 +1,6 @@
 // Color Variables
 :root {
-  // Light Mode Colors
+  // Light Mode Colors (default)
   --color-primary: #95d2b3;
   --color-secondary: #55ad9b;
   --color-secondary-half-tr: #56ae9c80;
@@ -13,18 +13,31 @@
   --color-error-bg: #ff7285;
   --color-error-bg-secondary: #ffb9b9;
 
+  // Light Mode Colors (explicit references)
+  --color-light-primary: #95d2b3;
+  --color-light-secondary: #55ad9b;
+  --color-light-secondary-half-tr: #56ae9c80;
+  --color-light-background: #f1f8e8;
+  --color-light-background-secondary: #d8efd3;
+  --color-light-text-primary: #021207;
+  --color-light-text-secondary: #666;
+  --color-light-white: #ffffff;
+  --color-light-black: #000000;
+  --color-light-error-bg: #ff7285;
+  --color-light-error-bg-secondary: #ffb9b9;
+
   // Dark Mode Colors
-  --color-dark-primary: #397B5A;
+  --color-dark-primary: #397b5a;
   --color-dark-secondary: #327264;
   --color-dark-secondary-half-tr: #3272647b;
   --color-dark-background: #000000;
-  --color-dark-background-secondary: #1E1E1E;
+  --color-dark-background-secondary: #1e1e1e;
   --color-dark-text-primary: #e8e9ea;
   --color-dark-text-secondary: #c3c3c3;
   --color-dark-white: #000000;
   --color-dark-black: #ffffff;
   --color-dark-error-bg: #843742;
-  --color-dark-error-bg-secondary: #4A1E24;
+  --color-dark-error-bg-secondary: #4a1e24;
 
   // UI Colors
   --color-border: #e0e0e0;
