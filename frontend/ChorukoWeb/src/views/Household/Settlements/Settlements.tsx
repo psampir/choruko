@@ -5,15 +5,10 @@ import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import { useUser } from "../../../contexts/UserContext";
-import { useIsDarkTheme } from "../../../utils/iconUtils";
-import profileIconLight from "../../../assets/svg/light/profile-icon.svg";
-import profileIconDark from "../../../assets/svg/dark/profile-icon.svg";
-import pencilLight from "../../../assets/svg/light/pencil-light.svg";
-import pencilDark from "../../../assets/svg/dark/pencil-light.svg";
+import profileIcon from "../../../assets/svg/light/profile-icon.svg";
+import pencilLight from "../../../assets/svg/dark/pencil.svg";
 import checkLight from "../../../assets/svg/light/check.svg";
-import checkDark from "../../../assets/svg/dark/check.svg";
-import settlementIconLight from "../../../assets/svg/light/expenses.svg";
-import settlementIconDark from "../../../assets/svg/dark/expenses.svg";
+import settlementIcon from "../../../assets/svg/light/expenses.svg";
 
 interface Assignee {
   name: string;
@@ -28,30 +23,26 @@ interface Settlement {
   name: string;
   description: string;
   assignees: Assignee[];
-  status: "unpaid" | "paid";
+  status: "todo" | "done";
   author?: Author;
   amountSpent?: string;
-  paidBy?: string[]; // Array of assignee names who have paid
+  paidBy?: string[];
 }
 
 const Settlements: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
-  const isDark = useIsDarkTheme();
-
-  const profileIcon = isDark ? profileIconDark : profileIconLight;
-  const pencilIcon = isDark ? pencilDark : pencilLight;
-  const checkIcon = isDark ? checkDark : checkLight;
-  const settlementIcon = isDark ? settlementIconDark : settlementIconLight;
 
   // Currency symbol - can be made dynamic based on user preferences/household settings
   const currencySymbol = "₴";
 
   const [collapsedSections, setCollapsedSections] = useState({
-    unpaid: false,
-    paid: false,
+    todo: false,
+    done: false,
   });
+
+  const [viewMode, setViewMode] = useState<"all" | "my">("all");
 
   // Load settlements from localStorage or return default settlements
   const getInitialSettlements = (): Settlement[] => {
@@ -74,7 +65,7 @@ const Settlements: React.FC = () => {
             avatar: "https://randomuser.me/api/portraits/men/2.jpg",
           },
         ],
-        status: "unpaid",
+        status: "todo",
         author: {
           name: "Andreas Toretto",
           avatar: "https://randomuser.me/api/portraits/men/1.jpg",
@@ -92,7 +83,7 @@ const Settlements: React.FC = () => {
             avatar: "https://randomuser.me/api/portraits/women/2.jpg",
           },
         ],
-        status: "unpaid",
+        status: "todo",
         author: {
           name: "Gabby Mayers",
           avatar: "https://randomuser.me/api/portraits/women/2.jpg",
@@ -118,7 +109,7 @@ const Settlements: React.FC = () => {
             avatar: "https://randomuser.me/api/portraits/men/3.jpg",
           },
         ],
-        status: "paid",
+        status: "done",
         author: {
           name: "Ann Huang",
           avatar: "https://randomuser.me/api/portraits/women/1.jpg",
@@ -186,10 +177,10 @@ const Settlements: React.FC = () => {
               description: updatedSettlement.description,
               assignees: Array.isArray(updatedSettlement.assignees)
                 ? updatedSettlement.assignees.map((a: any) =>
-                  typeof a === "object"
-                    ? { name: a.name, avatar: a.avatar }
-                    : { name: a, avatar: a }
-                )
+                    typeof a === "object"
+                      ? { name: a.name, avatar: a.avatar }
+                      : { name: a, avatar: a }
+                  )
                 : [],
               status: settlement.status,
               author: updatedSettlement.author || settlement.author,
@@ -214,12 +205,12 @@ const Settlements: React.FC = () => {
           description: newSettlement.description,
           assignees: Array.isArray(newSettlement.assignees)
             ? newSettlement.assignees.map((a: any) =>
-              typeof a === "object"
-                ? { name: a.name, avatar: a.avatar }
-                : { name: a, avatar: a }
-            )
+                typeof a === "object"
+                  ? { name: a.name, avatar: a.avatar }
+                  : { name: a, avatar: a }
+              )
             : [],
-          status: "unpaid",
+          status: "todo",
           author:
             newSettlement.author && typeof newSettlement.author === "object"
               ? (newSettlement.author as Author)
@@ -254,22 +245,39 @@ const Settlements: React.FC = () => {
     navigate("/settlements/add");
   };
 
-  const markSettlementAsPaid = (settlementId: number) => {
+  const markSettlementAsDone = (settlementId: number) => {
     setSettlements((prevSettlements) =>
       prevSettlements.map((settlement) =>
         settlement.id === settlementId
-          ? { ...settlement, status: "paid" as const }
+          ? { ...settlement, status: "done" as const }
           : settlement
       )
     );
   };
 
-  const unpaidSettlements = settlements.filter(
-    (settlement) => settlement.status === "unpaid"
+  const todoSettlements = settlements.filter(
+    (settlement) => settlement.status === "todo"
   );
-  const paidSettlements = settlements.filter(
-    (settlement) => settlement.status === "paid"
+  const doneSettlements = settlements.filter(
+    (settlement) => settlement.status === "done"
   );
+
+  // Filter settlements based on view mode
+  const getFilteredSettlements = (settlementList: Settlement[]) => {
+    if (viewMode === "all") {
+      return settlementList;
+    }
+    // "my" view - show only settlements where user is assignee or author
+    const userFullName = user ? `${user.firstName} ${user.lastName}` : "";
+    return settlementList.filter(
+      (settlement) =>
+        settlement.author?.name === userFullName ||
+        settlement.assignees.some((assignee) => assignee.name === userFullName)
+    );
+  };
+
+  const filteredTodoSettlements = getFilteredSettlements(todoSettlements);
+  const filteredDoneSettlements = getFilteredSettlements(doneSettlements);
 
   const [selectedSettlement, setSelectedSettlement] =
     useState<Settlement | null>(null);
@@ -282,8 +290,9 @@ const Settlements: React.FC = () => {
   ) => {
     return (
       <div
-        className={`settlement ${isFirst ? "settlement--first" : ""} ${isLast ? "settlement--last" : ""
-          }`}
+        className={`settlement ${isFirst ? "settlement--first" : ""} ${
+          isLast ? "settlement--last" : ""
+        }`}
         key={settlement.id}
         onClick={() => {
           setSelectedSettlement(settlement);
@@ -309,8 +318,8 @@ const Settlements: React.FC = () => {
           </div>
           <span className="settlement__icon-container">
             <img
-              src={settlement.status === "unpaid" ? settlementIcon : checkIcon}
-              alt="Settlement status icon"
+              src={settlement.status === "todo" ? settlementIcon : checkLight}
+              alt="Check light icon"
             />
           </span>
         </div>
@@ -327,73 +336,99 @@ const Settlements: React.FC = () => {
         </Button>
       </div>
 
+      {/* View Toggle */}
+      <div className="settlements__view-toggle">
+        <button
+          className={`settlements__view-button ${
+            viewMode === "my" ? "settlements__view-button--active" : ""
+          }`}
+          onClick={() => setViewMode("my")}
+        >
+          My Payments
+        </button>
+        <button
+          className={`settlements__view-button ${
+            viewMode === "all" ? "settlements__view-button--active" : ""
+          }`}
+          onClick={() => setViewMode("all")}
+        >
+          All Payments
+        </button>
+      </div>
+
       <div className="settlements__content">
-        {/* Unpaid Section */}
+        {/* To-Do Section */}
         <div
-          className={`settlements__section settlements__section--unpaid ${collapsedSections.unpaid ? "settlements__section--collapsed" : ""
-            }`}
+          className={`settlements__section settlements__section--todo ${
+            collapsedSections.todo ? "settlements__section--collapsed" : ""
+          }`}
         >
           <h2
             className="settlements__section-title"
-            onClick={() => toggleSection("unpaid")}
+            onClick={() => toggleSection("todo")}
           >
             AMOUNTS DUE
           </h2>
           <span
             className="dropdown__arrow"
-            onClick={() => toggleSection("unpaid")}
+            onClick={() => toggleSection("todo")}
           >
             &#9660;
           </span>
-          {!collapsedSections.unpaid && (
+          {!collapsedSections.todo && (
             <div className="settlements__list">
-              {unpaidSettlements.length > 0 ? (
-                unpaidSettlements.map((settlement, index) =>
+              {filteredTodoSettlements.length > 0 ? (
+                filteredTodoSettlements.map((settlement, index) =>
                   renderSettlement(
                     settlement,
-                    index === unpaidSettlements.length - 1,
+                    index === filteredTodoSettlements.length - 1,
                     index === 0
                   )
                 )
               ) : (
                 <p className="settlements__empty-message">
-                  No unpaid settlements
+                  {viewMode === "my"
+                    ? "No settlements assigned to you"
+                    : "No settlements to do"}
                 </p>
               )}
             </div>
           )}
         </div>
 
-        {/* Paid Section */}
+        {/* Done Section */}
         <div
-          className={`settlements__section settlements__section--paid ${collapsedSections.paid ? "settlements__section--collapsed" : ""
-            }`}
+          className={`settlements__section settlements__section--done ${
+            collapsedSections.done ? "settlements__section--collapsed" : ""
+          }`}
         >
           <h2
             className="settlements__section-title"
-            onClick={() => toggleSection("paid")}
+            onClick={() => toggleSection("done")}
           >
-            AMOUNTS PAID
+            AMOUNTS
           </h2>
           <span
             className="dropdown__arrow"
-            onClick={() => toggleSection("paid")}
+            onClick={() => toggleSection("done")}
           >
             &#9660;
           </span>
-          {!collapsedSections.paid && (
+          {!collapsedSections.done && (
             <div className="settlements__list">
-              {paidSettlements.length > 0 ? (
-                paidSettlements.map((settlement, index) =>
+              {filteredDoneSettlements.length > 0 ? (
+                filteredDoneSettlements.map((settlement, index) =>
                   renderSettlement(
                     settlement,
-                    index === paidSettlements.length - 1,
+                    index === filteredDoneSettlements.length - 1,
                     index === 0
                   )
                 )
               ) : (
                 <p className="settlements__empty-message">
-                  No paid settlements
+                  {viewMode === "my"
+                    ? "No completed settlements assigned to you"
+                    : "No completed settlements"}
                 </p>
               )}
             </div>
@@ -414,11 +449,11 @@ const Settlements: React.FC = () => {
               <div className="amount-per-person">
                 {currencySymbol}
                 {selectedSettlement.amountSpent &&
-                  selectedSettlement.assignees.length > 0
+                selectedSettlement.assignees.length > 0
                   ? (
-                    parseFloat(selectedSettlement.amountSpent) /
-                    selectedSettlement.assignees.length
-                  ).toFixed(2)
+                      parseFloat(selectedSettlement.amountSpent) /
+                      selectedSettlement.assignees.length
+                    ).toFixed(2)
                   : "0.00"}{" "}
                 per person
               </div>
@@ -430,26 +465,26 @@ const Settlements: React.FC = () => {
           }
           variant="primary"
           actions={
-            selectedSettlement.status !== "paid"
+            selectedSettlement.status !== "done"
               ? [
-                {
-                  label: "Mark as paid",
-                  onClick: () => {
-                    markSettlementAsPaid(selectedSettlement.id);
-                    setShowPopup(false);
-                    setSelectedSettlement(null);
+                  {
+                    label: "Mark as done",
+                    onClick: () => {
+                      markSettlementAsDone(selectedSettlement.id);
+                      setShowPopup(false);
+                      setSelectedSettlement(null);
+                    },
+                    variant: "primary",
                   },
-                  variant: "primary",
-                },
-              ]
+                ]
               : []
           }
           customActions={
-            // Show edit button only for settlement author and not for paid settlements
+            // Show edit button only for settlement author and not for done settlements
             user &&
-              selectedSettlement.author?.name ===
+            selectedSettlement.author?.name ===
               `${user.firstName} ${user.lastName}` &&
-              selectedSettlement.status !== "paid" ? (
+            selectedSettlement.status !== "done" ? (
               <div
                 className="settlement-edit-button"
                 onClick={() => {
@@ -469,7 +504,7 @@ const Settlements: React.FC = () => {
                   setSelectedSettlement(null);
                 }}
               >
-                <img src={pencilIcon} alt="Edit settlement" />
+                <img src={pencilLight} alt="Edit settlement" />
               </div>
             ) : null
           }
