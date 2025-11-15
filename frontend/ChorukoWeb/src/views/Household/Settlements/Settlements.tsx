@@ -34,18 +34,19 @@ interface Settlement {
   paidBy?: string[];
 }
 
+// Household settlements management with view filtering and localStorage persistence
 const Settlements: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
   const isDark = useIsDarkTheme();
 
+  // Theme-aware icons
   const profileIcon = isDark ? profileIconDark : profileIconLight;
   const pencilIcon = isDark ? pencilDark : pencilLight;
   const checkIcon = isDark ? checkDark : checkLight;
   const settlementIcon = isDark ? settlementIconDark : settlementIconLight;
 
-  // Currency symbol - can be made dynamic based on user preferences/household settings
   const currencySymbol = "₴";
 
   const [collapsedSections, setCollapsedSections] = useState({
@@ -53,9 +54,9 @@ const Settlements: React.FC = () => {
     paid: false,
   });
 
-  const [viewMode, setViewMode] = useState<"all" | "my">("all");
+  const [viewMode, setViewMode] = useState<"all" | "my">("my");
 
-  // Load settlements from localStorage or return default settlements
+  // Load settlements from localStorage or return mock data
   const getInitialSettlements = (): Settlement[] => {
     const saved = localStorage.getItem("choruko-settlements");
     if (saved) {
@@ -144,7 +145,7 @@ const Settlements: React.FC = () => {
   const hasUpdatedSettlementRef = useRef(false);
   const hasDeletedSettlementRef = useRef(false);
 
-  // Handle settlement operations from AddSettlement page via navigation state
+  // Handle add/update/delete operations from AddSettlement via navigation state
   useEffect(() => {
     const state = location.state as {
       newSettlement?: {
@@ -207,7 +208,6 @@ const Settlements: React.FC = () => {
     if (state?.newSettlement && !hasAddedSettlementRef.current) {
       hasAddedSettlementRef.current = true;
       const { newSettlement } = state;
-      console.log("Received newSettlement:", newSettlement);
 
       setSettlements((prevSettlements) => {
         const settlementToAdd: Settlement = {
@@ -273,7 +273,7 @@ const Settlements: React.FC = () => {
     (settlement) => settlement.status === "paid"
   );
 
-  // Filter settlements based on view mode
+  // Filter settlements: "my" shows user involvement, "all" shows everything
   const getFilteredSettlements = (settlementList: Settlement[]) => {
     if (viewMode === "all") {
       return settlementList;
@@ -320,9 +320,12 @@ const Settlements: React.FC = () => {
             />
           </div>
           <div className="settlement__info">
-            <p className="settlement__name">
-              {settlement.amountSpent
-                ? `${currencySymbol}${settlement.amountSpent}`
+            <p className="settlement__amount">
+              {settlement.amountSpent && settlement.assignees.length > 0
+                ? `${currencySymbol}${(
+                    parseFloat(settlement.amountSpent) /
+                    settlement.assignees.length
+                  ).toFixed(2)}`
                 : "No amount"}
             </p>
             <p className="settlement__description">{settlement.description}</p>
@@ -438,7 +441,7 @@ const Settlements: React.FC = () => {
               ) : (
                 <p className="settlements__empty-message">
                   {viewMode === "my"
-                    ? "No completed settlements assigned to you"
+                    ? "No paid settlements assigned to you"
                     : "No paid settlements"}
                 </p>
               )}

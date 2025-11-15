@@ -19,7 +19,7 @@ import defineActivityLight from "../../../assets/svg/light/activities.svg";
 import delegateAdminLight from "../../../assets/svg/light/star-emty.svg";
 import addParticipantsLight from "../../../assets/svg/light/profile-icon-light.svg";
 import deleteHouseholdLight from "../../../assets/svg/light/trash-bin.svg";
-import declineLight from "../../../assets/svg/light/decline.svg"
+import declineLight from "../../../assets/svg/light/decline.svg";
 
 import householdDefaultIconDark from "../../../assets/svg/dark/householdDefault.svg";
 import profileDefaultIconDark from "../../../assets/svg/dark/profile-icon.svg";
@@ -28,7 +28,7 @@ import defineActivityDark from "../../../assets/svg/dark/activities.svg";
 import delegateAdminDark from "../../../assets/svg/dark/star-emty.svg";
 import addParticipantsDark from "../../../assets/svg/dark/profile-icon-light.svg";
 import deleteHouseholdDark from "../../../assets/svg/dark/trash-bin.svg";
-import declineDark from "../../../assets/svg/dark/decline.svg"
+import declineDark from "../../../assets/svg/dark/decline.svg";
 
 const buttonActions = {
   defineActivity: "define_activity",
@@ -40,29 +40,42 @@ const buttonActions = {
 
 type ButtonAction = (typeof buttonActions)[keyof typeof buttonActions];
 
+// Household management - edit name, manage participants, delegate admin, delete household
 const ManageHousehold: React.FC = () => {
   const navigate = useNavigate();
-  const { householdInfo, participants, refreshHousehold, error: householdError, loading: householdLoading } = useHousehold();
+  const {
+    householdInfo,
+    participants,
+    refreshHousehold,
+    error: householdError,
+    loading: householdLoading,
+  } = useHousehold();
   const { hasHousehold, checkAuth } = useAuth();
   const { user } = useUser();
   const isDark = useIsDarkTheme();
-  
-  // Select themed icons
-  const householdDefaultIcon = isDark ? householdDefaultIconDark : householdDefaultIconLight;
-  const profileDefaultIcon = isDark ? profileDefaultIconDark : profileDefaultIconLight;
+
+  const householdDefaultIcon = isDark
+    ? householdDefaultIconDark
+    : householdDefaultIconLight;
+  const profileDefaultIcon = isDark
+    ? profileDefaultIconDark
+    : profileDefaultIconLight;
   const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
   const defineActivity = isDark ? defineActivityDark : defineActivityLight;
   const delegateAdmin = isDark ? delegateAdminDark : delegateAdminLight;
   const addParticipants = isDark ? addParticipantsDark : addParticipantsLight;
   const deleteHousehold = isDark ? deleteHouseholdDark : deleteHouseholdLight;
   const decline = isDark ? declineDark : declineLight;
-  
+
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("");
-  const [profileImage, setProfileImage] = useState<string>(householdDefaultIcon);
+  const [profileImage, setProfileImage] =
+    useState<string>(householdDefaultIcon);
   const [clickedButton, setClickedButton] = useState<ButtonAction | null>(null);
-  const [selectedParticipant, setSelectedParticipant] = useState<HouseholdParticipant | null>(null);
-  const [selectedNewAdmin, setSelectedNewAdmin] = useState<HouseholdParticipant | null>(null);
+  const [selectedParticipant, setSelectedParticipant] =
+    useState<HouseholdParticipant | null>(null);
+  const [selectedNewAdmin, setSelectedNewAdmin] =
+    useState<HouseholdParticipant | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [notification, setNotification] = useState<{
@@ -75,18 +88,16 @@ const ManageHousehold: React.FC = () => {
     type: "success",
   });
 
-  // Check if user was removed from household
+  // Redirect if user loses household access
   useEffect(() => {
     const checkHouseholdAccess = async () => {
-      // If there's an error indicating no household access
-      if (householdError && householdError.includes("not part of any household")) {
-        console.log("User no longer has household access, refreshing auth and redirecting...");
+      if (
+        householdError &&
+        householdError.includes("not part of any household")
+      ) {
         await checkAuth(false);
         navigate("/joinOrCreateHousehold", { replace: true });
-      }
-      // Also check hasHousehold flag directly
-      else if (!householdLoading && !hasHousehold) {
-        console.log("User has no household, redirecting...");
+      } else if (!householdLoading && !hasHousehold) {
         navigate("/joinOrCreateHousehold", { replace: true });
       }
     };
@@ -94,7 +105,7 @@ const ManageHousehold: React.FC = () => {
     checkHouseholdAccess();
   }, [householdError, hasHousehold, householdLoading, checkAuth, navigate]);
 
-  // Initialize values from householdInfo
+  // Initialize household name and image from context
   useEffect(() => {
     if (householdInfo) {
       setNameValue(householdInfo.name);
@@ -102,7 +113,10 @@ const ManageHousehold: React.FC = () => {
     }
   }, [householdInfo]);
 
-  const showNotification = (message: string, type: "success" | "error" = "success") => {
+  const showNotification = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
     setNotification({ message, isVisible: true, type });
 
     setTimeout(() => {
@@ -128,7 +142,10 @@ const ManageHousehold: React.FC = () => {
         showNotification("Household name changed successfully", "success");
         await refreshHousehold();
       } else {
-        showNotification(result.message || "Failed to change household name", "error");
+        showNotification(
+          result.message || "Failed to change household name",
+          "error"
+        );
       }
     } catch (error) {
       showNotification("An unexpected error occurred", "error");
@@ -137,7 +154,9 @@ const ManageHousehold: React.FC = () => {
     }
   };
 
-  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       // Show preview
@@ -156,13 +175,20 @@ const ManageHousehold: React.FC = () => {
           showNotification("Household picture changed successfully", "success");
           await refreshHousehold();
         } else {
-          showNotification(result.message || "Failed to change household picture", "error");
+          showNotification(
+            result.message || "Failed to change household picture",
+            "error"
+          );
           // Revert preview on failure
-          setProfileImage(householdInfo?.profilePictureUrl || householdDefaultIcon);
+          setProfileImage(
+            householdInfo?.profilePictureUrl || householdDefaultIcon
+          );
         }
       } catch (error) {
         showNotification("An unexpected error occurred", "error");
-        setProfileImage(householdInfo?.profilePictureUrl || householdDefaultIcon);
+        setProfileImage(
+          householdInfo?.profilePictureUrl || householdDefaultIcon
+        );
       } finally {
         setLoading(false);
       }
@@ -192,7 +218,10 @@ const ManageHousehold: React.FC = () => {
     );
   };
 
-  const handleSelectNewAdmin = (participant: HouseholdParticipant, event: React.MouseEvent<HTMLDivElement>) => {
+  const handleSelectNewAdmin = (
+    participant: HouseholdParticipant,
+    event: React.MouseEvent<HTMLDivElement>
+  ) => {
     const participantsListInPopup =
       event.currentTarget.closest(".participants-list");
 
@@ -213,7 +242,9 @@ const ManageHousehold: React.FC = () => {
 
     setLoading(true);
     try {
-      const result = await householdService.setHouseholdAdmin(selectedNewAdmin.id);
+      const result = await householdService.setHouseholdAdmin(
+        selectedNewAdmin.id
+      );
       if (result.success) {
         showNotification("Admin delegated successfully", "success");
         setOpenPopup(false);
@@ -246,7 +277,10 @@ const ManageHousehold: React.FC = () => {
           navigate("/joinOrCreateHousehold");
         }, 1500);
       } else {
-        showNotification(result.message || "Failed to delete household", "error");
+        showNotification(
+          result.message || "Failed to delete household",
+          "error"
+        );
       }
     } catch (error) {
       showNotification("An unexpected error occurred", "error");
@@ -260,14 +294,19 @@ const ManageHousehold: React.FC = () => {
 
     setLoading(true);
     try {
-      const result = await householdService.removeUserFromHousehold(selectedParticipant.id);
+      const result = await householdService.removeUserFromHousehold(
+        selectedParticipant.id
+      );
       if (result.success) {
         showNotification("Participant removed successfully", "success");
         setOpenPopup(false);
         setSelectedParticipant(null);
         await refreshHousehold();
       } else {
-        showNotification(result.message || "Failed to remove participant", "error");
+        showNotification(
+          result.message || "Failed to remove participant",
+          "error"
+        );
       }
     } catch (error) {
       showNotification("An unexpected error occurred", "error");
@@ -290,7 +329,9 @@ const ManageHousehold: React.FC = () => {
   });
 
   // Filter out current admin for delegation popup
-  const delegateableParticipants = participants.filter(participant => participant.id !== user?.id);
+  const delegateableParticipants = participants.filter(
+    (participant) => participant.id !== user?.id
+  );
 
   return (
     <div className="manage-household">
@@ -301,8 +342,9 @@ const ManageHousehold: React.FC = () => {
         onClick={() => navigate(-1)}
       />
       <div
-        className={`notification-bar notification-bar--${notification.type} ${notification.isVisible ? "notification-bar--visible" : ""
-          }`}
+        className={`notification-bar notification-bar--${notification.type} ${
+          notification.isVisible ? "notification-bar--visible" : ""
+        }`}
       >
         <span>{notification.message}</span>
       </div>
@@ -328,7 +370,11 @@ const ManageHousehold: React.FC = () => {
             value={nameValue}
             onChange={(e) => setNameValue(e.target.value)}
           />
-          <Button variant="primary" onClick={handleNameChange} disabled={loading}>
+          <Button
+            variant="primary"
+            onClick={handleNameChange}
+            disabled={loading}
+          >
             {loading ? "Saving..." : "Change Name"}
           </Button>
         </div>
@@ -378,7 +424,10 @@ const ManageHousehold: React.FC = () => {
             >
               <span>
                 <img
-                  src={getProfilePictureUrl(participant.profilePicturePath) || profileDefaultIcon}
+                  src={
+                    getProfilePictureUrl(participant.profilePicturePath) ||
+                    profileDefaultIcon
+                  }
                   alt={`${participant.firstName} ${participant.lastName}`}
                 />
                 <p>{`${participant.firstName} ${participant.lastName}`}</p>
@@ -400,7 +449,10 @@ const ManageHousehold: React.FC = () => {
       {openPopup && (
         <Popup
           variant={
-            clickedButton === buttonActions.deleteHousehold || clickedButton === buttonActions.deleteParticipant ? "red" : "primary"
+            clickedButton === buttonActions.deleteHousehold ||
+            clickedButton === buttonActions.deleteParticipant
+              ? "red"
+              : "primary"
           }
           title=""
           onClose={() => setOpenPopup(false)}
@@ -408,8 +460,11 @@ const ManageHousehold: React.FC = () => {
           {clickedButton === buttonActions.delegateAdmin && (
             <>
               <p>Select a new household admin</p>
-              <p className="warning-text">You will be logged out after delegating admin rights.</p>
-              {delegateableParticipants && delegateableParticipants.length > 0 ? (
+              <p className="warning-text">
+                You will be logged out after delegating admin rights.
+              </p>
+              {delegateableParticipants &&
+              delegateableParticipants.length > 0 ? (
                 <div className="participants-list">
                   <div className="participants-list__header">PARTICIPANTS</div>
                   {delegateableParticipants.map((participant, index) => (
@@ -421,7 +476,9 @@ const ManageHousehold: React.FC = () => {
                     >
                       <img
                         src={
-                          getProfilePictureUrl(participant.profilePicturePath) || profileDefaultIcon
+                          getProfilePictureUrl(
+                            participant.profilePicturePath
+                          ) || profileDefaultIcon
                         }
                         alt={`${participant.firstName} ${participant.lastName}`}
                       />
@@ -458,24 +515,37 @@ const ManageHousehold: React.FC = () => {
               <p>Are you sure you want to delete this household?</p>
               <img src={profileImage} alt="Household Image" />
               <p>{householdInfo?.name || "Household"}</p>
-              <Button variant="red" onClick={handleDeleteHousehold} disabled={loading}>
+              <Button
+                variant="red"
+                onClick={handleDeleteHousehold}
+                disabled={loading}
+              >
                 {loading ? "Deleting..." : "Delete"}
               </Button>
             </>
           )}
-          {clickedButton === buttonActions.deleteParticipant && selectedParticipant && (
-            <>
-              <p>Are you sure you want to remove this participant?</p>
-              <img
-                src={getProfilePictureUrl(selectedParticipant.profilePicturePath) || profileDefaultIcon}
-                alt={`${selectedParticipant.firstName} ${selectedParticipant.lastName}`}
-              />
-              <p>{`${selectedParticipant.firstName} ${selectedParticipant.lastName}`}</p>
-              <Button variant="red" onClick={handleDeleteParticipant} disabled={loading}>
-                {loading ? "Removing..." : "Remove"}
-              </Button>
-            </>
-          )}
+          {clickedButton === buttonActions.deleteParticipant &&
+            selectedParticipant && (
+              <>
+                <p>Are you sure you want to remove this participant?</p>
+                <img
+                  src={
+                    getProfilePictureUrl(
+                      selectedParticipant.profilePicturePath
+                    ) || profileDefaultIcon
+                  }
+                  alt={`${selectedParticipant.firstName} ${selectedParticipant.lastName}`}
+                />
+                <p>{`${selectedParticipant.firstName} ${selectedParticipant.lastName}`}</p>
+                <Button
+                  variant="red"
+                  onClick={handleDeleteParticipant}
+                  disabled={loading}
+                >
+                  {loading ? "Removing..." : "Remove"}
+                </Button>
+              </>
+            )}
         </Popup>
       )}
     </div>

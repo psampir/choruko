@@ -13,13 +13,13 @@ import ErrorMessage from "../../../../components/ErrorMessage";
 import checkIconLight from "../../../../assets/svg/light/check.svg";
 import checkIconDark from "../../../../assets/svg/dark/check.svg";
 
-// Assignee type definition
 interface Assignee {
   id: number;
   name: string;
   avatar: string;
 }
 
+// Create or edit settlement with assignee selection and amount calculation
 const AddSettlement: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,7 +29,7 @@ const AddSettlement: React.FC = () => {
   const arrowLeftIcon = isDark ? arrowLeftIconDark : arrowLeftIconLight;
   const checkIcon = isDark ? checkIconDark : checkIconLight;
 
-  // Check if we're in edit mode
+  // Determine if editing existing settlement
   const editSettlement = location.state?.editSettlement;
   const isEditMode = !!editSettlement;
 
@@ -39,14 +39,15 @@ const AddSettlement: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Currency symbol - can be made dynamic based on user preferences/household settings
-  const currencySymbol = "₴"; // Pre-fill form when in edit mode
+  const currencySymbol = "₴";
+
+  // Pre-fill form when editing
   useEffect(() => {
     if (editSettlement) {
       setSettlementDescription(editSettlement.description || "");
       setAmountSpent(editSettlement.amountSpent || "");
 
-      // Select assignees by matching both name AND avatar
+      // Match assignees by name and avatar to handle duplicates
       if (editSettlement.assignees && Array.isArray(editSettlement.assignees)) {
         const assigneeIds = assignees
           .filter((assignee) =>
@@ -102,7 +103,7 @@ const AddSettlement: React.FC = () => {
   };
 
   const handleAddSettlement = () => {
-    // Validate that required fields are filled
+    // Validate required fields before submission
     const missingFields = [];
     if (!settlementDescription) missingFields.push("Settlement description");
     if (selectedAssignees.length === 0) missingFields.push("Assignees");
@@ -113,13 +114,12 @@ const AddSettlement: React.FC = () => {
       return;
     }
 
-    // Get the selected assignees' objects
+    // Get selected assignee objects
     const selectedAssigneeObjs = assignees.filter((assignee) =>
       selectedAssignees.includes(assignee.id)
     );
 
     if (isEditMode && editSettlement) {
-      // Update existing settlement
       const updatedSettlement = {
         id: editSettlement.id,
         name: settlementDescription,
@@ -129,13 +129,11 @@ const AddSettlement: React.FC = () => {
         author: editSettlement.author,
       };
 
-      // Clear error message on successful submission
       setErrorMessage("");
 
-      // Navigate back to settlements with the updated settlement data
+      // Navigate back with updated settlement
       navigate("/settlements", { state: { updatedSettlement } });
     } else {
-      // Create new settlement
       const newSettlement = {
         name: settlementDescription,
         description: settlementDescription,
@@ -143,23 +141,21 @@ const AddSettlement: React.FC = () => {
         amountSpent: amountSpent,
         author: user
           ? {
-            name: `${user.firstName} ${user.lastName}`,
-            avatar: user.profilePicturePath || null,
-          }
+              name: `${user.firstName} ${user.lastName}`,
+              avatar: user.profilePicturePath || null,
+            }
           : null,
       };
 
-      // Clear error message on successful submission
       setErrorMessage("");
 
-      // Navigate back to settlements with the new settlement data
       navigate("/settlements", { state: { newSettlement } });
     }
   };
 
+  // Navigate back with delete ID to remove settlement
   const handleDeleteSettlement = () => {
     if (editSettlement) {
-      // Navigate back with delete flag
       navigate("/settlements", {
         state: { deleteSettlementId: editSettlement.id },
       });
@@ -208,8 +204,9 @@ const AddSettlement: React.FC = () => {
 
         {/* Select Assignees Section */}
         <div
-          className={`participants-list ${collapsedSections.assignees ? "participants-list--collapsed" : ""
-            }`}
+          className={`participants-list ${
+            collapsedSections.assignees ? "participants-list--collapsed" : ""
+          }`}
         >
           <div
             className="participants-list__header"
@@ -223,10 +220,11 @@ const AddSettlement: React.FC = () => {
               {assignees.map((assignee) => (
                 <div
                   key={assignee.id}
-                  className={`activity ${selectedAssignees.includes(assignee.id)
-                    ? "activity--selected"
-                    : ""
-                    }`}
+                  className={`activity ${
+                    selectedAssignees.includes(assignee.id)
+                      ? "activity--selected"
+                      : ""
+                  }`}
                   onClick={() => handleAssigneeToggle(assignee.id)}
                 >
                   <div className="activity-data">
