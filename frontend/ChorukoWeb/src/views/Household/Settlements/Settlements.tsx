@@ -46,7 +46,7 @@ interface UISettlement {
 const Settlements: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { settlements: backendSettlements, loading, error, refreshSettlements, markAsPaid, markAsUnpaid } = useSettlement();
+  const { settlements: backendSettlements, loading, error, refreshSettlements, markAsPaid, markAsUnpaid, markAsDone, unmarkAsDone } = useSettlement();
   const { refreshHousehold } = useHousehold();
   const isDark = useIsDarkTheme();
 
@@ -299,37 +299,70 @@ const Settlements: React.FC = () => {
               </div>
             }
             variant="primary"
-            actions={
-              selectedSettlement.status === "unpaid"
-                ? [
-                  {
-                    label: "Mark as paid",
+            actions={(() => {
+              if (!selectedBackendSettlement || !user) return [];
+              
+              const isCreator = selectedSettlement.author.id === user.id;
+              const isPayer = selectedBackendSettlement.unsettledUsers?.some(u => u.id === user.id) || 
+                             selectedBackendSettlement.settledUsers?.some(u => u.id === user.id);
+              const hasUserPaid = selectedBackendSettlement.settledUsers?.some(u => u.id === user.id);
+              
+              // Creator sees "Mark as done/undone" buttons
+              if (isCreator) {
+                if (selectedSettlement.status === "unpaid") {
+                  return [{
+                    label: "Mark as done",
                     onClick: async () => {
-                      if (selectedBackendSettlement) {
-                        await markAsPaid(selectedBackendSettlement.id);
-                      }
+                      await markAsDone(selectedBackendSettlement.id);
                       setShowPopup(false);
                       setSelectedSettlement(null);
                       setSelectedBackendSettlement(null);
                     },
                     variant: "primary" as const,
-                  },
-                ]
-                : [
-                  {
+                  }];
+                } else {
+                  return [{
+                    label: "Mark as undone",
+                    onClick: async () => {
+                      await unmarkAsDone(selectedBackendSettlement.id);
+                      setShowPopup(false);
+                      setSelectedSettlement(null);
+                      setSelectedBackendSettlement(null);
+                    },
+                    variant: "primary" as const,
+                  }];
+                }
+              }
+              
+              // Payers see "Mark as paid/unpaid" buttons
+              if (isPayer) {
+                if (hasUserPaid) {
+                  return [{
                     label: "Mark as unpaid",
                     onClick: async () => {
-                      if (selectedBackendSettlement) {
-                        await markAsUnpaid(selectedBackendSettlement.id);
-                      }
+                      await markAsUnpaid(selectedBackendSettlement.id);
                       setShowPopup(false);
                       setSelectedSettlement(null);
                       setSelectedBackendSettlement(null);
                     },
                     variant: "primary" as const,
-                  },
-                ]
-            }
+                  }];
+                } else {
+                  return [{
+                    label: "Mark as paid",
+                    onClick: async () => {
+                      await markAsPaid(selectedBackendSettlement.id);
+                      setShowPopup(false);
+                      setSelectedSettlement(null);
+                      setSelectedBackendSettlement(null);
+                    },
+                    variant: "primary" as const,
+                  }];
+                }
+              }
+              
+              return [];
+            })()}
             customActions={
               // Show edit button only for settlement author and not for paid settlements
               user &&
