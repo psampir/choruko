@@ -47,6 +47,22 @@ var connectionString = $"Host={dbHost};Port={dbPort};Username={dbUser};Password=
 builder.Services.AddDbContext<DataContext>(options => options
 .UseNpgsql(connectionString).UseLazyLoadingProxies());
 
+var smtpHost = config["SMTP_HOST"];
+var smtpPort = int.Parse(config["SMTP_PORT"] ?? "587");
+var smtpUsername = config["SMTP_USERNAME"];
+var smtpPassword = config["SMTP_PASSWORD"];
+var smtpFrom = config["SMTP_FROM"];
+
+builder.Services.AddScoped<IEmailService, EmailService>(sp =>
+    new EmailService(
+        smtpHost!, 
+        smtpPort, 
+        smtpUsername!, 
+        smtpPassword!, 
+        smtpFrom!
+    )
+);
+
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
 
