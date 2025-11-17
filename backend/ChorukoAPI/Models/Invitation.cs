@@ -15,17 +15,22 @@ public class Invitation
     [ForeignKey("SenderId")]
     public virtual User Sender { get; set; }
 
+
     [Required]
     [EmailAddress]
     [StringLength(255)]
     [Column(TypeName = "varchar(255)")]
-    public string RecieverEmail { get; set; }
+    public string ReceiverId { get; set; }
+    [ForeignKey("ReceiverId")]
+    public virtual User Receiver { get; set; }
+
 
     [Required]
     [Column(TypeName = "varchar(36)")]
     public string HouseholdId { get; set; }
     [ForeignKey("HouseholdId")]
     public virtual Household Household { get; set; }
+
 
     [Required]
     [Column(TypeName = "smallint")]
