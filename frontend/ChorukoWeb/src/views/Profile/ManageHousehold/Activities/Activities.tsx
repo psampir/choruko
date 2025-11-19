@@ -15,11 +15,21 @@ import arrowLeftDark from "../../../../assets/svg/dark/arrow-left.svg";
 import editBoxDark from "../../../../assets/svg/dark/edit-box.svg";
 import starDark from "../../../../assets/svg/dark/star.svg";
 
+// Manage household activities - create, edit, delete activities with point values
 const Activities: React.FC = () => {
   const navigate = useNavigate();
-  const { activities, loading, error, refreshActivities, createActivity, editActivity, deleteActivity, clearError } = useActivity();
+  const {
+    activities,
+    loading,
+    error,
+    refreshActivities,
+    createActivity,
+    editActivity,
+    deleteActivity,
+    clearError,
+  } = useActivity();
   const isDark = useIsDarkTheme();
-  
+
   const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
   const editBox = isDark ? editBoxDark : editBoxLight;
   const star = isDark ? starDark : starLight;
@@ -28,7 +38,9 @@ const Activities: React.FC = () => {
   const [openCreatePopup, setOpenCreatePopup] = useState<boolean>(false);
   const [editActivityName, setEditActivityName] = useState("");
   const [editActivityPoints, setEditActivityPoints] = useState("");
-  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(
+    null
+  );
 
   const [createActivityName, setCreateActivityName] = useState("");
   const [createActivityPoints, setCreateActivityPoints] = useState("");
@@ -48,7 +60,7 @@ const Activities: React.FC = () => {
     refreshActivities();
   }, [refreshActivities]);
 
-  // Show error notification if any
+  // Display error notifications from context
   useEffect(() => {
     if (error) {
       showNotification(error, "error");
@@ -56,7 +68,10 @@ const Activities: React.FC = () => {
     }
   }, [error, clearError]);
 
-  const showNotification = (message: string, type: "success" | "error" = "success") => {
+  const showNotification = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
     setNotification({ message, isVisible: true, type });
 
     setTimeout(() => {
@@ -64,7 +79,11 @@ const Activities: React.FC = () => {
     }, 3000);
   };
 
-  const handleEditClick = (activity: { id: string; name: string; pointsAwarded: number }) => {
+  const handleEditClick = (activity: {
+    id: string;
+    name: string;
+    pointsAwarded: number;
+  }) => {
     setEditActivityName(activity.name);
     setEditActivityPoints(activity.pointsAwarded.toString());
     setEditingActivityId(activity.id);
@@ -87,20 +106,33 @@ const Activities: React.FC = () => {
       }
 
       if (editActivityName.trim().length < 3) {
-        showNotification("Activity name must be at least 3 characters long", "error");
+        showNotification(
+          "Activity name must be at least 3 characters long",
+          "error"
+        );
         return;
       }
 
-      const result = await editActivity(editingActivityId, editActivityName, points);
+      const result = await editActivity(
+        editingActivityId,
+        editActivityName,
+        points
+      );
 
       if (result.success) {
-        showNotification(result.message || "Activity updated successfully!", "success");
+        showNotification(
+          result.message || "Activity updated successfully!",
+          "success"
+        );
         setOpenEditPopup(false);
         setEditingActivityId(null);
         setEditActivityName("");
         setEditActivityPoints("");
       } else {
-        showNotification(result.message || "Failed to update activity", "error");
+        showNotification(
+          result.message || "Failed to update activity",
+          "error"
+        );
       }
     }
   };
@@ -114,14 +146,20 @@ const Activities: React.FC = () => {
     }
 
     if (createActivityName.trim().length < 3) {
-      showNotification("Activity name must be at least 3 characters long", "error");
+      showNotification(
+        "Activity name must be at least 3 characters long",
+        "error"
+      );
       return;
     }
 
     const result = await createActivity(createActivityName, points);
 
     if (result.success) {
-      showNotification(result.message || "Activity created successfully!", "success");
+      showNotification(
+        result.message || "Activity created successfully!",
+        "success"
+      );
       setOpenCreatePopup(false);
       setCreateActivityName("");
       setCreateActivityPoints("");
@@ -135,13 +173,19 @@ const Activities: React.FC = () => {
       const result = await deleteActivity(editingActivityId);
 
       if (result.success) {
-        showNotification(result.message || "Activity deleted successfully!", "success");
+        showNotification(
+          result.message || "Activity deleted successfully!",
+          "success"
+        );
         setOpenEditPopup(false);
         setEditingActivityId(null);
         setEditActivityName("");
         setEditActivityPoints("");
       } else {
-        showNotification(result.message || "Failed to delete activity", "error");
+        showNotification(
+          result.message || "Failed to delete activity",
+          "error"
+        );
       }
     }
   };
@@ -158,8 +202,9 @@ const Activities: React.FC = () => {
         Add
       </Button>
       <div
-        className={`notification-bar notification-bar--${notification.type} ${notification.isVisible ? "notification-bar--visible" : ""
-          }`}
+        className={`notification-bar notification-bar--${notification.type} ${
+          notification.isVisible ? "notification-bar--visible" : ""
+        }`}
       >
         <span>{notification.message}</span>
       </div>
@@ -169,18 +214,16 @@ const Activities: React.FC = () => {
       {loading && <div className="loading-message">Loading activities...</div>}
 
       {!loading && activities.length === 0 && (
-        <div className="no-activities-message">No activities found. Create one to get started!</div>
+        <div className="no-activities-message">
+          No activities found. Create one to get started!
+        </div>
       )}
 
       {!loading && activities.length > 0 && (
         <div className="participants-list">
           <div className="participants-list__header">ACTIVITIES</div>
           {activities.map((activity) => (
-            <div
-              className="activity"
-              key={activity.id}
-              id={activity.id}
-            >
+            <div className="activity" key={activity.id} id={activity.id}>
               <div className="activity-data">
                 <span className="points">
                   <img src={star} alt="" />
