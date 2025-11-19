@@ -31,21 +31,22 @@ interface Settlement {
   status: "unpaid" | "paid";
   author?: Author;
   amountSpent?: string;
-  paidBy?: string[]; // Array of assignee names who have paid
+  paidBy?: string[];
 }
 
+// Household settlements management with view filtering and localStorage persistence
 const Settlements: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useUser();
   const isDark = useIsDarkTheme();
 
+  // Theme-aware icons
   const profileIcon = isDark ? profileIconDark : profileIconLight;
   const pencilIcon = isDark ? pencilDark : pencilLight;
   const checkIcon = isDark ? checkDark : checkLight;
   const settlementIcon = isDark ? settlementIconDark : settlementIconLight;
 
-  // Currency symbol - can be made dynamic based on user preferences/household settings
   const currencySymbol = "₴";
 
   const [collapsedSections, setCollapsedSections] = useState({
@@ -53,7 +54,9 @@ const Settlements: React.FC = () => {
     paid: false,
   });
 
-  // Load settlements from localStorage or return default settlements
+  const [viewMode, setViewMode] = useState<"all" | "my">("my");
+
+  // Load settlements from localStorage or return mock data
   const getInitialSettlements = (): Settlement[] => {
     const saved = localStorage.getItem("choruko-settlements");
     if (saved) {
@@ -142,7 +145,7 @@ const Settlements: React.FC = () => {
   const hasUpdatedSettlementRef = useRef(false);
   const hasDeletedSettlementRef = useRef(false);
 
-  // Handle settlement operations from AddSettlement page via navigation state
+  // Handle add/update/delete operations from AddSettlement via navigation state
   useEffect(() => {
     const state = location.state as {
       newSettlement?: {
@@ -186,10 +189,10 @@ const Settlements: React.FC = () => {
               description: updatedSettlement.description,
               assignees: Array.isArray(updatedSettlement.assignees)
                 ? updatedSettlement.assignees.map((a: any) =>
-                  typeof a === "object"
-                    ? { name: a.name, avatar: a.avatar }
-                    : { name: a, avatar: a }
-                )
+                    typeof a === "object"
+                      ? { name: a.name, avatar: a.avatar }
+                      : { name: a, avatar: a }
+                  )
                 : [],
               status: settlement.status,
               author: updatedSettlement.author || settlement.author,
@@ -205,7 +208,6 @@ const Settlements: React.FC = () => {
     if (state?.newSettlement && !hasAddedSettlementRef.current) {
       hasAddedSettlementRef.current = true;
       const { newSettlement } = state;
-      console.log("Received newSettlement:", newSettlement);
 
       setSettlements((prevSettlements) => {
         const settlementToAdd: Settlement = {
@@ -214,10 +216,10 @@ const Settlements: React.FC = () => {
           description: newSettlement.description,
           assignees: Array.isArray(newSettlement.assignees)
             ? newSettlement.assignees.map((a: any) =>
-              typeof a === "object"
-                ? { name: a.name, avatar: a.avatar }
-                : { name: a, avatar: a }
-            )
+                typeof a === "object"
+                  ? { name: a.name, avatar: a.avatar }
+                  : { name: a, avatar: a }
+              )
             : [],
           status: "unpaid",
           author:
@@ -271,6 +273,23 @@ const Settlements: React.FC = () => {
     (settlement) => settlement.status === "paid"
   );
 
+  // Filter settlements: "my" shows user involvement, "all" shows everything
+  const getFilteredSettlements = (settlementList: Settlement[]) => {
+    if (viewMode === "all") {
+      return settlementList;
+    }
+    // "my" view - show only settlements where user is assignee or author
+    const userFullName = user ? `${user.firstName} ${user.lastName}` : "";
+    return settlementList.filter(
+      (settlement) =>
+        settlement.author?.name === userFullName ||
+        settlement.assignees.some((assignee) => assignee.name === userFullName)
+    );
+  };
+
+  const filteredUnpaidSettlements = getFilteredSettlements(unpaidSettlements);
+  const filteredPaidSettlements = getFilteredSettlements(paidSettlements);
+
   const [selectedSettlement, setSelectedSettlement] =
     useState<Settlement | null>(null);
   const [showPopup, setShowPopup] = useState(false);
@@ -282,8 +301,9 @@ const Settlements: React.FC = () => {
   ) => {
     return (
       <div
-        className={`settlement ${isFirst ? "settlement--first" : ""} ${isLast ? "settlement--last" : ""
-          }`}
+        className={`settlement ${isFirst ? "settlement--first" : ""} ${
+          isLast ? "settlement--last" : ""
+        }`}
         key={settlement.id}
         onClick={() => {
           setSelectedSettlement(settlement);
@@ -300,9 +320,12 @@ const Settlements: React.FC = () => {
             />
           </div>
           <div className="settlement__info">
-            <p className="settlement__name">
-              {settlement.amountSpent
-                ? `${currencySymbol}${settlement.amountSpent}`
+            <p className="settlement__amount">
+              {settlement.amountSpent && settlement.assignees.length > 0
+                ? `${currencySymbol}${(
+                    parseFloat(settlement.amountSpent) /
+                    settlement.assignees.length
+                  ).toFixed(2)}`
                 : "No amount"}
             </p>
             <p className="settlement__description">{settlement.description}</p>
@@ -327,11 +350,32 @@ const Settlements: React.FC = () => {
         </Button>
       </div>
 
+      {/* View Toggle */}
+      <div className="settlements__view-toggle">
+        <button
+          className={`settlements__view-button ${
+            viewMode === "my" ? "settlements__view-button--active" : ""
+          }`}
+          onClick={() => setViewMode("my")}
+        >
+          My Payments
+        </button>
+        <button
+          className={`settlements__view-button ${
+            viewMode === "all" ? "settlements__view-button--active" : ""
+          }`}
+          onClick={() => setViewMode("all")}
+        >
+          All Payments
+        </button>
+      </div>
+
       <div className="settlements__content">
         {/* Unpaid Section */}
         <div
-          className={`settlements__section settlements__section--unpaid ${collapsedSections.unpaid ? "settlements__section--collapsed" : ""
-            }`}
+          className={`settlements__section settlements__section--unpaid ${
+            collapsedSections.unpaid ? "settlements__section--collapsed" : ""
+          }`}
         >
           <h2
             className="settlements__section-title"
@@ -347,17 +391,19 @@ const Settlements: React.FC = () => {
           </span>
           {!collapsedSections.unpaid && (
             <div className="settlements__list">
-              {unpaidSettlements.length > 0 ? (
-                unpaidSettlements.map((settlement, index) =>
+              {filteredUnpaidSettlements.length > 0 ? (
+                filteredUnpaidSettlements.map((settlement, index) =>
                   renderSettlement(
                     settlement,
-                    index === unpaidSettlements.length - 1,
+                    index === filteredUnpaidSettlements.length - 1,
                     index === 0
                   )
                 )
               ) : (
                 <p className="settlements__empty-message">
-                  No unpaid settlements
+                  {viewMode === "my"
+                    ? "No settlements assigned to you"
+                    : "No unpaid settlements"}
                 </p>
               )}
             </div>
@@ -366,8 +412,9 @@ const Settlements: React.FC = () => {
 
         {/* Paid Section */}
         <div
-          className={`settlements__section settlements__section--paid ${collapsedSections.paid ? "settlements__section--collapsed" : ""
-            }`}
+          className={`settlements__section settlements__section--paid ${
+            collapsedSections.paid ? "settlements__section--collapsed" : ""
+          }`}
         >
           <h2
             className="settlements__section-title"
@@ -383,17 +430,19 @@ const Settlements: React.FC = () => {
           </span>
           {!collapsedSections.paid && (
             <div className="settlements__list">
-              {paidSettlements.length > 0 ? (
-                paidSettlements.map((settlement, index) =>
+              {filteredPaidSettlements.length > 0 ? (
+                filteredPaidSettlements.map((settlement, index) =>
                   renderSettlement(
                     settlement,
-                    index === paidSettlements.length - 1,
+                    index === filteredPaidSettlements.length - 1,
                     index === 0
                   )
                 )
               ) : (
                 <p className="settlements__empty-message">
-                  No paid settlements
+                  {viewMode === "my"
+                    ? "No paid settlements assigned to you"
+                    : "No paid settlements"}
                 </p>
               )}
             </div>
@@ -414,11 +463,11 @@ const Settlements: React.FC = () => {
               <div className="amount-per-person">
                 {currencySymbol}
                 {selectedSettlement.amountSpent &&
-                  selectedSettlement.assignees.length > 0
+                selectedSettlement.assignees.length > 0
                   ? (
-                    parseFloat(selectedSettlement.amountSpent) /
-                    selectedSettlement.assignees.length
-                  ).toFixed(2)
+                      parseFloat(selectedSettlement.amountSpent) /
+                      selectedSettlement.assignees.length
+                    ).toFixed(2)
                   : "0.00"}{" "}
                 per person
               </div>
@@ -432,24 +481,24 @@ const Settlements: React.FC = () => {
           actions={
             selectedSettlement.status !== "paid"
               ? [
-                {
-                  label: "Mark as paid",
-                  onClick: () => {
-                    markSettlementAsPaid(selectedSettlement.id);
-                    setShowPopup(false);
-                    setSelectedSettlement(null);
+                  {
+                    label: "Mark as paid",
+                    onClick: () => {
+                      markSettlementAsPaid(selectedSettlement.id);
+                      setShowPopup(false);
+                      setSelectedSettlement(null);
+                    },
+                    variant: "primary",
                   },
-                  variant: "primary",
-                },
-              ]
+                ]
               : []
           }
           customActions={
             // Show edit button only for settlement author and not for paid settlements
             user &&
-              selectedSettlement.author?.name ===
+            selectedSettlement.author?.name ===
               `${user.firstName} ${user.lastName}` &&
-              selectedSettlement.status !== "paid" ? (
+            selectedSettlement.status !== "paid" ? (
               <div
                 className="settlement-edit-button"
                 onClick={() => {

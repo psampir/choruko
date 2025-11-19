@@ -8,16 +8,19 @@ interface LoginProps {
   onJoinHousehold: () => void;
 }
 
-const JoinOrCreateHousehold: React.FC<LoginProps> = ({
-  onJoinHousehold,
-}) => {
+// Initial household setup - choose between joining or creating
+const JoinOrCreateHousehold: React.FC<LoginProps> = ({ onJoinHousehold }) => {
   const { user } = useUser();
   const navigate = useNavigate();
 
   return (
     <div className="join-or-create-household">
       <RaccoonLogo />
-      {user && <h1 className="join-or-create-household__title">Welcome, {user?.firstName}!</h1>}
+      {user && (
+        <h1 className="join-or-create-household__title">
+          Welcome, {user?.firstName}!
+        </h1>
+      )}
 
       <div className="join-or-create-household__buttons">
         <Button variant="primary" onClick={onJoinHousehold}>

@@ -21,13 +21,13 @@ import starDark from "../../../../assets/svg/dark/star.svg";
 import profileDefaultIconLight from "../../../../assets/svg/light/profile-icon.svg";
 import profileDefaultIconDark from "../../../../assets/svg/dark/profile-icon.svg";
 
-// Assignee type definition (from household participants)
 interface Assignee {
   id: string;
   name: string;
   avatar: string | null;
 }
 
+// Create or edit task with activity selection and assignee management
 const AddTask: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,13 +36,14 @@ const AddTask: React.FC = () => {
   const { participants } = useHousehold();
   const themeDir = useThemeDir();
 
-  // Theme-aware icon selection
-  const arrowLeftIcon = themeDir === "dark" ? arrowLeftIconDark : arrowLeftIconLight;
+  const arrowLeftIcon =
+    themeDir === "dark" ? arrowLeftIconDark : arrowLeftIconLight;
   const checkIcon = themeDir === "dark" ? checkIconDark : checkIconLight;
   const star = themeDir === "dark" ? starDark : starLight;
-  const profileDefaultIcon = themeDir === "dark" ? profileDefaultIconDark : profileDefaultIconLight;
+  const profileDefaultIcon =
+    themeDir === "dark" ? profileDefaultIconDark : profileDefaultIconLight;
 
-  // Check if we're in edit mode
+  // Determine if editing existing task
   const editTask = location.state?.editTask;
   const isEditMode = !!editTask;
 
@@ -56,17 +57,15 @@ const AddTask: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pre-fill form when in edit mode
+  // Pre-fill form when editing
   useEffect(() => {
     if (editTask) {
       setTaskName(editTask.name || "");
       setTaskDescription(editTask.description || "");
 
-      // Convert deadline string to Date object (backend uses 'deadLine' not 'deadline')
+      // Parse deadline from backend (handles both deadLine and deadline fields)
       const deadlineValue = editTask.deadLine || editTask.deadline;
       if (deadlineValue) {
-        // Parse ISO string as local time (backend sends without timezone)
-        // If the string has 'T' but no timezone, treat it as local
         const deadlineDate = new Date(deadlineValue);
         setDeadline(deadlineDate);
       }
@@ -122,19 +121,19 @@ const AddTask: React.FC = () => {
     );
   };
 
-  // Format date as local ISO string (without timezone conversion)
+  // Format date as local ISO string without timezone conversion
   const formatLocalDateTime = (date: Date): string => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
   };
 
   const handleAddTask = async () => {
-    // Validate that required fields are filled
+    // Validate required fields
     const missingFields = [];
     if (!taskName) missingFields.push("Task name");
     if (!taskDescription) missingFields.push("Task description");
@@ -155,7 +154,9 @@ const AddTask: React.FC = () => {
 
     // Validate that selected assignees don't exceed maximum
     if (selectedAssignees.length > participantsCountNum) {
-      setErrorMessage(`You have selected ${selectedAssignees.length} assignees, but maximum is ${participantsCountNum}`);
+      setErrorMessage(
+        `You have selected ${selectedAssignees.length} assignees, but maximum is ${participantsCountNum}`
+      );
       return;
     }
 
@@ -208,7 +209,6 @@ const AddTask: React.FC = () => {
 
   const handleDeleteTask = async () => {
     if (editTask) {
-      console.log("Deleting task with ID:", editTask.id);
       setIsSubmitting(true);
       const result = await deleteTask(editTask.id);
 
@@ -278,8 +278,9 @@ const AddTask: React.FC = () => {
           <div className="add-task__loading">Loading activities...</div>
         ) : activities && activities.length > 0 ? (
           <div
-            className={`participants-list ${collapsedSections.activities ? "participants-list--collapsed" : ""
-              }`}
+            className={`participants-list ${
+              collapsedSections.activities ? "participants-list--collapsed" : ""
+            }`}
           >
             <div
               className="participants-list__header"
@@ -292,10 +293,11 @@ const AddTask: React.FC = () => {
               <div className="participants-list__content">
                 {activities.map((activity) => (
                   <div
-                    className={`activity ${selectedActivity === activity.id
-                      ? "activity--selected"
-                      : ""
-                      }`}
+                    className={`activity ${
+                      selectedActivity === activity.id
+                        ? "activity--selected"
+                        : ""
+                    }`}
                     key={activity.id}
                     onClick={() => handleActivitySelect(activity.id)}
                   >
@@ -336,13 +338,13 @@ const AddTask: React.FC = () => {
                 const value = e.target.value;
                 const num = parseInt(value);
                 // Allow empty or valid positive numbers
-                if (value === '' || (num >= 1 && !isNaN(num))) {
+                if (value === "" || (num >= 1 && !isNaN(num))) {
                   setParticipantsCount(value);
                 }
               }}
-              className="input input--edit add-task__input"
+              className="input input--primary add-task__input"
             />
-            <span className="input__date">
+            <span className="input__participants-icon">
               <img src={profileDefaultIcon} alt="participants icon" />
             </span>
           </div>
@@ -350,8 +352,9 @@ const AddTask: React.FC = () => {
 
         {/* Select Assignees Section */}
         <div
-          className={`participants-list ${collapsedSections.assignees ? "participants-list--collapsed" : ""
-            }`}
+          className={`participants-list ${
+            collapsedSections.assignees ? "participants-list--collapsed" : ""
+          }`}
         >
           <div
             className="participants-list__header"
@@ -365,10 +368,11 @@ const AddTask: React.FC = () => {
               {assignees.map((assignee) => (
                 <div
                   key={assignee.id}
-                  className={`activity ${selectedAssignees.includes(assignee.id)
-                    ? "activity--selected"
-                    : ""
-                    }`}
+                  className={`activity ${
+                    selectedAssignees.includes(assignee.id)
+                      ? "activity--selected"
+                      : ""
+                  }`}
                   onClick={() => handleAssigneeToggle(assignee.id)}
                 >
                   <div className="activity-data">
@@ -410,11 +414,7 @@ const AddTask: React.FC = () => {
             onClick={handleAddTask}
             disabled={isSubmitting}
           >
-            {isSubmitting
-              ? "Saving..."
-              : isEditMode
-                ? "Save Changes"
-                : "Add"}
+            {isSubmitting ? "Saving..." : isEditMode ? "Save Changes" : "Add"}
           </Button>
           {isEditMode && (
             <Button

@@ -16,7 +16,7 @@ public class InvitationsController(IInvitationService invitationService) : Contr
 {
     [HttpPost("{householdId}/create")]
     [Authorize(Roles = "HouseholdAdmin")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> InviteUserToHousehold([FromRoute] string householdId, string userIdToAdd)
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> InviteUserToHousehold([FromRoute] string householdId, string userEmail)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -25,7 +25,7 @@ public class InvitationsController(IInvitationService invitationService) : Contr
             return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
         }
 
-        var result = await invitationService.CreateHouseholdInvitation(userId, householdId, userIdToAdd);
+        var result = await invitationService.CreateHouseholdInvitation(userId, householdId, userEmail);
 
         return result.ToApiResponse("Invite participant)");
     }

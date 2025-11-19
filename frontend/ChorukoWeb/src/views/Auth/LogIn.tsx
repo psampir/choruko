@@ -10,6 +10,7 @@ interface LogInProps {
   onModeChange: (mode: string) => void;
 }
 
+// User login with conditional navigation based on household status
 export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
   const {
     login,
@@ -21,7 +22,6 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState("");
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError("");
@@ -30,25 +30,24 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
       const result = await login(email, password);
 
       if (result.success) {
-        console.log("Login successful!");
-        // Navigate based on household status
+        // Navigate to leaderboard if has household, else to household setup
         if (result.hasHousehold) {
           navigate("/leaderboard");
         } else {
           navigate("/joinOrCreateHousehold");
         }
       } else {
-        // Handle login failure with backend error message
+        // Handle backend authentication errors
         const errorMsg = parseErrorMessage(
           result.message || "Login failed. Please try again."
         );
         setLocalError(errorMsg);
       }
     } catch (error: any) {
-      // Handle network or other errors
+      // Handle network errors
       const errorMsg = parseErrorMessage(
         error.message ||
-        "Connection failed. Please check your internet and try again."
+          "Connection failed. Please check your internet and try again."
       );
       setLocalError(errorMsg);
     }

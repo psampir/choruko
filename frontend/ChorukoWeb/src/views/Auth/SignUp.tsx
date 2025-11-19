@@ -9,6 +9,7 @@ interface SignUpProps {
   onModeChange: (mode: string) => void;
 }
 
+// User registration with password match validation
 export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
   const {
     register,
@@ -25,7 +26,6 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
     confirmPassword: "",
   });
   const [localError, setLocalError] = useState("");
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -34,6 +34,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
     }));
   };
 
+  // Parse backend errors into user-friendly messages
   const parseErrorMessage = (errorMessage: string): string => {
     try {
       const errorData = JSON.parse(errorMessage);
@@ -45,6 +46,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
       if (errorData.message) return errorData.message;
       return "An error occurred. Please try again.";
     } catch {
+      // If not JSON, return raw message
       return errorMessage || "An unexpected error occurred. Please try again.";
     }
   };
@@ -53,7 +55,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
     e.preventDefault();
     setLocalError("");
 
-    // Basic validation
+    // Validate passwords match before submission
     if (formData.password !== formData.confirmPassword) {
       setLocalError("Passwords do not match");
       return;
@@ -63,14 +65,13 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
       const result = await register(formData);
 
       if (result.success) {
-        // Registration successful - navigate to dashboard
         navigate("/dashboard");
       } else {
-        // added failure handling
+        // Handle backend validation errors
         setLocalError(parseErrorMessage(result.message || "Sign up failed."));
       }
     } catch (error: any) {
-      // added catch parsing
+      // Handle network errors
       setLocalError(
         parseErrorMessage(
           error?.message || "Connection failed. Please try again."
@@ -81,7 +82,6 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
 
   return (
     <>
-      {/* added ErrorMessage overlay */}
       <ErrorMessage
         message={localError || authError || ""}
         variant="overlay"

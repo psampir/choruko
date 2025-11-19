@@ -7,6 +7,7 @@ import RaccoonLogo from "../../components/RaccoonLogo";
 
 type AuthView = "login" | "signup" | "resetPassword";
 
+// Main auth wrapper managing login/signup/reset navigation
 function AuthContainer() {
   const [currentView, setCurrentView] = useState<AuthView>("login");
 
@@ -18,12 +19,12 @@ function AuthContainer() {
 
   return (
     <div className="login active">
-      {/* Common header with persistent animation */}
+      {/* Common header with persistent raccoon animation and app title */}
       <div className="login__top-container">
         <RaccoonLogo />
         <h1 className="login__title">Choruko</h1>
 
-        {/* Different views */}
+        {/* Conditionally render auth views based on currentView state */}
         {currentView === "login" && <LogIn onModeChange={handleModeChange} />}
         {currentView === "signup" && <SignUp onModeChange={handleModeChange} />}
         {currentView === "resetPassword" && (
