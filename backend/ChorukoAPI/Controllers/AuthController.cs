@@ -77,14 +77,20 @@ public class AuthController(
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         
-        await _emailService.SendPasswordResetEmailAsync(user.Email!, token);
+        try
+        {
+            await _emailService.SendPasswordResetEmailAsync(user.Email!, token);
+        }
+        catch
+        {
+            // Suppress any exception to avoid leaking user existence information
+        }
 
         var successResponse = ServiceResponseFactory.Success(
             new OperationResultDto 
             { 
                 Operation = "ForgotPassword", 
-                Timestamp = DateTime.UtcNow, 
-                Metadata = new Dictionary<string, object> { { "UserId", user.Id } } 
+                Timestamp = DateTime.UtcNow
             },
             "If an account exists for this email, a password reset link has been sent.",
             HttpStatusCode.OK
