@@ -13,6 +13,7 @@ import arrowLeftIconLight from "../../../assets/svg/light/arrow-left.svg";
 import arrowLeftIconDark from "../../../assets/svg/dark/arrow-left.svg";
 import householdService from "../../../services/householdService";
 
+// Create new household with name and optional profile picture
 function CreateHousehold() {
   const navigate = useNavigate();
   const { refreshUser } = useUser();
@@ -34,7 +35,10 @@ function CreateHousehold() {
     type: "success",
   });
 
-  const showNotification = (message: string, type: "success" | "error" = "success") => {
+  const showNotification = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
     setNotification({ message, isVisible: true, type });
 
     setTimeout(() => {
@@ -42,10 +46,12 @@ function CreateHousehold() {
     }, 3000);
   };
 
+  // Trigger file input click for image selection
   const handleImageSelect = () => {
     document.getElementById("household-image-input")?.click();
   };
 
+  // Preview selected image before upload
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -59,6 +65,7 @@ function CreateHousehold() {
     }
   };
 
+  // Validate and create household, then navigate to leaderboard
   const handleCreateHousehold = async () => {
     if (!householdName.trim()) {
       showNotification("Please enter a household name", "error");
@@ -80,15 +87,17 @@ function CreateHousehold() {
 
       if (result.success) {
         showNotification("Household created successfully!", "success");
-        // Refresh user info to update hasHousehold state
+        // Update user state with household info before navigating
         await refreshUser();
-        // Refresh household info to load household data
         await refreshHousehold();
         setTimeout(() => {
           navigate("/leaderboard");
         }, 1500);
       } else {
-        showNotification(result.message || "Failed to create household", "error");
+        showNotification(
+          result.message || "Failed to create household",
+          "error"
+        );
       }
     } catch (error) {
       showNotification("An unexpected error occurred", "error");
