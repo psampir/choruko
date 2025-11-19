@@ -5,7 +5,7 @@ namespace ChorukoAPI.Contracts.Requests.Task
     public class EditHouseholdTaskRequest
     {
         [Required]
-        public string ActivityId { get; set; }
+        public required string ActivityId { get; set; }
 
         [Required]
         public DateTime DeadLine { get; set; }
@@ -14,11 +14,11 @@ namespace ChorukoAPI.Contracts.Requests.Task
         public int ParticipantsAmount { get; set; }
         
         [Required]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [Required]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
-        public List<string> AssigneeIds { get; set; }
+        public required List<string> AssigneeIds { get; set; }
     }
 }

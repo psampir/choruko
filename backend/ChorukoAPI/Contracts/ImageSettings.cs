@@ -6,5 +6,5 @@ public sealed class ImageSettings
     public long MaxFileSize { get; init; }
     public int MaxDimension { get; init; }
     public int MinDimension { get; init; }
-    public string[] AllowedFormats { get; init; }
+    public required string[] AllowedFormats { get; init; }
 }

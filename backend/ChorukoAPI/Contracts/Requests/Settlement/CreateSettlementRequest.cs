@@ -6,7 +6,7 @@ public class CreateSettlementRequest
 {
     [Required(ErrorMessage = "Settlement description is required.")]
     [StringLength(200, MinimumLength = 2, ErrorMessage = "Description must be between 2 and 200 characters.")]
-    public string Description { get; set; }
+    public required string Description { get; set; }
 
     public decimal Amount { get; set; }
 

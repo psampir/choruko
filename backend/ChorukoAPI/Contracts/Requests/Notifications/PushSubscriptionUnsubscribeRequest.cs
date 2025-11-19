@@ -6,5 +6,5 @@ public class PushSubscriptionUnsubscribeRequest
 {
     [Required]
     [StringLength(1024)]
-    public string Endpoint { get; set; }
+    public required string Endpoint { get; set; }
 }
