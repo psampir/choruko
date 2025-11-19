@@ -67,7 +67,7 @@ if (enableEmails == "true")
     if (string.IsNullOrWhiteSpace(smtpFrom))
         throw new InvalidOperationException("Missing required configuration value: SMTP_FROM");
     if (string.IsNullOrWhiteSpace(domainName))
-        throw new InvalidOperationException("Missing required configuration value: SMTP_FROM");
+        throw new InvalidOperationException("Missing required configuration value: DOMAIN_NAME");
     
     builder.Services.AddScoped<IEmailService, EmailService>(sp =>
         new EmailService(
