@@ -52,14 +52,27 @@ var smtpPort = int.Parse(config["SMTP_PORT"] ?? "587");
 var smtpUsername = config["SMTP_USERNAME"];
 var smtpPassword = config["SMTP_PASSWORD"];
 var smtpFrom = config["SMTP_FROM"];
+var domainName = config["DOMAIN_NAME"];
+
+if (string.IsNullOrWhiteSpace(smtpHost))
+    throw new InvalidOperationException("Missing required configuration value: SMTP_HOST");
+if (string.IsNullOrWhiteSpace(smtpUsername))
+    throw new InvalidOperationException("Missing required configuration value: SMTP_USERNAME");
+if (string.IsNullOrWhiteSpace(smtpPassword))
+    throw new InvalidOperationException("Missing required configuration value: SMTP_PASSWORD");
+if (string.IsNullOrWhiteSpace(smtpFrom))
+    throw new InvalidOperationException("Missing required configuration value: SMTP_FROM");
+if (string.IsNullOrWhiteSpace(domainName))
+    throw new InvalidOperationException("Missing required configuration value: SMTP_FROM");
 
 builder.Services.AddScoped<IEmailService, EmailService>(sp =>
     new EmailService(
-        smtpHost!, 
+        smtpHost, 
         smtpPort, 
-        smtpUsername!, 
-        smtpPassword!, 
-        smtpFrom!
+        smtpUsername, 
+        smtpPassword, 
+        smtpFrom,
+        domainName
     )
 );
 
