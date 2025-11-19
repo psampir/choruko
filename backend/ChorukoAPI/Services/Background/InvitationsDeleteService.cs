@@ -29,15 +29,15 @@ public class InvitationsDeleteService(
                 using var scope = scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<DataContext>();
 
-                var declinedInvitations = await db.Invitations
-                    .Where(i => i.Status == InvitationStatus.Declined)
+                var resolvedInvitations = await db.Invitations
+                    .Where(i => i.Status == InvitationStatus.Declined || i.Status == InvitationStatus.Accepted)
                     .ToListAsync(stoppingToken);
 
                 var expiredInvitations = await db.Invitations
                     .Where(i => i.Status == InvitationStatus.Pending && now - i.SentAt > ExpiryPeriod)
                     .ToListAsync(stoppingToken);
 
-                var toRemove = declinedInvitations.Concat(expiredInvitations).ToList();
+                var toRemove = resolvedInvitations.Concat(expiredInvitations).ToList();
 
                 if (toRemove.Count > 0)
                     db.Invitations.RemoveRange(toRemove);
