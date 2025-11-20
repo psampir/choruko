@@ -57,7 +57,10 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
 
     try {
-      setLoading(true);
+      // Only show loading state if we don't have data yet
+      if (tasks.length === 0) {
+        setLoading(true);
+      }
       setError(null);
 
       const result = await taskService.getAllTasks(householdInfo.id);
@@ -75,7 +78,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [householdInfo?.id]);
+  }, [householdInfo?.id, tasks.length]);
 
   // Create a new task
   const createTask = async (data: CreateTaskData) => {
