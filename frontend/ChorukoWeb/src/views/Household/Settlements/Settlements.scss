@@ -97,7 +97,13 @@
     }
 
     &--unpaid {
-      border-color: var(--color-secondary);
+      border-color: var(--color-error-bg);
+      background-color: var(--color-error-bg-secondary);
+
+      .settlements__section-title {
+        border-color: var(--color-error-bg);
+        background-color: var(--color-error-bg);
+      }
     }
 
     &--paid {
