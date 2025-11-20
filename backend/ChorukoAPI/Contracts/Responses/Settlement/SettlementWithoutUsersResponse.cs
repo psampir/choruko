@@ -20,4 +20,7 @@ public class SettlementWithoutUsersResponse
     public decimal Amount { get; set; }
 
     public SettlementStatus Status { get; set; }
+
+    public List<string>? SettledUserIds { get; set; }
+    public List<string>? UnsettledUserIds { get; set; }
 }
