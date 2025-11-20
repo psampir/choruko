@@ -176,6 +176,13 @@ const Settlements: React.FC = () => {
     isLast: boolean,
     isFirst: boolean
   ) => {
+    // Check if user is involved in this settlement
+    const isInvolved = user && (
+      settlement.author.id === user.id ||
+      settlement.settledUsers.some(u => u.id === user.id) ||
+      settlement.unsettledUsers.some(u => u.id === user.id)
+    );
+
     return (
       <div
         className={`settlement ${isFirst ? "settlement--first" : ""} ${isLast ? "settlement--last" : ""
@@ -208,12 +215,14 @@ const Settlements: React.FC = () => {
             </p>
             <p className="settlement__description">{settlement.description}</p>
           </div>
-          <span className="settlement__icon-container">
-            <img
-              src={settlement.status === "unpaid" ? settlementIcon : checkIcon}
-              alt="Settlement status icon"
-            />
-          </span>
+          {isInvolved && (
+            <span className="settlement__icon-container">
+              <img
+                src={settlement.status === "unpaid" ? settlementIcon : checkIcon}
+                alt="Settlement status icon"
+              />
+            </span>
+          )}
         </div>
       </div>
     );
