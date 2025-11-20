@@ -5,6 +5,7 @@ import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import ErrorMessage from "../../../components/ErrorMessage";
+import ViewModeToggle from "../../../components/ViewModeToggle/ViewModeToggle";
 import { useUser } from "../../../contexts/UserContext";
 import { useTask } from "../../../contexts/TaskContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
@@ -348,25 +349,12 @@ const Tasks: React.FC = () => {
 
       {!loading && !error && (
         <>
-          {/* View Toggle */}
-          <div className="tasks__view-toggle">
-            <button
-              className={`tasks__view-button ${
-                viewMode === "my" ? "tasks__view-button--active" : ""
-              }`}
-              onClick={() => setViewMode("my")}
-            >
-              My Tasks
-            </button>
-            <button
-              className={`tasks__view-button ${
-                viewMode === "all" ? "tasks__view-button--active" : ""
-              }`}
-              onClick={() => setViewMode("all")}
-            >
-              All Tasks
-            </button>
-          </div>
+          <ViewModeToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            myLabel="My Tasks"
+            allLabel="All Tasks"
+          />
 
           <div className="tasks__content">
           {/* Overtime Section - only show if there are overtime tasks */}
