@@ -123,10 +123,12 @@
 
     &--todo {
       border-color: var(--color-secondary);
+      background-color: var(--color-background-secondary);
     }
 
     &--done {
-      border-color: var(--color-primary);
+      border-color: var(--color-secondary);
+      background-color: var(--color-background-secondary);
     }
   }
 
