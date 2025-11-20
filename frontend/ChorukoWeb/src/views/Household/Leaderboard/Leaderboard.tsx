@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
 import starLight from "../../../assets/svg/light/star.svg";
@@ -145,7 +145,7 @@ const Leaderboard: React.FC = () => {
           ) : sortedParticipants.length === 0 ? (
             <div className="empty-message">No participants to display</div>
           ) : (
-            sortedParticipants.map((participant, index) => (
+            sortedParticipants.map((participant) => (
               <div
                 key={participant.id}
                 className="participant"
