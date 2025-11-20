@@ -6,6 +6,7 @@ import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import ErrorMessage from "../../../components/ErrorMessage";
 import ViewModeToggle from "../../../components/ViewModeToggle/ViewModeToggle";
+import CollapsibleSection from "../../../components/CollapsibleSection/CollapsibleSection";
 import { useUser } from "../../../contexts/UserContext";
 import { useTask } from "../../../contexts/TaskContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
@@ -359,106 +360,67 @@ const Tasks: React.FC = () => {
           <div className="tasks__content">
           {/* Overtime Section - only show if there are overtime tasks */}
           {overtimeTasks.length > 0 && (
-            <div
-              className={`tasks__section tasks__section--overtime ${
-                collapsedSections.overtime ? "tasks__section--collapsed" : ""
-              }`}
+            <CollapsibleSection
+              title="OVERTIME"
+              isCollapsed={collapsedSections.overtime}
+              onToggle={() => toggleSection("overtime")}
+              variant="error"
             >
-              <h2
-                className="tasks__section-title"
-                onClick={() => toggleSection("overtime")}
-              >
-                OVERTIME
-              </h2>
-              <span
-                className="dropdown__arrow"
-                onClick={() => toggleSection("overtime")}
-              >
-                &#9660;
-              </span>
-              {!collapsedSections.overtime && (
-                <div className="tasks__list">
-                  {overtimeTasks.map((task, index) =>
-                    renderTask(
-                      task,
-                      index === overtimeTasks.length - 1,
-                      index === 0
-                    )
-                  )}
-                </div>
-              )}
-            </div>
+              <div className="tasks__list">
+                {overtimeTasks.map((task, index) =>
+                  renderTask(
+                    task,
+                    index === overtimeTasks.length - 1,
+                    index === 0
+                  )
+                )}
+              </div>
+            </CollapsibleSection>
           )}
 
           {/* To-Do Section */}
-          <div
-            className={`tasks__section tasks__section--todo ${
-              collapsedSections.todo ? "tasks__section--collapsed" : ""
-            }`}
+          <CollapsibleSection
+            title="TO DO"
+            isCollapsed={collapsedSections.todo}
+            onToggle={() => toggleSection("todo")}
+            variant="default"
           >
-            <h2
-              className="tasks__section-title"
-              onClick={() => toggleSection("todo")}
-            >
-              TO DO
-            </h2>
-            <span
-              className="dropdown__arrow"
-              onClick={() => toggleSection("todo")}
-            >
-              &#9660;
-            </span>
-            {!collapsedSections.todo && (
-              <div className="tasks__list">
-                {todoTasks.length > 0 ? (
-                  todoTasks.map((task, index) =>
-                    renderTask(
-                      task,
-                      index === todoTasks.length - 1,
-                      index === 0
-                    )
+            <div className="tasks__list">
+              {todoTasks.length > 0 ? (
+                todoTasks.map((task, index) =>
+                  renderTask(
+                    task,
+                    index === todoTasks.length - 1,
+                    index === 0
                   )
-                ) : (
-                  <p className="tasks__empty-message">No tasks to do</p>
-                )}
-              </div>
-            )}
-          </div>
+                )
+              ) : (
+                <p className="tasks__empty-message">No tasks to do</p>
+              )}
+            </div>
+          </CollapsibleSection>
 
           {/* Done Section */}
-          <div
-            className={`tasks__section tasks__section--done ${
-              collapsedSections.done ? "tasks__section--collapsed" : ""
-            }`}
+          <CollapsibleSection
+            title="DONE"
+            isCollapsed={collapsedSections.done}
+            onToggle={() => toggleSection("done")}
+            variant="default"
           >
-            <h2
-              className="tasks__section-title"
-              onClick={() => toggleSection("done")}
-            >
-              DONE
-            </h2>
-            <span
-              className="dropdown__arrow"
-              onClick={() => toggleSection("done")}
-            >
-              &#9660;
-            </span>
-            {!collapsedSections.done && (
-              <div className="tasks__list">
-                {doneTasks.length > 0 ? (
-                  doneTasks.map((task, index) =>
-                    renderTask(
-                      task,
-                      index === doneTasks.length - 1,
-                      index === 0
-                    )
+            <div className="tasks__list">
+              {doneTasks.length > 0 ? (
+                doneTasks.map((task, index) =>
+                  renderTask(
+                    task,
+                    index === doneTasks.length - 1,
+                    index === 0
                   )
-                ) : (
-                  <p className="tasks__empty-message">No completed tasks</p>
-                )}
-              </div>
-            )}
-          </div>
+                )
+              ) : (
+                <p className="tasks__empty-message">No completed tasks</p>
+              )}
+            </div>
+          </CollapsibleSection>
         </div>
         </>
       )}
