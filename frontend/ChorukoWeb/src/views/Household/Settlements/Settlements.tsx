@@ -281,43 +281,37 @@ const Settlements: React.FC = () => {
           </div>
 
           <div className="settlements__content">
-        {/* Unpaid Section */}
-        <div
-          className={`settlements__section settlements__section--unpaid ${collapsedSections.unpaid ? "settlements__section--collapsed" : ""
-            }`}
-        >
-          <h2
-            className="settlements__section-title"
-            onClick={() => toggleSection("unpaid")}
+        {/* Unpaid Section - only show if there are unpaid settlements */}
+        {filteredUnpaidSettlements.length > 0 && (
+          <div
+            className={`settlements__section settlements__section--unpaid ${collapsedSections.unpaid ? "settlements__section--collapsed" : ""
+              }`}
           >
-            AMOUNTS DUE
-          </h2>
-          <span
-            className="dropdown__arrow"
-            onClick={() => toggleSection("unpaid")}
-          >
-            &#9660;
-          </span>
-          {!collapsedSections.unpaid && (
-            <div className="settlements__list">
-              {filteredUnpaidSettlements.length > 0 ? (
-                filteredUnpaidSettlements.map((settlement, index) =>
+            <h2
+              className="settlements__section-title"
+              onClick={() => toggleSection("unpaid")}
+            >
+              AMOUNTS DUE
+            </h2>
+            <span
+              className="dropdown__arrow"
+              onClick={() => toggleSection("unpaid")}
+            >
+              &#9660;
+            </span>
+            {!collapsedSections.unpaid && (
+              <div className="settlements__list">
+                {filteredUnpaidSettlements.map((settlement, index) =>
                   renderSettlement(
                     settlement,
                     index === filteredUnpaidSettlements.length - 1,
                     index === 0
                   )
-                )
-              ) : (
-                <p className="settlements__empty-message">
-                  {viewMode === "my"
-                    ? "No settlements assigned to you"
-                    : "No unpaid settlements"}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Paid Section */}
         <div
