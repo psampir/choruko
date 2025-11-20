@@ -44,11 +44,9 @@
     border: 2px solid var(--color-secondary);
     border-radius: var(--border-radius-standard);
     background-color: var(--color-background-secondary);
-    flex: 1; // Allow sections to grow
 
     .tasks__list {
       padding-top: 33px;
-      flex: 1; // Allow list to grow within section
       display: flex;
       flex-direction: column;
     }
