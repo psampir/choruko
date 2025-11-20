@@ -254,6 +254,8 @@ public class SettlementService(
         {
             var settlements = await _context.Settlements
                 .Include(s => s.Creator)
+                .Include(s => s.SettledUsers)
+                .Include(s => s.UnsettledUsers)
                 .Where(s => s.HouseholdId == householdId)
                 .AsNoTracking()
                 .ToListAsync();
