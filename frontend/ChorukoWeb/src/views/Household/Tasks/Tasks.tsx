@@ -72,6 +72,7 @@ const Tasks: React.FC = () => {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [viewMode, setViewMode] = useState<"all" | "my">("my");
 
   // Classify task as overtime/todo/done based on completion status and deadline
   const determineTaskStatus = useCallback(
@@ -210,9 +211,23 @@ const Tasks: React.FC = () => {
     }
   };
 
-  const overtimeTasks = tasks.filter((task) => task.status === "overtime");
-  const todoTasks = tasks.filter((task) => task.status === "todo");
-  const doneTasks = tasks.filter((task) => task.status === "done");
+  // Filter tasks: "my" shows user involvement, "all" shows everything
+  const getFilteredTasks = (taskList: Task[]) => {
+    if (viewMode === "all") {
+      return taskList;
+    }
+    // "my" view - show only tasks where user is creator or assignee
+    if (!user) return [];
+    return taskList.filter(
+      (task) =>
+        task.author?.name === `${user.firstName} ${user.lastName}` ||
+        task.assignees.some(a => a.name === `${user.firstName} ${user.lastName}`)
+    );
+  };
+
+  const overtimeTasks = getFilteredTasks(tasks.filter((task) => task.status === "overtime"));
+  const todoTasks = getFilteredTasks(tasks.filter((task) => task.status === "todo"));
+  const doneTasks = getFilteredTasks(tasks.filter((task) => task.status === "done"));
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedBackendTask, setSelectedBackendTask] =
@@ -332,7 +347,28 @@ const Tasks: React.FC = () => {
       )}
 
       {!loading && !error && (
-        <div className="tasks__content">
+        <>
+          {/* View Toggle */}
+          <div className="tasks__view-toggle">
+            <button
+              className={`tasks__view-button ${
+                viewMode === "my" ? "tasks__view-button--active" : ""
+              }`}
+              onClick={() => setViewMode("my")}
+            >
+              My Tasks
+            </button>
+            <button
+              className={`tasks__view-button ${
+                viewMode === "all" ? "tasks__view-button--active" : ""
+              }`}
+              onClick={() => setViewMode("all")}
+            >
+              All Tasks
+            </button>
+          </div>
+
+          <div className="tasks__content">
           {/* Overtime Section - only show if there are overtime tasks */}
           {overtimeTasks.length > 0 && (
             <div
@@ -436,6 +472,7 @@ const Tasks: React.FC = () => {
             )}
           </div>
         </div>
+        </>
       )}
 
       {/* Task Details Popup */}
