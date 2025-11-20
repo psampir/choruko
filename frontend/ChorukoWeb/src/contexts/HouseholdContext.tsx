@@ -51,7 +51,10 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
     }
 
     try {
-      setLoading(true);
+      // Only show loading state if we don't have data yet
+      if (!householdInfo) {
+        setLoading(true);
+      }
       setError(null);
 
       const result = await householdService.getHouseholdInfo();
@@ -74,7 +77,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
     } finally {
       setLoading(false);
     }
-  }, [hasHousehold, checkAuth]);
+  }, [hasHousehold, checkAuth, householdInfo]);
 
   // Fetch household data when user has a household
   useEffect(() => {

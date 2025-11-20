@@ -57,7 +57,10 @@ export const SettlementProvider: React.FC<SettlementProviderProps> = ({ children
     }
 
     try {
-      setLoading(true);
+      // Only show loading state if we don't have data yet
+      if (settlements.length === 0) {
+        setLoading(true);
+      }
       setError(null);
 
       const result = await settlementService.getAllSettlements(householdInfo.id);
@@ -75,7 +78,7 @@ export const SettlementProvider: React.FC<SettlementProviderProps> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [householdInfo?.id]);
+  }, [householdInfo?.id, settlements.length]);
 
   // Create a new settlement
   const createSettlement = async (data: CreateSettlementData) => {
