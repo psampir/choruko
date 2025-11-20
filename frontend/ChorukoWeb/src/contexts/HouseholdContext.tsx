@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "./AuthContext";
 import householdService from "../services/householdService";
@@ -37,6 +37,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
   const [householdInfo, setHouseholdInfo] = useState<HouseholdInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasDataRef = useRef(false);
 
   // Clear error function
   const clearError = () => {
@@ -47,12 +48,13 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
   const refreshHousehold = useCallback(async () => {
     if (!hasHousehold) {
       setHouseholdInfo(null);
+      hasDataRef.current = false;
       return;
     }
 
     try {
       // Only show loading state if we don't have data yet
-      if (!householdInfo) {
+      if (!hasDataRef.current) {
         setLoading(true);
       }
       setError(null);
@@ -61,6 +63,7 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
 
       if (result.success && result.data) {
         setHouseholdInfo(result.data);
+        hasDataRef.current = true;
       } else {
         // If backend indicates user has no household, refresh auth state
         if (result.message?.includes("not part of any household")) {
@@ -69,15 +72,17 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
         }
         setError(result.message || "Failed to fetch household info");
         setHouseholdInfo(null);
+        hasDataRef.current = false;
       }
     } catch (err) {
       console.error("Failed to fetch household data:", err);
       setError("Failed to fetch household data");
       setHouseholdInfo(null);
+      hasDataRef.current = false;
     } finally {
       setLoading(false);
     }
-  }, [hasHousehold, checkAuth, householdInfo]);
+  }, [hasHousehold, checkAuth]);
 
   // Fetch household data when user has a household
   useEffect(() => {
