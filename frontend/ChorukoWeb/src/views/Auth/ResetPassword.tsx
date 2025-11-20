@@ -1,28 +1,32 @@
 import { useState, useEffect } from "react";
-import Button from '../../components/Button';
-import Input from '../../components/Input';
+import Button from "../../components/Button";
+import Input from "../../components/Input";
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface ResetPasswordProps {
   onLoginClick: () => void;
 }
 
+// Password reset - checks backend email config before allowing reset
 function ResetPassword({ onLoginClick }: ResetPasswordProps) {
   const [showPopup, setShowPopup] = useState(false);
-  const [emailEnabled, setEmailEnabled] = useState<boolean | null>(null);
+  const [emailEnabled, setEmailEnabled] = useState<boolean | null>(null); // null=loading, true=enabled, false=disabled
 
+  // Check if email functionality is configured on backend
   useEffect(() => {
-    let ignore = false;
+    let ignore = false; // Prevent state updates after unmount
+
     const loadConfig = async () => {
       try {
         const res = await fetch(`${apiBaseUrl}/config/email-enabled`, {
-          headers: { Accept: "application/json" }
+          headers: { Accept: "application/json" },
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (!ignore) setEmailEnabled(Boolean(data?.enableEmails));
       } catch (err) {
         console.error("Failed to fetch email-enabled config", err);
+        // If config fails, assume email is not available
         if (!ignore) setEmailEnabled(false);
       }
     };
@@ -100,7 +104,8 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
         </form>
       ) : (
         <div className="login__notice">
-          Automated password reset is not configured.<br />
+          Automated password reset is not configured.
+          <br />
           Please contact your administrator to reset your password manually.
         </div>
       )}

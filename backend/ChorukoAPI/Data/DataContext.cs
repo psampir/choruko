@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 
 namespace ChorukoAPI.Data;
 
-public class DataContext(DbContextOptions<DataContext> options, IConfiguration Configuration) : IdentityDbContext<User>(options)
+public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<User>(options)
 {
     public override DbSet<User> Users { get; set; }
     public DbSet<Activity> Activities { get; set; }

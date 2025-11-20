@@ -18,17 +18,19 @@ interface Invitation {
   image: string;
 }
 
+// Display and manage household invitations (accept/decline)
 function Invitations() {
   const navigate = useNavigate();
   const isDark = useIsDarkTheme();
-  
-  // Select themed icons
-  const householdDefault = isDark ? householdDefaultDark : householdDefaultLight;
+
+  const householdDefault = isDark
+    ? householdDefaultDark
+    : householdDefaultLight;
   const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
   const acceptIcon = isDark ? acceptDark : acceptLight;
   const declineIcon = isDark ? declineDark : declineLight;
-  
-  // Initialize with one invitation directly instead of using useEffect
+
+  // Initialize with mock invitation
   const [invitations, setInvitations] = useState<Invitation[]>([
     {
       id: Date.now(),
@@ -63,21 +65,21 @@ function Invitations() {
   //   setInvitations((prev) => [...prev, invitation]);
   // };
 
+  // Show confirmation popup before accepting
   const acceptInvitation = (invitation: { id: number; name: string }) => {
     setSelectedInvitation(invitation);
     setPopup(true);
   };
 
+  // Remove invitation and close popup on accept
   const handleAccept = () => {
     if (selectedInvitation) {
-      // Remove the invitation from the list
       setInvitations((prev) =>
         prev.filter((inv) => inv.id !== selectedInvitation.id)
       );
-      // Close popup
       setPopup(false);
       setSelectedInvitation(null);
-      // Here you could add logic to actually join the household
+      // TODO: Add backend logic to join household
     }
   };
 

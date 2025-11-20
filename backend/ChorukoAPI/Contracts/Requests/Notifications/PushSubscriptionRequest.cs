@@ -5,11 +5,11 @@ namespace ChorukoAPI.Contracts.Requests.Notifications;
 public class PushSubscriptionRequest
 {
     [Required]
-    public string Endpoint { get; set; }
+    public required string Endpoint { get; set; }
 
     [Required]
-    public string P256dhKey { get; set; }
+    public required string P256dhKey { get; set; }
 
     [Required]
-    public string AuthKey { get; set; }
+    public required string AuthKey { get; set; }
 }

@@ -99,7 +99,7 @@ const Input: React.FC<InputProps> = ({
             showTimeSelect
             timeFormat="HH:mm"
             timeIntervals={15}
-            dateFormat="MMMM d, yyyy h:mm aa"
+            dateFormat="MMMM d, yyyy HH:mm"
             placeholderText={props.placeholder || "Select date and time"}
             className={`input input--datetime ${className}`}
             wrapperClassName="datepicker-wrapper"

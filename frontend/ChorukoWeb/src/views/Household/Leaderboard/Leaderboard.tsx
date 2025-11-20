@@ -15,13 +15,16 @@ import "./Leaderboard.scss";
 
 type TimeFilter = "CURRENT MONTH" | "CURRENT YEAR" | "ALL TIME";
 
+// Ranked household participants display with time-based filtering
 const Leaderboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<TimeFilter>("ALL TIME");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { householdInfo, participants, loading, error, refreshHousehold } = useHousehold();
+  const { householdInfo, participants, loading, error, refreshHousehold } =
+    useHousehold();
   const isDark = useIsDarkTheme();
 
+  // Select theme-appropriate icons
   const star = isDark ? starDark : starLight;
   const householdDefaultIcon = isDark
     ? householdDefaultIconDark
@@ -30,6 +33,7 @@ const Leaderboard: React.FC = () => {
     ? profileDefaultIconDark
     : profileDefaultIconLight;
 
+  // Refs for calculating dynamic participant list height based on individual item size
   const participantsRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
   const participantRef = useRef<HTMLDivElement>(null);
@@ -44,11 +48,11 @@ const Leaderboard: React.FC = () => {
     setIsDropdownOpen(false);
   };
 
-  // Sort and rank participants based on active filter
+  // Sort participants by points for selected time period and assign ranks
   const sortedParticipants = useMemo(() => {
     if (!participants || participants.length === 0) return [];
 
-    // Determine which points field to use based on filter
+    // Select appropriate points field based on time filter
     const getPoints = (participant: HouseholdParticipant): number => {
       switch (activeFilter) {
         case "CURRENT MONTH":
@@ -62,12 +66,12 @@ const Leaderboard: React.FC = () => {
       }
     };
 
-    // Sort by points (descending) and add rank
+    // Sort by points descending and assign ranks
     const sorted = [...participants]
       .map((participant) => ({
         ...participant,
         displayPoints: getPoints(participant),
-        rank: 0, // Will be set after sorting
+        rank: 0,
       }))
       .sort((a, b) => b.displayPoints - a.displayPoints)
       .map((participant, index) => ({
@@ -78,16 +82,14 @@ const Leaderboard: React.FC = () => {
     return sorted;
   }, [participants, activeFilter]);
 
-  // Check if user was removed from household
+  // Redirect if user was removed from household
   useEffect(() => {
-    // Only redirect if there's a clear error about not having household access
     if (!loading && error && error.includes("not part of any household")) {
-      console.log("User no longer has household access, redirecting...");
       navigate("/joinOrCreateHousehold", { replace: true });
     }
   }, [error, loading, navigate]);
 
-  // Calculate dynamic height after component mounts
+  // Calculate dynamic height to show 3 participants, recalculate on resize
   useEffect(() => {
     const calculateDynamicHeight = () => {
       if (
@@ -99,7 +101,7 @@ const Leaderboard: React.FC = () => {
         const desiredVisibleCount = 3;
         const maxHeight = participantHeight * desiredVisibleCount;
 
-        // Set CSS custom property for dynamic height
+        // Set CSS custom properties for dynamic styling
         participantsRef.current.style.setProperty(
           "--dynamic-participant-height",
           `${participantHeight}px`
@@ -115,10 +117,10 @@ const Leaderboard: React.FC = () => {
       }
     };
 
-    // Calculate after a small delay to ensure DOM is fully rendered
+    // Delay ensures DOM is fully rendered before measuring
     const timer = setTimeout(calculateDynamicHeight, 100);
 
-    // Recalculate on window resize
+    // Recalculate on window resize for responsive behavior
     window.addEventListener("resize", calculateDynamicHeight);
 
     return () => {
@@ -159,7 +161,7 @@ const Leaderboard: React.FC = () => {
             {isDropdownOpen && (
               <div className="dropdown__options">
                 {(["CURRENT MONTH", "CURRENT YEAR", "ALL TIME"] as TimeFilter[])
-                  .filter((filter) => filter !== activeFilter) // Hide currently selected option
+                  .filter((filter) => filter !== activeFilter) // Only show unselected options
                   .map((filter) => (
                     <div
                       key={filter}

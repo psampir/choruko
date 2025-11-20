@@ -18,11 +18,11 @@ public class InvitationService(DataContext context,
     IMapper<Invitation, InvitationResponse> mapper,
     UserManager<User> userManager) : IInvitationService
 {
-    public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdInvitation(string userId, string householdId, string userIdToAdd)
+    public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdInvitation(string userId, string householdId, string userEmail)
     {
         try
         {
-            var userToAdd = await context.Users.FirstOrDefaultAsync(u => u.Id == userIdToAdd);
+            var userToAdd = await context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
 
             if (userToAdd == null)
             {
@@ -58,9 +58,9 @@ public class InvitationService(DataContext context,
                 url = "/"
             });
 
-            if (userIdToAdd != userToAdd.Id)
+            if (userEmail != userToAdd.Id)
             {
-                await pushNotificationService.SendNotificationAsync(userIdToAdd, payload);
+                await pushNotificationService.SendNotificationAsync(userEmail, payload);
             }
 
 
