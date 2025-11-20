@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using ChorukoAPI.Contracts;
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Models;
-using ChorukoAPI.Mappers;
 using System.Net; 
 
 
