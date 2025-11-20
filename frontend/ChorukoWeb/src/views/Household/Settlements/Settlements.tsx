@@ -65,6 +65,7 @@ const Settlements: React.FC = () => {
 
   const [settlements, setSettlements] = useState<UISettlement[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [viewMode, setViewMode] = useState<"all" | "my">("my");
 
   // Refresh household info and settlements when component mounts
   useEffect(() => {
@@ -82,7 +83,7 @@ const Settlements: React.FC = () => {
         id: index,
         backendId: backendSettlement.id,
         description: backendSettlement.description,
-        assignees: [], // Not available in list view
+        assignees: [],
         status: backendSettlement.status === "Completed" ? "paid" : "unpaid",
         author: {
           id: backendSettlement.creator.id,
@@ -90,8 +91,16 @@ const Settlements: React.FC = () => {
           avatar: getProfilePictureUrl(backendSettlement.creator.profilePicturePath),
         },
         amount: backendSettlement.amount,
-        settledUsers: [], // Not available in list view
-        unsettledUsers: [], // Not available in list view
+        settledUsers: (backendSettlement.settledUserIds || []).map(id => ({
+          id,
+          name: '',
+          avatar: profileIcon,
+        })),
+        unsettledUsers: (backendSettlement.unsettledUserIds || []).map(id => ({
+          id,
+          name: '',
+          avatar: profileIcon,
+        })),
       };
     });
     setSettlements(convertedSettlements);
@@ -114,6 +123,24 @@ const Settlements: React.FC = () => {
   const paidSettlements = settlements.filter(
     (settlement) => settlement.status === "paid"
   );
+
+  // Filter settlements: "my" shows user involvement, "all" shows everything
+  const getFilteredSettlements = (settlementList: UISettlement[]) => {
+    if (viewMode === "all") {
+      return settlementList;
+    }
+    // "my" view - show only settlements where user is creator or payer
+    if (!user) return [];
+    return settlementList.filter(
+      (settlement) => 
+        settlement.author.id === user.id ||
+        settlement.settledUsers.some(u => u.id === user.id) ||
+        settlement.unsettledUsers.some(u => u.id === user.id)
+    );
+  };
+
+  const filteredUnpaidSettlements = getFilteredSettlements(unpaidSettlements);
+  const filteredPaidSettlements = getFilteredSettlements(paidSettlements);
 
   const [selectedSettlement, setSelectedSettlement] =
     useState<UISettlement | null>(null);
@@ -200,7 +227,28 @@ const Settlements: React.FC = () => {
       )}
 
       {!loading && !error && (
-        <div className="settlements__content">
+        <>
+          {/* View Toggle */}
+          <div className="settlements__view-toggle">
+            <button
+              className={`settlements__view-button ${
+                viewMode === "my" ? "settlements__view-button--active" : ""
+              }`}
+              onClick={() => setViewMode("my")}
+            >
+              My Payments
+            </button>
+            <button
+              className={`settlements__view-button ${
+                viewMode === "all" ? "settlements__view-button--active" : ""
+              }`}
+              onClick={() => setViewMode("all")}
+            >
+              All Payments
+            </button>
+          </div>
+
+          <div className="settlements__content">
         {/* Unpaid Section */}
         <div
           className={`settlements__section settlements__section--unpaid ${collapsedSections.unpaid ? "settlements__section--collapsed" : ""
@@ -220,17 +268,19 @@ const Settlements: React.FC = () => {
           </span>
           {!collapsedSections.unpaid && (
             <div className="settlements__list">
-              {unpaidSettlements.length > 0 ? (
-                unpaidSettlements.map((settlement, index) =>
+              {filteredUnpaidSettlements.length > 0 ? (
+                filteredUnpaidSettlements.map((settlement, index) =>
                   renderSettlement(
                     settlement,
-                    index === unpaidSettlements.length - 1,
+                    index === filteredUnpaidSettlements.length - 1,
                     index === 0
                   )
                 )
               ) : (
                 <p className="settlements__empty-message">
-                  No unpaid settlements
+                  {viewMode === "my"
+                    ? "No settlements assigned to you"
+                    : "No unpaid settlements"}
                 </p>
               )}
             </div>
@@ -256,23 +306,26 @@ const Settlements: React.FC = () => {
           </span>
           {!collapsedSections.paid && (
             <div className="settlements__list">
-              {paidSettlements.length > 0 ? (
-                paidSettlements.map((settlement, index) =>
+              {filteredPaidSettlements.length > 0 ? (
+                filteredPaidSettlements.map((settlement, index) =>
                   renderSettlement(
                     settlement,
-                    index === paidSettlements.length - 1,
+                    index === filteredPaidSettlements.length - 1,
                     index === 0
                   )
                 )
               ) : (
                 <p className="settlements__empty-message">
-                  No paid settlements
+                  {viewMode === "my"
+                    ? "No paid settlements assigned to you"
+                    : "No paid settlements"}
                 </p>
               )}
             </div>
           )}
         </div>
-      </div>
+        </div>
+      </>
       )}
 
       {/* Settlement Details Popup */}
