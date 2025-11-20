@@ -6,6 +6,7 @@ import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import ErrorMessage from "../../../components/ErrorMessage";
 import ViewModeToggle from "../../../components/ViewModeToggle/ViewModeToggle";
+import CollapsibleSection from "../../../components/CollapsibleSection/CollapsibleSection";
 import { useUser } from "../../../contexts/UserContext";
 import { useSettlement } from "../../../contexts/SettlementContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
@@ -271,73 +272,49 @@ const Settlements: React.FC = () => {
           <div className="settlements__content">
         {/* Unpaid Section - only show if there are unpaid settlements */}
         {filteredUnpaidSettlements.length > 0 && (
-          <div
-            className={`settlements__section settlements__section--unpaid ${collapsedSections.unpaid ? "settlements__section--collapsed" : ""
-              }`}
+          <CollapsibleSection
+            title="AMOUNTS DUE"
+            isCollapsed={collapsedSections.unpaid}
+            onToggle={() => toggleSection("unpaid")}
+            variant="error"
           >
-            <h2
-              className="settlements__section-title"
-              onClick={() => toggleSection("unpaid")}
-            >
-              AMOUNTS DUE
-            </h2>
-            <span
-              className="dropdown__arrow"
-              onClick={() => toggleSection("unpaid")}
-            >
-              &#9660;
-            </span>
-            {!collapsedSections.unpaid && (
-              <div className="settlements__list">
-                {filteredUnpaidSettlements.map((settlement, index) =>
-                  renderSettlement(
-                    settlement,
-                    index === filteredUnpaidSettlements.length - 1,
-                    index === 0
-                  )
-                )}
-              </div>
-            )}
-          </div>
+            <div className="settlements__list">
+              {filteredUnpaidSettlements.map((settlement, index) =>
+                renderSettlement(
+                  settlement,
+                  index === filteredUnpaidSettlements.length - 1,
+                  index === 0
+                )
+              )}
+            </div>
+          </CollapsibleSection>
         )}
 
         {/* Paid Section */}
-        <div
-          className={`settlements__section settlements__section--paid ${collapsedSections.paid ? "settlements__section--collapsed" : ""
-            }`}
+        <CollapsibleSection
+          title="AMOUNTS PAID"
+          isCollapsed={collapsedSections.paid}
+          onToggle={() => toggleSection("paid")}
+          variant="default"
         >
-          <h2
-            className="settlements__section-title"
-            onClick={() => toggleSection("paid")}
-          >
-            AMOUNTS PAID
-          </h2>
-          <span
-            className="dropdown__arrow"
-            onClick={() => toggleSection("paid")}
-          >
-            &#9660;
-          </span>
-          {!collapsedSections.paid && (
-            <div className="settlements__list">
-              {filteredPaidSettlements.length > 0 ? (
-                filteredPaidSettlements.map((settlement, index) =>
-                  renderSettlement(
-                    settlement,
-                    index === filteredPaidSettlements.length - 1,
-                    index === 0
-                  )
+          <div className="settlements__list">
+            {filteredPaidSettlements.length > 0 ? (
+              filteredPaidSettlements.map((settlement, index) =>
+                renderSettlement(
+                  settlement,
+                  index === filteredPaidSettlements.length - 1,
+                  index === 0
                 )
-              ) : (
-                <p className="settlements__empty-message">
-                  {viewMode === "my"
-                    ? "No paid settlements assigned to you"
-                    : "No paid settlements"}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+              )
+            ) : (
+              <p className="settlements__empty-message">
+                {viewMode === "my"
+                  ? "No paid settlements assigned to you"
+                  : "No paid settlements"}
+              </p>
+            )}
+          </div>
+        </CollapsibleSection>
         </div>
       </>
       )}
