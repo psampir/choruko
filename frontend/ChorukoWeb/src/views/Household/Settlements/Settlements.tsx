@@ -5,6 +5,7 @@ import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
 import ErrorMessage from "../../../components/ErrorMessage";
+import ViewModeToggle from "../../../components/ViewModeToggle/ViewModeToggle";
 import { useUser } from "../../../contexts/UserContext";
 import { useSettlement } from "../../../contexts/SettlementContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
@@ -260,25 +261,12 @@ const Settlements: React.FC = () => {
 
       {!loading && !error && (
         <>
-          {/* View Toggle */}
-          <div className="settlements__view-toggle">
-            <button
-              className={`settlements__view-button ${
-                viewMode === "my" ? "settlements__view-button--active" : ""
-              }`}
-              onClick={() => setViewMode("my")}
-            >
-              My Payments
-            </button>
-            <button
-              className={`settlements__view-button ${
-                viewMode === "all" ? "settlements__view-button--active" : ""
-              }`}
-              onClick={() => setViewMode("all")}
-            >
-              All Payments
-            </button>
-          </div>
+          <ViewModeToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            myLabel="My Payments"
+            allLabel="All Payments"
+          />
 
           <div className="settlements__content">
         {/* Unpaid Section - only show if there are unpaid settlements */}
