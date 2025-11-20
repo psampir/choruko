@@ -117,12 +117,35 @@ const Settlements: React.FC = () => {
     navigate("/settlements/add");
   };
 
-  const unpaidSettlements = settlements.filter(
-    (settlement) => settlement.status === "unpaid"
-  );
-  const paidSettlements = settlements.filter(
-    (settlement) => settlement.status === "paid"
-  );
+  // Categorize settlements from user's perspective
+  const categorizeForUser = (settlement: UISettlement): "unpaid" | "paid" => {
+    if (!user) return settlement.status;
+    
+    // For creators, use the settlement status
+    if (settlement.author.id === user.id) {
+      return settlement.status;
+    }
+    
+    // For payers, check if they personally have paid
+    const hasUserPaid = settlement.settledUsers.some(u => u.id === user.id);
+    return hasUserPaid ? "paid" : "unpaid";
+  };
+
+  // In "my" view, categorize based on user's personal payment status
+  // In "all" view, use the overall settlement status
+  const unpaidSettlements = settlements.filter((settlement) => {
+    if (viewMode === "my") {
+      return categorizeForUser(settlement) === "unpaid";
+    }
+    return settlement.status === "unpaid";
+  });
+
+  const paidSettlements = settlements.filter((settlement) => {
+    if (viewMode === "my") {
+      return categorizeForUser(settlement) === "paid";
+    }
+    return settlement.status === "paid";
+  });
 
   // Filter settlements: "my" shows user involvement, "all" shows everything
   const getFilteredSettlements = (settlementList: UISettlement[]) => {
