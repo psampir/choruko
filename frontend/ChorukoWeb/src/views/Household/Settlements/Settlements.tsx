@@ -83,7 +83,7 @@ const Settlements: React.FC = () => {
         id: index,
         backendId: backendSettlement.id,
         description: backendSettlement.description,
-        assignees: [], // Not available in list view
+        assignees: [],
         status: backendSettlement.status === "Completed" ? "paid" : "unpaid",
         author: {
           id: backendSettlement.creator.id,
@@ -91,8 +91,16 @@ const Settlements: React.FC = () => {
           avatar: getProfilePictureUrl(backendSettlement.creator.profilePicturePath),
         },
         amount: backendSettlement.amount,
-        settledUsers: [], // Not available in list view
-        unsettledUsers: [], // Not available in list view
+        settledUsers: (backendSettlement.settledUserIds || []).map(id => ({
+          id,
+          name: '',
+          avatar: profileIcon,
+        })),
+        unsettledUsers: (backendSettlement.unsettledUserIds || []).map(id => ({
+          id,
+          name: '',
+          avatar: profileIcon,
+        })),
       };
     });
     setSettlements(convertedSettlements);
@@ -121,10 +129,13 @@ const Settlements: React.FC = () => {
     if (viewMode === "all") {
       return settlementList;
     }
-    // "my" view - show only settlements where user is creator or involved
+    // "my" view - show only settlements where user is creator or payer
     if (!user) return [];
     return settlementList.filter(
-      (settlement) => settlement.author.id === user.id
+      (settlement) => 
+        settlement.author.id === user.id ||
+        settlement.settledUsers.some(u => u.id === user.id) ||
+        settlement.unsettledUsers.some(u => u.id === user.id)
     );
   };
 
