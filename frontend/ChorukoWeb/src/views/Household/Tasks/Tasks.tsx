@@ -333,40 +333,38 @@ const Tasks: React.FC = () => {
 
       {!loading && !error && (
         <div className="tasks__content">
-          {/* Overtime Section */}
-          <div
-            className={`tasks__section tasks__section--overtime ${
-              collapsedSections.overtime ? "tasks__section--collapsed" : ""
-            }`}
-          >
-            <h2
-              className="tasks__section-title"
-              onClick={() => toggleSection("overtime")}
+          {/* Overtime Section - only show if there are overtime tasks */}
+          {overtimeTasks.length > 0 && (
+            <div
+              className={`tasks__section tasks__section--overtime ${
+                collapsedSections.overtime ? "tasks__section--collapsed" : ""
+              }`}
             >
-              OVERTIME
-            </h2>
-            <span
-              className="dropdown__arrow"
-              onClick={() => toggleSection("overtime")}
-            >
-              &#9660;
-            </span>
-            {!collapsedSections.overtime && (
-              <div className="tasks__list">
-                {overtimeTasks.length > 0 ? (
-                  overtimeTasks.map((task, index) =>
+              <h2
+                className="tasks__section-title"
+                onClick={() => toggleSection("overtime")}
+              >
+                OVERTIME
+              </h2>
+              <span
+                className="dropdown__arrow"
+                onClick={() => toggleSection("overtime")}
+              >
+                &#9660;
+              </span>
+              {!collapsedSections.overtime && (
+                <div className="tasks__list">
+                  {overtimeTasks.map((task, index) =>
                     renderTask(
                       task,
                       index === overtimeTasks.length - 1,
                       index === 0
                     )
-                  )
-                ) : (
-                  <p className="tasks__empty-message">No overtime tasks</p>
-                )}
-              </div>
-            )}
-          </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* To-Do Section */}
           <div
