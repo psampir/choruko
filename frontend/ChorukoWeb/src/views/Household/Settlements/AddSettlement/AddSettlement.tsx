@@ -314,7 +314,7 @@ const AddSettlement: React.FC = () => {
             {
               label: "Cancel",
               onClick: () => setShowDeleteConfirm(false),
-              variant: "secondary",
+              variant: "primary",
             },
             {
               label: "Delete",
