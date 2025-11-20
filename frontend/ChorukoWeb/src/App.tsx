@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,23 +14,25 @@ import { SettlementProvider } from "./contexts/SettlementContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PushNotificationProvider } from "./contexts/PushNotificationContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
-import AuthContainer from "./views/Auth/AuthContainer";
-import Tasks from "./views/Household/Tasks/Tasks";
-import AddTask from "./views/Household/Tasks/AddTask/AddTask";
-import Settlements from "./views/Household/Settlements/Settlements";
-import AddSettlement from "./views/Household/Settlements/AddSettlement/AddSettlement";
 import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
 import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
-import JoinOrCreateHousehold from "./views/JoinOrCreateHousehold/JoinOrCreateHousehold";
-import Invitations from "./views/JoinOrCreateHousehold/Invitations/Invitations";
-import CreateHousehold from "./views/JoinOrCreateHousehold/CreateHousehold/CreateHousehold";
-import Leaderboard from "./views/Household/Leaderboard/Leaderboard";
-import ManageAccount from "./views/Profile/ManageAccount/ManageAccount";
-import ManageHousehold from "./views/Profile/ManageHousehold/ManageHousehold";
-import Activities from "./views/Profile/ManageHousehold/Activities/Activities";
-import TestNotifications from "./views/TestNotifications";
 import PushNotificationHandler from "./components/PushNotificationHandler";
+
+// Lazy load route components
+const AuthContainer = lazy(() => import("./views/Auth/AuthContainer"));
+const Tasks = lazy(() => import("./views/Household/Tasks/Tasks"));
+const AddTask = lazy(() => import("./views/Household/Tasks/AddTask/AddTask"));
+const Settlements = lazy(() => import("./views/Household/Settlements/Settlements"));
+const AddSettlement = lazy(() => import("./views/Household/Settlements/AddSettlement/AddSettlement"));
+const JoinOrCreateHousehold = lazy(() => import("./views/JoinOrCreateHousehold/JoinOrCreateHousehold"));
+const Invitations = lazy(() => import("./views/JoinOrCreateHousehold/Invitations/Invitations"));
+const CreateHousehold = lazy(() => import("./views/JoinOrCreateHousehold/CreateHousehold/CreateHousehold"));
+const Leaderboard = lazy(() => import("./views/Household/Leaderboard/Leaderboard"));
+const ManageAccount = lazy(() => import("./views/Profile/ManageAccount/ManageAccount"));
+const ManageHousehold = lazy(() => import("./views/Profile/ManageHousehold/ManageHousehold"));
+const Activities = lazy(() => import("./views/Profile/ManageHousehold/Activities/Activities"));
+const TestNotifications = lazy(() => import("./views/TestNotifications"));
 
 // Layout component for protected pages with top navbar
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -67,7 +70,8 @@ function RootRedirect() {
 
 function AppRoutes() {
   return (
-    <Routes>
+    <Suspense fallback={<div className="loading">Loading...</div>}>
+      <Routes>
       {/* Public routes */}
       <Route path="/login" element={<AuthContainer />} />
       <Route path="/signup" element={<AuthContainer />} />
@@ -215,7 +219,8 @@ function AppRoutes() {
       {/* Smart default redirect */}
       <Route path="/" element={<RootRedirect />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 
