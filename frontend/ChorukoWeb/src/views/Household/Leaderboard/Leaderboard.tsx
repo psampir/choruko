@@ -33,11 +33,6 @@ const Leaderboard: React.FC = () => {
     ? profileDefaultIconDark
     : profileDefaultIconLight;
 
-  // Refs for calculating dynamic participant list height based on individual item size
-  const participantsRef = useRef<HTMLDivElement>(null);
-  const scrollableContentRef = useRef<HTMLDivElement>(null);
-  const participantRef = useRef<HTMLDivElement>(null);
-
   // Refresh household info when component mounts
   useEffect(() => {
     refreshHousehold();
@@ -89,45 +84,7 @@ const Leaderboard: React.FC = () => {
     }
   }, [error, loading, navigate]);
 
-  // Calculate dynamic height to show 3 participants, recalculate on resize
-  useEffect(() => {
-    const calculateDynamicHeight = () => {
-      if (
-        participantRef.current &&
-        participantsRef.current &&
-        scrollableContentRef.current
-      ) {
-        const participantHeight = participantRef.current.offsetHeight;
-        const desiredVisibleCount = 3;
-        const maxHeight = participantHeight * desiredVisibleCount;
 
-        // Set CSS custom properties for dynamic styling
-        participantsRef.current.style.setProperty(
-          "--dynamic-participant-height",
-          `${participantHeight}px`
-        );
-        participantsRef.current.style.setProperty(
-          "--max-visible-participants",
-          `${desiredVisibleCount}`
-        );
-
-        // Set max height on both containers
-        participantsRef.current.style.maxHeight = `${maxHeight}px`;
-        scrollableContentRef.current.style.maxHeight = `${maxHeight}px`;
-      }
-    };
-
-    // Delay ensures DOM is fully rendered before measuring
-    const timer = setTimeout(calculateDynamicHeight, 100);
-
-    // Recalculate on window resize for responsive behavior
-    window.addEventListener("resize", calculateDynamicHeight);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("resize", calculateDynamicHeight);
-    };
-  }, [sortedParticipants]);
 
   return (
     <div className="leaderboard">
@@ -181,8 +138,8 @@ const Leaderboard: React.FC = () => {
       </div>
 
       {/* Participants List */}
-      <div className="participants" ref={participantsRef}>
-        <div className="scrollable-content" ref={scrollableContentRef}>
+      <div className="participants">
+        <div className="scrollable-content">
           {loading ? (
             <div className="loading-message">Loading participants...</div>
           ) : sortedParticipants.length === 0 ? (
@@ -192,7 +149,6 @@ const Leaderboard: React.FC = () => {
               <div
                 key={participant.id}
                 className="participant"
-                ref={index === 0 ? participantRef : null}
               >
                 <div className="participant__rank">#{participant.rank}</div>
                 <img
