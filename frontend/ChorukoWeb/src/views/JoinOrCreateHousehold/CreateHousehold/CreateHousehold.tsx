@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import NavbarMobile from "../../../components/NavbarMobile";
+import NotificationBar from "../../../components/NotificationBar";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
@@ -115,18 +116,17 @@ function CreateHousehold() {
   return (
     <div className="create-household">
       <NavbarMobile />
+      <NotificationBar
+        message={notification.message}
+        isVisible={notification.isVisible}
+        type={notification.type}
+      />
       <img
         className="back-arrow"
         src={arrowLeftIcon}
         alt="back-arrow"
         onClick={() => navigate(-1)}
       />
-      <div
-        className={`notification-bar notification-bar--${notification.type} ${notification.isVisible ? "notification-bar--visible" : ""
-          }`}
-      >
-        <span>{notification.message}</span>
-      </div>
 
       <h1>Create Household</h1>
       <img
