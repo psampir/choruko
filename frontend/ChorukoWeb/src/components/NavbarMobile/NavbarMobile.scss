@@ -107,6 +107,10 @@
         height: 24px;
         background: url("../../assets/svg/light/close-icon.svg") no-repeat center/contain;
         cursor: pointer;
+
+        :root[data-theme="dark"] & {
+          background: url("../../assets/svg/dark/close-icon.svg") no-repeat center/contain;
+        }
       }
 
       .profile-popup__icon {
