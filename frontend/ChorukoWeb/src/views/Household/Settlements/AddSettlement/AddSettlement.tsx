@@ -12,7 +12,7 @@ import NavbarMobile from "../../../../components/NavbarMobile";
 import arrowLeftIconLight from "../../../../assets/svg/light/arrow-left.svg";
 import arrowLeftIconDark from "../../../../assets/svg/dark/arrow-left.svg";
 import Popup from "../../../../components/Popup/Popup";
-import ErrorMessage from "../../../../components/ErrorMessage";
+import NotificationBar from "../../../../components/NotificationBar";
 import checkIconLight from "../../../../assets/svg/light/check.svg";
 import checkIconDark from "../../../../assets/svg/dark/check.svg";
 import profileDefaultIconLight from "../../../../assets/svg/light/profile-icon.svg";
@@ -176,10 +176,13 @@ const AddSettlement: React.FC = () => {
     <div className="add-settlement">
       <NavbarMobile />
 
-      <ErrorMessage
+      <NotificationBar
         message={errorMessage}
+        isVisible={!!errorMessage}
+        type="error"
         onClose={() => setErrorMessage("")}
-        variant="overlay"
+        autoDismiss={true}
+        dismissTime={5000}
       />
 
       <div className="add-settlement__container">

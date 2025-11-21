@@ -4,7 +4,7 @@ import "./Settlements.scss";
 import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
-import ErrorMessage from "../../../components/ErrorMessage";
+import NotificationBar from "../../../components/NotificationBar";
 import ViewModeToggle from "../../../components/ViewModeToggle/ViewModeToggle";
 import CollapsibleSection from "../../../components/CollapsibleSection/CollapsibleSection";
 import { useUser } from "../../../contexts/UserContext";
@@ -232,10 +232,13 @@ const Settlements: React.FC = () => {
 
   return (
     <div className="settlements">
-      <ErrorMessage
+      <NotificationBar
         message={errorMessage}
         onClose={() => setErrorMessage("")}
-        variant="overlay"
+        type="error"
+        isVisible={!!errorMessage}
+        autoDismiss={true}
+        dismissTime={5000}
       />
 
       <div className="settlements__header">

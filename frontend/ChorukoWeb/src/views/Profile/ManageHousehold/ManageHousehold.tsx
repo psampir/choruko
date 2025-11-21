@@ -11,6 +11,7 @@ import "./ManageHousehold.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
+import NotificationBar from "../../../components/NotificationBar";
 
 import householdDefaultIconLight from "../../../assets/svg/light/householdDefault.svg";
 import profileDefaultIconLight from "../../../assets/svg/light/profile-icon.svg";
@@ -335,19 +336,17 @@ const ManageHousehold: React.FC = () => {
 
   return (
     <div className="manage-household">
+      <NotificationBar
+        message={notification.message}
+        isVisible={notification.isVisible}
+        type={notification.type}
+      />
       <img
         className="back-arrow"
         src={arrowLeft}
         alt="Back"
         onClick={() => navigate(-1)}
       />
-      <div
-        className={`notification-bar notification-bar--${notification.type} ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
-      >
-        <span>{notification.message}</span>
-      </div>
 
       <h1 className="manage-household__title">Manage Household</h1>
       <div className="household-header">
