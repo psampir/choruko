@@ -24,20 +24,23 @@ function AuthContainer() {
   };
 
   return (
-    <div className="login active">
-      {/* Common header with persistent raccoon animation and app title */}
-      <div className="login__top-container">
-        <RaccoonLogo />
-        <h1 className="login__title">Choruko</h1>
+    <>
+      <div className="version">{import.meta.env.VITE_APP_VERSION}</div>
+      <div className="login active">
+        {/* Common header with persistent raccoon animation and app title */}
+        <div className="login__top-container">
+          <RaccoonLogo />
+          <h1 className="login__title">Choruko</h1>
 
-        {/* Conditionally render auth views based on currentView state */}
-        {currentView === "login" && <LogIn onModeChange={handleModeChange} />}
-        {currentView === "signup" && <SignUp onModeChange={handleModeChange} />}
-        {currentView === "resetPassword" && (
-          <ResetPassword onLoginClick={showLogin} />
-        )}
+          {/* Conditionally render auth views based on currentView state */}
+          {currentView === "login" && <LogIn onModeChange={handleModeChange} />}
+          {currentView === "signup" && <SignUp onModeChange={handleModeChange} />}
+          {currentView === "resetPassword" && (
+            <ResetPassword onLoginClick={showLogin} />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
