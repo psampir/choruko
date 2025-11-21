@@ -4,6 +4,10 @@ body {
   overflow-y: hidden;
 }
 
+.app {
+  min-height: 100vh;
+}
+
 .back-arrow {
   position: absolute;
   top: 90px;
@@ -21,6 +25,7 @@ body {
 
 
 .activities {
+  margin-top: 90px;
   background: var(--color-background);
   padding: var(--spacing-2xl);
   font-family: var(--font-family-base);
