@@ -277,13 +277,13 @@ const NavbarMobile = () => {
           className="popup__leave-household"
           title=""
         >
-          <p>Are you sure you want to leave this household?</p>
+          <p style={{ fontSize: 'var(--font-size-h4)' }}>Are you sure you want to leave this household?</p>
           <img 
             src={householdInfo?.profilePictureUrl || householdDefaultIcon} 
             alt="Household Image" 
           />
-          <p>{householdInfo?.name || "Household"}</p>
-          {error && <p style={{ color: 'var(--color-error)', marginTop: '10px' }}>{error}</p>}
+          <p style={{ fontSize: 'var(--font-size-h4)' }}>{householdInfo?.name || "Household"}</p>
+          {error && <p style={{ color: 'var(--color-error)', marginTop: '10px', fontSize: 'var(--font-size-h4)' }}>{error}</p>}
           <Button variant="red" onClick={handleLeaveHousehold} disabled={loading}>
             {loading ? "Leaving..." : "Leave"}
           </Button>

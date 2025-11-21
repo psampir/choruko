@@ -57,6 +57,7 @@ const applyTheme = (theme: ThemeType) => {
       "var(--color-dark-error-bg-secondary)"
     );
   } else {
+    // Light mode: Reference light theme variables
     root.style.setProperty("--color-primary", "var(--color-light-primary)");
     root.style.setProperty("--color-secondary", "var(--color-light-secondary)");
     root.style.setProperty(

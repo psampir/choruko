@@ -80,6 +80,10 @@ if (enableEmails == "true")
         )
     );
 }
+else
+{
+    builder.Services.AddScoped<IEmailService, NoOpEmailService>();
+}
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {

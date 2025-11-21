@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { useHousehold } from "./HouseholdContext";
 import taskService from "../services/taskService";
@@ -43,6 +43,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const [tasks, setTasks] = useState<HouseholdTask[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasDataRef = useRef(false);
 
   // Clear error function
   const clearError = () => {
@@ -53,25 +54,32 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const refreshTasks = useCallback(async () => {
     if (!householdInfo?.id) {
       setTasks([]);
+      hasDataRef.current = false;
       return;
     }
 
     try {
-      setLoading(true);
+      // Only show loading state if we don't have data yet
+      if (!hasDataRef.current) {
+        setLoading(true);
+      }
       setError(null);
 
       const result = await taskService.getAllTasks(householdInfo.id);
 
       if (result.success && result.data) {
         setTasks(result.data);
+        hasDataRef.current = true;
       } else {
         setError(result.message || "Failed to fetch tasks");
         setTasks([]);
+        hasDataRef.current = false;
       }
     } catch (err) {
       console.error("Failed to fetch tasks:", err);
       setError("Failed to fetch tasks");
       setTasks([]);
+      hasDataRef.current = false;
     } finally {
       setLoading(false);
     }
