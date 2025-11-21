@@ -1,7 +1,7 @@
 @use "../../../../styles/variables";
 
 body {
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .app {
@@ -29,7 +29,7 @@ body {
   background: var(--color-background);
   padding: var(--spacing-2xl);
   font-family: var(--font-family-base);
-  overflow-y: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -117,9 +117,8 @@ body {
     border: 3px solid var(--color-secondary);
     border-radius: 10px;
     background: var(--color-background-secondary);
-    overflow-y: auto;
+    overflow-y: visible;
     margin-bottom: var(--spacing-xl);
-    max-height: calc(100vh - 200px - 80px);
     scroll-behavior: smooth;
 
     &::-webkit-scrollbar {
