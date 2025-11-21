@@ -173,8 +173,6 @@ class TaskService {
   // Delete a task
   async deleteTask(taskId: string) {
     try {
-      console.log(`Attempting to delete task with ID: ${taskId}`);
-      
       const response = await fetch(`${apiBaseUrl}/HouseholdTask/delete/${taskId}`, {
         method: "DELETE",
         credentials: "include",
