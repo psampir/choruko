@@ -110,15 +110,14 @@ function CreateHousehold() {
     <div className="create-household">
       <NavbarMobile />
       <img
-        className="create-household back-arrow"
+        className="back-arrow"
         src={arrowLeftIcon}
         alt="back-arrow"
         onClick={() => navigate(-1)}
       />
       <div
-        className={`notification-bar notification-bar--${notification.type} ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
+        className={`notification-bar notification-bar--${notification.type} ${notification.isVisible ? "notification-bar--visible" : ""
+          }`}
       >
         <span>{notification.message}</span>
       </div>
