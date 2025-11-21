@@ -65,54 +65,52 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
         }}
       />
 
-      <div className="login">
-        <form onSubmit={handleLogin} className="login__form">
-          <div className="login__input-container">
-            <Input
-              className="login__input-email"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+      <form onSubmit={handleLogin} className="login__form">
+        <div className="login__input-container">
+          <Input
+            className="login__input-email"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <Button
-            type="submit"
-            className="login__button--login"
-            disabled={authLoading}
-          >
-            {authLoading ? "Logging in..." : "Log In"}
-          </Button>
-
-          <Button
-            variant="additional"
-            type="button"
-            className="login__button--reset"
-            onClick={() => onModeChange("resetPassword")}
-          >
-            Reset Password
-          </Button>
-        </form>
-
-        <div className="login__bottom-container">
-          <p className="login__without-account">Don't have an account?</p>
-          <Button
-            className="login__button--signup"
-            onClick={() => onModeChange("signup")}
-          >
-            Sign Up
-          </Button>
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </div>
+
+        <Button
+          type="submit"
+          className="login__button--login"
+          disabled={authLoading}
+        >
+          {authLoading ? "Logging in..." : "Log In"}
+        </Button>
+
+        <Button
+          variant="additional"
+          type="button"
+          className="login__button--reset"
+          onClick={() => onModeChange("resetPassword")}
+        >
+          Reset Password
+        </Button>
+      </form>
+
+      <div className="login__bottom-container">
+        <p className="login__without-account">Don't have an account?</p>
+        <Button
+          className="login__button--signup"
+          onClick={() => onModeChange("signup")}
+        >
+          Sign Up
+        </Button>
       </div>
     </>
   );
