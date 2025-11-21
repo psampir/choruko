@@ -49,7 +49,7 @@ const Settlements: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { settlements: backendSettlements, loading, error, refreshSettlements, markAsPaid, markAsUnpaid, markAsDone, unmarkAsDone } = useSettlement();
-  const { refreshHousehold } = useHousehold();
+  const { refreshHousehold, participants } = useHousehold();
   const isDark = useIsDarkTheme();
 
   const profileIcon = isDark ? profileIconDark : profileIconLight;
@@ -116,18 +116,23 @@ const Settlements: React.FC = () => {
   };
 
   const addSettlement = () => {
+    // Check if there are other household members besides the current user
+    if (!participants || participants.length <= 1) {
+      setErrorMessage("You can't create a settlement as the only person in the household");
+      return;
+    }
     navigate("/settlements/add");
   };
 
   // Categorize settlements from user's perspective
   const categorizeForUser = (settlement: UISettlement): "unpaid" | "paid" => {
     if (!user) return settlement.status;
-    
+
     // For creators, use the settlement status
     if (settlement.author.id === user.id) {
       return settlement.status;
     }
-    
+
     // For payers, check if they personally have paid
     const hasUserPaid = settlement.settledUsers.some(u => u.id === user.id);
     return hasUserPaid ? "paid" : "unpaid";
@@ -157,7 +162,7 @@ const Settlements: React.FC = () => {
     // "my" view - show only settlements where user is creator or payer
     if (!user) return [];
     return settlementList.filter(
-      (settlement) => 
+      (settlement) =>
         settlement.author.id === user.id ||
         settlement.settledUsers.some(u => u.id === user.id) ||
         settlement.unsettledUsers.some(u => u.id === user.id)
@@ -273,228 +278,228 @@ const Settlements: React.FC = () => {
           />
 
           <div className="settlements__content">
-        {/* Unpaid Section - only show if there are unpaid settlements */}
-        {filteredUnpaidSettlements.length > 0 && (
-          <CollapsibleSection
-            title="AMOUNTS DUE"
-            isCollapsed={collapsedSections.unpaid}
-            onToggle={() => toggleSection("unpaid")}
-            variant="error"
-          >
-            <div className="settlements__list">
-              {filteredUnpaidSettlements.map((settlement, index) =>
-                renderSettlement(
-                  settlement,
-                  index === filteredUnpaidSettlements.length - 1,
-                  index === 0
-                )
-              )}
-            </div>
-          </CollapsibleSection>
-        )}
-
-        {/* Paid Section */}
-        <CollapsibleSection
-          title="AMOUNTS PAID"
-          isCollapsed={collapsedSections.paid}
-          onToggle={() => toggleSection("paid")}
-          variant="default"
-        >
-          <div className="settlements__list">
-            {filteredPaidSettlements.length > 0 ? (
-              filteredPaidSettlements.map((settlement, index) =>
-                renderSettlement(
-                  settlement,
-                  index === filteredPaidSettlements.length - 1,
-                  index === 0
-                )
-              )
-            ) : (
-              <p className="settlements__empty-message">
-                {viewMode === "my"
-                  ? "No paid settlements assigned to you"
-                  : "No paid settlements"}
-              </p>
+            {/* Unpaid Section - only show if there are unpaid settlements */}
+            {filteredUnpaidSettlements.length > 0 && (
+              <CollapsibleSection
+                title="AMOUNTS DUE"
+                isCollapsed={collapsedSections.unpaid}
+                onToggle={() => toggleSection("unpaid")}
+                variant="error"
+              >
+                <div className="settlements__list">
+                  {filteredUnpaidSettlements.map((settlement, index) =>
+                    renderSettlement(
+                      settlement,
+                      index === filteredUnpaidSettlements.length - 1,
+                      index === 0
+                    )
+                  )}
+                </div>
+              </CollapsibleSection>
             )}
+
+            {/* Paid Section */}
+            <CollapsibleSection
+              title="AMOUNTS PAID"
+              isCollapsed={collapsedSections.paid}
+              onToggle={() => toggleSection("paid")}
+              variant="default"
+            >
+              <div className="settlements__list">
+                {filteredPaidSettlements.length > 0 ? (
+                  filteredPaidSettlements.map((settlement, index) =>
+                    renderSettlement(
+                      settlement,
+                      index === filteredPaidSettlements.length - 1,
+                      index === 0
+                    )
+                  )
+                ) : (
+                  <p className="settlements__empty-message">
+                    {viewMode === "my"
+                      ? "No paid settlements assigned to you"
+                      : "No paid settlements"}
+                  </p>
+                )}
+              </div>
+            </CollapsibleSection>
           </div>
-        </CollapsibleSection>
-        </div>
-      </>
+        </>
       )}
 
       {/* Settlement Details Popup */}
       {showPopup && selectedSettlement && (
         <Popup
-            open={showPopup}
-            onClose={() => {
-              setShowPopup(false);
-              setSelectedSettlement(null);
-              setSelectedBackendSettlement(null);
-            }}
-            title={
-              <div>
-                <div className="amount-per-person">
-                  {currencySymbol}
-                  {selectedBackendSettlement && (selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0) > 0
-                    ? (selectedSettlement.amount / ((selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0))).toFixed(2)
-                    : selectedSettlement.amount.toFixed(2)}{" "}
-                  per person
-                </div>
-                <div className="total-amount">
-                  Total of {currencySymbol}{selectedSettlement.amount.toFixed(2)}
-                </div>
+          open={showPopup}
+          onClose={() => {
+            setShowPopup(false);
+            setSelectedSettlement(null);
+            setSelectedBackendSettlement(null);
+          }}
+          title={
+            <div>
+              <div className="amount-per-person">
+                {currencySymbol}
+                {selectedBackendSettlement && (selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0) > 0
+                  ? (selectedSettlement.amount / ((selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0))).toFixed(2)
+                  : selectedSettlement.amount.toFixed(2)}{" "}
+                per person
               </div>
-            }
-            variant="primary"
-            actions={(() => {
-              if (!selectedBackendSettlement || !user) return [];
-              
-              const isCreator = selectedSettlement.author.id === user.id;
-              const isPayer = selectedBackendSettlement.unsettledUsers?.some(u => u.id === user.id) || 
-                             selectedBackendSettlement.settledUsers?.some(u => u.id === user.id);
-              const hasUserPaid = selectedBackendSettlement.settledUsers?.some(u => u.id === user.id);
-              
-              // Creator sees "Mark as done/undone" buttons
-              if (isCreator) {
-                if (selectedSettlement.status === "unpaid") {
-                  return [{
-                    label: "Mark as done",
-                    onClick: async () => {
-                      await markAsDone(selectedBackendSettlement.id);
-                      setShowPopup(false);
-                      setSelectedSettlement(null);
-                      setSelectedBackendSettlement(null);
-                    },
-                    variant: "primary" as const,
-                  }];
-                } else {
-                  return [{
-                    label: "Mark as undone",
-                    onClick: async () => {
-                      await unmarkAsDone(selectedBackendSettlement.id);
-                      setShowPopup(false);
-                      setSelectedSettlement(null);
-                      setSelectedBackendSettlement(null);
-                    },
-                    variant: "primary" as const,
-                  }];
-                }
-              }
-              
-              // Payers see "Mark as paid/unpaid" buttons
-              if (isPayer) {
-                if (hasUserPaid) {
-                  return [{
-                    label: "Mark as unpaid",
-                    onClick: async () => {
-                      await markAsUnpaid(selectedBackendSettlement.id);
-                      setShowPopup(false);
-                      setSelectedSettlement(null);
-                      setSelectedBackendSettlement(null);
-                    },
-                    variant: "primary" as const,
-                  }];
-                } else {
-                  return [{
-                    label: "Mark as paid",
-                    onClick: async () => {
-                      await markAsPaid(selectedBackendSettlement.id);
-                      setShowPopup(false);
-                      setSelectedSettlement(null);
-                      setSelectedBackendSettlement(null);
-                    },
-                    variant: "primary" as const,
-                  }];
-                }
-              }
-              
-              return [];
-            })()}
-            customActions={
-              // Show edit button only for settlement author and not for paid settlements
-              user &&
-                selectedSettlement.author.id === user.id &&
-                selectedSettlement.status !== "paid" ? (
-                <div
-                  className="settlement-edit-button"
-                  onClick={() => {
-                    navigate("/settlements/add", {
-                      state: {
-                        editSettlement: selectedBackendSettlement,
-                      },
-                    });
+              <div className="total-amount">
+                Total of {currencySymbol}{selectedSettlement.amount.toFixed(2)}
+              </div>
+            </div>
+          }
+          variant="primary"
+          actions={(() => {
+            if (!selectedBackendSettlement || !user) return [];
+
+            const isCreator = selectedSettlement.author.id === user.id;
+            const isPayer = selectedBackendSettlement.unsettledUsers?.some(u => u.id === user.id) ||
+              selectedBackendSettlement.settledUsers?.some(u => u.id === user.id);
+            const hasUserPaid = selectedBackendSettlement.settledUsers?.some(u => u.id === user.id);
+
+            // Creator sees "Mark as done/undone" buttons
+            if (isCreator) {
+              if (selectedSettlement.status === "unpaid") {
+                return [{
+                  label: "Mark as done",
+                  onClick: async () => {
+                    await markAsDone(selectedBackendSettlement.id);
                     setShowPopup(false);
                     setSelectedSettlement(null);
                     setSelectedBackendSettlement(null);
-                  }}
-                >
-                  <img src={pencilIcon} alt="Edit settlement" />
-                </div>
-              ) : null
+                  },
+                  variant: "primary" as const,
+                }];
+              } else {
+                return [{
+                  label: "Mark as undone",
+                  onClick: async () => {
+                    await unmarkAsDone(selectedBackendSettlement.id);
+                    setShowPopup(false);
+                    setSelectedSettlement(null);
+                    setSelectedBackendSettlement(null);
+                  },
+                  variant: "primary" as const,
+                }];
+              }
             }
-            className="settlement-details-popup settlement-details-popup--button-top"
-          >
-            <div className="settlement-details-content">
-              <div className="settlement-details-description">
-                {selectedSettlement.description}
+
+            // Payers see "Mark as paid/unpaid" buttons
+            if (isPayer) {
+              if (hasUserPaid) {
+                return [{
+                  label: "Mark as unpaid",
+                  onClick: async () => {
+                    await markAsUnpaid(selectedBackendSettlement.id);
+                    setShowPopup(false);
+                    setSelectedSettlement(null);
+                    setSelectedBackendSettlement(null);
+                  },
+                  variant: "primary" as const,
+                }];
+              } else {
+                return [{
+                  label: "Mark as paid",
+                  onClick: async () => {
+                    await markAsPaid(selectedBackendSettlement.id);
+                    setShowPopup(false);
+                    setSelectedSettlement(null);
+                    setSelectedBackendSettlement(null);
+                  },
+                  variant: "primary" as const,
+                }];
+              }
+            }
+
+            return [];
+          })()}
+          customActions={
+            // Show edit button only for settlement author and not for paid settlements
+            user &&
+              selectedSettlement.author.id === user.id &&
+              selectedSettlement.status !== "paid" ? (
+              <div
+                className="settlement-edit-button"
+                onClick={() => {
+                  navigate("/settlements/add", {
+                    state: {
+                      editSettlement: selectedBackendSettlement,
+                    },
+                  });
+                  setShowPopup(false);
+                  setSelectedSettlement(null);
+                  setSelectedBackendSettlement(null);
+                }}
+              >
+                <img src={pencilIcon} alt="Edit settlement" />
               </div>
-              <div className="participants-list assignor-list">
-                <div className="participants-list__header">BUYER</div>
-                <div className="participants-list__content">
-                  <div className="activity activity--selected">
-                    <div className="activity-data">
-                      <img
-                        src={selectedSettlement.author.avatar || profileIcon}
-                        alt={selectedSettlement.author.name}
-                        className="assignee-avatar"
-                      />
-                      <p>{selectedSettlement.author.name}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* Unsettled Section */}
-              {selectedBackendSettlement?.unsettledUsers && selectedBackendSettlement.unsettledUsers.length > 0 && (
-                <div className="participants-list unsettled-list">
-                  <div className="participants-list__header">UNSETTLED</div>
-                  <div className="participants-list__content">
-                    {selectedBackendSettlement.unsettledUsers.map((u, idx) => (
-                      <div className="activity activity--selected" key={idx}>
-                        <div className="activity-data">
-                          <img
-                            src={getProfilePictureUrl(u.profilePicturePath) || profileIcon}
-                            alt={`${u.firstName} ${u.lastName}`}
-                            className="assignee-avatar"
-                          />
-                          <p>{u.firstName} {u.lastName}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {/* Settled Section */}
-              {selectedBackendSettlement?.settledUsers && selectedBackendSettlement.settledUsers.length > 0 && (
-                <div className="participants-list assignees-list">
-                  <div className="participants-list__header">SETTLED</div>
-                  <div className="participants-list__content">
-                    {selectedBackendSettlement.settledUsers.map((u, idx) => (
-                      <div className="activity activity--selected" key={idx}>
-                        <div className="activity-data">
-                          <img
-                            src={getProfilePictureUrl(u.profilePicturePath) || profileIcon}
-                            alt={`${u.firstName} ${u.lastName}`}
-                            className="assignee-avatar"
-                          />
-                          <p>{u.firstName} {u.lastName}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+            ) : null
+          }
+          className="settlement-details-popup settlement-details-popup--button-top"
+        >
+          <div className="settlement-details-content">
+            <div className="settlement-details-description">
+              {selectedSettlement.description}
             </div>
-          </Popup>
+            <div className="participants-list assignor-list">
+              <div className="participants-list__header">BUYER</div>
+              <div className="participants-list__content">
+                <div className="activity activity--selected">
+                  <div className="activity-data">
+                    <img
+                      src={selectedSettlement.author.avatar || profileIcon}
+                      alt={selectedSettlement.author.name}
+                      className="assignee-avatar"
+                    />
+                    <p>{selectedSettlement.author.name}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Unsettled Section */}
+            {selectedBackendSettlement?.unsettledUsers && selectedBackendSettlement.unsettledUsers.length > 0 && (
+              <div className="participants-list unsettled-list">
+                <div className="participants-list__header">UNSETTLED</div>
+                <div className="participants-list__content">
+                  {selectedBackendSettlement.unsettledUsers.map((u, idx) => (
+                    <div className="activity activity--selected" key={idx}>
+                      <div className="activity-data">
+                        <img
+                          src={getProfilePictureUrl(u.profilePicturePath) || profileIcon}
+                          alt={`${u.firstName} ${u.lastName}`}
+                          className="assignee-avatar"
+                        />
+                        <p>{u.firstName} {u.lastName}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Settled Section */}
+            {selectedBackendSettlement?.settledUsers && selectedBackendSettlement.settledUsers.length > 0 && (
+              <div className="participants-list assignees-list">
+                <div className="participants-list__header">SETTLED</div>
+                <div className="participants-list__content">
+                  {selectedBackendSettlement.settledUsers.map((u, idx) => (
+                    <div className="activity activity--selected" key={idx}>
+                      <div className="activity-data">
+                        <img
+                          src={getProfilePictureUrl(u.profilePicturePath) || profileIcon}
+                          alt={`${u.firstName} ${u.lastName}`}
+                          className="assignee-avatar"
+                        />
+                        <p>{u.firstName} {u.lastName}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </Popup>
       )}
 
       <BottomNav />
