@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import { VitePWA } from 'vite-plugin-pwa';
 import type { ManifestOptions } from 'vite-plugin-pwa';
 
+const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
+
 const iconsJsonPath = new URL('./public/icons.json', import.meta.url);
 const iconsJson = JSON.parse(fs.readFileSync(iconsJsonPath, 'utf-8')) as {
   icons: { src: string; sizes: string }[];
@@ -28,6 +30,9 @@ const manifestIcons: ManifestIcon[] = iconsJson.icons.map(i => {
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(packageJson.version)
+  },
   server: {
     host: true, // Allow access from other devices on the network
     port: 3000, // Default port for Vite
