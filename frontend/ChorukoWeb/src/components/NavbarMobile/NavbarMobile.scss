@@ -22,6 +22,10 @@
     width: 100%;
     z-index: var(--z-navbar);
 
+    body.notification-bar-visible & {
+      display: none;
+    }
+
     .theme-toggle,
     .profile-icon {
       user-select: none;
@@ -49,6 +53,10 @@
     opacity: 0;
     transition: opacity var(--transition-slow),
       transform var(--transition-transform);
+
+    body.notification-bar-visible & {
+      display: none;
+    }
 
     &.open {
       transform: translate(-50%, 0%) translateY(0);
