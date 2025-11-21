@@ -4,16 +4,22 @@ import { SignUp } from "./SignUp";
 import ResetPassword from "./ResetPassword";
 import "./Auth.scss";
 import RaccoonLogo from "../../components/RaccoonLogo";
+import { useAuth } from "../../contexts/AuthContext";
 
 type AuthView = "login" | "signup" | "resetPassword";
 
 // Main auth wrapper managing login/signup/reset navigation
 function AuthContainer() {
   const [currentView, setCurrentView] = useState<AuthView>("login");
+  const { clearError } = useAuth();
 
-  const showLogin = () => setCurrentView("login");
+  const showLogin = () => {
+    clearError();
+    setCurrentView("login");
+  };
 
   const handleModeChange = (mode: string) => {
+    clearError();
     setCurrentView(mode as AuthView);
   };
 
