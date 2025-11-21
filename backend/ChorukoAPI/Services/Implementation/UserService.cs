@@ -291,7 +291,7 @@ public class UserService(
                 {
                     return ServiceResponseFactory.Error<OperationResultDto>(
                         null, 
-                        "Cannot delete account. You are the sole administrator of your household. Please transfer ownership or delete the household first.", 
+                        "Please transfer household ownership or delete it first.", 
                         HttpStatusCode.Forbidden
                     );
                 }
