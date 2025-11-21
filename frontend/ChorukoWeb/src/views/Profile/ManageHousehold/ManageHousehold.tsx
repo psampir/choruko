@@ -218,12 +218,6 @@ const ManageHousehold: React.FC = () => {
     } else {
       navigate("/activities");
     }
-    console.log(
-      "Button clicked:",
-      action,
-      "Current clicked button state:",
-      clickedButton
-    );
   };
 
   const handleSelectNewAdmin = (
@@ -456,7 +450,7 @@ const ManageHousehold: React.FC = () => {
         <Popup
           variant={
             clickedButton === buttonActions.deleteHousehold ||
-            clickedButton === buttonActions.deleteParticipant
+              clickedButton === buttonActions.deleteParticipant
               ? "red"
               : "primary"
           }
