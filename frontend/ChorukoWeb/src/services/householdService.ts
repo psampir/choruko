@@ -50,7 +50,7 @@ class HouseholdService {
         return { success: true, data: result, message: "Household created successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to create household" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to create household" };
       }
     } catch (error) {
       console.error("Error creating household:", error);
@@ -75,7 +75,7 @@ class HouseholdService {
         }
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to fetch household info" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to fetch household info" };
       }
     } catch (error) {
       console.error("Error fetching household info:", error);
@@ -99,7 +99,7 @@ class HouseholdService {
         return { success: true, message: "Household renamed successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to rename household" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to rename household" };
       }
     } catch (error) {
       console.error("Error renaming household:", error);
@@ -143,7 +143,7 @@ class HouseholdService {
         return { success: true, message: "Household deleted successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to delete household" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to delete household" };
       }
     } catch (error) {
       console.error("Error deleting household:", error);
@@ -163,7 +163,7 @@ class HouseholdService {
         return { success: true, message: "User removed from household successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to remove user from household" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to remove user from household" };
       }
     } catch (error) {
       console.error("Error removing user from household:", error);
