@@ -28,6 +28,18 @@ const NotificationBar: React.FC<NotificationBarProps> = ({
     }
   }, [isVisible, autoDismiss, onClose, dismissTime]);
 
+  useEffect(() => {
+    if (isVisible) {
+      document.body.classList.add('notification-bar-visible');
+    } else {
+      document.body.classList.remove('notification-bar-visible');
+    }
+
+    return () => {
+      document.body.classList.remove('notification-bar-visible');
+    };
+  }, [isVisible]);
+
   if (!message) return null;
 
   return (
