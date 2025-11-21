@@ -91,73 +91,71 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
           clearError();
         }}
       />
-      <div className="login">
-        <form onSubmit={handleSignUp} className="login__form">
-          <div className="login__input-container">
-            <Input
-              type="text"
-              name="firstName"
-              placeholder="First Name"
-              value={formData.firstName}
-              onChange={handleInputChange}
-              required
-            />
+      <form onSubmit={handleSignUp} className="login__form">
+        <div className="login__input-container">
+          <Input
+            type="text"
+            name="firstName"
+            placeholder="First Name"
+            value={formData.firstName}
+            onChange={handleInputChange}
+            required
+          />
 
-            <Input
-              type="text"
-              name="lastName"
-              placeholder="Last Name"
-              value={formData.lastName}
-              onChange={handleInputChange}
-              required
-            />
+          <Input
+            type="text"
+            name="lastName"
+            placeholder="Last Name"
+            value={formData.lastName}
+            onChange={handleInputChange}
+            required
+          />
 
-            <Input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-            />
+          <Input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+          />
 
-            <Input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-            />
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleInputChange}
+            required
+          />
 
-            <Input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm Password"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          <Button
-            type="submit"
-            className="login__button--signup"
-            disabled={authLoading}
-          >
-            {authLoading ? "Creating Account..." : "Sign Up"}
-          </Button>
-        </form>
-
-        <div className="login__bottom-container">
-          <p className="login__without-account">Already have an account?</p>
-          <Button
-            className="login__button--login"
-            onClick={() => onModeChange("login")}
-          >
-            Log In
-          </Button>
+          <Input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            required
+          />
         </div>
+
+        <Button
+          type="submit"
+          className="login__button--signup"
+          disabled={authLoading}
+        >
+          {authLoading ? "Creating Account..." : "Sign Up"}
+        </Button>
+      </form>
+
+      <div className="login__bottom-container">
+        <p className="login__without-account">Already have an account?</p>
+        <Button
+          className="login__button--login"
+          onClick={() => onModeChange("login")}
+        >
+          Log In
+        </Button>
       </div>
     </>
   );
