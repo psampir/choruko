@@ -111,7 +111,7 @@ const ManageHousehold: React.FC = () => {
       setNameValue(householdInfo.name);
       setProfileImage(householdInfo.profilePictureUrl || householdDefaultIcon);
     }
-  }, [householdInfo]);
+  }, [householdInfo, householdDefaultIcon]);
 
   const showNotification = (
     message: string,

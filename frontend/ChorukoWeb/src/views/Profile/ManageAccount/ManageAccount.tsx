@@ -49,9 +49,11 @@ const ManageAccount: React.FC = () => {
       const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
       if (pictureUrl) {
         setProfileImageSrc(pictureUrl);
+      } else {
+        setProfileImageSrc(ProfileDefaultIcon);
       }
     }
-  }, [user]);
+  }, [user, ProfileDefaultIcon]);
 
   const [notification, setNotification] = useState<{
     message: string;

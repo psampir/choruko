@@ -1,5 +1,5 @@
 import "./CreateHousehold.scss";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import NavbarMobile from "../../../components/NavbarMobile";
@@ -45,6 +45,12 @@ function CreateHousehold() {
       setNotification({ message: "", isVisible: false, type: "success" });
     }, 3000);
   };
+
+  useEffect(() => {
+    if (!selectedImage) {
+      setImagePreview(householdIcon);
+    }
+  }, [householdIcon, selectedImage]);
 
   // Trigger file input click for image selection
   const handleImageSelect = () => {
