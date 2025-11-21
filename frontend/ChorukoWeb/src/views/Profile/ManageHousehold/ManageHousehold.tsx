@@ -203,11 +203,18 @@ const ManageHousehold: React.FC = () => {
   const handleButtonClick = (action: ButtonAction) => {
     setClickedButton(action);
     if (action !== "define_activity") {
-      setOpenPopup(true);
-      // Reset selected new admin when opening delegate popup
+      // Check if delegate admin but no other participants
       if (action === "delegate_admin") {
+        const delegateableParticipants = participants.filter(
+          (participant) => participant.id !== user?.id
+        );
+        if (delegateableParticipants.length === 0) {
+          showNotification("No other participants available to delegate admin role", "error");
+          return;
+        }
         setSelectedNewAdmin(null);
       }
+      setOpenPopup(true);
     } else {
       navigate("/activities");
     }
@@ -462,32 +469,27 @@ const ManageHousehold: React.FC = () => {
               <p className="warning-text">
                 You will be logged out after delegating admin rights.
               </p>
-              {delegateableParticipants &&
-              delegateableParticipants.length > 0 ? (
-                <div className="participants-list">
-                  <div className="participants-list__header">PARTICIPANTS</div>
-                  {delegateableParticipants.map((participant, index) => (
-                    <div
-                      className="participant__delegate-admin"
-                      key={participant.id}
-                      id={String(index)}
-                      onClick={(e) => handleSelectNewAdmin(participant, e)}
-                    >
-                      <img
-                        src={
-                          getProfilePictureUrl(
-                            participant.profilePicturePath
-                          ) || profileDefaultIcon
-                        }
-                        alt={`${participant.firstName} ${participant.lastName}`}
-                      />
-                      <p>{`${participant.firstName} ${participant.lastName}`}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p>No other participants available to delegate admin role</p>
-              )}
+              <div className="participants-list">
+                <div className="participants-list__header">PARTICIPANTS</div>
+                {delegateableParticipants.map((participant, index) => (
+                  <div
+                    className="participant__delegate-admin"
+                    key={participant.id}
+                    id={String(index)}
+                    onClick={(e) => handleSelectNewAdmin(participant, e)}
+                  >
+                    <img
+                      src={
+                        getProfilePictureUrl(
+                          participant.profilePicturePath
+                        ) || profileDefaultIcon
+                      }
+                      alt={`${participant.firstName} ${participant.lastName}`}
+                    />
+                    <p>{`${participant.firstName} ${participant.lastName}`}</p>
+                  </div>
+                ))}
+              </div>
               <Button
                 variant="primary"
                 onClick={handleDelegateAdmin}
