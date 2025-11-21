@@ -1,1 +1,1 @@
-export { default } from "./NotificationBar";
+export { default } from "./NotificationBarPortal";
