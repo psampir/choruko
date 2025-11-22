@@ -117,7 +117,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax; // Changed from None to Lax for development
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Allow HTTP in development
-    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
 
     // Configure events to return proper status codes
