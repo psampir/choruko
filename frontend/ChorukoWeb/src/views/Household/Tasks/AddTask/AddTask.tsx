@@ -8,7 +8,7 @@ import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import NavbarMobile from "../../../../components/NavbarMobile";
 import Popup from "../../../../components/Popup/Popup";
-import ErrorMessage from "../../../../components/ErrorMessage";
+import NotificationBar from "../../../../components/NotificationBar";
 import { useThemeDir } from "../../../../utils/iconUtils";
 import { getProfilePictureUrl } from "../../../../utils/imageUtils";
 
@@ -230,10 +230,13 @@ const AddTask: React.FC = () => {
     <div className="add-task">
       <NavbarMobile />
 
-      <ErrorMessage
+      <NotificationBar
         message={errorMessage}
+        isVisible={!!errorMessage}
+        type="error"
         onClose={() => setErrorMessage("")}
-        variant="overlay"
+        autoDismiss={true}
+        dismissTime={5000}
       />
 
       <div className="add-task__container">

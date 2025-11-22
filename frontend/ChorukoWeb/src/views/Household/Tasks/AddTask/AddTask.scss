@@ -39,8 +39,8 @@
     justify-content: center;
 
     img {
-      width: 33px;
-      height: 33px;
+      width: 46px;
+      height: 46px;
     }
   }
 
@@ -48,6 +48,9 @@
   &__title {
     margin: 0;
     color: var(--color-text-primary);
+    text-align: center;
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-semibold);
   }
 
   &__section {

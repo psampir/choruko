@@ -67,7 +67,6 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
       } else {
         // If backend indicates user has no household, refresh auth state
         if (result.message?.includes("not part of any household")) {
-          console.log("Backend indicates user has no household, refreshing auth state...");
           await checkAuth(false);
         }
         setError(result.message || "Failed to fetch household info");

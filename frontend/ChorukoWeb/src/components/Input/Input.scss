@@ -71,15 +71,6 @@
       width: 0;
       height: 0;
     }
-
-    // Webkit (Chrome/Safari/Edge)
-    &::-webkit-credentials-auto-fill-button,
-    &::-webkit-textfield-decoration-container {
-      visibility: hidden;
-      pointer-events: none;
-      position: absolute;
-      right: 0;
-    }
   }
 
   // Email input variant (inherits from primary)
@@ -130,8 +121,7 @@
       user-select: none;
 
       :root[data-theme="dark"] & {
-        background: url("../../assets/svg/dark/eye.svg") no-repeat
-          center/contain;
+        background: url("../../assets/svg/dark/eye.svg") no-repeat center/contain;
       }
 
       // Remove any focus styles
@@ -175,6 +165,7 @@
         object-fit: contain;
       }
     }
+
     .input__currency-symbol {
       background: none;
       color: #55ad9b;
@@ -212,13 +203,11 @@
     }
 
     // When password is visible, show closed eye
-    .input--password.active + .input__eye {
-      background: url("../../assets/svg/light/close-eye.svg") no-repeat
-        center/contain;
+    .input--password.active+.input__eye {
+      background: url("../../assets/svg/light/close-eye.svg") no-repeat center/contain;
 
       :root[data-theme="dark"] & {
-        background: url("../../assets/svg/dark/close-eye.svg") no-repeat
-          center/contain;
+        background: url("../../assets/svg/dark/close-eye.svg") no-repeat center/contain;
       }
     }
   }

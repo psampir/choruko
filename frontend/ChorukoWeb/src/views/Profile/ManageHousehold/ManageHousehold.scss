@@ -20,49 +20,6 @@ body {
   }
 }
 
-// Styles for iOS devices with a notch
-:root.is-notch .back-arrow {
-  top: calc(90px + env(safe-area-inset-top));
-}
-
-.notification-bar {
-  position: fixed;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  top: 0;
-  left: 0;
-  right: 0;
-  color: var(--color-background);
-  text-align: center;
-  padding: var(--spacing-lg);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-body);
-  z-index: 1111;
-  height: 70px;
-
-  transform: translateY(-100%);
-  transition: transform 0.3s ease-in-out;
-
-  &--visible {
-    transform: translateY(0);
-  }
-
-  &--error {
-    background: var(--color-error-bg) !important;
-  }
-
-  &--success {
-    background: var(--color-secondary) !important;
-  }
-
-  span {
-    display: block;
-    color: var(--color-background);
-    text-align: center;
-    font-size: var(--font-size-h5);
-  }
-}
 
 .manage-household {
   background: var(--color-background);

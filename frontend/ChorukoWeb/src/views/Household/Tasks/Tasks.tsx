@@ -4,7 +4,7 @@ import "./Tasks.scss";
 import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
-import ErrorMessage from "../../../components/ErrorMessage";
+import NotificationBar from "../../../components/NotificationBar";
 import ViewModeToggle from "../../../components/ViewModeToggle/ViewModeToggle";
 import CollapsibleSection from "../../../components/CollapsibleSection/CollapsibleSection";
 import { useUser } from "../../../contexts/UserContext";
@@ -247,9 +247,8 @@ const Tasks: React.FC = () => {
 
     return (
       <div
-        className={`task ${isFirst ? "task--first" : ""} ${
-          isLast ? "task--last" : ""
-        }`}
+        className={`task ${isFirst ? "task--first" : ""} ${isLast ? "task--last" : ""
+          }`}
         key={task.id}
         onClick={() => {
           // Find the corresponding backend task using the stored GUID
@@ -274,9 +273,8 @@ const Tasks: React.FC = () => {
                   {visibleAvatars.map((avatar, idx) => (
                     <img
                       key={idx}
-                      className={`task__assignee-avatar ${
-                        avatar.isActive ? "task__assignee-avatar--active" : ""
-                      }`}
+                      className={`task__assignee-avatar ${avatar.isActive ? "task__assignee-avatar--active" : ""
+                        }`}
                       src={avatar.src}
                       alt={`assignee ${idx + 1}`}
                     />
@@ -320,10 +318,13 @@ const Tasks: React.FC = () => {
 
   return (
     <div className="tasks">
-      <ErrorMessage
+      <NotificationBar
         message={errorMessage}
         onClose={() => setErrorMessage("")}
-        variant="overlay"
+        type="error"
+        isVisible={!!errorMessage}
+        autoDismiss={true}
+        dismissTime={5000}
       />
 
       <div className="tasks__header">
@@ -358,70 +359,70 @@ const Tasks: React.FC = () => {
           />
 
           <div className="tasks__content">
-          {/* Overtime Section - only show if there are overtime tasks */}
-          {overtimeTasks.length > 0 && (
+            {/* Overtime Section - only show if there are overtime tasks */}
+            {overtimeTasks.length > 0 && (
+              <CollapsibleSection
+                title="OVERTIME"
+                isCollapsed={collapsedSections.overtime}
+                onToggle={() => toggleSection("overtime")}
+                variant="error"
+              >
+                <div className="tasks__list">
+                  {overtimeTasks.map((task, index) =>
+                    renderTask(
+                      task,
+                      index === overtimeTasks.length - 1,
+                      index === 0
+                    )
+                  )}
+                </div>
+              </CollapsibleSection>
+            )}
+
+            {/* To-Do Section */}
             <CollapsibleSection
-              title="OVERTIME"
-              isCollapsed={collapsedSections.overtime}
-              onToggle={() => toggleSection("overtime")}
-              variant="error"
+              title="TO DO"
+              isCollapsed={collapsedSections.todo}
+              onToggle={() => toggleSection("todo")}
+              variant="default"
             >
               <div className="tasks__list">
-                {overtimeTasks.map((task, index) =>
-                  renderTask(
-                    task,
-                    index === overtimeTasks.length - 1,
-                    index === 0
+                {todoTasks.length > 0 ? (
+                  todoTasks.map((task, index) =>
+                    renderTask(
+                      task,
+                      index === todoTasks.length - 1,
+                      index === 0
+                    )
                   )
+                ) : (
+                  <p className="tasks__empty-message">No tasks to do</p>
                 )}
               </div>
             </CollapsibleSection>
-          )}
 
-          {/* To-Do Section */}
-          <CollapsibleSection
-            title="TO DO"
-            isCollapsed={collapsedSections.todo}
-            onToggle={() => toggleSection("todo")}
-            variant="default"
-          >
-            <div className="tasks__list">
-              {todoTasks.length > 0 ? (
-                todoTasks.map((task, index) =>
-                  renderTask(
-                    task,
-                    index === todoTasks.length - 1,
-                    index === 0
+            {/* Done Section */}
+            <CollapsibleSection
+              title="DONE"
+              isCollapsed={collapsedSections.done}
+              onToggle={() => toggleSection("done")}
+              variant="default"
+            >
+              <div className="tasks__list">
+                {doneTasks.length > 0 ? (
+                  doneTasks.map((task, index) =>
+                    renderTask(
+                      task,
+                      index === doneTasks.length - 1,
+                      index === 0
+                    )
                   )
-                )
-              ) : (
-                <p className="tasks__empty-message">No tasks to do</p>
-              )}
-            </div>
-          </CollapsibleSection>
-
-          {/* Done Section */}
-          <CollapsibleSection
-            title="DONE"
-            isCollapsed={collapsedSections.done}
-            onToggle={() => toggleSection("done")}
-            variant="default"
-          >
-            <div className="tasks__list">
-              {doneTasks.length > 0 ? (
-                doneTasks.map((task, index) =>
-                  renderTask(
-                    task,
-                    index === doneTasks.length - 1,
-                    index === 0
-                  )
-                )
-              ) : (
-                <p className="tasks__empty-message">No completed tasks</p>
-              )}
-            </div>
-          </CollapsibleSection>
-        </div>
+                ) : (
+                  <p className="tasks__empty-message">No completed tasks</p>
+                )}
+              </div>
+            </CollapsibleSection>
+          </div>
         </>
       )}
 
