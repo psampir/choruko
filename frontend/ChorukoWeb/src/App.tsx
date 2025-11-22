@@ -65,160 +65,161 @@ function RootRedirect() {
     return <div className="loading">Loading...</div>;
   }
 
-  return <Navigate to={isAuthenticated ? "/profile" : "/login"} replace />;
+  return <Navigate to={isAuthenticated ? "/leaderboard" : "/login"} replace />;
 }
 
 function AppRoutes() {
   return (
     <Suspense fallback={<div className="loading">Loading...</div>}>
       <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={<AuthContainer />} />
-      <Route path="/signup" element={<AuthContainer />} />
+        {/* Root route - must be first */}
+        <Route path="/" element={<RootRedirect />} />
 
-      {/* Protected routes with layout */}
-      <Route
-        path="/joinOrCreateHousehold"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <JoinOrCreateHousehold onJoinHousehold={() => {}} />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
+        {/* Public routes */}
+        <Route path="/login" element={<AuthContainer />} />
 
-      <Route
-        path="/tasks"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Tasks />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        {/* Protected routes with layout */}
+        <Route
+          path="/joinOrCreateHousehold"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <JoinOrCreateHousehold onJoinHousehold={() => { }} />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/tasks/add"
-        element={
-          <ProtectedRoute>
-            <AddTask />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Tasks />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/invitations"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <Invitations />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/tasks/add"
+          element={
+            <ProtectedRoute>
+              <AddTask />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/createHousehold"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <CreateHousehold />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/invitations"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Invitations />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/expenses"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Settlements />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/createHousehold"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <CreateHousehold />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/settlements"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Settlements />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/expenses"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Settlements />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/settlements/add"
-        element={
-          <ProtectedRoute>
-            <AddSettlement />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/settlements"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Settlements />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/leaderboard"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Leaderboard />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/settlements/add"
+          element={
+            <ProtectedRoute>
+              <AddSettlement />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/manageAccount"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <ManageAccount />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/manageHousehold"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <ManageHousehold />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/leaderboard"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Leaderboard />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/activities"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Activities />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/manageAccount"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <ManageAccount />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manageHousehold"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <ManageHousehold />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Test route for push notifications */}
-      <Route
-        path="/test-notifications"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <TestNotifications />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/activities"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Activities />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Smart default redirect */}
-      <Route path="/" element={<RootRedirect />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Test route for push notifications */}
+        <Route
+          path="/test-notifications"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <TestNotifications />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all for unknown routes */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Suspense>
   );
