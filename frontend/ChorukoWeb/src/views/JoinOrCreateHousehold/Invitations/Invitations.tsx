@@ -179,9 +179,9 @@ function Invitations() {
           ) : invitations.length ? (
             invitations.map((invitation) => (
               <li key={invitation.id}>
-                <img 
-                  src={getProfilePictureUrl(invitation.householdImagePath) || householdDefault} 
-                  alt={invitation.householdName} 
+                <img
+                  src={getProfilePictureUrl(invitation.householdImagePath) || householdDefault}
+                  alt={invitation.householdName}
                 />
                 <h6>{invitation.householdName}</h6>
                 <span
@@ -211,12 +211,12 @@ function Invitations() {
         >
           <>
             <p>Are you sure you want to join this household?</p>
-            <img 
-              src={getProfilePictureUrl(selectedInvitation.householdImagePath) || householdDefault} 
-              alt="Household" 
+            <img
+              src={getProfilePictureUrl(selectedInvitation.householdImagePath) || householdDefault}
+              alt="Household"
             />
             <p>{selectedInvitation.householdName}</p>
-            <p style={{ fontSize: "0.9rem", marginTop: "var(--spacing-sm)" }}>
+            <p>
               Invited by: {selectedInvitation.inviterFirstName}{" "}
               {selectedInvitation.inviterLastName}
             </p>
@@ -241,12 +241,12 @@ function Invitations() {
         >
           <>
             <p>Are you sure you want to decline this invitation?</p>
-            <img 
-              src={getProfilePictureUrl(selectedInvitation.householdImagePath) || householdDefault} 
-              alt="Household" 
+            <img
+              src={getProfilePictureUrl(selectedInvitation.householdImagePath) || householdDefault}
+              alt="Household"
             />
             <p>{selectedInvitation.householdName}</p>
-            <p style={{ fontSize: "0.9rem", marginTop: "var(--spacing-sm)" }}>
+            <p>
               Invited by: {selectedInvitation.inviterFirstName}{" "}
               {selectedInvitation.inviterLastName}
             </p>
