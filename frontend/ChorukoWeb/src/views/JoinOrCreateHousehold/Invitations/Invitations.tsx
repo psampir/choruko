@@ -10,10 +10,6 @@ import householdDefaultLight from "/src/assets/svg/light/householdDefault.svg";
 import householdDefaultDark from "/src/assets/svg/dark/householdDefault.svg";
 import arrowLeftLight from "/src/assets/svg/light/arrow-left.svg";
 import arrowLeftDark from "/src/assets/svg/dark/arrow-left.svg";
-import acceptLight from "/src/assets/svg/light/accept.svg";
-import acceptDark from "/src/assets/svg/dark/accept.svg";
-import declineLight from "/src/assets/svg/light/decline.svg";
-import declineDark from "/src/assets/svg/dark/decline.svg";
 import NavbarMobile from "../../../components/NavbarMobile";
 import Popup from "../../../components/Popup";
 import Button from "../../../components/Button";
@@ -29,13 +25,10 @@ function Invitations() {
     ? householdDefaultDark
     : householdDefaultLight;
   const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
-  const acceptIcon = isDark ? acceptDark : acceptLight;
-  const declineIcon = isDark ? declineDark : declineLight;
 
   const [invitations, setInvitations] = useState<InvitationResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState<boolean>(false);
-  const [declinePopup, setDeclinePopup] = useState<boolean>(false);
   const [selectedInvitation, setSelectedInvitation] =
     useState<InvitationResponse | null>(null);
 
@@ -83,7 +76,7 @@ function Invitations() {
     loadInvitations();
   }, []);
 
-  const acceptInvitation = (invitation: InvitationResponse) => {
+  const openInvitationPopup = (invitation: InvitationResponse) => {
     setSelectedInvitation(invitation);
     setPopup(true);
   };
@@ -120,13 +113,7 @@ function Invitations() {
 
   const handleCancel = () => {
     setPopup(false);
-    setDeclinePopup(false);
     setSelectedInvitation(null);
-  };
-
-  const declineInvitationClick = (invitation: InvitationResponse) => {
-    setSelectedInvitation(invitation);
-    setDeclinePopup(true);
   };
 
   const handleDecline = async () => {
@@ -142,7 +129,7 @@ function Invitations() {
         setInvitations((prev) =>
           prev.filter((inv) => inv.id !== selectedInvitation.id)
         );
-        setDeclinePopup(false);
+        setPopup(false);
         setSelectedInvitation(null);
       } else {
         showNotification(
@@ -166,36 +153,24 @@ function Invitations() {
       />
       <NavbarMobile />
       <img
-        className="invitations back-arrow"
+        className="back-arrow"
         src={arrowLeft}
         alt="back-arrow"
         onClick={() => navigate(-1)}
       />
       <h2>Invitations</h2>
       <div className="invitations-list">
-        <ul className="scrollable-content">
+        <ul>
           {loading ? (
             <li>Loading invitations...</li>
           ) : invitations.length ? (
             invitations.map((invitation) => (
-              <li key={invitation.id}>
+              <li key={invitation.id} onClick={() => openInvitationPopup(invitation)}>
                 <img
                   src={getProfilePictureUrl(invitation.householdImagePath) || householdDefault}
                   alt={invitation.householdName}
                 />
                 <h6>{invitation.householdName}</h6>
-                <span
-                  onClick={() => acceptInvitation(invitation)}
-                  className="accept"
-                >
-                  <img src={acceptIcon} alt="Accept" />
-                </span>
-                <span
-                  onClick={() => declineInvitationClick(invitation)}
-                  className="decline"
-                >
-                  <img src={declineIcon} alt="Decline" />
-                </span>
               </li>
             ))
           ) : (
@@ -210,7 +185,7 @@ function Invitations() {
           onClose={handleCancel}
         >
           <>
-            <p>Are you sure you want to join this household?</p>
+            <p>Do you want to join this household?</p>
             <img
               src={getProfilePictureUrl(selectedInvitation.householdImagePath) || householdDefault}
               alt="Household"
@@ -223,43 +198,22 @@ function Invitations() {
             <p className="warning-text">
               You will be logged out after joining to update your access permissions.
             </p>
-            <Button
-              variant="primary"
-              onClick={handleAccept}
-              disabled={loading}
-            >
-              {loading ? "Joining..." : "Join"}
-            </Button>
-          </>
-        </Popup>
-      )}
-      {declinePopup && selectedInvitation && (
-        <Popup
-          variant="red"
-          title=""
-          onClose={handleCancel}
-        >
-          <>
-            <p>Are you sure you want to decline this invitation?</p>
-            <img
-              src={getProfilePictureUrl(selectedInvitation.householdImagePath) || householdDefault}
-              alt="Household"
-            />
-            <p>{selectedInvitation.householdName}</p>
-            <p>
-              Invited by: {selectedInvitation.inviterFirstName}{" "}
-              {selectedInvitation.inviterLastName}
-            </p>
-            <p className="warning-text">
-              This invitation will be permanently removed.
-            </p>
-            <Button
-              variant="red"
-              onClick={handleDecline}
-              disabled={loading}
-            >
-              {loading ? "Declining..." : "Decline"}
-            </Button>
+            <div style={{ display: "flex", gap: "var(--spacing-md)", marginTop: "var(--spacing-md)" }}>
+              <Button
+                variant="primary"
+                onClick={handleAccept}
+                disabled={loading}
+              >
+                {loading ? "Accepting..." : "Accept"}
+              </Button>
+              <Button
+                variant="red"
+                onClick={handleDecline}
+                disabled={loading}
+              >
+                {loading ? "Declining..." : "Decline"}
+              </Button>
+            </div>
           </>
         </Popup>
       )}
