@@ -4,12 +4,8 @@ import { useUser } from "../../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import "./JoinOrCreateHousehold.scss";
 
-interface LoginProps {
-  onJoinHousehold: () => void;
-}
-
 // Initial household setup - choose between joining or creating
-const JoinOrCreateHousehold: React.FC<LoginProps> = ({ onJoinHousehold }) => {
+const JoinOrCreateHousehold: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
 
@@ -23,7 +19,7 @@ const JoinOrCreateHousehold: React.FC<LoginProps> = ({ onJoinHousehold }) => {
       )}
 
       <div className="join-or-create-household__buttons">
-        <Button variant="primary" onClick={onJoinHousehold}>
+        <Button variant="primary" onClick={() => navigate("/invitations")}>
           Join Household
         </Button>
         <Button variant="primary" onClick={() => navigate("/createHousehold")}>
