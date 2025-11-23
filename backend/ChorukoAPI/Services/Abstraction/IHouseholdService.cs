@@ -17,4 +17,5 @@ public interface IHouseholdService
     Task<ServiceResponse<OperationResultDto>> LeaveHouseholdAsync(string userId);
     Task<ServiceResponse<OperationResultDto>> ChangeHouseholdPictureAsync(ChangeHouseholdPictureRequest request, string userId);
     Task<ServiceResponse<OperationResultDto>> SetHouseholdAdminAsync(string userId, string newAdminId);
+    Task<ServiceResponse<OperationResultDto>> ChangeHouseholdCurrencyAsync(ChangeCurrencyRequest request, string userId);
 }

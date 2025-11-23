@@ -58,6 +58,11 @@ namespace ChorukoAPI.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(36)");
 
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("varchar(3)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
