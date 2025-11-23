@@ -84,7 +84,7 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <AppLayout>
-                <JoinOrCreateHousehold onJoinHousehold={() => { }} />
+                <JoinOrCreateHousehold />
               </AppLayout>
             </ProtectedRoute>
           }
