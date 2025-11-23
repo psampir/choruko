@@ -58,9 +58,9 @@ public class InvitationService(DataContext context,
                 url = "/"
             });
 
-            if (userEmail != userToAdd.Id)
+            if (userId != userToAdd.Id)
             {
-                await pushNotificationService.SendNotificationAsync(userEmail, payload);
+                await pushNotificationService.SendNotificationAsync(userToAdd.Id, payload);
             }
 
 
