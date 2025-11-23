@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Invitations.scss";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
+import invitationService from "../../../services/invitationService";
+import type { InvitationResponse } from "../../../services/invitationService";
+import { useAuth } from "../../../contexts/AuthContext";
 import householdDefaultLight from "/src/assets/svg/light/householdDefault.svg";
 import householdDefaultDark from "/src/assets/svg/dark/householdDefault.svg";
 import arrowLeftLight from "/src/assets/svg/light/arrow-left.svg";
@@ -12,16 +15,13 @@ import declineLight from "/src/assets/svg/light/decline.svg";
 import declineDark from "/src/assets/svg/dark/decline.svg";
 import NavbarMobile from "../../../components/NavbarMobile";
 import Popup from "../../../components/Popup";
-interface Invitation {
-  id: number;
-  name: string;
-  image: string;
-}
+import NotificationBar from "../../../components/NotificationBar";
 
 // Display and manage household invitations (accept/decline)
 function Invitations() {
   const navigate = useNavigate();
   const isDark = useIsDarkTheme();
+  const { checkAuth } = useAuth();
 
   const householdDefault = isDark
     ? householdDefaultDark
@@ -30,56 +30,88 @@ function Invitations() {
   const acceptIcon = isDark ? acceptDark : acceptLight;
   const declineIcon = isDark ? declineDark : declineLight;
 
-  // Initialize with mock invitation
-  const [invitations, setInvitations] = useState<Invitation[]>([
-    {
-      id: Date.now(),
-      name: "New Invitation",
-      image: householdDefault,
-    },
-  ]);
-
-  // Update invitation images when theme changes
-  useEffect(() => {
-    setInvitations((prev) =>
-      prev.map((inv) => ({
-        ...inv,
-        image: householdDefault,
-      }))
-    );
-  }, [householdDefault]);
-
+  const [invitations, setInvitations] = useState<InvitationResponse[]>([]);
+  const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState<boolean>(false);
-  const [selectedInvitation, setSelectedInvitation] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
+  const [selectedInvitation, setSelectedInvitation] =
+    useState<InvitationResponse | null>(null);
 
-  // Function to add a new invitation (kept for future use)
-  // const addInvitation = () => {
-  //   const invitation = {
-  //     id: Date.now() + Math.random(), // Better unique ID
-  //     name: "New Invitation",
-  //     image: householdDefault,
-  //   };
-  //   setInvitations((prev) => [...prev, invitation]);
-  // };
+  const [notification, setNotification] = useState<{
+    message: string;
+    isVisible: boolean;
+    type: "success" | "error";
+  }>({
+    message: "",
+    isVisible: false,
+    type: "success",
+  });
 
-  // Show confirmation popup before accepting
-  const acceptInvitation = (invitation: { id: number; name: string }) => {
+  const showNotification = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
+    setNotification({ message, isVisible: true, type });
+
+    setTimeout(() => {
+      setNotification({ message: "", isVisible: false, type: "success" });
+    }, 3000);
+  };
+
+  const loadInvitations = async () => {
+    setLoading(true);
+    try {
+      const result = await invitationService.getAllInvitations();
+      if (result.success && result.data) {
+        setInvitations(result.data);
+      } else {
+        showNotification(
+          result.message || "Failed to load invitations",
+          "error"
+        );
+      }
+    } catch (error) {
+      showNotification("An unexpected error occurred", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadInvitations();
+  }, []);
+
+  const acceptInvitation = (invitation: InvitationResponse) => {
     setSelectedInvitation(invitation);
     setPopup(true);
   };
 
-  // Remove invitation and close popup on accept
-  const handleAccept = () => {
-    if (selectedInvitation) {
-      setInvitations((prev) =>
-        prev.filter((inv) => inv.id !== selectedInvitation.id)
+  const handleAccept = async () => {
+    if (!selectedInvitation) return;
+
+    setLoading(true);
+    try {
+      const result = await invitationService.acceptInvitation(
+        selectedInvitation.id
       );
-      setPopup(false);
-      setSelectedInvitation(null);
-      // TODO: Add backend logic to join household
+      if (result.success) {
+        showNotification("Invitation accepted successfully", "success");
+        setPopup(false);
+        setSelectedInvitation(null);
+        // Refresh auth state and redirect to home
+        await checkAuth(false);
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      } else {
+        showNotification(
+          result.message || "Failed to accept invitation",
+          "error"
+        );
+      }
+    } catch (error) {
+      showNotification("An unexpected error occurred", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,12 +120,33 @@ function Invitations() {
     setSelectedInvitation(null);
   };
 
-  const declineInvitation = (id: number) => {
-    setInvitations((prev) => prev.filter((invitation) => invitation.id !== id));
+  const declineInvitation = async (invitationId: string) => {
+    setLoading(true);
+    try {
+      const result = await invitationService.declineInvitation(invitationId);
+      if (result.success) {
+        showNotification("Invitation declined", "success");
+        setInvitations((prev) => prev.filter((inv) => inv.id !== invitationId));
+      } else {
+        showNotification(
+          result.message || "Failed to decline invitation",
+          "error"
+        );
+      }
+    } catch (error) {
+      showNotification("An unexpected error occurred", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="invitations">
+      <NotificationBar
+        message={notification.message}
+        isVisible={notification.isVisible}
+        type={notification.type}
+      />
       <NavbarMobile />
       <img
         className="invitations back-arrow"
@@ -104,18 +157,15 @@ function Invitations() {
       <h2>Invitations</h2>
       <div className="invitations-list">
         <ul className="scrollable-content">
-          {invitations.length ? (
+          {loading ? (
+            <li>Loading invitations...</li>
+          ) : invitations.length ? (
             invitations.map((invitation) => (
               <li key={invitation.id}>
-                <img src={invitation.image} alt={invitation.name} />
-                <h6>{invitation.name}</h6>
+                <img src={householdDefault} alt={invitation.householdName} />
+                <h6>{invitation.householdName}</h6>
                 <span
-                  onClick={() =>
-                    acceptInvitation({
-                      id: invitation.id,
-                      name: invitation.name,
-                    })
-                  }
+                  onClick={() => acceptInvitation(invitation)}
                   className="accept"
                 >
                   <img src={acceptIcon} alt="Accept" />
@@ -140,9 +190,10 @@ function Invitations() {
           onClose={handleCancel}
           actions={[
             {
-              label: "Join",
+              label: loading ? "Joining..." : "Join",
               onClick: handleAccept,
               variant: "primary",
+              disabled: loading,
             },
           ]}
         >
@@ -154,7 +205,11 @@ function Invitations() {
                 className="household-image"
               />
             </div>
-            <h3 className="household-name">Home1</h3>
+            <h3 className="household-name">{selectedInvitation.householdName}</h3>
+            <p>
+              Invited by: {selectedInvitation.inviterFirstName}{" "}
+              {selectedInvitation.inviterLastName}
+            </p>
           </div>
         </Popup>
       )}
