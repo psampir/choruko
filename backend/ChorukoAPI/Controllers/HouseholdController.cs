@@ -112,6 +112,27 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         return result.ToApiResponse("Rename household");
     }
     
+    [HttpPatch("change-currency")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> ChangeCurrency([FromBody] ChangeCurrencyRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.ChangeHouseholdCurrencyAsync(request, userId);
+
+        return result.ToApiResponse("Change household currency");
+    }
+    
     [HttpPost("leave")]
     [Authorize(Roles = "HouseholdAdmin,Participant")]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> LeaveHousehold()
