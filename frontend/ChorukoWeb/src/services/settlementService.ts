@@ -19,6 +19,8 @@ export interface SettlementListItem {
   description: string;
   amount: number;
   status: "Pending" | "Completed";
+  settledUserIds?: string[];
+  unsettledUserIds?: string[];
 }
 
 // Response from single settlement endpoint (with users list)

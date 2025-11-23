@@ -17,7 +17,9 @@ public class SettlementWithoutUsersMapper(IMapper<User, UserInfoResponse> userMa
             DateOfCreation = source.DateOfCreation,
             Description = source.Description,
             Amount = source.Amount,
-            Status = source.Status
+            Status = source.Status,
+            SettledUserIds = source.SettledUsers?.Select(u => u.Id).ToList(),
+            UnsettledUserIds = source.UnsettledUsers?.Select(u => u.Id).ToList()
         };
     }
 }

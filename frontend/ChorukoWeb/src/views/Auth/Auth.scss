@@ -47,9 +47,12 @@
         right: 10px;
         width: 24px;
         height: 24px;
-        background: url("../../assets/svg/light/close-icon.svg") no-repeat
-          center/contain;
+        background: url("../../assets/svg/light/close-icon.svg") no-repeat center/contain;
         cursor: pointer;
+
+        :root[data-theme="dark"] & {
+          background: url("../../assets/svg/dark/close-icon.svg") no-repeat center/contain;
+        }
       }
 
       .login__popup-message {
@@ -141,14 +144,14 @@
       font-size: 0.875rem;
     }
   }
+}
 
-  &__error {
-    color: var(--color-text-primary);
-    background-color: var(--color-error-bg-secondary);
-    border: 1px solid var(--color-error-bg);
-    padding: 12px;
-    font-size: 14px;
-    width: 100%;
-    text-align: center;
-  }
+.version {
+  position: absolute;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--color-text-secondary);
+  opacity: 1;
 }

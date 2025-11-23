@@ -102,16 +102,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      console.log("🔐 Starting login process...");
       const result = await authService.login(email, password);
-      console.log("📨 Login response:", result);
 
       if (result.success) {
-        console.log("✅ Login successful, waiting before checking auth...");
+
         // Wait a moment for the cookie to be set properly
         await new Promise(resolve => setTimeout(resolve, 100));
-
-        console.log("🔍 Now checking authentication status...");
         const authResult = await authService.checkStatus();
 
         if (authResult.authenticated && authResult.user) {
@@ -139,27 +135,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Register function
   const register = async (userData: RegisterData) => {
-    console.log("🔄 AuthContext register called with:");
     try {
       setLoading(true);
       setError(null);
 
-      console.log("📡 Calling authService.register...");
       const result = await authService.register(userData);
-      console.log("📨 AuthService response:", result);
 
       if (result.success) {
-        console.log("✅ Registration successful in AuthContext");
         // Optionally auto-login after registration
         await login(userData.email, userData.password);
         return { success: true, message: result.message };
       } else {
-        console.log("❌ Registration failed:", result.message);
         setError(result.message || "Registration failed");
         return { success: false, message: result.message };
       }
     } catch (error) {
-      console.error("💥 AuthContext register error:", error);
       const errorMessage = "An unexpected error occurred during registration";
       setError(errorMessage);
       return { success: false, message: errorMessage };
@@ -181,18 +171,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     try {
       setLoading(true);
-      
+
       // Call all registered callbacks before logout
-      console.log('🔄 Running pre-logout callbacks...');
       const callbacks = Array.from(beforeLogoutCallbacks);
       await Promise.all(callbacks.map(cb => Promise.resolve(cb())));
-      console.log('✅ Pre-logout callbacks completed');
-      
       await authService.logout();
       setUser(null);
       setError(null);
 
-      // Optionally redirect to login page
       // window.location.href = '/';
     } catch (error) {
       console.error("Logout error:", error);

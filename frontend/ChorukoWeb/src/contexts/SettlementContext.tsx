@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { useHousehold } from "./HouseholdContext";
 import settlementService from "../services/settlementService";
@@ -43,6 +43,7 @@ export const SettlementProvider: React.FC<SettlementProviderProps> = ({ children
   const [settlements, setSettlements] = useState<SettlementListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasDataRef = useRef(false);
 
   // Clear error function
   const clearError = () => {
@@ -53,25 +54,32 @@ export const SettlementProvider: React.FC<SettlementProviderProps> = ({ children
   const refreshSettlements = useCallback(async () => {
     if (!householdInfo?.id) {
       setSettlements([]);
+      hasDataRef.current = false;
       return;
     }
 
     try {
-      setLoading(true);
+      // Only show loading state if we don't have data yet
+      if (!hasDataRef.current) {
+        setLoading(true);
+      }
       setError(null);
 
       const result = await settlementService.getAllSettlements(householdInfo.id);
 
       if (result.success && result.data) {
         setSettlements(result.data);
+        hasDataRef.current = true;
       } else {
         setError(result.message || "Failed to fetch settlements");
         setSettlements([]);
+        hasDataRef.current = false;
       }
     } catch (err) {
       console.error("Failed to fetch settlements:", err);
       setError("Failed to fetch settlements");
       setSettlements([]);
+      hasDataRef.current = false;
     } finally {
       setLoading(false);
     }

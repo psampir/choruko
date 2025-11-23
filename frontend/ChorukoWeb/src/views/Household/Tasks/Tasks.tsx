@@ -4,7 +4,9 @@ import "./Tasks.scss";
 import Button from "../../../components/Button";
 import BottomNav from "../../../components/BottomNav/BottomNav";
 import Popup from "../../../components/Popup/Popup";
-import ErrorMessage from "../../../components/ErrorMessage";
+import NotificationBar from "../../../components/NotificationBar";
+import ViewModeToggle from "../../../components/ViewModeToggle/ViewModeToggle";
+import CollapsibleSection from "../../../components/CollapsibleSection/CollapsibleSection";
 import { useUser } from "../../../contexts/UserContext";
 import { useTask } from "../../../contexts/TaskContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
@@ -72,6 +74,7 @@ const Tasks: React.FC = () => {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [viewMode, setViewMode] = useState<"all" | "my">("my");
 
   // Classify task as overtime/todo/done based on completion status and deadline
   const determineTaskStatus = useCallback(
@@ -210,9 +213,23 @@ const Tasks: React.FC = () => {
     }
   };
 
-  const overtimeTasks = tasks.filter((task) => task.status === "overtime");
-  const todoTasks = tasks.filter((task) => task.status === "todo");
-  const doneTasks = tasks.filter((task) => task.status === "done");
+  // Filter tasks: "my" shows user involvement, "all" shows everything
+  const getFilteredTasks = (taskList: Task[]) => {
+    if (viewMode === "all") {
+      return taskList;
+    }
+    // "my" view - show only tasks where user is creator or assignee
+    if (!user) return [];
+    return taskList.filter(
+      (task) =>
+        task.author?.name === `${user.firstName} ${user.lastName}` ||
+        task.assignees.some(a => a.name === `${user.firstName} ${user.lastName}`)
+    );
+  };
+
+  const overtimeTasks = getFilteredTasks(tasks.filter((task) => task.status === "overtime"));
+  const todoTasks = getFilteredTasks(tasks.filter((task) => task.status === "todo"));
+  const doneTasks = getFilteredTasks(tasks.filter((task) => task.status === "done"));
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedBackendTask, setSelectedBackendTask] =
@@ -230,9 +247,8 @@ const Tasks: React.FC = () => {
 
     return (
       <div
-        className={`task ${isFirst ? "task--first" : ""} ${
-          isLast ? "task--last" : ""
-        }`}
+        className={`task ${isFirst ? "task--first" : ""} ${isLast ? "task--last" : ""
+          }`}
         key={task.id}
         onClick={() => {
           // Find the corresponding backend task using the stored GUID
@@ -257,9 +273,8 @@ const Tasks: React.FC = () => {
                   {visibleAvatars.map((avatar, idx) => (
                     <img
                       key={idx}
-                      className={`task__assignee-avatar ${
-                        avatar.isActive ? "task__assignee-avatar--active" : ""
-                      }`}
+                      className={`task__assignee-avatar ${avatar.isActive ? "task__assignee-avatar--active" : ""
+                        }`}
                       src={avatar.src}
                       alt={`assignee ${idx + 1}`}
                     />
@@ -303,10 +318,13 @@ const Tasks: React.FC = () => {
 
   return (
     <div className="tasks">
-      <ErrorMessage
+      <NotificationBar
         message={errorMessage}
         onClose={() => setErrorMessage("")}
-        variant="overlay"
+        type="error"
+        isVisible={!!errorMessage}
+        autoDismiss={true}
+        dismissTime={5000}
       />
 
       <div className="tasks__header">
@@ -332,61 +350,42 @@ const Tasks: React.FC = () => {
       )}
 
       {!loading && !error && (
-        <div className="tasks__content">
-          {/* Overtime Section */}
-          <div
-            className={`tasks__section tasks__section--overtime ${
-              collapsedSections.overtime ? "tasks__section--collapsed" : ""
-            }`}
-          >
-            <h2
-              className="tasks__section-title"
-              onClick={() => toggleSection("overtime")}
-            >
-              OVERTIME
-            </h2>
-            <span
-              className="dropdown__arrow"
-              onClick={() => toggleSection("overtime")}
-            >
-              &#9660;
-            </span>
-            {!collapsedSections.overtime && (
-              <div className="tasks__list">
-                {overtimeTasks.length > 0 ? (
-                  overtimeTasks.map((task, index) =>
+        <>
+          <ViewModeToggle
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            myLabel="My Tasks"
+            allLabel="All Tasks"
+          />
+
+          <div className="tasks__content">
+            {/* Overtime Section - only show if there are overtime tasks */}
+            {overtimeTasks.length > 0 && (
+              <CollapsibleSection
+                title="OVERTIME"
+                isCollapsed={collapsedSections.overtime}
+                onToggle={() => toggleSection("overtime")}
+                variant="error"
+              >
+                <div className="tasks__list">
+                  {overtimeTasks.map((task, index) =>
                     renderTask(
                       task,
                       index === overtimeTasks.length - 1,
                       index === 0
                     )
-                  )
-                ) : (
-                  <p className="tasks__empty-message">No overtime tasks</p>
-                )}
-              </div>
+                  )}
+                </div>
+              </CollapsibleSection>
             )}
-          </div>
 
-          {/* To-Do Section */}
-          <div
-            className={`tasks__section tasks__section--todo ${
-              collapsedSections.todo ? "tasks__section--collapsed" : ""
-            }`}
-          >
-            <h2
-              className="tasks__section-title"
-              onClick={() => toggleSection("todo")}
+            {/* To-Do Section */}
+            <CollapsibleSection
+              title="TO DO"
+              isCollapsed={collapsedSections.todo}
+              onToggle={() => toggleSection("todo")}
+              variant="default"
             >
-              TO DO
-            </h2>
-            <span
-              className="dropdown__arrow"
-              onClick={() => toggleSection("todo")}
-            >
-              &#9660;
-            </span>
-            {!collapsedSections.todo && (
               <div className="tasks__list">
                 {todoTasks.length > 0 ? (
                   todoTasks.map((task, index) =>
@@ -400,28 +399,15 @@ const Tasks: React.FC = () => {
                   <p className="tasks__empty-message">No tasks to do</p>
                 )}
               </div>
-            )}
-          </div>
+            </CollapsibleSection>
 
-          {/* Done Section */}
-          <div
-            className={`tasks__section tasks__section--done ${
-              collapsedSections.done ? "tasks__section--collapsed" : ""
-            }`}
-          >
-            <h2
-              className="tasks__section-title"
-              onClick={() => toggleSection("done")}
+            {/* Done Section */}
+            <CollapsibleSection
+              title="DONE"
+              isCollapsed={collapsedSections.done}
+              onToggle={() => toggleSection("done")}
+              variant="default"
             >
-              DONE
-            </h2>
-            <span
-              className="dropdown__arrow"
-              onClick={() => toggleSection("done")}
-            >
-              &#9660;
-            </span>
-            {!collapsedSections.done && (
               <div className="tasks__list">
                 {doneTasks.length > 0 ? (
                   doneTasks.map((task, index) =>
@@ -435,9 +421,9 @@ const Tasks: React.FC = () => {
                   <p className="tasks__empty-message">No completed tasks</p>
                 )}
               </div>
-            )}
+            </CollapsibleSection>
           </div>
-        </div>
+        </>
       )}
 
       {/* Task Details Popup */}

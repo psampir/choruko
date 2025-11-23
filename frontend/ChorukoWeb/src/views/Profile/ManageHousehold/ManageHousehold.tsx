@@ -11,6 +11,7 @@ import "./ManageHousehold.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
+import NotificationBar from "../../../components/NotificationBar";
 
 import householdDefaultIconLight from "../../../assets/svg/light/householdDefault.svg";
 import profileDefaultIconLight from "../../../assets/svg/light/profile-icon.svg";
@@ -111,7 +112,7 @@ const ManageHousehold: React.FC = () => {
       setNameValue(householdInfo.name);
       setProfileImage(householdInfo.profilePictureUrl || householdDefaultIcon);
     }
-  }, [householdInfo]);
+  }, [householdInfo, householdDefaultIcon]);
 
   const showNotification = (
     message: string,
@@ -202,20 +203,21 @@ const ManageHousehold: React.FC = () => {
   const handleButtonClick = (action: ButtonAction) => {
     setClickedButton(action);
     if (action !== "define_activity") {
-      setOpenPopup(true);
-      // Reset selected new admin when opening delegate popup
+      // Check if delegate admin but no other participants
       if (action === "delegate_admin") {
+        const delegateableParticipants = participants.filter(
+          (participant) => participant.id !== user?.id
+        );
+        if (delegateableParticipants.length === 0) {
+          showNotification("No other participants available to delegate admin role", "error");
+          return;
+        }
         setSelectedNewAdmin(null);
       }
+      setOpenPopup(true);
     } else {
       navigate("/activities");
     }
-    console.log(
-      "Button clicked:",
-      action,
-      "Current clicked button state:",
-      clickedButton
-    );
   };
 
   const handleSelectNewAdmin = (
@@ -335,19 +337,17 @@ const ManageHousehold: React.FC = () => {
 
   return (
     <div className="manage-household">
+      <NotificationBar
+        message={notification.message}
+        isVisible={notification.isVisible}
+        type={notification.type}
+      />
       <img
         className="back-arrow"
         src={arrowLeft}
         alt="Back"
         onClick={() => navigate(-1)}
       />
-      <div
-        className={`notification-bar notification-bar--${notification.type} ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
-      >
-        <span>{notification.message}</span>
-      </div>
 
       <h1 className="manage-household__title">Manage Household</h1>
       <div className="household-header">
@@ -450,7 +450,7 @@ const ManageHousehold: React.FC = () => {
         <Popup
           variant={
             clickedButton === buttonActions.deleteHousehold ||
-            clickedButton === buttonActions.deleteParticipant
+              clickedButton === buttonActions.deleteParticipant
               ? "red"
               : "primary"
           }
@@ -463,32 +463,27 @@ const ManageHousehold: React.FC = () => {
               <p className="warning-text">
                 You will be logged out after delegating admin rights.
               </p>
-              {delegateableParticipants &&
-              delegateableParticipants.length > 0 ? (
-                <div className="participants-list">
-                  <div className="participants-list__header">PARTICIPANTS</div>
-                  {delegateableParticipants.map((participant, index) => (
-                    <div
-                      className="participant__delegate-admin"
-                      key={participant.id}
-                      id={String(index)}
-                      onClick={(e) => handleSelectNewAdmin(participant, e)}
-                    >
-                      <img
-                        src={
-                          getProfilePictureUrl(
-                            participant.profilePicturePath
-                          ) || profileDefaultIcon
-                        }
-                        alt={`${participant.firstName} ${participant.lastName}`}
-                      />
-                      <p>{`${participant.firstName} ${participant.lastName}`}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p>No other participants available to delegate admin role</p>
-              )}
+              <div className="participants-list">
+                <div className="participants-list__header">PARTICIPANTS</div>
+                {delegateableParticipants.map((participant, index) => (
+                  <div
+                    className="participant__delegate-admin"
+                    key={participant.id}
+                    id={String(index)}
+                    onClick={(e) => handleSelectNewAdmin(participant, e)}
+                  >
+                    <img
+                      src={
+                        getProfilePictureUrl(
+                          participant.profilePicturePath
+                        ) || profileDefaultIcon
+                      }
+                      alt={`${participant.firstName} ${participant.lastName}`}
+                    />
+                    <p>{`${participant.firstName} ${participant.lastName}`}</p>
+                  </div>
+                ))}
+              </div>
               <Button
                 variant="primary"
                 onClick={handleDelegateAdmin}
