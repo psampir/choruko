@@ -22,6 +22,7 @@ public class HouseholdInfoMapper : IMapper<Household, HouseholdInfoResponse>
             .ToList() ?? new List<HouseholdParticipantResponse>();
 
         string currencySymbol = GetCurrencySymbol(source.CurrencyCode);
+        string ISOcurrencySymbol = source.CurrencyCode;
         
         return new HouseholdInfoResponse(
             source.Id,
@@ -32,6 +33,7 @@ public class HouseholdInfoMapper : IMapper<Household, HouseholdInfoResponse>
             source.Participants?.Count ?? 0,
             source.ProfilePicturePath,
             currencySymbol,
+            ISOcurrencySymbol,
             participants);
     }
     

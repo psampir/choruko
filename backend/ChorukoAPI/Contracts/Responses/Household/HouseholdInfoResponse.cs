@@ -9,4 +9,5 @@ public record HouseholdInfoResponse(
     int ParticipantsCount,
     string? ProfilePictureUrl,
     string CurrencySymbol,
+    string ISOCurrencySymbol,
     List<HouseholdParticipantResponse> Participants);

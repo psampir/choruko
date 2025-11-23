@@ -33,12 +33,12 @@ public class HouseholdService(DataContext _context,
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, "", new List<HouseholdParticipantResponse>()), "User not found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, "", "",new List<HouseholdParticipantResponse>()), "User not found.", HttpStatusCode.NotFound);
         }
 
         if (string.IsNullOrEmpty(user.HouseholdId))
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null,"" , new List<HouseholdParticipantResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null,"" ,"", new List<HouseholdParticipantResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
         }
 
         var household = await _context.Households
@@ -49,7 +49,7 @@ public class HouseholdService(DataContext _context,
         if (household == null)
         {
             return ServiceResponseFactory.Error
-                (new HouseholdInfoResponse("", "", "", "", "", 0, null, "", new List<HouseholdParticipantResponse>()), "Household not found.", HttpStatusCode.NotFound);
+                (new HouseholdInfoResponse("", "", "", "", "", 0, null, "","", new List<HouseholdParticipantResponse>()), "Household not found.", HttpStatusCode.NotFound);
         }
 
         return ServiceResponseFactory.Success(await _mapper.Map(household));
