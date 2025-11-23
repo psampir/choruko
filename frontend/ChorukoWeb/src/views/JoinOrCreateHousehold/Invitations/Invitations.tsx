@@ -35,6 +35,7 @@ function Invitations() {
   const [invitations, setInvitations] = useState<InvitationResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState<boolean>(false);
+  const [declinePopup, setDeclinePopup] = useState<boolean>(false);
   const [selectedInvitation, setSelectedInvitation] =
     useState<InvitationResponse | null>(null);
 
@@ -119,16 +120,30 @@ function Invitations() {
 
   const handleCancel = () => {
     setPopup(false);
+    setDeclinePopup(false);
     setSelectedInvitation(null);
   };
 
-  const declineInvitation = async (invitationId: string) => {
+  const declineInvitationClick = (invitation: InvitationResponse) => {
+    setSelectedInvitation(invitation);
+    setDeclinePopup(true);
+  };
+
+  const handleDecline = async () => {
+    if (!selectedInvitation) return;
+
     setLoading(true);
     try {
-      const result = await invitationService.declineInvitation(invitationId);
+      const result = await invitationService.declineInvitation(
+        selectedInvitation.id
+      );
       if (result.success) {
         showNotification("Invitation declined", "success");
-        setInvitations((prev) => prev.filter((inv) => inv.id !== invitationId));
+        setInvitations((prev) =>
+          prev.filter((inv) => inv.id !== selectedInvitation.id)
+        );
+        setDeclinePopup(false);
+        setSelectedInvitation(null);
       } else {
         showNotification(
           result.message || "Failed to decline invitation",
@@ -176,7 +191,7 @@ function Invitations() {
                   <img src={acceptIcon} alt="Accept" />
                 </span>
                 <span
-                  onClick={() => declineInvitation(invitation.id)}
+                  onClick={() => declineInvitationClick(invitation)}
                   className="decline"
                 >
                   <img src={declineIcon} alt="Decline" />
@@ -214,6 +229,36 @@ function Invitations() {
               disabled={loading}
             >
               {loading ? "Joining..." : "Join"}
+            </Button>
+          </>
+        </Popup>
+      )}
+      {declinePopup && selectedInvitation && (
+        <Popup
+          variant="red"
+          title=""
+          onClose={handleCancel}
+        >
+          <>
+            <p>Are you sure you want to decline this invitation?</p>
+            <img 
+              src={getProfilePictureUrl(selectedInvitation.householdImagePath) || householdDefault} 
+              alt="Household" 
+            />
+            <p>{selectedInvitation.householdName}</p>
+            <p style={{ fontSize: "0.9rem", marginTop: "var(--spacing-sm)" }}>
+              Invited by: {selectedInvitation.inviterFirstName}{" "}
+              {selectedInvitation.inviterLastName}
+            </p>
+            <p className="warning-text">
+              This invitation will be permanently removed.
+            </p>
+            <Button
+              variant="red"
+              onClick={handleDecline}
+              disabled={loading}
+            >
+              {loading ? "Declining..." : "Decline"}
             </Button>
           </>
         </Popup>
