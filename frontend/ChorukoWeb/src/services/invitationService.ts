@@ -11,6 +11,8 @@ interface InvitationResponse {
   inviterLastName: string;
   inviteeEmail: string;
   createdAt: string;
+  receiverId: string;
+  householdImagePath: string;
 }
 
 class InvitationService {
