@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Invitations.scss";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
+import { getProfilePictureUrl } from "../../../utils/imageUtils";
 import invitationService from "../../../services/invitationService";
 import type { InvitationResponse } from "../../../services/invitationService";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -163,7 +164,10 @@ function Invitations() {
           ) : invitations.length ? (
             invitations.map((invitation) => (
               <li key={invitation.id}>
-                <img src={householdDefault} alt={invitation.householdName} />
+                <img 
+                  src={getProfilePictureUrl(invitation.householdImagePath) || householdDefault} 
+                  alt={invitation.householdName} 
+                />
                 <h6>{invitation.householdName}</h6>
                 <span
                   onClick={() => acceptInvitation(invitation)}
@@ -192,7 +196,10 @@ function Invitations() {
         >
           <>
             <p>Are you sure you want to join this household?</p>
-            <img src={householdDefault} alt="Household" />
+            <img 
+              src={getProfilePictureUrl(selectedInvitation.householdImagePath) || householdDefault} 
+              alt="Household" 
+            />
             <p>{selectedInvitation.householdName}</p>
             <p style={{ fontSize: "0.9rem", marginTop: "var(--spacing-sm)" }}>
               Invited by: {selectedInvitation.inviterFirstName}{" "}
