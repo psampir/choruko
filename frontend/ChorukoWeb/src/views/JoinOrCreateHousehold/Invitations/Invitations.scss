@@ -9,6 +9,16 @@
   flex-direction: column;
   width: 100%;
 
+  .popup-container .popup .popup-content p {
+    font-size: var(--font-size-h4);
+  }
+
+  .popup-container .popup .popup-content p.warning-text {
+    font-size: var(--font-size-body2);
+    color: var(--color-text-secondary);
+    margin-top: var(--spacing-xs);
+  }
+
   &.back-arrow {
     position: absolute;
     top: 90px;
