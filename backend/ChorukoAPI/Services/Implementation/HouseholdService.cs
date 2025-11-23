@@ -14,6 +14,7 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using Microsoft.Extensions.Options;
 using ChorukoAPI.Mappers;
+using System.Globalization;
 
 namespace ChorukoAPI.Services.Implementation;
 
@@ -32,12 +33,12 @@ public class HouseholdService(DataContext _context,
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "User not found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, "", new List<HouseholdParticipantResponse>()), "User not found.", HttpStatusCode.NotFound);
         }
 
         if (string.IsNullOrEmpty(user.HouseholdId))
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null,"" , new List<HouseholdParticipantResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
         }
 
         var household = await _context.Households
@@ -47,7 +48,8 @@ public class HouseholdService(DataContext _context,
 
         if (household == null)
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "Household not found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error
+                (new HouseholdInfoResponse("", "", "", "", "", 0, null, "", new List<HouseholdParticipantResponse>()), "Household not found.", HttpStatusCode.NotFound);
         }
 
         return ServiceResponseFactory.Success(await _mapper.Map(household));
@@ -81,6 +83,7 @@ public class HouseholdService(DataContext _context,
         {
             Id = Guid.NewGuid().ToString(), 
             Name = request.Name,
+            CurrencyCode = request.CurrencyCode.ToUpper(),
             AdminId = user.Id, 
             Participants = new List<User>(),
             ProfilePicturePath = profilePicturePath 
@@ -763,5 +766,64 @@ public class HouseholdService(DataContext _context,
             "Household admin was successfully set and roles were swapped.",
             HttpStatusCode.OK
         );
+    }
+    
+    private string GetCurrencySymbolFromIso(string isoCurrencyCode)
+    {
+        try
+        {
+            var region = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+                .Select(c => new RegionInfo(c.Name))
+                .FirstOrDefault(r => r.ISOCurrencySymbol.Equals(isoCurrencyCode, StringComparison.InvariantCultureIgnoreCase));
+
+            return region?.CurrencySymbol ?? isoCurrencyCode; 
+        }
+        catch
+        {
+            return isoCurrencyCode;
+        }
+    }
+    
+    public async Task<ServiceResponse<OperationResultDto>> ChangeHouseholdCurrencyAsync(ChangeCurrencyRequest request, string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+
+        var userRoles = await _userManager.GetRolesAsync(user);
+        if (!userRoles.Contains("HouseholdAdmin"))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Only household admins can change the currency settings.", HttpStatusCode.Forbidden);
+        }
+
+        if (string.IsNullOrWhiteSpace(request.NewCurrencyCode) || request.NewCurrencyCode.Length != 3)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Invalid currency code format.", HttpStatusCode.BadRequest);
+        }
+
+        var household = await _context.Households.FirstOrDefaultAsync(h => h.Id == user.HouseholdId);
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
+        }
+
+        var oldCurrency = household.CurrencyCode;
+        household.CurrencyCode = request.NewCurrencyCode.ToUpper();
+
+        _context.Households.Update(household);
+        await _context.SaveChangesAsync();
+
+        var response = new OperationResultDto
+        {
+            Operation = "ChangeCurrency",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "HouseholdId", household.Id },
+                { "OldCurrency", oldCurrency },
+                { "NewCurrency", household.CurrencyCode }
+            }
+        };
+
+        return ServiceResponseFactory.Success(response, "Household currency updated successfully.", HttpStatusCode.OK);
     }
 }
