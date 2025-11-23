@@ -6,7 +6,6 @@ import { getProfilePictureUrl } from "../../../utils/imageUtils";
 import invitationService from "../../../services/invitationService";
 import authService from "../../../services/authService";
 import type { InvitationResponse } from "../../../services/invitationService";
-import { useAuth } from "../../../contexts/AuthContext";
 import householdDefaultLight from "/src/assets/svg/light/householdDefault.svg";
 import householdDefaultDark from "/src/assets/svg/dark/householdDefault.svg";
 import arrowLeftLight from "/src/assets/svg/light/arrow-left.svg";
@@ -20,7 +19,6 @@ import NotificationBar from "../../../components/NotificationBar";
 function Invitations() {
   const navigate = useNavigate();
   const isDark = useIsDarkTheme();
-  const { checkAuth } = useAuth();
 
   const householdDefault = isDark
     ? householdDefaultDark
