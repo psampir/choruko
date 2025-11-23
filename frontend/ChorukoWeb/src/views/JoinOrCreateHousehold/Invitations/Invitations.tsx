@@ -15,6 +15,7 @@ import declineLight from "/src/assets/svg/light/decline.svg";
 import declineDark from "/src/assets/svg/dark/decline.svg";
 import NavbarMobile from "../../../components/NavbarMobile";
 import Popup from "../../../components/Popup";
+import Button from "../../../components/Button";
 import NotificationBar from "../../../components/NotificationBar";
 
 // Display and manage household invitations (accept/decline)
@@ -186,31 +187,28 @@ function Invitations() {
       {popup && selectedInvitation && (
         <Popup
           variant="primary"
-          title="Confirm the invitation"
+          title=""
           onClose={handleCancel}
-          actions={[
-            {
-              label: loading ? "Joining..." : "Join",
-              onClick: handleAccept,
-              variant: "primary",
-              disabled: loading,
-            },
-          ]}
         >
-          <div className="invitation-confirmation">
-            <div className="household-image-container">
-              <img
-                src={householdDefault}
-                alt="Household"
-                className="household-image"
-              />
-            </div>
-            <h3 className="household-name">{selectedInvitation.householdName}</h3>
-            <p>
+          <>
+            <p>Are you sure you want to join this household?</p>
+            <img src={householdDefault} alt="Household" />
+            <p>{selectedInvitation.householdName}</p>
+            <p style={{ fontSize: "0.9rem", marginTop: "var(--spacing-sm)" }}>
               Invited by: {selectedInvitation.inviterFirstName}{" "}
               {selectedInvitation.inviterLastName}
             </p>
-          </div>
+            <p className="warning-text">
+              You will be logged out after joining to update your access permissions.
+            </p>
+            <Button
+              variant="primary"
+              onClick={handleAccept}
+              disabled={loading}
+            >
+              {loading ? "Joining..." : "Join"}
+            </Button>
+          </>
         </Popup>
       )}
     </div>
