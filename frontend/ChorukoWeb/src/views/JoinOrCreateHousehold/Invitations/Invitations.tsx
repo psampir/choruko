@@ -4,6 +4,7 @@ import "./Invitations.scss";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 import invitationService from "../../../services/invitationService";
+import authService from "../../../services/authService";
 import type { InvitationResponse } from "../../../services/invitationService";
 import { useAuth } from "../../../contexts/AuthContext";
 import householdDefaultLight from "/src/assets/svg/light/householdDefault.svg";
@@ -93,11 +94,15 @@ function Invitations() {
         showNotification("Invitation accepted successfully", "success");
         setPopup(false);
         setSelectedInvitation(null);
-        // Refresh auth state and redirect to home
-        await checkAuth(false);
-        setTimeout(() => {
-          navigate("/");
-        }, 1500);
+        
+        // Wait a moment for the notification to be visible
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Logout the user
+        await authService.logout();
+        
+        // Redirect to login
+        navigate("/login");
       } else {
         showNotification(
           result.message || "Failed to accept invitation",
