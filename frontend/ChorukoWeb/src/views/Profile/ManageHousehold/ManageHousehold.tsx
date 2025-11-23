@@ -5,6 +5,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
 import householdService from "../../../services/householdService";
+import invitationService from "../../../services/invitationService";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 import type { HouseholdParticipant } from "../../../services/householdService";
 import "./ManageHousehold.scss";
@@ -77,6 +78,7 @@ const ManageHousehold: React.FC = () => {
     useState<HouseholdParticipant | null>(null);
   const [selectedNewAdmin, setSelectedNewAdmin] =
     useState<HouseholdParticipant | null>(null);
+  const [invitationEmail, setInvitationEmail] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   const [notification, setNotification] = useState<{
@@ -323,6 +325,46 @@ const ManageHousehold: React.FC = () => {
     setOpenPopup(true);
   };
 
+  const handleSendInvitation = async () => {
+    if (!invitationEmail.trim()) {
+      showNotification("Please enter an email address", "error");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(invitationEmail.trim())) {
+      showNotification("Please enter a valid email address", "error");
+      return;
+    }
+
+    if (!householdInfo?.id) {
+      showNotification("Household information not available", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await invitationService.createInvitation(
+        householdInfo.id,
+        invitationEmail.trim()
+      );
+      if (result.success) {
+        showNotification("Invitation sent successfully", "success");
+        setInvitationEmail("");
+        setOpenPopup(false);
+      } else {
+        showNotification(
+          result.message || "Failed to send invitation",
+          "error"
+        );
+      }
+    } catch (error) {
+      showNotification("An unexpected error occurred", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Sort participants to show admin first
   const sortedParticipants = [...participants].sort((a, b) => {
     if (a.id === householdInfo?.adminId) return -1;
@@ -500,9 +542,17 @@ const ManageHousehold: React.FC = () => {
                 variant="primary"
                 type="email"
                 placeholder="Email"
+                value={invitationEmail}
+                onChange={(e) => setInvitationEmail(e.target.value)}
                 style={{ marginBottom: "var(--spacing-lg)" }}
               />
-              <Button variant="primary">Send Invitations</Button>
+              <Button
+                variant="primary"
+                onClick={handleSendInvitation}
+                disabled={loading}
+              >
+                {loading ? "Sending..." : "Send Invitation"}
+              </Button>
             </>
           )}
           {clickedButton === buttonActions.deleteHousehold && (
