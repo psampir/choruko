@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import authService from "../../services/authService";
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface ResetPasswordProps {
@@ -11,10 +12,12 @@ interface ResetPasswordProps {
 function ResetPassword({ onLoginClick }: ResetPasswordProps) {
   const [showPopup, setShowPopup] = useState(false);
   const [emailEnabled, setEmailEnabled] = useState<boolean | null>(null); // null=loading, true=enabled, false=disabled
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Check if email functionality is configured on backend
   useEffect(() => {
-    let ignore = false; // Prevent state updates after unmount
+    let ignore = false;
 
     const loadConfig = async () => {
       try {
@@ -26,7 +29,6 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
         if (!ignore) setEmailEnabled(Boolean(data?.enableEmails));
       } catch (err) {
         console.error("Failed to fetch email-enabled config", err);
-        // If config fails, assume email is not available
         if (!ignore) setEmailEnabled(false);
       }
     };
@@ -42,20 +44,34 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
     return emailRegex.test(email);
   };
 
-  const handleResetPassword = () => {
-    const emailInput = document.querySelector<HTMLInputElement>(
-      ".login__input--email"
-    );
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    if (emailInput && emailInput.value.trim() !== "") {
-      if (isValidEmail(emailInput.value.trim())) {
-        emailInput.value = "";
+    if (!email.trim()) {
+      alert("Please enter your email address");
+      return;
+    }
+
+    if (!isValidEmail(email.trim())) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const result = await authService.forgotPassword(email);
+      
+      if (result.success) {
+        setEmail("");
         setShowPopup(true);
       } else {
-        alert("Please enter a valid email address");
+        alert(result.message || "Failed to send reset email");
       }
-    } else {
-      alert("Please enter your email address");
+    } catch (error: any) {
+      alert(error.message || "Network error occurred");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,20 +102,24 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
       {emailEnabled === null ? (
         <div className="login__loading">Loading...</div>
       ) : emailEnabled ? (
-        <form className="login__form" style={{ gap: "22px" }}>
+        <form className="login__form" style={{ gap: "22px" }} onSubmit={handleResetPassword}>
           <Input
             variant="email"
             className="login__input--email"
-            type="text"
+            type="email"
             placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
 
           <Button
             variant="primary"
             className="login__button--login"
-            onClick={handleResetPassword}
+            type="submit"
+            disabled={loading}
           >
-            Reset Password
+            {loading ? "Sending..." : "Reset Password"}
           </Button>
         </form>
       ) : (
