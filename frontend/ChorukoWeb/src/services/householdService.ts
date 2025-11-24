@@ -26,6 +26,8 @@ interface HouseholdInfo {
   adminLastName: string;
   participantsCount: number;
   profilePictureUrl: string | null;
+  currencySymbol: string;
+  isoCurrencySymbol: string;
   participants: HouseholdParticipant[];
 }
 
@@ -108,6 +110,30 @@ class HouseholdService {
       }
     } catch (error) {
       console.error("Error renaming household:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Change household currency
+  async changeHouseholdCurrency(newCurrencyCode: string) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Household/change-currency`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ newCurrencyCode }),
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Household currency changed successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to change household currency" };
+      }
+    } catch (error) {
+      console.error("Error changing household currency:", error);
       return { success: false, message: "Network error occurred" };
     }
   }
