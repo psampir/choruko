@@ -49,7 +49,7 @@ const Settlements: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { settlements: backendSettlements, loading, error, refreshSettlements, markAsPaid, markAsUnpaid, markAsDone, unmarkAsDone } = useSettlement();
-  const { refreshHousehold, participants } = useHousehold();
+  const { refreshHousehold, participants, householdInfo } = useHousehold();
   const isDark = useIsDarkTheme();
 
   const profileIcon = isDark ? profileIconDark : profileIconLight;
@@ -57,8 +57,8 @@ const Settlements: React.FC = () => {
   const checkIcon = isDark ? checkDark : checkLight;
   const settlementIcon = isDark ? settlementIconDark : settlementIconLight;
 
-  // Currency symbol - can be made dynamic based on user preferences/household settings
-  const currencySymbol = "₴";
+  // Get currency symbol from household info
+  const currencySymbol = householdInfo?.currencySymbol || "$";
 
   const [collapsedSections, setCollapsedSections] = useState({
     unpaid: false,

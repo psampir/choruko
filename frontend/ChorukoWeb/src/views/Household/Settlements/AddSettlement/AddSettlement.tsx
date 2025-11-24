@@ -30,7 +30,7 @@ const AddSettlement: React.FC = () => {
   const location = useLocation();
   const { user } = useUser();
   const { createSettlement, editSettlement: editSettlementContext, deleteSettlement } = useSettlement();
-  const { participants } = useHousehold();
+  const { participants, householdInfo } = useHousehold();
   const isDark = useIsDarkTheme();
 
   const arrowLeftIcon = isDark ? arrowLeftIconDark : arrowLeftIconLight;
@@ -48,8 +48,8 @@ const AddSettlement: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Currency symbol - can be made dynamic based on user preferences/household settings
-  const currencySymbol = "₴";
+  // Get currency symbol from household info
+  const currencySymbol = householdInfo?.currencySymbol || "$";
 
   // Pre-fill form when in edit mode
   useEffect(() => {
