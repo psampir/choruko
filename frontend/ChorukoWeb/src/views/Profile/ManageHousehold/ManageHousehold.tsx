@@ -4,6 +4,7 @@ import { useHousehold } from "../../../contexts/HouseholdContext";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
+import { POPULAR_CURRENCIES } from "../../../utils/currencies";
 import householdService from "../../../services/householdService";
 import invitationService from "../../../services/invitationService";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
@@ -22,6 +23,7 @@ import delegateAdminLight from "../../../assets/svg/light/star-emty.svg";
 import addParticipantsLight from "../../../assets/svg/light/profile-icon-light.svg";
 import deleteHouseholdLight from "../../../assets/svg/light/trash-bin.svg";
 import declineLight from "../../../assets/svg/light/decline.svg";
+import checkIconLight from "../../../assets/svg/light/check.svg";
 
 import householdDefaultIconDark from "../../../assets/svg/dark/householdDefault.svg";
 import profileDefaultIconDark from "../../../assets/svg/dark/profile-icon.svg";
@@ -31,6 +33,7 @@ import delegateAdminDark from "../../../assets/svg/dark/star-emty.svg";
 import addParticipantsDark from "../../../assets/svg/dark/profile-icon-light.svg";
 import deleteHouseholdDark from "../../../assets/svg/dark/trash-bin.svg";
 import declineDark from "../../../assets/svg/dark/decline.svg";
+import checkIconDark from "../../../assets/svg/dark/check.svg";
 
 const buttonActions = {
   defineActivity: "define_activity",
@@ -68,9 +71,12 @@ const ManageHousehold: React.FC = () => {
   const addParticipants = isDark ? addParticipantsDark : addParticipantsLight;
   const deleteHousehold = isDark ? deleteHouseholdDark : deleteHouseholdLight;
   const decline = isDark ? declineDark : declineLight;
+  const checkIcon = isDark ? checkIconDark : checkIconLight;
 
   const [openPopup, setOpenPopup] = useState<boolean>(false);
   const [nameValue, setNameValue] = useState<string>("");
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("USD");
+  const [currencyCollapsed, setCurrencyCollapsed] = useState(false);
   const [profileImage, setProfileImage] =
     useState<string>(householdDefaultIcon);
   const [clickedButton, setClickedButton] = useState<ButtonAction | null>(null);
@@ -113,6 +119,7 @@ const ManageHousehold: React.FC = () => {
     if (householdInfo) {
       setNameValue(householdInfo.name);
       setProfileImage(householdInfo.profilePictureUrl || householdDefaultIcon);
+      setSelectedCurrency(householdInfo.isoCurrencySymbol || "USD");
     }
   }, [householdInfo, householdDefaultIcon]);
 
@@ -147,6 +154,26 @@ const ManageHousehold: React.FC = () => {
       } else {
         showNotification(
           result.message || "Failed to change household name",
+          "error"
+        );
+      }
+    } catch (error) {
+      showNotification("An unexpected error occurred", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCurrencyChange = async () => {
+    setLoading(true);
+    try {
+      const result = await householdService.changeHouseholdCurrency(selectedCurrency);
+      if (result.success) {
+        showNotification("Household currency changed successfully", "success");
+        await refreshHousehold();
+      } else {
+        showNotification(
+          result.message || "Failed to change household currency",
           "error"
         );
       }
@@ -420,6 +447,56 @@ const ManageHousehold: React.FC = () => {
             {loading ? "Saving..." : "Change Name"}
           </Button>
         </div>
+
+        {/* Currency Selection */}
+        <div className="manage-household__currency-section">
+          <div
+            className={`participants-list ${
+              currencyCollapsed ? "participants-list--collapsed" : ""
+            }`}
+          >
+            <div
+              className="participants-list__header"
+              onClick={() => setCurrencyCollapsed(!currencyCollapsed)}
+            >
+              SELECT CURRENCY
+              <span className="dropdown__arrow">&#9660;</span>
+            </div>
+            {!currencyCollapsed && (
+              <div className="participants-list__content">
+                {POPULAR_CURRENCIES.map((currency) => (
+                  <div
+                    className={`activity ${
+                      selectedCurrency === currency.code ? "activity--selected" : ""
+                    }`}
+                    key={currency.code}
+                    onClick={() => setSelectedCurrency(currency.code)}
+                  >
+                    <div className="activity-data">
+                      <span className="currency-code">{currency.code}</span>
+                      <p>{currency.name}</p>
+                    </div>
+                    {selectedCurrency === currency.code && (
+                      <img
+                        src={checkIcon}
+                        alt="Selected"
+                        className="check-icon"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <Button
+            variant="primary"
+            onClick={handleCurrencyChange}
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Change Currency"}
+          </Button>
+        </div>
+
         <div className="manage-household__buttons-grid">
           <Button
             variant="primary"
