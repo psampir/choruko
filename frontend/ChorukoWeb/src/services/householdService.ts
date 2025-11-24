@@ -4,6 +4,7 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface CreateHouseholdData {
   name: string;
+  currencyCode?: string;
   profilePicture?: File;
 }
 
@@ -34,6 +35,10 @@ class HouseholdService {
     try {
       const formData = new FormData();
       formData.append("Name", data.name);
+      
+      if (data.currencyCode) {
+        formData.append("CurrencyCode", data.currencyCode);
+      }
 
       if (data.profilePicture) {
         formData.append("ProfilePicture", data.profilePicture);
