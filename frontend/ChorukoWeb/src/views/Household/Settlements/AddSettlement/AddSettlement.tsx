@@ -5,6 +5,7 @@ import { useSettlement } from "../../../../contexts/SettlementContext";
 import { useHousehold } from "../../../../contexts/HouseholdContext";
 import { useIsDarkTheme } from "../../../../utils/iconUtils";
 import { getProfilePictureUrl } from "../../../../utils/imageUtils";
+import { formatCurrency } from "../../../../utils/currencyFormatter";
 import "./AddSettlement.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
@@ -276,9 +277,9 @@ const AddSettlement: React.FC = () => {
           {/* Amount per person calculation */}
           {amountSpent && selectedAssignees.length > 0 && (
             <p className="amount-per-person">
-              = {currencySymbol}
-              {(parseFloat(amountSpent) / selectedAssignees.length).toFixed(
-                2
+              = {formatCurrency(
+                parseFloat(amountSpent) / selectedAssignees.length,
+                currencySymbol
               )}{" "}
               per person
             </p>
