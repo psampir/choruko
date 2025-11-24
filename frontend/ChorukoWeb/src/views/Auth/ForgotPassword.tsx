@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import ErrorMessage from "../../components/ErrorMessage";
 import authService from "../../services/authService";
+import { parseErrorMessage } from "../../utils/errorUtils";
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface ResetPasswordProps {
@@ -14,6 +16,7 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
   const [emailEnabled, setEmailEnabled] = useState<boolean | null>(null); // null=loading, true=enabled, false=disabled
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Check if email functionality is configured on backend
   useEffect(() => {
@@ -46,30 +49,35 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     if (!email.trim()) {
-      alert("Please enter your email address");
+      const errorMsg = parseErrorMessage("Please enter your email address");
+      setError(errorMsg);
       return;
     }
 
     if (!isValidEmail(email.trim())) {
-      alert("Please enter a valid email address");
+      const errorMsg = parseErrorMessage("Please enter a valid email address");
+      setError(errorMsg);
       return;
     }
 
     setLoading(true);
-    
+
     try {
       const result = await authService.forgotPassword(email);
-      
+
       if (result.success) {
         setEmail("");
         setShowPopup(true);
       } else {
-        alert(result.message || "Failed to send reset email");
+        const errorMsg = parseErrorMessage(result.message || "Failed to send reset email");
+        setError(errorMsg);
       }
     } catch (error: any) {
-      alert(error.message || "Network error occurred");
+      const errorMsg = parseErrorMessage(error.message || "Network error occurred");
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -81,6 +89,13 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
 
   return (
     <>
+      <ErrorMessage
+        message={error}
+        variant="overlay"
+        dismissTime={5000}
+        onClose={() => setError("")}
+      />
+
       {emailEnabled === true && showPopup && (
         <div className="login__popup-container active">
           <div className="login__popup">
@@ -104,6 +119,7 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
       ) : emailEnabled ? (
         <form className="login__form" style={{ gap: "22px" }} onSubmit={handleResetPassword}>
           <Input
+            style={{ minWidth: "288px" }}
             variant="email"
             className="login__input--email"
             type="email"
