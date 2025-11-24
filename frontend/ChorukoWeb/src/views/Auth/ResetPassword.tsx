@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import ErrorMessage from "../../components/ErrorMessage";
 import authService from "../../services/authService";
+import { parseErrorMessage } from "../../utils/errorUtils";
 import "./Auth.scss";
 import RaccoonLogo from "../../components/RaccoonLogo";
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();
-  
+
   const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -35,17 +37,20 @@ function ResetPassword() {
     setError("");
 
     if (!newPassword || !confirmPassword) {
-      setError("Please fill in all fields");
+      const errorMsg = parseErrorMessage("Please fill in all fields");
+      setError(errorMsg);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      const errorMsg = parseErrorMessage("Passwords do not match");
+      setError(errorMsg);
       return;
     }
 
     if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters long");
+      const errorMsg = parseErrorMessage("Password must be at least 6 characters long");
+      setError(errorMsg);
       return;
     }
 
@@ -54,7 +59,7 @@ function ResetPassword() {
     try {
       const result = await authService.resetPassword(
         email,
-        token,
+        encodeURIComponent(token),
         newPassword,
         confirmPassword
       );
@@ -62,10 +67,12 @@ function ResetPassword() {
       if (result.success) {
         setSuccess(true);
       } else {
-        setError(result.message || "Failed to reset password");
+        const errorMsg = parseErrorMessage(result.message || "Failed to reset password");
+        setError(errorMsg);
       }
     } catch (error: any) {
-      setError(error.message || "Network error occurred");
+      const errorMsg = parseErrorMessage(error.message || "Network error occurred");
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -73,6 +80,13 @@ function ResetPassword() {
 
   return (
     <>
+      <ErrorMessage
+        message={error}
+        variant="overlay"
+        dismissTime={5000}
+        onClose={() => setError("")}
+      />
+
       <div className="version">{import.meta.env.VITE_APP_VERSION}</div>
       <div className="login active">
         <div className="login__top-container">
@@ -81,8 +95,7 @@ function ResetPassword() {
 
           {success ? (
             <>
-              <h2 className="login__subtitle">Password Reset Successfully!</h2>
-              <p style={{ textAlign: "center", marginBottom: "20px" }}>
+              <p style={{ textAlign: "center", marginBottom: "20px", marginTop: "20px" }}>
                 Your password has been reset successfully.
               </p>
               <Button
@@ -92,11 +105,11 @@ function ResetPassword() {
                 Go to Login
               </Button>
             </>
-          ) : error && (!email || !token) ? (
+          ) : (!email || !token) ? (
             <>
               <h2 className="login__subtitle">Invalid Reset Link</h2>
-              <p style={{ textAlign: "center", marginBottom: "20px", color: "red" }}>
-                {error}
+              <p style={{ textAlign: "center", marginBottom: "20px" }}>
+                Please request a new password reset.
               </p>
               <Button
                 variant="primary"
@@ -107,12 +120,6 @@ function ResetPassword() {
             </>
           ) : (
             <>
-              {error && (
-                <div style={{ color: "red", marginBottom: "20px", textAlign: "center" }}>
-                  {error}
-                </div>
-              )}
-
               <form onSubmit={handleSubmit} className="login__form">
                 <div className="login__input-container">
                   <Input
