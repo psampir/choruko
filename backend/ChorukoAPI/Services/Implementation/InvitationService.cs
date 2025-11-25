@@ -58,9 +58,9 @@ public class InvitationService(DataContext context,
                 url = "/"
             });
 
-            if (userEmail != userToAdd.Id)
+            if (userId != userToAdd.Id)
             {
-                await pushNotificationService.SendNotificationAsync(userEmail, payload);
+                await pushNotificationService.SendNotificationAsync(userToAdd.Id, payload);
             }
 
 
@@ -197,6 +197,7 @@ public class InvitationService(DataContext context,
             household.Participants.Add(newParticipant);
 
             context.Users.Update(newParticipant);
+            context.Invitations.Remove(invitation);
 
             await context.SaveChangesAsync();
 
@@ -245,7 +246,7 @@ public class InvitationService(DataContext context,
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "You accepted this invitation", HttpStatusCode.BadRequest);
             }
 
-            invitation.Status = InvitationStatus.Declined;
+            context.Invitations.Remove(invitation);
 
             await context.SaveChangesAsync();
 

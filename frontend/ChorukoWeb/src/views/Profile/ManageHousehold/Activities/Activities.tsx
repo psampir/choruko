@@ -4,6 +4,7 @@ import "./Activities.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import Popup from "../../../../components/Popup";
+import NotificationBar from "../../../../components/NotificationBar";
 import { useActivity } from "../../../../contexts/ActivityContext";
 import { useIsDarkTheme } from "../../../../utils/iconUtils";
 
@@ -192,6 +193,11 @@ const Activities: React.FC = () => {
 
   return (
     <div className="activities">
+      <NotificationBar
+        message={notification.message}
+        isVisible={notification.isVisible}
+        type={notification.type}
+      />
       <img
         className="back-arrow"
         src={arrowLeft}
@@ -201,13 +207,6 @@ const Activities: React.FC = () => {
       <Button variant="add" onClick={handleCreateClick}>
         Add
       </Button>
-      <div
-        className={`notification-bar notification-bar--${notification.type} ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
-      >
-        <span>{notification.message}</span>
-      </div>
 
       <h1 className="manage-household__title">Activities</h1>
 

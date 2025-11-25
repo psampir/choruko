@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,26 +10,30 @@ import { UserProvider, useUser } from "./contexts/UserContext";
 import { HouseholdProvider } from "./contexts/HouseholdContext";
 import { ActivityProvider } from "./contexts/ActivityContext";
 import { TaskProvider } from "./contexts/TaskContext";
+import { SettlementProvider } from "./contexts/SettlementContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PushNotificationProvider } from "./contexts/PushNotificationContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
-import AuthContainer from "./views/Auth/AuthContainer";
-import Tasks from "./views/Household/Tasks/Tasks";
-import AddTask from "./views/Household/Tasks/AddTask/AddTask";
-import Settlements from "./views/Household/Settlements/Settlements";
-import AddSettlement from "./views/Household/Settlements/AddSettlement/AddSettlement";
 import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
 import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
-import JoinOrCreateHousehold from "./views/JoinOrCreateHousehold/JoinOrCreateHousehold";
-import Invitations from "./views/JoinOrCreateHousehold/Invitations/Invitations";
-import CreateHousehold from "./views/JoinOrCreateHousehold/CreateHousehold/CreateHousehold";
-import Leaderboard from "./views/Household/Leaderboard/Leaderboard";
-import ManageAccount from "./views/Profile/ManageAccount/ManageAccount";
-import ManageHousehold from "./views/Profile/ManageHousehold/ManageHousehold";
-import Activities from "./views/Profile/ManageHousehold/Activities/Activities";
-import TestNotifications from "./views/TestNotifications";
 import PushNotificationHandler from "./components/PushNotificationHandler";
+
+// Lazy load route components
+const AuthContainer = lazy(() => import("./views/Auth/AuthContainer"));
+const ResetPassword = lazy(() => import("./views/Auth/ResetPassword"));
+const Tasks = lazy(() => import("./views/Household/Tasks/Tasks"));
+const AddTask = lazy(() => import("./views/Household/Tasks/AddTask/AddTask"));
+const Settlements = lazy(() => import("./views/Household/Settlements/Settlements"));
+const AddSettlement = lazy(() => import("./views/Household/Settlements/AddSettlement/AddSettlement"));
+const JoinOrCreateHousehold = lazy(() => import("./views/JoinOrCreateHousehold/JoinOrCreateHousehold"));
+const Invitations = lazy(() => import("./views/JoinOrCreateHousehold/Invitations/Invitations"));
+const CreateHousehold = lazy(() => import("./views/JoinOrCreateHousehold/CreateHousehold/CreateHousehold"));
+const Leaderboard = lazy(() => import("./views/Household/Leaderboard/Leaderboard"));
+const ManageAccount = lazy(() => import("./views/Profile/ManageAccount/ManageAccount"));
+const ManageHousehold = lazy(() => import("./views/Profile/ManageHousehold/ManageHousehold"));
+const Activities = lazy(() => import("./views/Profile/ManageHousehold/Activities/Activities"));
+const TestNotifications = lazy(() => import("./views/TestNotifications"));
 
 // Layout component for protected pages with top navbar
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -61,160 +66,164 @@ function RootRedirect() {
     return <div className="loading">Loading...</div>;
   }
 
-  return <Navigate to={isAuthenticated ? "/profile" : "/login"} replace />;
+  return <Navigate to={isAuthenticated ? "/leaderboard" : "/login"} replace />;
 }
 
 function AppRoutes() {
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={<AuthContainer />} />
-      <Route path="/signup" element={<AuthContainer />} />
+    <Suspense fallback={<div className="loading">Loading...</div>}>
+      <Routes>
+        {/* Root route - must be first */}
+        <Route path="/" element={<RootRedirect />} />
 
-      {/* Protected routes with layout */}
-      <Route
-        path="/joinOrCreateHousehold"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <JoinOrCreateHousehold onJoinHousehold={() => {}} />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
+        {/* Public routes */}
+        <Route path="/login" element={<AuthContainer />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-      <Route
-        path="/tasks"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Tasks />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        {/* Protected routes with layout */}
+        <Route
+          path="/joinOrCreateHousehold"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <JoinOrCreateHousehold />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/tasks/add"
-        element={
-          <ProtectedRoute>
-            <AddTask />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Tasks />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/invitations"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <Invitations />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/tasks/add"
+          element={
+            <ProtectedRoute>
+              <AddTask />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/createHousehold"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <CreateHousehold />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/invitations"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Invitations />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/expenses"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Settlements />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/createHousehold"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <CreateHousehold />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/settlements"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Settlements />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/expenses"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Settlements />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/settlements/add"
-        element={
-          <ProtectedRoute>
-            <AddSettlement />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/settlements"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Settlements />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/leaderboard"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Leaderboard />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/settlements/add"
+          element={
+            <ProtectedRoute>
+              <AddSettlement />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/manageAccount"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <ManageAccount />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/manageHousehold"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <ManageHousehold />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/leaderboard"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Leaderboard />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/activities"
-        element={
-          <ProtectedRoute>
-            <MainAppLayout>
-              <Activities />
-            </MainAppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/manageAccount"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <ManageAccount />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/manageHousehold"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <ManageHousehold />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Test route for push notifications */}
-      <Route
-        path="/test-notifications"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <TestNotifications />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/activities"
+          element={
+            <ProtectedRoute>
+              <MainAppLayout>
+                <Activities />
+              </MainAppLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Smart default redirect */}
-      <Route path="/" element={<RootRedirect />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+        {/* Test route for push notifications */}
+        <Route
+          path="/test-notifications"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <TestNotifications />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all for unknown routes */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 
@@ -226,12 +235,14 @@ function App() {
           <HouseholdProvider>
             <ActivityProvider>
               <TaskProvider>
-                <PushNotificationProvider>
-                  <Router>
-                    <PushNotificationHandler />
-                    <AppRoutes />
-                  </Router>
-                </PushNotificationProvider>
+                <SettlementProvider>
+                  <PushNotificationProvider>
+                    <Router>
+                      <PushNotificationHandler />
+                      <AppRoutes />
+                    </Router>
+                  </PushNotificationProvider>
+                </SettlementProvider>
               </TaskProvider>
             </ActivityProvider>
           </HouseholdProvider>

@@ -56,7 +56,7 @@ if (enableEmails == "true")
     var smtpUsername = config["SMTP_USERNAME"];
     var smtpPassword = config["SMTP_PASSWORD"];
     var smtpFrom = config["SMTP_FROM"];
-    var domainName = config["DOMAIN_NAME"];
+    var serverUrl = config["SERVER_URL"];
 
     if (string.IsNullOrWhiteSpace(smtpHost))
         throw new InvalidOperationException("Missing required configuration value: SMTP_HOST");
@@ -66,8 +66,8 @@ if (enableEmails == "true")
         throw new InvalidOperationException("Missing required configuration value: SMTP_PASSWORD");
     if (string.IsNullOrWhiteSpace(smtpFrom))
         throw new InvalidOperationException("Missing required configuration value: SMTP_FROM");
-    if (string.IsNullOrWhiteSpace(domainName))
-        throw new InvalidOperationException("Missing required configuration value: DOMAIN_NAME");
+    if (string.IsNullOrWhiteSpace(serverUrl))
+        throw new InvalidOperationException("Missing required configuration value: SERVER_URL");
     
     builder.Services.AddScoped<IEmailService, EmailService>(sp =>
         new EmailService(
@@ -76,9 +76,13 @@ if (enableEmails == "true")
             smtpUsername, 
             smtpPassword, 
             smtpFrom,
-            domainName
+            serverUrl
         )
     );
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, NoOpEmailService>();
 }
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -113,7 +117,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax; // Changed from None to Lax for development
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Allow HTTP in development
-    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
 
     // Configure events to return proper status codes

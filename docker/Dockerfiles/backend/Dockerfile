@@ -26,7 +26,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
 WORKDIR /app
 
 # Set up globalization support in .NET
-RUN apk add --no-cache icu-libs
+RUN apk add --no-cache icu-libs icu-data-full
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 # Copy the built app from the build stage

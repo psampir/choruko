@@ -4,6 +4,7 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface CreateHouseholdData {
   name: string;
+  currencyCode?: string;
   profilePicture?: File;
 }
 
@@ -25,6 +26,8 @@ interface HouseholdInfo {
   adminLastName: string;
   participantsCount: number;
   profilePictureUrl: string | null;
+  currencySymbol: string;
+  isoCurrencySymbol: string;
   participants: HouseholdParticipant[];
 }
 
@@ -34,6 +37,10 @@ class HouseholdService {
     try {
       const formData = new FormData();
       formData.append("Name", data.name);
+      
+      if (data.currencyCode) {
+        formData.append("CurrencyCode", data.currencyCode);
+      }
 
       if (data.profilePicture) {
         formData.append("ProfilePicture", data.profilePicture);
@@ -50,7 +57,7 @@ class HouseholdService {
         return { success: true, data: result, message: "Household created successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to create household" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to create household" };
       }
     } catch (error) {
       console.error("Error creating household:", error);
@@ -75,7 +82,7 @@ class HouseholdService {
         }
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to fetch household info" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to fetch household info" };
       }
     } catch (error) {
       console.error("Error fetching household info:", error);
@@ -99,10 +106,34 @@ class HouseholdService {
         return { success: true, message: "Household renamed successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to rename household" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to rename household" };
       }
     } catch (error) {
       console.error("Error renaming household:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Change household currency
+  async changeHouseholdCurrency(newCurrencyCode: string) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Household/change-currency`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ newCurrencyCode }),
+      });
+
+      if (response.ok) {
+        return { success: true, message: "Household currency changed successfully" };
+      } else {
+        const errorText = await response.text();
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to change household currency" };
+      }
+    } catch (error) {
+      console.error("Error changing household currency:", error);
       return { success: false, message: "Network error occurred" };
     }
   }
@@ -143,7 +174,7 @@ class HouseholdService {
         return { success: true, message: "Household deleted successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to delete household" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to delete household" };
       }
     } catch (error) {
       console.error("Error deleting household:", error);
@@ -163,7 +194,7 @@ class HouseholdService {
         return { success: true, message: "User removed from household successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to remove user from household" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to remove user from household" };
       }
     } catch (error) {
       console.error("Error removing user from household:", error);

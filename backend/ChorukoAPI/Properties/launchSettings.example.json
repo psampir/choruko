@@ -15,13 +15,13 @@
         "DB_DATABASE_NAME": "choruko_dev",
         "APP_DATA_LOCATION": "./app_data",
         "CURRENCY": "USD",
-        "ENABLE_EMAILS": "true",
+        "ENABLE_EMAILS": "false",
         "SMTP_HOST": "smtp.example.com",
         "SMTP_PORT": "587",
         "SMTP_USERNAME": "your@email.com",
         "SMTP_PASSWORD": "your_password",
         "SMTP_FROM": "Choruko App <no-reply@example.com>",
-        "DOMAIN_NAME": "dev.choruko.online"
+        "SERVER_URL": "https://your-server-url.com"
       }
     }
   }
