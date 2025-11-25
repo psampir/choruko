@@ -12,6 +12,7 @@ import { useSettlement } from "../../../contexts/SettlementContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
+import { formatCurrency } from "../../../utils/currencyFormatter";
 import settlementService from "../../../services/settlementService";
 import type { SettlementListItem, Settlement as BackendSettlement } from "../../../services/settlementService";
 import profileIconLight from "../../../assets/svg/light/profile-icon.svg";
@@ -49,7 +50,7 @@ const Settlements: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const { settlements: backendSettlements, loading, error, refreshSettlements, markAsPaid, markAsUnpaid, markAsDone, unmarkAsDone } = useSettlement();
-  const { refreshHousehold, participants } = useHousehold();
+  const { refreshHousehold, participants, householdInfo } = useHousehold();
   const isDark = useIsDarkTheme();
 
   const profileIcon = isDark ? profileIconDark : profileIconLight;
@@ -57,8 +58,8 @@ const Settlements: React.FC = () => {
   const checkIcon = isDark ? checkDark : checkLight;
   const settlementIcon = isDark ? settlementIconDark : settlementIconLight;
 
-  // Currency symbol - can be made dynamic based on user preferences/household settings
-  const currencySymbol = "₴";
+  // Get currency symbol from household info
+  const currencySymbol = householdInfo?.currencySymbol || "$";
 
   const [collapsedSections, setCollapsedSections] = useState({
     unpaid: false,
@@ -218,7 +219,7 @@ const Settlements: React.FC = () => {
           </div>
           <div className="settlement__info">
             <p className="settlement__name">
-              {currencySymbol}{settlement.amount.toFixed(2)}
+              {formatCurrency(settlement.amount, currencySymbol)}
             </p>
             <p className="settlement__description">{settlement.description}</p>
           </div>
@@ -339,14 +340,16 @@ const Settlements: React.FC = () => {
           title={
             <div>
               <div className="amount-per-person">
-                {currencySymbol}
                 {selectedBackendSettlement && (selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0) > 0
-                  ? (selectedSettlement.amount / ((selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0))).toFixed(2)
-                  : selectedSettlement.amount.toFixed(2)}{" "}
+                  ? formatCurrency(
+                      selectedSettlement.amount / ((selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0)),
+                      currencySymbol
+                    )
+                  : formatCurrency(selectedSettlement.amount, currencySymbol)}{" "}
                 per person
               </div>
               <div className="total-amount">
-                Total of {currencySymbol}{selectedSettlement.amount.toFixed(2)}
+                Total of {formatCurrency(selectedSettlement.amount, currencySymbol)}
               </div>
             </div>
           }

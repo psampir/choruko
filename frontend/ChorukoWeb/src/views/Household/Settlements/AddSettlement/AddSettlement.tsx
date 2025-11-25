@@ -5,6 +5,7 @@ import { useSettlement } from "../../../../contexts/SettlementContext";
 import { useHousehold } from "../../../../contexts/HouseholdContext";
 import { useIsDarkTheme } from "../../../../utils/iconUtils";
 import { getProfilePictureUrl } from "../../../../utils/imageUtils";
+import { formatCurrency } from "../../../../utils/currencyFormatter";
 import "./AddSettlement.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
@@ -30,7 +31,7 @@ const AddSettlement: React.FC = () => {
   const location = useLocation();
   const { user } = useUser();
   const { createSettlement, editSettlement: editSettlementContext, deleteSettlement } = useSettlement();
-  const { participants } = useHousehold();
+  const { participants, householdInfo } = useHousehold();
   const isDark = useIsDarkTheme();
 
   const arrowLeftIcon = isDark ? arrowLeftIconDark : arrowLeftIconLight;
@@ -48,8 +49,8 @@ const AddSettlement: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Currency symbol - can be made dynamic based on user preferences/household settings
-  const currencySymbol = "₴";
+  // Get currency symbol from household info
+  const currencySymbol = householdInfo?.currencySymbol || "$";
 
   // Pre-fill form when in edit mode
   useEffect(() => {
@@ -276,9 +277,9 @@ const AddSettlement: React.FC = () => {
           {/* Amount per person calculation */}
           {amountSpent && selectedAssignees.length > 0 && (
             <p className="amount-per-person">
-              = {currencySymbol}
-              {(parseFloat(amountSpent) / selectedAssignees.length).toFixed(
-                2
+              = {formatCurrency(
+                parseFloat(amountSpent) / selectedAssignees.length,
+                currencySymbol
               )}{" "}
               per person
             </p>
