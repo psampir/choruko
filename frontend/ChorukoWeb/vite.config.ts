@@ -85,7 +85,7 @@ export default defineConfig({
         description: 'A chore management app',
         theme_color: '#ffffff',
         background_color: '#ffffff',
-        start_url: '/login',
+        start_url: '/leaderboard',
         scope: '/',
         display: 'standalone',
         display_override: ['standalone', 'browser'],

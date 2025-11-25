@@ -12,7 +12,9 @@ public class InvitationMapper : IMapper<Invitation, InvitationResponse>
             Id = source.Id,
             ReceiverId = source.ReceiverId,
             HouseholdName = source.Household.Name,
-            HouseholdImagePath = source.Household.ProfilePicturePath
+            HouseholdImagePath = source.Household.ProfilePicturePath,
+            InviterFirstName = source.Sender.FirstName,
+            InviterLastName = source.Sender.LastName
         };
     }
 }

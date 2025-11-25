@@ -34,7 +34,8 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 
 // Push notification handler
 self.addEventListener('push', (event: PushEvent) => {
-  console.log('Push notification received:', event);
+  console.log('[SW] 🔔 Push event received!', event);
+  console.log('[SW] Event data:', event.data);
 
   let notificationData = {
     title: 'Choruko',
@@ -50,6 +51,7 @@ self.addEventListener('push', (event: PushEvent) => {
   if (event.data) {
     try {
       const payload = event.data.json();
+      console.log('[SW] 📦 Parsed payload:', payload);
       notificationData = {
         title: payload.title || notificationData.title,
         body: payload.body || notificationData.body,
@@ -61,9 +63,12 @@ self.addEventListener('push', (event: PushEvent) => {
         }
       };
     } catch (error) {
-      console.error('Error parsing push data:', error);
+      console.error('[SW] ❌ Error parsing push data:', error);
+      console.log('[SW] Raw data:', event.data.text());
     }
   }
+
+  console.log('[SW] 📢 Showing notification with data:', notificationData);
 
   const promiseChain = self.registration.showNotification(
     notificationData.title,
@@ -75,7 +80,11 @@ self.addEventListener('push', (event: PushEvent) => {
       tag: 'choruko-notification',
       requireInteraction: false
     }
-  );
+  ).then(() => {
+    console.log('[SW] ✅ Notification shown successfully!');
+  }).catch((error) => {
+    console.error('[SW] ❌ Error showing notification:', error);
+  });
 
   event.waitUntil(promiseChain);
 });

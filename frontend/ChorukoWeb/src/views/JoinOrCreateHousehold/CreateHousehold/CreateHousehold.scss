@@ -1,12 +1,15 @@
+.app {
+  min-height: 100vh;
+}
+
 .create-household {
+  margin-top: 90px;
   width: 100vw;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  // padding: 0 2rem;
   background-color: var(--color-background);
-  // margin-top: 155px;
 
 
   .back-arrow {
