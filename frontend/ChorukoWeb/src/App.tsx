@@ -21,6 +21,7 @@ import PushNotificationHandler from "./components/PushNotificationHandler";
 
 // Lazy load route components
 const AuthContainer = lazy(() => import("./views/Auth/AuthContainer"));
+const ResetPassword = lazy(() => import("./views/Auth/ResetPassword"));
 const Tasks = lazy(() => import("./views/Household/Tasks/Tasks"));
 const AddTask = lazy(() => import("./views/Household/Tasks/AddTask/AddTask"));
 const Settlements = lazy(() => import("./views/Household/Settlements/Settlements"));
@@ -77,6 +78,7 @@ function AppRoutes() {
 
         {/* Public routes */}
         <Route path="/login" element={<AuthContainer />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected routes with layout */}
         <Route

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import LogIn from "./LogIn";
 import { SignUp } from "./SignUp";
-import ResetPassword from "./ResetPassword";
+import ForgotPassword from "./ForgotPassword";
 import "./Auth.scss";
 import RaccoonLogo from "../../components/RaccoonLogo";
 import { useAuth } from "../../contexts/AuthContext";
@@ -36,7 +36,7 @@ function AuthContainer() {
           {currentView === "login" && <LogIn onModeChange={handleModeChange} />}
           {currentView === "signup" && <SignUp onModeChange={handleModeChange} />}
           {currentView === "resetPassword" && (
-            <ResetPassword onLoginClick={showLogin} />
+            <ForgotPassword onLoginClick={showLogin} />
           )}
         </div>
       </div>
