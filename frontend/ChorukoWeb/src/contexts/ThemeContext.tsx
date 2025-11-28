@@ -95,7 +95,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [theme, setThemeState] = useState<ThemeType>(() => {
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    const initialTheme = (savedTheme as ThemeType) || "light";
+    const initialTheme = (savedTheme as ThemeType) || "system";
     // Apply theme immediately during initialization
     applyTheme(initialTheme);
     return initialTheme;
