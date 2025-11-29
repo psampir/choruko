@@ -18,6 +18,7 @@ import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
 import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
 import PushNotificationHandler from "./components/PushNotificationHandler";
+import AdminPromotionHandler from "./components/AdminPromotionHandler";
 
 // Lazy load route components
 const AuthContainer = lazy(() => import("./views/Auth/AuthContainer"));
@@ -239,6 +240,7 @@ function App() {
                   <PushNotificationProvider>
                     <Router>
                       <PushNotificationHandler />
+                      <AdminPromotionHandler />
                       <AppRoutes />
                     </Router>
                   </PushNotificationProvider>
