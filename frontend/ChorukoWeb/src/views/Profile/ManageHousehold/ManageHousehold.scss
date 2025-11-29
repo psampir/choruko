@@ -150,6 +150,11 @@ body {
       color: var(--color-background);
       width: 100%;
       z-index: var(--z-dropdown);
+
+      + .participant,
+      + .participant__delegate-admin {
+        margin-top: 30px;
+      }
     }
 
     .participant,
