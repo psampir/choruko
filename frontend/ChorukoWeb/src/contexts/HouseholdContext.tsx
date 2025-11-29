@@ -12,6 +12,8 @@ interface HouseholdContextType {
   error: string | null;
   refreshHousehold: () => Promise<void>;
   clearError: () => void;
+  showAdminPromotionPopup: boolean;
+  dismissAdminPromotionPopup: () => void;
 }
 
 // Create the context
@@ -33,15 +35,22 @@ interface HouseholdProviderProps {
 
 // HouseholdProvider component
 export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }) => {
-  const { hasHousehold, checkAuth } = useAuth();
+  const { hasHousehold, checkAuth, user } = useAuth();
   const [householdInfo, setHouseholdInfo] = useState<HouseholdInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAdminPromotionPopup, setShowAdminPromotionPopup] = useState(false);
   const hasDataRef = useRef(false);
+  const previousAdminIdRef = useRef<string | null>(null);
 
   // Clear error function
   const clearError = () => {
     setError(null);
+  };
+
+  // Dismiss admin promotion popup
+  const dismissAdminPromotionPopup = () => {
+    setShowAdminPromotionPopup(false);
   };
 
   // Fetch household data from the server
@@ -62,6 +71,17 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
       const result = await householdService.getHouseholdInfo();
 
       if (result.success && result.data) {
+        // Check if current user just became admin
+        const newAdminId = result.data.adminId;
+        const wasNotAdminBefore = previousAdminIdRef.current && previousAdminIdRef.current !== user?.id;
+        const isAdminNow = newAdminId === user?.id;
+        
+        if (wasNotAdminBefore && isAdminNow) {
+          // User just became admin, show popup
+          setShowAdminPromotionPopup(true);
+        }
+        
+        previousAdminIdRef.current = newAdminId;
         setHouseholdInfo(result.data);
         hasDataRef.current = true;
       } else {
@@ -102,6 +122,8 @@ export const HouseholdProvider: React.FC<HouseholdProviderProps> = ({ children }
     error,
     refreshHousehold,
     clearError,
+    showAdminPromotionPopup,
+    dismissAdminPromotionPopup,
   };
 
   return (
