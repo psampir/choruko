@@ -92,13 +92,13 @@ function Invitations() {
         showNotification("Invitation accepted successfully", "success");
         setPopup(false);
         setSelectedInvitation(null);
-        
+
         // Wait a moment for the notification to be visible
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // Logout the user
         await authService.logout();
-        
+
         // Redirect to login
         navigate("/login");
       } else {
@@ -198,7 +198,7 @@ function Invitations() {
               Invited by: {selectedInvitation.inviterFirstName}{" "}
               {selectedInvitation.inviterLastName}
             </p>
-            <p className="warning-text">
+            <p style={{ textAlign: "center", marginBottom: "1rem", fontSize: "var(--font-size-body)" }}>
               You will be logged out after joining to update your access permissions.
             </p>
             <div style={{ display: "flex", gap: "var(--spacing-md)", marginTop: "var(--spacing-md)" }}>

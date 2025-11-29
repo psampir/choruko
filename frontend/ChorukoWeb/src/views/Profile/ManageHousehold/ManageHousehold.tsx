@@ -577,7 +577,7 @@ const ManageHousehold: React.FC = () => {
           {clickedButton === buttonActions.delegateAdmin && (
             <>
               <p>Select a new household admin</p>
-              <p className="warning-text">
+              <p style={{ textAlign: "center", marginBottom: "1rem", fontSize: "var(--font-size-body)" }}>
                 To apply your new permissions, you will need to log in again.
               </p>
               <div className="participants-list">
@@ -667,8 +667,9 @@ const ManageHousehold: React.FC = () => {
               </>
             )}
         </Popup>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 
