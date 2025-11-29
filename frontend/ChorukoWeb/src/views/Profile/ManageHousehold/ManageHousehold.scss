@@ -44,12 +44,6 @@ body {
     font-size: var(--font-size-h4);
   }
 
-  .popup-container .popup .popup-content p.warning-text {
-    font-size: var(--font-size-body2);
-    color: var(--color-text-secondary);
-    margin-top: var(--spacing-xs);
-  }
-
   & button {
     width: 200px;
   }
@@ -151,8 +145,8 @@ body {
       width: 100%;
       z-index: var(--z-dropdown);
 
-      + .participant,
-      + .participant__delegate-admin {
+      +.participant,
+      +.participant__delegate-admin {
         margin-top: 30px;
       }
     }
