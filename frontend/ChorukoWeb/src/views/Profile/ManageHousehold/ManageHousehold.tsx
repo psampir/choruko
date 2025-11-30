@@ -451,9 +451,8 @@ const ManageHousehold: React.FC = () => {
         {/* Currency Selection */}
         <div className="manage-household__currency-section">
           <div
-            className={`participants-list ${
-              currencyCollapsed ? "participants-list--collapsed" : ""
-            }`}
+            className={`participants-list ${currencyCollapsed ? "participants-list--collapsed" : ""
+              }`}
           >
             <div
               className="participants-list__header"
@@ -466,9 +465,8 @@ const ManageHousehold: React.FC = () => {
               <div className="participants-list__content">
                 {POPULAR_CURRENCIES.map((currency) => (
                   <div
-                    className={`activity ${
-                      selectedCurrency === currency.code ? "activity--selected" : ""
-                    }`}
+                    className={`activity ${selectedCurrency === currency.code ? "activity--selected" : ""
+                      }`}
                     key={currency.code}
                     onClick={() => setSelectedCurrency(currency.code)}
                   >
@@ -579,8 +577,8 @@ const ManageHousehold: React.FC = () => {
           {clickedButton === buttonActions.delegateAdmin && (
             <>
               <p>Select a new household admin</p>
-              <p className="warning-text">
-                You will be logged out after delegating admin rights.
+              <p style={{ textAlign: "center", marginBottom: "1rem", fontSize: "var(--font-size-body)" }}>
+                To apply your new permissions, you will need to log in again.
               </p>
               <div className="participants-list">
                 <div className="participants-list__header">PARTICIPANTS</div>
@@ -669,8 +667,9 @@ const ManageHousehold: React.FC = () => {
               </>
             )}
         </Popup>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 
