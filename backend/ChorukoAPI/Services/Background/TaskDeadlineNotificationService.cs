@@ -117,8 +117,8 @@ public class TaskDeadlineNotificationService(
     {
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "⏰ Reminder: Task Due Tomorrow!",
-            body = $"{task.Name} is due in 24 hours!",
+            title = "⏰ Task due tomorrow",
+            body = $"{task.Name}",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
             url = "/tasks"
@@ -131,8 +131,8 @@ public class TaskDeadlineNotificationService(
     {
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "⚠️ Task Deadline Passed!",
-            body = $"{task.Name} is now overdue!",
+            title = "⚠️ Task overdue",
+            body = $"{task.Name}",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
             url = "/tasks"

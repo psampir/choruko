@@ -89,8 +89,8 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"👋 {creator.FirstName} requested money from you!",
-                body = $"{request.Description}, amount: {request.Amount}!",
+                title = $"💰 Payment request from {creator.FirstName}",
+                body = $"{request.Description} - Amount: {request.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
                 url = "/settlements"
@@ -195,8 +195,8 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "✏️ Settlement was updated!",
-                body = $"{request.Description}, amount: {request.Amount}!",
+                title = "✏️ Settlement updated",
+                body = $"{request.Description} - Amount: {request.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
                 url = "/settlements"
@@ -338,8 +338,8 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "✅ Settlement was completed!",
-                body = $"{settlement.Description}, amount: {settlement.Amount}!",
+                title = "✅ Settlement completed",
+                body = $"{settlement.Description} - Amount: {settlement.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
                 url = "/settlements"
@@ -418,8 +418,8 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "🔄 Settlement was reopened",
-                body = $"{settlement.Description}, amount: {settlement.Amount}!",
+                title = "🔄 Settlement reopened",
+                body = $"{settlement.Description} - Amount: {settlement.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
                 url = "/settlements"
@@ -515,8 +515,8 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"✅ {user.FirstName} completed the payment",
-                body = $"{settlement.Description}, amount: {settlement.Amount}!",
+                title = $"✅ Payment completed by {user.FirstName}",
+                body = $"{settlement.Description} - Amount: {settlement.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
                 url = "/settlements"
@@ -591,8 +591,8 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"❌ {user.FirstName} cancelled the payment",
-                body = $"{settlement.Description}, amount: {settlement.Amount}!",
+                title = $"❌ Payment cancelled by {user.FirstName}",
+                body = $"{settlement.Description} - Amount: {settlement.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
                 url = "/settlements"
