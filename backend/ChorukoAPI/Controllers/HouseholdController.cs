@@ -64,17 +64,6 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         return result.ToApiResponse("Delete participant");
     }
     
-    [HttpPost("{userIdToAdd}/add")]
-    [Authorize(Roles="HouseholdAdmin")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> AddUserToHousehold([FromRoute] string userIdToAdd)
-    {
-        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
-        var result = await _householdService.AddUserToHouseholdAsync(userIdToAdd, currentUserId);
-
-        return result.ToApiResponse("Add participant");
-    }
-
     [HttpDelete("delete")]
     [Authorize(Roles="HouseholdAdmin")]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteHousehold()
