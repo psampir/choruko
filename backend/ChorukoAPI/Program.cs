@@ -173,6 +173,7 @@ builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 
 builder.Services.AddHostedService<PointsResetService>();
 builder.Services.AddHostedService<InvitationsDeleteService>();
+builder.Services.AddHostedService<TaskDeadlineNotificationService>();
 builder.Services.AddHostedService<DataCleanupService>();
 
 builder.Services.AddControllers();
