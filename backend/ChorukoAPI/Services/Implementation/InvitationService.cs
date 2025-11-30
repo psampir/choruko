@@ -51,7 +51,7 @@ public class InvitationService(DataContext context,
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"👋 You were invited to household by {household.Admin.FirstName}!",
+                title = $"📬 You were invited to household by {household.Admin.FirstName}!",
                 body = $"Household name: {household.Name}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",

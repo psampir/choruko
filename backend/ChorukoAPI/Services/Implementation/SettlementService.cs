@@ -195,7 +195,7 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "👋 Settlement was updated!",
+                title = "✏️ Settlement was updated!",
                 body = $"{request.Description}, amount: {request.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
@@ -338,7 +338,7 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "👋 Settlement was completed!",
+                title = "✅ Settlement was completed!",
                 body = $"{settlement.Description}, amount: {settlement.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
@@ -418,7 +418,7 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "👋 Settlement was reopened",
+                title = "🔄 Settlement was reopened",
                 body = $"{settlement.Description}, amount: {settlement.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
@@ -515,7 +515,7 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"👋 {user.FirstName} completed the payment",
+                title = $"✅ {user.FirstName} completed the payment",
                 body = $"{settlement.Description}, amount: {settlement.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
@@ -591,7 +591,7 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"👋 {user.FirstName} cancelled the payment",
+                title = $"❌ {user.FirstName} cancelled the payment",
                 body = $"{settlement.Description}, amount: {settlement.Amount}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
