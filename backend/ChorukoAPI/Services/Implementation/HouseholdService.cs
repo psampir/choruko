@@ -208,7 +208,7 @@ public class HouseholdService(DataContext _context,
     {
         if (file.Length > _options.Value.MaxFileSize)
         {
-            return ServiceResponseFactory.Error<string>(null, $"File size must not exceed {_options.Value.MaxFileSize / 1024 / 1024}MB.", HttpStatusCode.RequestEntityTooLarge);
+            return ServiceResponseFactory.Error<string>(null, $"File size too large. Maximum allowed size is {_options.Value.MaxFileSize / 1024 / 1024}MB.", HttpStatusCode.RequestEntityTooLarge);
         }
         
         var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
