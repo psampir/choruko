@@ -25,7 +25,23 @@ export const parseErrorMessage = (errorMessage: string): string => {
     // If JSON but no recognizable error structure
     return "An error occurred. Please try again.";
   } catch {
-    // If not JSON, return the message as-is
+    // Check if the error is an HTML response (e.g., from nginx)
+    if (errorMessage && errorMessage.trim().startsWith("<")) {
+      // Parse common nginx error codes from HTML
+      if (errorMessage.includes("413 Request Entity Too Large")) {
+        return "File size too large. Maximum allowed size is 10MB.";
+      }
+      if (errorMessage.includes("502 Bad Gateway")) {
+        return "Server is temporarily unavailable. Please try again later.";
+      }
+      if (errorMessage.includes("504 Gateway Timeout")) {
+        return "Request timed out. Please try again.";
+      }
+      // Generic HTML error response
+      return "An error occurred on the server. Please try again.";
+    }
+    
+    // If not JSON or HTML, return the message as-is
     return errorMessage || "An unexpected error occurred. Please try again.";
   }
 };
