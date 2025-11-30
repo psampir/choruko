@@ -155,3 +155,10 @@
   color: var(--color-text-secondary);
   opacity: 1;
 }
+
+.install-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+}
