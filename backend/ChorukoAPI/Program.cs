@@ -173,7 +173,7 @@ builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 
 builder.Services.AddHostedService<PointsResetService>();
 builder.Services.AddHostedService<InvitationsDeleteService>();
-builder.Services.AddHostedService<TaskDeadlineNotificationService>();
+builder.Services.AddHostedService<DataCleanupService>();
 
 builder.Services.AddControllers();
 
@@ -184,11 +184,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy  =>
         {
-            // Allow the Vite dev server
             policy.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials(); // Required for cookies
+                .AllowCredentials();
         });
 });
 
