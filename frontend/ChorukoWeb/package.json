@@ -1,7 +1,7 @@
 {
   "name": "choruko",
   "private": true,
-  "version": "Beta 0.9",
+  "version": "v1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
