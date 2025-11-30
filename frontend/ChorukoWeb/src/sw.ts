@@ -26,8 +26,12 @@ self.addEventListener('activate', () => {
   self.clients.claim();
 });
 
-// Minimal fetch handler (pass-through).
+// Minimal fetch handler - only intercept same-origin requests
 self.addEventListener('fetch', (event: FetchEvent) => {
+  // Skip cross-origin requests (like fonts from bunny.net) - let browser handle them
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
   event.respondWith(fetch(event.request));
 });
 // (If you add runtime caching, implement it here.)

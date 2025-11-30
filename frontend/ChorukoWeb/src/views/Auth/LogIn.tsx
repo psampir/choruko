@@ -1,7 +1,8 @@
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import ErrorMessage from "../../components/ErrorMessage";
-import React, { useState } from "react";
+import PWAInstallPopup from "../../components/PWAInstallPopup";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { parseErrorMessage } from "../../utils/errorUtils";
@@ -22,6 +23,24 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState("");
+  const [showPWAPopup, setShowPWAPopup] = useState(false);
+
+  useEffect(() => {
+    // Check if app is running in standalone mode (PWA installed)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         (window.navigator as any).standalone === true;
+    
+    // Check if on mobile device
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    // Check if user already dismissed the popup (stored in localStorage)
+    const hasSeenPopup = localStorage.getItem('pwa-install-popup-dismissed');
+    
+    // Show popup only if: not in standalone mode, on mobile, and hasn't dismissed before
+    if (!isStandalone && isMobile && !hasSeenPopup) {
+      setShowPWAPopup(true);
+    }
+  }, []);
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError("");
@@ -53,8 +72,15 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
     }
   };
 
+  const handleClosePWAPopup = () => {
+    setShowPWAPopup(false);
+    localStorage.setItem('pwa-install-popup-dismissed', 'true');
+  };
+
   return (
     <>
+      <PWAInstallPopup open={showPWAPopup} onClose={handleClosePWAPopup} />
+      
       <ErrorMessage
         message={localError || authError || ""}
         variant="overlay"
