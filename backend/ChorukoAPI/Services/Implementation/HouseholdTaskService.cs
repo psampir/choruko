@@ -104,7 +104,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "👋 New task was created!",
+                title = "✅ New task was created!",
                 body = $"{request.Name}, deadline:{request.DeadLine}!",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
@@ -215,7 +215,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             {
                 var editedPayload = System.Text.Json.JsonSerializer.Serialize(new
                 {
-                    title = "👋 Task info was edited!",
+                    title = "✏️ Task info was edited!",
                     body = $"{request.Name}, deadline:{request.DeadLine.ToShortDateString()}!",
                     icon = "/icons/icon-192x192.png",
                     badge = "/icons/icon-96x96.png",
@@ -312,7 +312,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 New assignee in task!",
+            title = "➕ New assignee in task!",
             body = $"{householdTask.Name}, assignee:{user.FirstName} {user.LastName}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
@@ -375,7 +375,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 User left task!",
+            title = "➖ User left task!",
             body = $"{householdTask.Name}, assignee:{user.FirstName} {user.LastName}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
@@ -430,7 +430,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 Task was completed!",
+            title = "✅ Task was completed!",
             body = $"{householdTask.Name}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
@@ -507,7 +507,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 Task was reopened!",
+            title = "🔄 Task was reopened!",
             body = $"{householdTask.Name}!",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
