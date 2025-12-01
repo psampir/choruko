@@ -278,7 +278,7 @@ const AddSettlement: React.FC = () => {
           {amountSpent && selectedAssignees.length > 0 && (
             <p className="amount-per-person">
               = {formatCurrency(
-                parseFloat(amountSpent) / selectedAssignees.length,
+                parseFloat(amountSpent) / (selectedAssignees.length + 1),
                 currencySymbol
               )}{" "}
               per person
