@@ -203,14 +203,14 @@ function Invitations() {
             </p>
             <div style={{ display: "flex", gap: "var(--spacing-md)", marginTop: "var(--spacing-md)" }}>
               <Button
-                variant="primary"
+                variant="primary-popup"
                 onClick={handleAccept}
                 disabled={loading}
               >
                 {loading ? "Accepting..." : "Accept"}
               </Button>
               <Button
-                variant="red"
+                variant="red-popup"
                 onClick={handleDecline}
                 disabled={loading}
               >
