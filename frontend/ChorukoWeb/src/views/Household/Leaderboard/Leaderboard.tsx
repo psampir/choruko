@@ -20,6 +20,7 @@ const Leaderboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<TimeFilter>("ALL TIME");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
   const { householdInfo, participants, loading, error, refreshHousehold } =
     useHousehold();
   const isDark = useIsDarkTheme();
@@ -84,6 +85,20 @@ const Leaderboard: React.FC = () => {
     }
   }, [error, loading, navigate]);
 
+  // Secret dev access: tap household icon 7 times
+  const handleHouseholdImageTap = () => {
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+    
+    if (newCount === 7) {
+      navigate('/dev-push-test');
+      setTapCount(0);
+    }
+    
+    // Reset counter after 2 seconds of no taps
+    setTimeout(() => setTapCount(0), 2000);
+  };
+
 
 
   return (
@@ -93,6 +108,8 @@ const Leaderboard: React.FC = () => {
           className="household-image"
           src={householdInfo?.profilePictureUrl || householdDefaultIcon}
           alt="Household"
+          onClick={handleHouseholdImageTap}
+          style={{ cursor: 'pointer' }}
         />
         <h1 className="household-name">
           {loading ? "Loading..." : householdInfo?.name || "No Household"}
