@@ -26,7 +26,7 @@ public class InvitationService(DataContext context,
 
             if (userToAdd == null)
             {
-                return ServiceResponseFactory.Error<OperationResultDto>(null, "No users were found", HttpStatusCode.NotFound);
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No user was found with this email", HttpStatusCode.NotFound);
             }
 
             var household = await context.Households.FirstOrDefaultAsync(h => h.Id == householdId);
