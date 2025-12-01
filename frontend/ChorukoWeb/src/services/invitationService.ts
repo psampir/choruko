@@ -38,9 +38,20 @@ class InvitationService {
         };
       } else {
         const errorData = await response.json();
+        
+        // Handle validation errors with specific field messages
+        if (errorData.errors) {
+          const fieldErrors = Object.values(errorData.errors).flat() as string[];
+          return {
+            success: false,
+            message: fieldErrors.join(" "),
+          };
+        }
+        
+        // Handle general error messages
         return {
           success: false,
-          message: parseErrorMessage(errorData),
+          message: errorData.title || errorData.message || "Failed to send invitation",
         };
       }
     } catch (error) {
