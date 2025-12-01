@@ -162,7 +162,7 @@
     .participants-list__content {
       width: 100%;
       padding-top: 33px;
-      max-height: calc(2 * (var(--spacing-md) + var(--spacing-lg) + var(--spacing-3xl) + 30px) + 33px);
+      max-height: calc(4 * (var(--spacing-md) + var(--spacing-lg) + var(--spacing-3xl) + 30px) + 33px);
       overflow-y: auto;
 
       &::-webkit-scrollbar {
