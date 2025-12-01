@@ -41,7 +41,7 @@ public class DataCleanupService : BackgroundService
         {
             var context = scope.ServiceProvider.GetRequiredService<DataContext>();
             
-            var cutOffDate = DateTime.UtcNow.AddMonths(-3);
+            var cutOffDate = DateTime.SpecifyKind(DateTime.UtcNow.AddMonths(-3), DateTimeKind.Unspecified);
             
             var oldTasks = context.HouseholdTasks
                 .Where(t => t.Status == Models.TaskStatus.Completed && t.DeadLine < cutOffDate);
