@@ -244,7 +244,6 @@ const TestNotifications: React.FC = () => {
 
       <div style={{
         backgroundColor: logBgColor,
-        color: logTextColor,
         padding: '15px',
         borderRadius: '5px',
         height: '400px',
@@ -254,9 +253,9 @@ const TestNotifications: React.FC = () => {
         border: `1px solid ${isDark ? '#333' : '#ddd'}`
       }}>
         {log.length === 0 ? (
-          <div style={{ color: isDark ? '#666' : '#999' }}>Click buttons above to test push notifications...</div>
+          <div style={{ color: isDark ? '#00ff00' : '#999' }}>Click buttons above to test push notifications...</div>
         ) : (
-          log.map((entry, i) => <div key={i}>{entry}</div>)
+          log.map((entry, i) => <div key={i} style={{ color: logTextColor }}>{entry}</div>)
         )}
       </div>
 
