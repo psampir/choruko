@@ -3,7 +3,7 @@
 
 #root {
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
   background-color: var(--color-background);
 
   font-synthesis: none;
@@ -30,11 +30,14 @@
   user-select: none;
 
   /* Hide page scrollbar completely */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
 
   &::-webkit-scrollbar {
-    display: none; /* WebKit browsers (Chrome, Safari, Edge) */
+    display: none;
+    /* WebKit browsers (Chrome, Safari, Edge) */
   }
 }
 
@@ -43,7 +46,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: fit-content;
+  min-height: 100vh;
   width: 100%;
   height: 100%;
   overflow-y: auto;
@@ -65,12 +68,19 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
-  padding-top: var(--navbar-height); /* Space for top navbar - always present */
+  padding-top: var(--navbar-height);
+  /* Space for top navbar - always present */
 }
 
 /* Additional bottom padding for pages with bottom nav */
 .app:has(.bottom-nav) .main-content {
-  padding-bottom: var(--navbar-height); /* Space for bottom navbar */
+  padding-bottom: var(--navbar-height);
+  /* Space for bottom navbar */
+}
+
+/* Additional top padding for notched devices */
+:root.is-notch .main-content {
+  padding-top: calc(var(--navbar-height) + env(safe-area-inset-top));
 }
 
 body {
@@ -117,13 +127,3 @@ body {
   }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-
-  a:hover {
-    color: #747bff;
-  }
-}

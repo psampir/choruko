@@ -1,0 +1,294 @@
+@use "../../../../styles/variables.scss";
+
+// Block: add-task
+.add-task {
+  min-width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-background);
+
+  // Element: add-task__container
+  &__container {
+    padding: var(--spacing-2xl);
+    padding-top: calc(var(--navbar-height) + var(--spacing-2xl));
+    padding-bottom: calc(var(--spacing-2xl) + var(--navbar-height));
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+  }
+
+  // Element: add-task__header
+  &__header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  // Element: add-task__back-btn
+  &__back-btn {
+    position: absolute;
+    left: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 46px;
+      height: 46px;
+    }
+  }
+
+  // Element: add-task__title
+  &__title {
+    margin: 0;
+    color: var(--color-text-primary);
+    text-align: center;
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  &__section {
+    margin-bottom: var(--spacing-xl);
+
+    .add-task__input {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    // Hide number input spinner buttons
+    input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+  }
+
+  // Element: add-task__footer
+  &__footer {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing-xl);
+
+    .button {
+      width: 120px;
+    }
+  }
+
+  // Activities list (from Activities.scss)
+  .participants-list {
+    position: relative;
+    width: 100%;
+    border: 3px solid var(--color-secondary);
+    border-radius: 10px;
+    background: var(--color-background-secondary);
+    overflow-y: auto;
+    margin-bottom: var(--spacing-xl);
+    max-height: calc(100vh - 200px - 80px);
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+
+    // Collapsed state
+    &--collapsed {
+      height: 33px;
+      min-height: 33px;
+      max-height: 33px;
+      overflow: hidden;
+
+      .participants-list__content {
+        display: none;
+      }
+
+      .dropdown__arrow {
+        transform: rotate(-90deg);
+      }
+    }
+
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--color-secondary);
+      border-radius: 6px;
+      border: 2px solid var(--color-background);
+
+      &:hover {
+        background: var(--color-primary);
+      }
+
+      &:active {
+        background: var(--color-primary-dark);
+      }
+    }
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-secondary) transparent;
+
+    .participants-list__header {
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      width: calc(100% + 4px);
+      height: calc(33px + 3px);
+      padding: 0 var(--spacing-md);
+      background-color: var(--color-secondary);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-body);
+      font-weight: 400;
+      border: 2px solid var(--color-secondary);
+      border-radius: var(--border-radius-standart);
+      color: var(--color-background);
+      cursor: pointer;
+      user-select: none;
+
+      .dropdown__arrow {
+        position: absolute;
+        right: 15px;
+        top: 7px;
+        color: var(--color-background);
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        font-size: var(--font-size-body3);
+        z-index: 5;
+      }
+    }
+
+    .participants-list__content {
+      width: 100%;
+      padding-top: 33px;
+      max-height: calc(
+        2 * (var(--spacing-md) + var(--spacing-lg) + var(--spacing-3xl) + 30px) +
+          33px
+      ); // 2 activities height + header
+      overflow-y: auto;
+
+      // Custom scrollbar styling
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: var(--color-secondary-half-tr);
+        border-radius: 3px;
+
+        &:hover {
+          background: var(--color-secondary);
+        }
+      }
+
+      // Firefox scrollbar
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-secondary-half-tr) transparent;
+    }
+
+    .activity {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-md) var(--spacing-3xl) var(--spacing-lg);
+      position: relative;
+      font-size: var(--font-size-h6);
+      object-fit: cover;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--color-primary-bg-secondary);
+      }
+
+      &--selected {
+        background-color: var(--color-primary-bg-secondary);
+      }
+
+      .activity-data {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 30px;
+        width: calc(100% - 30px);
+
+        .assignee-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+
+        .points {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 2px var(--spacing-sm);
+          color: var(--color-background);
+          gap: 3px;
+          border-radius: 10px;
+          font-size: var(--font-size-body2);
+          background-color: var(--color-secondary);
+
+          img {
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
+
+      p {
+        margin: 0;
+      }
+
+      img {
+        width: 30px;
+        height: 30px;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 1px;
+        left: var(--spacing-3xl);
+        right: var(--spacing-3xl);
+        height: 3px;
+        background-color: var(--color-secondary-half-tr);
+      }
+
+      &:last-child::after {
+        display: none;
+      }
+    }
+  }
+
+  // Element: add-task__delete-btn
+  &__delete-btn {
+    margin-top: var(--spacing-md);
+  }
+
+  // Element: add-task__footer with multiple buttons
+  &__footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+
+    .button {
+      width: 100%;
+    }
+  }
+}

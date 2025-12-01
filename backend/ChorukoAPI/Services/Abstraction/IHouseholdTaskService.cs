@@ -16,7 +16,7 @@ public interface IHouseholdTaskService
     Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request);
     Task<ServiceResponse<List<HouseholdTaskResponse>>> GetAllHouseholdTaskAsync(string householdId);
     Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string taskId);
-    Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId);
-    Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId);
+    Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId, string userId);
+    Task<ServiceResponse<OperationResultDto>> UnMarkTaskAsCompleted(string taskId, string userId);
     Task<ServiceResponse<OperationResultDto>> DeleteHouseholdTask(string taskId);
 }

@@ -5,15 +5,15 @@ namespace ChorukoAPI.Contracts.Responses.Task
 {
     public class HouseholdTaskResponse
     {
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
-        public string HouseholdId { get; set; }
+        public required string HouseholdId { get; set; }
 
-        public string ActivityId { get; set; }
-        public ActivityResponse Activity { get; set; }
+        public required string ActivityId { get; set; }
+        public required ActivityResponse Activity { get; set; }
 
-        public string CreatorId { get; set; }
-        public UserInfoResponse Creator { get; set; }
+        public required string CreatorId { get; set; }
+        public required UserInfoResponse Creator { get; set; }
 
         public DateTime CreationDate { get; set; }
 
@@ -22,13 +22,11 @@ namespace ChorukoAPI.Contracts.Responses.Task
         public Models.TaskStatus Status { get; set; }
 
         public int ParticipantsAmount { get; set; }
+        
+        public required string Name { get; set; }
 
-        public int Reward { get; set; }
+        public required string Description { get; set; }
 
-        public string Name { get; set; }
-
-        public string Description { get; set; }
-
-        public List<UserInfoResponse> Assignees { get; set; }
+        public required List<UserInfoResponse> Assignees { get; set; }
     }
 }

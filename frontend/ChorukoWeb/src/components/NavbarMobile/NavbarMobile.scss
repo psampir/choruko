@@ -1,7 +1,5 @@
 @use "../../styles/variables";
 
-
-
 .navbar-mobile {
   width: 100%;
   display: flex;
@@ -22,7 +20,11 @@
     padding: 10px var(--spacing-2xl);
     background-color: var(--color-primary);
     width: 100%;
-    z-index: var(--z-modal);
+    z-index: var(--z-navbar);
+
+    body.notification-bar-visible & {
+      display: none;
+    }
 
     .theme-toggle,
     .profile-icon {
@@ -52,13 +54,16 @@
     transition: opacity var(--transition-slow),
       transform var(--transition-transform);
 
+    body.notification-bar-visible & {
+      display: none;
+    }
+
     &.open {
       transform: translate(-50%, 0%) translateY(0);
       opacity: 1;
     }
 
-    .dark-theme-icon,
-    .default-theme-icon {
+    .nav-theme-icon {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -66,12 +71,6 @@
       height: 46px;
       border-radius: 50%;
       cursor: pointer;
-
-      .letter-icon {
-        font-size: 18px;
-        font-weight: bold;
-        color: #55ad9b;
-      }
     }
   }
 
@@ -98,7 +97,7 @@
       top: 50%;
       left: 50%;
       width: 95%;
-      background-color: #e0f3db;
+      background-color: var(--color-background-secondary);
       border-radius: 10px;
       padding: 20px;
       display: flex;
@@ -114,9 +113,12 @@
         right: 10px;
         width: 24px;
         height: 24px;
-        background: url("../../assets/svg/close-icon.svg") no-repeat
-          center/contain;
+        background: url("../../assets/svg/light/close-icon.svg") no-repeat center/contain;
         cursor: pointer;
+
+        :root[data-theme="dark"] & {
+          background: url("../../assets/svg/dark/close-icon.svg") no-repeat center/contain;
+        }
       }
 
       .profile-popup__icon {
@@ -157,17 +159,5 @@
         }
       }
     }
-  }
-}
-
-// Styles for iOS devices with a notch
-:root.is-notch .navbar-mobile {
-  &-container {
-    padding-top: calc(env(safe-area-inset-top) + 20px);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  .theme-dropdown {
-    top: calc(88px + env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }

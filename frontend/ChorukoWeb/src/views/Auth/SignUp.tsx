@@ -1,15 +1,22 @@
 import React, { useState } from "react";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
-import { useAuth } from "../../contexts/AuthContext"; // Use AuthContext
+import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import ErrorMessage from "../../components/ErrorMessage";
 
 interface SignUpProps {
   onModeChange: (mode: string) => void;
 }
 
+// User registration with password match validation
 export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
-  const { register, loading: authLoading, error: authError } = useAuth();
+  const {
+    register,
+    loading: authLoading,
+    error: authError,
+    clearError,
+  } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -19,7 +26,6 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
     confirmPassword: "",
   });
   const [localError, setLocalError] = useState("");
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -28,45 +34,64 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
     }));
   };
 
+  // Parse backend errors into user-friendly messages
+  const parseErrorMessage = (errorMessage: string): string => {
+    try {
+      const errorData = JSON.parse(errorMessage);
+      if (errorData.errors) {
+        const fieldErrors = Object.values(errorData.errors).flat() as string[];
+        return fieldErrors.join(" ");
+      }
+      if (errorData.title) return errorData.title;
+      if (errorData.message) return errorData.message;
+      return "An error occurred. Please try again.";
+    } catch {
+      // If not JSON, return raw message
+      return errorMessage || "An unexpected error occurred. Please try again.";
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("🚀 SignUp form submitted!");
     setLocalError("");
 
-    // Basic validation
+    // Validate passwords match before submission
     if (formData.password !== formData.confirmPassword) {
-      console.log("❌ Password mismatch");
       setLocalError("Passwords do not match");
       return;
     }
 
-    console.log("✅ Validation passed, calling register...");
     try {
       const result = await register(formData);
-      console.log("📡 Register response:", result);
 
       if (result.success) {
-        // Registration successful - navigate to dashboard
-        console.log("Registration successful!");
         navigate("/dashboard");
+      } else {
+        // Handle backend validation errors
+        setLocalError(parseErrorMessage(result.message || "Sign up failed."));
       }
-    } catch (error) {
-      console.error("Registration error:", error);
+    } catch (error: any) {
+      // Handle network errors
+      setLocalError(
+        parseErrorMessage(
+          error?.message || "Connection failed. Please try again."
+        )
+      );
     }
   };
 
   return (
-    <div className="login">
+    <>
+      <ErrorMessage
+        message={localError || authError || ""}
+        variant="overlay"
+        dismissTime={5000}
+        onClose={() => {
+          setLocalError("");
+          clearError();
+        }}
+      />
       <form onSubmit={handleSignUp} className="login__form">
-        {(localError || authError) && (
-          <div
-            className="login__error"
-            style={{ color: "red", marginBottom: "10px" }}
-          >
-            {localError || authError}
-          </div>
-        )}
-
         <div className="login__input-container">
           <Input
             type="text"
@@ -132,6 +157,6 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
           Log In
         </Button>
       </div>
-    </div>
+    </>
   );
 };

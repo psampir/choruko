@@ -23,6 +23,10 @@ public class Household
     [StringLength(500)]
     [Column(TypeName = "varchar(500)")]
     public string? ProfilePicturePath { get; set; }
+    [Required]
+    [StringLength(3, MinimumLength = 3)]
+    [Column(TypeName = "varchar(3)")]
+    public string CurrencyCode { get; set; }
     public virtual List<Activity>? Activities { get; set; }
     public virtual List<User> Participants { get; set; }
     public virtual List<HouseholdTask>? Tasks { get; set; }

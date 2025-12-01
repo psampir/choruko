@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import { VitePWA } from 'vite-plugin-pwa';
 import type { ManifestOptions } from 'vite-plugin-pwa';
 
+const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
+
 const iconsJsonPath = new URL('./public/icons.json', import.meta.url);
 const iconsJson = JSON.parse(fs.readFileSync(iconsJsonPath, 'utf-8')) as {
   icons: { src: string; sizes: string }[];
@@ -28,13 +30,36 @@ const manifestIcons: ManifestIcon[] = iconsJson.icons.map(i => {
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(packageJson.version)
+  },
   server: {
     host: true, // Allow access from other devices on the network
     port: 3000, // Default port for Vite
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5180',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: 'http://localhost:5180',
+        changeOrigin: true,
+      }
+    }
   },
   preview: {
     host: true,
     port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5180',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: 'http://localhost:5180',
+        changeOrigin: true,
+      }
+    }
   },
   plugins: [
     react(),
@@ -42,12 +67,14 @@ export default defineConfig({
       // auto-inject a light SW registration; no offline caching
       injectRegister: 'auto',
       registerType: 'autoUpdate',
-      strategies: 'injectManifest',
+      // Use generateSW for development, injectManifest for production
+      strategies: process.env.NODE_ENV === 'development' ? 'generateSW' : 'injectManifest',
       srcDir: 'src',
       filename: 'sw.ts',
-      // Enable SW during dev so you can test installability without a full build
+      // Enable SW during dev with generateSW strategy
       devOptions: {
-        enabled: true,
+        enabled: false,
+        type: 'module',
         navigateFallback: '/' // ensure SPA routing works when offline logic added later
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
@@ -58,7 +85,7 @@ export default defineConfig({
         description: 'A chore management app',
         theme_color: '#ffffff',
         background_color: '#ffffff',
-        start_url: '/login',
+        start_url: '/leaderboard',
         scope: '/',
         display: 'standalone',
         display_override: ['standalone', 'browser'],

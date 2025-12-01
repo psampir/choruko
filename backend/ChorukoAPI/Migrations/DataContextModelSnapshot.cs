@@ -58,6 +58,11 @@ namespace ChorukoAPI.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(36)");
 
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("varchar(3)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -111,9 +116,6 @@ namespace ChorukoAPI.Migrations
                     b.Property<int>("ParticipantsAmount")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Reward")
-                        .HasColumnType("integer");
-
                     b.Property<byte>("Status")
                         .HasColumnType("smallint");
 
@@ -137,7 +139,7 @@ namespace ChorukoAPI.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(36)");
 
-                    b.Property<string>("RecieverEmail")
+                    b.Property<string>("ReceiverId")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
@@ -155,6 +157,8 @@ namespace ChorukoAPI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("HouseholdId");
+
+                    b.HasIndex("ReceiverId");
 
                     b.HasIndex("SenderId");
 
@@ -201,6 +205,44 @@ namespace ChorukoAPI.Migrations
                     b.HasIndex("SettlementId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("ChorukoAPI.Models.PushSubscription", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AuthKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastUsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("P256dhKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Endpoint")
+                        .IsUnique();
+
+                    b.ToTable("PushSubscriptions");
                 });
 
             modelBuilder.Entity("ChorukoAPI.Models.Settlement", b =>
@@ -325,6 +367,15 @@ namespace ChorukoAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
+
+                    b.Property<int>("PointsAllTime")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PointsCurrentMonth")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PointsCurrentYear")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ProfilePicturePath")
                         .HasColumnType("text");
@@ -589,6 +640,12 @@ namespace ChorukoAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ChorukoAPI.Models.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ChorukoAPI.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
@@ -596,6 +653,8 @@ namespace ChorukoAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Household");
+
+                    b.Navigation("Receiver");
 
                     b.Navigation("Sender");
                 });

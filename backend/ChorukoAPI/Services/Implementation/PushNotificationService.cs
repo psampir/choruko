@@ -1,0 +1,210 @@
+﻿using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Requests.Notifications;
+using ChorukoAPI.Contracts.Responses;
+using ChorukoAPI.Data;
+using ChorukoAPI.Extensions;
+using ChorukoAPI.Models;
+using ChorukoAPI.Services.Abstraction;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Collections.Concurrent;
+using System.Net;
+using WebPush;
+
+namespace ChorukoAPI.Services.Implementation;
+
+public class PushNotificationService : IPushNotificationService
+{
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IOptions<VapidSettings> _vapidSettings;
+    private readonly ILogger<PushNotificationService> _logger;
+
+    public PushNotificationService(
+        IServiceScopeFactory scopeFactory,
+        IOptions<VapidSettings> vapidSettings,
+        ILogger<PushNotificationService> logger)
+    {
+        _scopeFactory = scopeFactory;
+        _vapidSettings = vapidSettings;
+        _logger = logger;
+    }
+
+    public Task<ServiceResponse<string>> GetPublicKeyAsync()
+    {
+        var result = _vapidSettings.Value.PublicKey;
+
+        if (string.IsNullOrEmpty(result))
+            return Task.FromResult(ServiceResponseFactory.Error("", "No keys were found"));
+
+        return Task.FromResult(ServiceResponseFactory.Success(result));
+    }
+
+    public async Task<ServiceResponse<OperationResultDto>> SubscribeAsync(string userId, PushSubscriptionRequest request)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var _context = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+        var existingSubscription = await _context.PushSubscriptions
+            .FirstOrDefaultAsync(s => s.Endpoint == request.Endpoint);
+
+        if (existingSubscription == null)
+        {
+            var newSubscription = new Models.PushSubscription
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserId = userId,
+                Endpoint = request.Endpoint,
+                P256dhKey = request.P256dhKey,
+                AuthKey = request.AuthKey,
+                CreatedAt = DateTime.UtcNow,
+                LastUsedAt = DateTime.UtcNow
+            };
+
+            await _context.PushSubscriptions.AddAsync(newSubscription);
+            _logger.LogInformation("New push subscription added for user {UserId}", userId);
+        }
+        else
+        {
+            existingSubscription.UserId = userId;
+            _context.PushSubscriptions.Update(existingSubscription);
+            _logger.LogInformation("Existing push subscription re-associated for user {UserId}", userId);
+        }
+
+        await _context.SaveChangesAsync();
+
+        var result = new OperationResultDto
+        {
+            Operation = "Subscribe",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>()
+            {
+                { "UserId", userId },
+            }
+        };
+
+        return ServiceResponseFactory.Success(result, "User was successfully subscribed");
+    }
+
+    public async Task<ServiceResponse<OperationResultDto>> UnsubscribeAsync(string userId, string endpoint)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var _context = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+        var subscription = await _context.PushSubscriptions
+            .FirstOrDefaultAsync(s => s.Endpoint == endpoint && s.UserId == userId);
+
+        if (subscription != null)
+        {
+            _context.PushSubscriptions.Remove(subscription);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Push subscription removed for user {UserId}", userId);
+        }
+
+        var result = new OperationResultDto
+        {
+            Operation = "Unsubscribe",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>()
+            {
+                { "UserId", userId },
+            }
+        };
+
+        return ServiceResponseFactory.Success(result, "User was successfully unsubscribed");
+    }
+
+    public async Task<ServiceResponse<OperationResultDto>> SendNotificationAsync(string receiverId, string payloadJson)
+    {
+        _logger.LogInformation("🔔 SendNotificationAsync called for user: {ReceiverId}", receiverId);
+
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var _context = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+        var subscriptions = await _context.PushSubscriptions
+            .Where(s => s.UserId == receiverId)
+            .ToListAsync();
+
+        _logger.LogInformation("Found {Count} subscription(s) for user {ReceiverId}", subscriptions.Count, receiverId);
+
+        if (!subscriptions.Any())
+        {
+            _logger.LogWarning("❌ No push subscriptions found for user {ReceiverId}", receiverId);
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "No push subscriptions found");
+        }
+
+        var vapidDetails = new VapidDetails(
+            _vapidSettings.Value.Subject,
+            _vapidSettings.Value.PublicKey,
+            _vapidSettings.Value.PrivateKey);
+        var webPushClient = new WebPushClient();
+
+        var subscriptionsToRemove = new ConcurrentBag<Models.PushSubscription>();
+        var subscriptionsToUpdate = new ConcurrentBag<Models.PushSubscription>();
+
+        var tasks = subscriptions.Select(sub =>
+            Task.Run(async () =>
+            {
+                var pushSubscription = new WebPush.PushSubscription(sub.Endpoint, sub.P256dhKey, sub.AuthKey);
+                try
+                {
+                    _logger.LogInformation("📤 Sending push to endpoint: {Endpoint}");
+
+                    await webPushClient.SendNotificationAsync(pushSubscription, payloadJson, vapidDetails);
+
+                    _logger.LogInformation("✅ Successfully sent push to endpoint: {Endpoint}");
+
+                    subscriptionsToUpdate.Add(sub);
+                }
+                catch (WebPushException ex)
+                {
+                    _logger.LogError(ex, "❌ WebPush error...", ex.StatusCode, ex.Message);
+
+                    if (ex.StatusCode == HttpStatusCode.Gone)
+                    {
+                        _logger.LogWarning("🗑️ Subscription expired (410 Gone)...");
+                        subscriptionsToRemove.Add(sub);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "❌ Generic error sending push...", ex.Message);
+                }
+            })
+        );
+
+        await Task.WhenAll(tasks);
+
+        if (!subscriptionsToUpdate.IsEmpty)
+        {
+            foreach (var subToUpdate in subscriptionsToUpdate)
+            {
+                subToUpdate.LastUsedAt = DateTime.UtcNow;
+                _context.PushSubscriptions.Update(subToUpdate);
+            }
+            _logger.LogInformation("🔄️ Updated {Count} 'LastUsedAt' timestamps.", subscriptionsToUpdate.Count);
+        }
+
+        if (!subscriptionsToRemove.IsEmpty)
+        {
+            _context.PushSubscriptions.RemoveRange(subscriptionsToRemove);
+            _logger.LogInformation("🗑️ Removed {Count} expired subscriptions.", subscriptionsToRemove.Count);
+        }
+
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("✅ SendNotificationAsync completed for user: {ReceiverId}", receiverId);
+
+        var result = new OperationResultDto
+        {
+            Operation = "SendNotification",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>()
+            {
+                { "ReceiverId", receiverId },
+            }
+        };
+
+        return ServiceResponseFactory.Success(result, "Notification was successfully sent");
+    }
+}

@@ -10,6 +10,8 @@ interface User {
   email: string;
   userName: string;
   role?: string;
+  householdId?: string | null;
+  profilePicturePath?: string | null;
   // Add other user properties from your backend as needed
 }
 
@@ -18,17 +20,20 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
+  hasHousehold: boolean;
   login: (
     email: string,
     password: string
-  ) => Promise<{ success: boolean; message?: string }>;
+  ) => Promise<{ success: boolean; message?: string; hasHousehold?: boolean }>;
   register: (
     userData: RegisterData
   ) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
-  checkAuth: () => Promise<void>;
+  clearAuth: () => void;
+  checkAuth: (showLoading?: boolean) => Promise<void>;
   error: string | null;
   clearError: () => void;
+  onBeforeLogout: (callback: () => Promise<void> | void) => () => void;
 }
 
 interface RegisterData {
@@ -61,9 +66,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [beforeLogoutCallbacks] = useState<Set<() => Promise<void> | void>>(new Set());
 
   // Derived state
   const isAuthenticated = user !== null;
+  const hasHousehold = user?.householdId !== null && user?.householdId !== undefined;
 
   // Clear error function
   const clearError = () => {
@@ -71,9 +78,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Check authentication status
-  const checkAuth = async () => {
+  const checkAuth = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const result = await authService.checkStatus();
 
       if (result.authenticated && result.user) {
@@ -95,18 +102,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      console.log("🔐 Starting login process...");
       const result = await authService.login(email, password);
-      console.log("📨 Login response:", result);
 
       if (result.success) {
-        console.log("✅ Login successful, waiting before checking auth...");
+
         // Wait a moment for the cookie to be set properly
         await new Promise(resolve => setTimeout(resolve, 100));
-        
-        console.log("🔍 Now checking authentication status...");
-        await checkAuth();
-        return { success: true, message: result.message };
+        const authResult = await authService.checkStatus();
+
+        if (authResult.authenticated && authResult.user) {
+          setUser(authResult.user);
+          return {
+            success: true,
+            message: result.message,
+            hasHousehold: authResult.user.householdId !== null && authResult.user.householdId !== undefined
+          };
+        } else {
+          return { success: false, message: "Authentication check failed" };
+        }
       } else {
         setError(result.message || "Login failed");
         return { success: false, message: result.message };
@@ -122,27 +135,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Register function
   const register = async (userData: RegisterData) => {
-    console.log("🔄 AuthContext register called with:");
     try {
       setLoading(true);
       setError(null);
 
-      console.log("📡 Calling authService.register...");
       const result = await authService.register(userData);
-      console.log("📨 AuthService response:", result);
 
       if (result.success) {
-        console.log("✅ Registration successful in AuthContext");
         // Optionally auto-login after registration
         await login(userData.email, userData.password);
         return { success: true, message: result.message };
       } else {
-        console.log("❌ Registration failed:", result.message);
         setError(result.message || "Registration failed");
         return { success: false, message: result.message };
       }
     } catch (error) {
-      console.error("💥 AuthContext register error:", error);
       const errorMessage = "An unexpected error occurred during registration";
       setError(errorMessage);
       return { success: false, message: errorMessage };
@@ -151,15 +158,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Register callback to be called before logout
+  const onBeforeLogout = (callback: () => Promise<void> | void) => {
+    beforeLogoutCallbacks.add(callback);
+    // Return cleanup function
+    return () => {
+      beforeLogoutCallbacks.delete(callback);
+    };
+  };
+
   // Logout function
   const logout = async () => {
     try {
       setLoading(true);
+
+      // Call all registered callbacks before logout
+      const callbacks = Array.from(beforeLogoutCallbacks);
+      await Promise.all(callbacks.map(cb => Promise.resolve(cb())));
       await authService.logout();
       setUser(null);
       setError(null);
 
-      // Optionally redirect to login page
       // window.location.href = '/';
     } catch (error) {
       console.error("Logout error:", error);
@@ -168,6 +187,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Clear auth state without calling API (useful for account deletion)
+  const clearAuth = () => {
+    setUser(null);
+    setError(null);
   };
 
   // Check auth on component mount
@@ -180,12 +205,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     loading,
     isAuthenticated,
+    hasHousehold,
     login,
     register,
     logout,
+    clearAuth,
     checkAuth,
     error,
     clearError,
+    onBeforeLogout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

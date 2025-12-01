@@ -1,4 +1,9 @@
+.app {
+  min-height: 100vh;
+}
+
 .join-or-create-household {
+  margin-top: 90px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,7 +37,7 @@
   max-width: 200px;
   min-width: 170px;
   height: 48px;
-  
+
   &:hover {
     outline: none;
   }

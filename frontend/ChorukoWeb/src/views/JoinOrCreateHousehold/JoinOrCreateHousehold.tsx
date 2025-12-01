@@ -1,25 +1,28 @@
 import Button from "../../components/Button";
 import RaccoonLogo from "../../components/RaccoonLogo";
+import { useUser } from "../../contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 import "./JoinOrCreateHousehold.scss";
 
-interface LoginProps {
-  onJoinHousehold: () => void;
-  onCreateHousehold: () => void;
-}
+// Initial household setup - choose between joining or creating
+const JoinOrCreateHousehold: React.FC = () => {
+  const { user } = useUser();
+  const navigate = useNavigate();
 
-const JoinOrCreateHousehold: React.FC<LoginProps> = ({
-  onJoinHousehold,
-  onCreateHousehold,
-}) => {
   return (
     <div className="join-or-create-household">
       <RaccoonLogo />
-      <h1 className="join-or-create-household__title">Choruko</h1>
+      {user && (
+        <h1 className="join-or-create-household__title">
+          Welcome, {user?.firstName}!
+        </h1>
+      )}
+
       <div className="join-or-create-household__buttons">
-        <Button variant="primary" onClick={onJoinHousehold}>
+        <Button variant="primary" onClick={() => navigate("/invitations")}>
           Join Household
         </Button>
-        <Button variant="primary" onClick={onCreateHousehold}>
+        <Button variant="primary" onClick={() => navigate("/createHousehold")}>
           Create Household
         </Button>
       </div>

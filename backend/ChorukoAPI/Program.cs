@@ -1,6 +1,10 @@
+using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Responses.Household;
+using ChorukoAPI.Contracts.Responses.Settlement;
 using ChorukoAPI.Contracts.Responses.Task;
 using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Data;
+using ChorukoAPI.Extensions;
 using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
@@ -9,6 +13,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using ChorukoAPI.Services.Background;
+using ChorukoAPI.Contracts.Responses.Invitation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +46,44 @@ var connectionString = $"Host={dbHost};Port={dbPort};Username={dbUser};Password=
 // Use the connection string to configure the DbContext
 builder.Services.AddDbContext<DataContext>(options => options
 .UseNpgsql(connectionString).UseLazyLoadingProxies());
+
+var enableEmails = config["ENABLE_EMAILS"];
+
+if (enableEmails == "true")
+{
+    var smtpHost = config["SMTP_HOST"];
+    var smtpPort = int.Parse(config["SMTP_PORT"] ?? "587");
+    var smtpUsername = config["SMTP_USERNAME"];
+    var smtpPassword = config["SMTP_PASSWORD"];
+    var smtpFrom = config["SMTP_FROM"];
+    var serverUrl = config["SERVER_URL"];
+
+    if (string.IsNullOrWhiteSpace(smtpHost))
+        throw new InvalidOperationException("Missing required configuration value: SMTP_HOST");
+    if (string.IsNullOrWhiteSpace(smtpUsername))
+        throw new InvalidOperationException("Missing required configuration value: SMTP_USERNAME");
+    if (string.IsNullOrWhiteSpace(smtpPassword))
+        throw new InvalidOperationException("Missing required configuration value: SMTP_PASSWORD");
+    if (string.IsNullOrWhiteSpace(smtpFrom))
+        throw new InvalidOperationException("Missing required configuration value: SMTP_FROM");
+    if (string.IsNullOrWhiteSpace(serverUrl))
+        throw new InvalidOperationException("Missing required configuration value: SERVER_URL");
+    
+    builder.Services.AddScoped<IEmailService, EmailService>(sp =>
+        new EmailService(
+            smtpHost, 
+            smtpPort, 
+            smtpUsername, 
+            smtpPassword, 
+            smtpFrom,
+            serverUrl
+        )
+    );
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, NoOpEmailService>();
+}
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
@@ -73,7 +117,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax; // Changed from None to Lax for development
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Allow HTTP in development
-    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
 
     // Configure events to return proper status codes
@@ -88,7 +132,13 @@ builder.Services.ConfigureApplicationCookie(options =>
         context.Response.StatusCode = 403;
         return Task.CompletedTask;
     };
-});
+}); 
+
+builder.Services.Configure<ImageSettings>(
+    builder.Configuration.GetSection(ImageSettings.SectionName));
+
+builder.Services.Configure<VapidSettings>(
+    builder.Configuration.GetSection("VapidSettings"));
 
 builder.Services.AddHttpContextAccessor();
 
@@ -106,10 +156,25 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 
 builder.Services.AddScoped<IHouseholdTaskService, HouseholdTaskService>();
 
+builder.Services.AddScoped<IInvitationService, InvitationService>();
+
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
 builder.Services.AddScoped<IMapper<UserPasswordResetData, AdminResetPasswordResponse>, AdminResetPasswordMapper>();
+builder.Services.AddScoped<IMapper<User, UserInfoResponse>, UserInfoMapper>();
+builder.Services.AddScoped<IMapper<Settlement, SettlementResponse>, SettlementMapper>();
+builder.Services.AddScoped<IMapper<Household, HouseholdInfoResponse>, HouseholdInfoMapper>();
+builder.Services.AddScoped<IMapper<Settlement, SettlementWithoutUsersResponse>, SettlementWithoutUsersMapper>();
+builder.Services.AddScoped<IMapper<Invitation, InvitationResponse>, InvitationMapper>();
+
+builder.Services.AddScoped<ISettlementService, SettlementService>();
+builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
+
+builder.Services.AddHostedService<PointsResetService>();
+builder.Services.AddHostedService<InvitationsDeleteService>();
+builder.Services.AddHostedService<TaskDeadlineNotificationService>();
+builder.Services.AddHostedService<DataCleanupService>();
 
 builder.Services.AddControllers();
 
@@ -120,13 +185,25 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy  =>
         {
-            // Allow the Vite dev server
             policy.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials(); // Required for cookies
+                .AllowCredentials();
         });
 });
+
+// Generate VAPID keys if they don't exist
+if (!VapidKeysChecker.CheckVapidKeys())
+{
+    VapidKeysGenerator.GenerateKeys();
+}
+else
+{
+    Console.WriteLine("VAPID keys already configured.");
+}
+
+// Load VAPID keys from file into configuration
+VapidKeysLoader.LoadVapidKeys(builder.Configuration);
 
 var app = builder.Build();
 
@@ -160,5 +237,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+NotificationHandler.Initialize(app.Services);
 
 app.Run();

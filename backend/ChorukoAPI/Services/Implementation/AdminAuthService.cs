@@ -42,7 +42,7 @@ public class AdminAuthService(IConfiguration configuration) : IAdminAuthService
 
         return ServiceResponseFactory.Success(
             default(T)!,
-            "Credentials verified"
+            "Credentials verified."
         );
     }
 

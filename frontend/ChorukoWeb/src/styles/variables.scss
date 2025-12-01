@@ -1,17 +1,44 @@
 // Color Variables
 :root {
-  // Primary Colors
-  --color-primary: #95d2b3;
-  --color-secondary: #55ad9b;
-  --color-secondary-half-tr: #56ae9c80;
-  --color-background: #f1f8e8;
-  --color-background-secondary: #d8efd3;
-  --color-text-primary: #021207;
-  --color-text-secondary: #666;
-  --color-white: #ffffff;
-  --color-black: #000000;
-  --color-error-bg: #ff7285;
-  
+  // Light Mode Colors
+  --color-light-primary: #95d2b3;
+  --color-light-secondary: #55ad9b;
+  --color-light-secondary-half-tr: #56ae9c80;
+  --color-light-background: #f1f8e8;
+  --color-light-background-secondary: #d8efd3;
+  --color-light-text-primary: #021207;
+  --color-light-text-secondary: #666;
+  --color-light-white: #ffffff;
+  --color-light-black: #000000;
+  --color-light-error-bg: #ff7285;
+  --color-light-error-bg-secondary: #ffb9b9;
+
+  // Active theme colors (default to light mode)
+  --color-primary: var(--color-light-primary);
+  --color-secondary: var(--color-light-secondary);
+  --color-secondary-half-tr: var(--color-light-secondary-half-tr);
+  --color-background: var(--color-light-background);
+  --color-background-secondary: var(--color-light-background-secondary);
+  --color-text-primary: var(--color-light-text-primary);
+  --color-text-secondary: var(--color-light-text-secondary);
+  --color-white: var(--color-light-white);
+  --color-black: var(--color-light-black);
+  --color-error-bg: var(--color-light-error-bg);
+  --color-error-bg-secondary: var(--color-light-error-bg-secondary);
+
+  // Dark Mode Colors
+  --color-dark-primary: #397b5a;
+  --color-dark-secondary: #327264;
+  --color-dark-secondary-half-tr: #3272647b;
+  --color-dark-background: #000000;
+  --color-dark-background-secondary: #1e1e1e;
+  --color-dark-text-primary: #e8e9ea;
+  --color-dark-text-secondary: #c3c3c3;
+  --color-dark-white: #000000;
+  --color-dark-black: #ffffff;
+  --color-dark-error-bg: #843742;
+  --color-dark-error-bg-secondary: #4a1e24;
+
   // UI Colors
   --color-border: #e0e0e0;
   --color-border-light: #f0f0f0;
@@ -19,10 +46,10 @@
   --color-shadow: rgba(0, 0, 0, 0.1);
   --color-overlay: rgba(255, 255, 255, 0.9);
   --color-overlay-dark: rgba(255, 255, 255, 0.2);
-  
+
   // Font Sizes
   --font-size-h1: 32px; // 2rem
-  --font-size-h2: 26px; // 1.625rem  
+  --font-size-h2: 26px; // 1.625rem
   --font-size-h3: 24px; // 1.5rem
   --font-size-h4: 22px; // 1.375rem
   --font-size-h5: 20px; // 1.25rem
@@ -30,16 +57,16 @@
   --font-size-body: 16px; // 1rem
   --font-size-body2: 14px; // 0.875rem
   --font-size-body3: 12px; // 0.75rem
-  
+
   // Font Weights
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  
+
   // Font Family
   --font-family-base: "Asap", sans-serif;
-  
+
   // Spacing
   --spacing-xs: 5px;
   --spacing-sm: 8px;
@@ -49,21 +76,22 @@
   --spacing-2xl: 20px;
   --spacing-3xl: 24px;
   --spacing-4xl: 30px;
-  
+
   // Layout
   --navbar-height: 70px;
   --border-radius-sm: 8px;
-  --border-radius-standart: 10px;
+  --border-radius-standard: 10px;
   --border-radius-md: 12px;
   --border-radius-lg: 15px;
   --border-radius-xl: 20px;
   --border-radius-full: 50%;
-  
+
   // Z-index
   --z-dropdown: 10;
   --z-navbar: 1000;
   --z-modal: 1001;
-  
+  --z-modal2: 1002;
+
   // Transitions
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;

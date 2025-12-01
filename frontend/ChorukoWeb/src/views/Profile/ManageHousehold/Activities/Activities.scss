@@ -1,7 +1,11 @@
 @use "../../../../styles/variables";
 
 body {
-  overflow-y: hidden;
+  overflow-y: auto;
+}
+
+.app {
+  min-height: 100vh;
 }
 
 .back-arrow {
@@ -19,63 +23,29 @@ body {
   }
 }
 
-.notification-bar {
-  position: fixed;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: var(--color-secondary);
-  color: var(--color-background);
-  text-align: center;
-  padding: var(--spacing-lg);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-body);
-  z-index: 1111;
-  height: 70px;
-
-  transform: translateY(-100%);
-  transition: transform 0.3s ease-in-out;
-
-  &--visible {
-    transform: translateY(0);
-  }
-
-  span {
-    display: block;
-    color: var(--color-background);
-    text-align: center;
-    font-size: var(--font-size-h5);
-  }
-}
-
-.input__wrapper {
-  width: 280px;
-  margin-bottom: var(--spacing-3xl);
-  input {
-    width: 100%;
-  }
-}
 
 .activities {
+  margin-top: 90px;
   background: var(--color-background);
   padding: var(--spacing-2xl);
   font-family: var(--font-family-base);
-  overflow-y: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-2xl);
-  min-height: 100vh;
+
+  .input__wrapper {
+    width: 280px;
+    margin-bottom: var(--spacing-3xl);
+
+    input {
+      width: 100%;
+    }
+  }
 
   .popup-container .popup .popup-content p {
     font-size: var(--font-size-h4);
-  }
-
-  & button {
-    width: 200px;
   }
 
   &__title {
@@ -140,15 +110,15 @@ body {
       margin-top: var(--spacing-lg);
     }
   }
+
   .participants-list {
     position: relative;
     width: 100%;
     border: 3px solid var(--color-secondary);
     border-radius: 10px;
     background: var(--color-background-secondary);
-    overflow-y: auto;
+    overflow-y: visible;
     margin-bottom: var(--spacing-xl);
-    max-height: calc(100vh - 200px - 80px);
     scroll-behavior: smooth;
 
     &::-webkit-scrollbar {
@@ -254,7 +224,7 @@ body {
 
     .participant__delegate-admin {
       &.admin-choose::before {
-        content: url(../../../../assets/svg/edit-box.svg);
+        content: url(../../../../assets/svg/light/edit-box.svg);
         position: absolute;
         right: var(--spacing-3xl);
         width: 30px;
@@ -292,6 +262,7 @@ body {
   button {
     max-width: 150px;
   }
+
   input {
     margin-bottom: var(--spacing-3xl);
   }

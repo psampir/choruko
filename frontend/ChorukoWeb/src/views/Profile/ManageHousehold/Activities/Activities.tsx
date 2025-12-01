@@ -1,208 +1,234 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Activities.scss";
 import Button from "../../../../components/Button";
 import Input from "../../../../components/Input";
 import Popup from "../../../../components/Popup";
+import NotificationBar from "../../../../components/NotificationBar";
+import { useActivity } from "../../../../contexts/ActivityContext";
+import { useIsDarkTheme } from "../../../../utils/iconUtils";
 
-// import householdDefaultIcon from "../../../../assets/svg/householdDefault.svg";
-import arrowLeft from "../../../../assets/svg/arrow-left.svg";
-import editBox from "../../../../assets/svg/edit-box.svg";
-import star from "../../../../assets/svg/star.svg";
+import arrowLeftLight from "../../../../assets/svg/light/arrow-left.svg";
+import editBoxLight from "../../../../assets/svg/light/edit-box.svg";
+import starLight from "../../../../assets/svg/light/star.svg";
 
-type Activity = {
-  id: number;
-  info: string;
-  points: string;
-};
+import arrowLeftDark from "../../../../assets/svg/dark/arrow-left.svg";
+import editBoxDark from "../../../../assets/svg/dark/edit-box.svg";
+import starDark from "../../../../assets/svg/dark/star.svg";
 
+// Manage household activities - create, edit, delete activities with point values
 const Activities: React.FC = () => {
   const navigate = useNavigate();
-  const [activities, setActivities] = useState<Activity[]>([
-    {
-      id: 1,
-      info: "Vacuuming the floor",
-      points: "62",
-    },
-    {
-      id: 2,
-      info: "Clean dishes",
-      points: "45",
-    },
-    {
-      id: 3,
-      info: "Make a breakfast",
-      points: "30",
-    },
-    {
-      id: 4,
-      info: "Throw out the trash",
-      points: "15",
-    },
-    {
-      id: 5,
-      info: "Clean the room",
-      points: "50",
-    },
-    {
-      id: 6,
-      info: "Wash clothes",
-      points: "35",
-    },
-    {
-      id: 7,
-      info: "Mow the lawn",
-      points: "80",
-    },
-    {
-      id: 4,
-      info: "Throw out the trash",
-      points: "15",
-    },
-    {
-      id: 5,
-      info: "Clean the room",
-      points: "50",
-    },
-    {
-      id: 6,
-      info: "Wash clothes",
-      points: "35",
-    },
-    {
-      id: 7,
-      info: "Mow the lawn",
-      points: "80",
-    },
-    {
-      id: 4,
-      info: "Throw out the trash",
-      points: "15",
-    },
-    {
-      id: 5,
-      info: "Clean the room",
-      points: "50",
-    },
-    {
-      id: 6,
-      info: "Wash clothes",
-      points: "35",
-    },
-    {
-      id: 7,
-      info: "Mow the lawn",
-      points: "80",
-    },
-  ]);
+  const {
+    activities,
+    loading,
+    error,
+    refreshActivities,
+    createActivity,
+    editActivity,
+    deleteActivity,
+    clearError,
+  } = useActivity();
+  const isDark = useIsDarkTheme();
 
-  const [openPopup, setOpenPopup] = useState<boolean>(false);
-  // const [nameValue, setNameValue] = useState<string>("Poznańska");
+  const arrowLeft = isDark ? arrowLeftDark : arrowLeftLight;
+  const editBox = isDark ? editBoxDark : editBoxLight;
+  const star = isDark ? starDark : starLight;
+
+  const [openEditPopup, setOpenEditPopup] = useState<boolean>(false);
+  const [openCreatePopup, setOpenCreatePopup] = useState<boolean>(false);
   const [editActivityName, setEditActivityName] = useState("");
   const [editActivityPoints, setEditActivityPoints] = useState("");
-  const [editingActivityId, setEditingActivityId] = useState<number | null>(
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(
     null
   );
+
+  const [createActivityName, setCreateActivityName] = useState("");
+  const [createActivityPoints, setCreateActivityPoints] = useState("");
 
   const [notification, setNotification] = useState<{
     message: string;
     isVisible: boolean;
+    type: "success" | "error";
   }>({
     message: "",
     isVisible: false,
+    type: "success",
   });
 
-  const showNotification = (message: string) => {
-    setNotification({ message, isVisible: true });
+  // Load activities on mount
+  useEffect(() => {
+    refreshActivities();
+  }, [refreshActivities]);
+
+  // Display error notifications from context
+  useEffect(() => {
+    if (error) {
+      showNotification(error, "error");
+      clearError();
+    }
+  }, [error, clearError]);
+
+  const showNotification = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
+    setNotification({ message, isVisible: true, type });
 
     setTimeout(() => {
-      setNotification({ message: "", isVisible: false });
+      setNotification({ message: "", isVisible: false, type: "success" });
     }, 3000);
   };
 
-  // const handleNameChange = () => {
-  //   if (nameValue.trim()) {
-  //     showNotification("Your name has been changed");
-  //   }
-  // };
-
-  const handleEditClick = (activity: Activity) => {
-    setEditActivityName(activity.info);
-    setEditActivityPoints(activity.points);
+  const handleEditClick = (activity: {
+    id: string;
+    name: string;
+    pointsAwarded: number;
+  }) => {
+    setEditActivityName(activity.name);
+    setEditActivityPoints(activity.pointsAwarded.toString());
     setEditingActivityId(activity.id);
-    setOpenPopup(true);
+    setOpenEditPopup(true);
   };
 
-  const saveActivityData = () => {
+  const handleCreateClick = () => {
+    setCreateActivityName("");
+    setCreateActivityPoints("");
+    setOpenCreatePopup(true);
+  };
+
+  const saveActivityData = async () => {
     if (editingActivityId !== null) {
-      // Update the specific activity in the activities array
-      setActivities((prevActivities) =>
-        prevActivities.map((activity) =>
-          activity.id === editingActivityId
-            ? {
-              ...activity,
-              info: editActivityName,
-              points: editActivityPoints,
-            }
-            : activity
-        )
+      const points = parseInt(editActivityPoints, 10);
+
+      if (isNaN(points) || points < 1 || points > 1000) {
+        showNotification("Points must be between 1 and 1000", "error");
+        return;
+      }
+
+      if (editActivityName.trim().length < 3) {
+        showNotification(
+          "Activity name must be at least 3 characters long",
+          "error"
+        );
+        return;
+      }
+
+      const result = await editActivity(
+        editingActivityId,
+        editActivityName,
+        points
       );
 
-      showNotification("Activity updated successfully!");
-      setOpenPopup(false);
-      setEditingActivityId(null);
-      setEditActivityName("");
-      setEditActivityPoints("");
+      if (result.success) {
+        showNotification(
+          result.message || "Activity updated successfully!",
+          "success"
+        );
+        setOpenEditPopup(false);
+        setEditingActivityId(null);
+        setEditActivityName("");
+        setEditActivityPoints("");
+      } else {
+        showNotification(
+          result.message || "Failed to update activity",
+          "error"
+        );
+      }
     }
   };
 
-  const deleteActivityData = () => {
-    if (editingActivityId !== null) {
-      // Remove the activity from the activities array
-      setActivities((prevActivities) =>
-        prevActivities.filter((activity) => activity.id !== editingActivityId)
-      );
+  const createNewActivity = async () => {
+    const points = parseInt(createActivityPoints, 10);
 
-      showNotification("Activity deleted successfully!");
-      setOpenPopup(false);
-      setEditingActivityId(null);
-      setEditActivityName("");
-      setEditActivityPoints("");
+    if (isNaN(points) || points < 1 || points > 1000) {
+      showNotification("Points must be between 1 and 1000", "error");
+      return;
+    }
+
+    if (createActivityName.trim().length < 3) {
+      showNotification(
+        "Activity name must be at least 3 characters long",
+        "error"
+      );
+      return;
+    }
+
+    const result = await createActivity(createActivityName, points);
+
+    if (result.success) {
+      showNotification(
+        result.message || "Activity created successfully!",
+        "success"
+      );
+      setOpenCreatePopup(false);
+      setCreateActivityName("");
+      setCreateActivityPoints("");
+    } else {
+      showNotification(result.message || "Failed to create activity", "error");
+    }
+  };
+
+  const deleteActivityData = async () => {
+    if (editingActivityId !== null) {
+      const result = await deleteActivity(editingActivityId);
+
+      if (result.success) {
+        showNotification(
+          result.message || "Activity deleted successfully!",
+          "success"
+        );
+        setOpenEditPopup(false);
+        setEditingActivityId(null);
+        setEditActivityName("");
+        setEditActivityPoints("");
+      } else {
+        showNotification(
+          result.message || "Failed to delete activity",
+          "error"
+        );
+      }
     }
   };
 
   return (
     <div className="activities">
+      <NotificationBar
+        message={notification.message}
+        isVisible={notification.isVisible}
+        type={notification.type}
+      />
       <img
         className="back-arrow"
         src={arrowLeft}
         alt="Back"
-        onClick={() => navigate("/manageHousehold")}
+        onClick={() => navigate(-1)}
       />
-      <div
-        className={`notification-bar ${notification.isVisible ? "notification-bar--visible" : ""
-          }`}
-      >
-        <span>{notification.message}</span>
-      </div>
+      <Button variant="add" onClick={handleCreateClick}>
+        Add
+      </Button>
 
       <h1 className="manage-household__title">Activities</h1>
 
-      {activities && (
+      {loading && <div className="loading-message">Loading activities...</div>}
+
+      {!loading && activities.length === 0 && (
+        <div className="no-activities-message">
+          No activities found. Create one to get started!
+        </div>
+      )}
+
+      {!loading && activities.length > 0 && (
         <div className="participants-list">
           <div className="participants-list__header">ACTIVITIES</div>
           {activities.map((activity) => (
-            <div
-              className="activity"
-              key={activity.id}
-              id={String(activity.id)}
-            >
+            <div className="activity" key={activity.id} id={activity.id}>
               <div className="activity-data">
                 <span className="points">
                   <img src={star} alt="" />
-                  {activity.points}
+                  {activity.pointsAwarded}
                 </span>
-                <p>{activity.info}</p>
+                <p>{activity.name}</p>
               </div>
               <img
                 src={editBox}
@@ -216,11 +242,40 @@ const Activities: React.FC = () => {
         </div>
       )}
 
-      {openPopup && (
+      {openCreatePopup && (
+        <Popup
+          variant="primary"
+          title="Create Activity"
+          onClose={() => setOpenCreatePopup(false)}
+        >
+          <Input
+            variant="edit"
+            value={createActivityName}
+            onChange={(e) => setCreateActivityName(e.target.value)}
+            placeholder="Activity name"
+          />
+          <Input
+            variant="edit"
+            type="number"
+            value={createActivityPoints}
+            onChange={(e) => setCreateActivityPoints(e.target.value)}
+            placeholder="Points"
+            min="1"
+            max="1000"
+          />
+          <div className="button__edit-activity">
+            <Button variant="primary" onClick={createNewActivity}>
+              Create
+            </Button>
+          </div>
+        </Popup>
+      )}
+
+      {openEditPopup && (
         <Popup
           variant="primary"
           title="Edit Activity"
-          onClose={() => setOpenPopup(false)}
+          onClose={() => setOpenEditPopup(false)}
         >
           <Input
             variant="edit"
@@ -230,9 +285,12 @@ const Activities: React.FC = () => {
           />
           <Input
             variant="edit"
+            type="number"
             value={editActivityPoints}
             onChange={(e) => setEditActivityPoints(e.target.value)}
             placeholder="Points"
+            min="1"
+            max="1000"
           />
           <div className="button__edit-activity">
             <Button variant="red" onClick={deleteActivityData}>
