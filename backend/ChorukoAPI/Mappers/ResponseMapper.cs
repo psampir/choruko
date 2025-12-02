@@ -47,10 +47,10 @@ public static class ResponseMapper
         var modelState = new ModelStateDictionary();
         var statusCode = (int)serviceResponse.StatusCode;
         var validationProblemDetails = new ValidationProblemDetails(modelState);
+        var key = validationKey ?? string.Empty;
 
         if (serviceResponse.Result is IdentityResult identityResult && !identityResult.Succeeded)
         {
-            string key = validationKey ?? string.Empty;
             foreach (var error in identityResult.Errors)
             {
                 modelState.AddModelError(key, error.Description);
@@ -66,7 +66,6 @@ public static class ResponseMapper
 
         if (serviceResponse.Result is Microsoft.AspNetCore.Identity.SignInResult signInResult && !signInResult.Succeeded)
         {
-            string key = validationKey ?? string.Empty;
             modelState.AddModelError(key, serviceResponse.Message ?? "Invalid login attempt.");
 
             validationProblemDetails = new ValidationProblemDetails(modelState)
@@ -77,7 +76,6 @@ public static class ResponseMapper
             return new ObjectResult(validationProblemDetails) { StatusCode = validationProblemDetails.Status };
         }
 
-        string key = validationKey ?? string.Empty;
         modelState.AddModelError(key, serviceResponse.Message ?? "An error occurred.");
 
         validationProblemDetails = new ValidationProblemDetails(modelState)
