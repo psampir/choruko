@@ -668,8 +668,11 @@ public class HouseholdService(DataContext _context,
         }
         
         await _context.SaveChangesAsync();
+        
+        // Invalidate cookie for new admin (might be offline when promoted)
+        await _userManager.UpdateSecurityStampAsync(newAdmin);
+        
         await _signInManager.RefreshSignInAsync(currentAdmin);
-        await _signInManager.RefreshSignInAsync(newAdmin);
 
         var response = new OperationResultDto
         {
