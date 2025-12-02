@@ -78,11 +78,21 @@ const TestNotifications: React.FC = () => {
       const registration = await navigator.serviceWorker.ready;
       addLog('✅ Service worker ready');
 
+      // Check for existing subscription first (iOS specific)
+      const existingSub = await registration.pushManager.getSubscription();
+      if (existingSub) {
+        addLog('⚠️  Found existing subscription, unsubscribing first...');
+        await existingSub.unsubscribe();
+        addLog('✅ Old subscription removed');
+      }
+
       const publicKey = vapidKey || await pushNotificationService.getPublicKey();
       if (!publicKey) {
         addLog('❌ No VAPID key available');
         return;
       }
+
+      addLog(`VAPID key length: ${publicKey.length}`);
 
       // Helper function
       const urlBase64ToUint8Array = (base64String: string) => {
@@ -96,10 +106,22 @@ const TestNotifications: React.FC = () => {
         return outputArray;
       };
 
-      const subscription = await registration.pushManager.subscribe({
+      const applicationServerKey = urlBase64ToUint8Array(publicKey);
+      addLog(`Application server key created (${applicationServerKey.length} bytes)`);
+
+      addLog('Calling pushManager.subscribe() - this may take a moment on iOS...');
+      
+      // Add timeout for iOS (30 seconds)
+      const subscribePromise = registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
+        applicationServerKey: applicationServerKey,
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Subscription timeout after 30s - iOS may require retry')), 30000)
+      );
+
+      const subscription = await Promise.race([subscribePromise, timeoutPromise]);
 
       addLog('✅ Browser subscription created');
 
@@ -123,6 +145,13 @@ const TestNotifications: React.FC = () => {
       }
     } catch (error) {
       addLog(`❌ ERROR: ${error}`);
+      if (error instanceof Error) {
+        addLog(`Error name: ${error.name}`);
+        addLog(`Error message: ${error.message}`);
+        if (error.stack) {
+          addLog(`Stack: ${error.stack.substring(0, 200)}...`);
+        }
+      }
     }
   };
 
