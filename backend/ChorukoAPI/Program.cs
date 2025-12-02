@@ -115,10 +115,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "ChorukoCookie";
     options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.Lax; // Changed from None to Lax for development
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Allow HTTP in development
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
+    options.Cookie.IsEssential = true;
 
     // Configure events to return proper status codes
     options.Events.OnRedirectToLogin = context =>
