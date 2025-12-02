@@ -18,26 +18,6 @@ on:
         type: boolean
         required: true
         default: false
-      build_frontend:
-        description: 'Build frontend image?'
-        type: boolean
-        required: false
-        default: true
-      build_backend:
-        description: 'Build backend image?'
-        type: boolean
-        required: false
-        default: true
-      build_manager:
-        description: 'Build manager image?'
-        type: boolean
-        required: false
-        default: true
-      previous_tag:
-        description: 'Previous tag to use for skipped images (e.g., dev-202412021530, v1.0.0, or latest)'
-        type: string
-        required: false
-        default: 'latest'
   workflow_call:
     inputs:
       branch:
@@ -50,26 +30,6 @@ on:
         type: boolean
         required: true
         default: false
-      build_frontend:
-        description: 'Build frontend image?'
-        type: boolean
-        required: false
-        default: true
-      build_backend:
-        description: 'Build backend image?'
-        type: boolean
-        required: false
-        default: true
-      build_manager:
-        description: 'Build manager image?'
-        type: boolean
-        required: false
-        default: true
-      previous_tag:
-        description: 'Previous tag to use for skipped images'
-        type: string
-        required: false
-        default: 'latest'
     outputs:
       frontend_image:
         description: 'Frontend image tag'
@@ -94,13 +54,10 @@ jobs:
         image:
           - name: choruko-frontend
             dockerfile: ./docker/Dockerfiles/frontend/Dockerfile
-            build_input: build_frontend
           - name: choruko-backend
             dockerfile: ./docker/Dockerfiles/backend/Dockerfile
-            build_input: build_backend
           - name: choruko-manager
             dockerfile: ./docker/Dockerfiles/manager/Dockerfile
-            build_input: build_manager
     steps:
 
       - name: Get input variables
@@ -109,39 +66,19 @@ jobs:
           if [ -n "${{ inputs.branch }}" ]; then
             echo "BRANCH=${{ inputs.branch }}" >> $GITHUB_OUTPUT
             echo "RELEASE=${{ inputs.release }}" >> $GITHUB_OUTPUT
-            echo "BUILD_FRONTEND=${{ inputs.build_frontend }}" >> $GITHUB_OUTPUT
-            echo "BUILD_BACKEND=${{ inputs.build_backend }}" >> $GITHUB_OUTPUT
-            echo "BUILD_MANAGER=${{ inputs.build_manager }}" >> $GITHUB_OUTPUT
-            echo "PREVIOUS_TAG=${{ inputs.previous_tag }}" >> $GITHUB_OUTPUT
           else
             echo "BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
             echo "RELEASE=${{ github.event.inputs.release }}" >> $GITHUB_OUTPUT
-            echo "BUILD_FRONTEND=${{ github.event.inputs.build_frontend }}" >> $GITHUB_OUTPUT
-            echo "BUILD_BACKEND=${{ github.event.inputs.build_backend }}" >> $GITHUB_OUTPUT
-            echo "BUILD_MANAGER=${{ github.event.inputs.build_manager }}" >> $GITHUB_OUTPUT
-            echo "PREVIOUS_TAG=${{ github.event.inputs.previous_tag }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Determine if this image should be built
-        id: should_build
-        run: |
-          if [[ "${{ matrix.image.build_input }}" == "build_frontend" ]]; then
-            echo "BUILD=${{ steps.vars.outputs.BUILD_FRONTEND }}" >> $GITHUB_OUTPUT
-          elif [[ "${{ matrix.image.build_input }}" == "build_backend" ]]; then
-            echo "BUILD=${{ steps.vars.outputs.BUILD_BACKEND }}" >> $GITHUB_OUTPUT
-          elif [[ "${{ matrix.image.build_input }}" == "build_manager" ]]; then
-            echo "BUILD=${{ steps.vars.outputs.BUILD_MANAGER }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Checkout code
-        if: ${{ steps.should_build.outputs.BUILD == 'true' }}
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.vars.outputs.BRANCH }}
           lfs: true
 
       - name: Check if tag exists in the repository
-        if: ${{ steps.should_build.outputs.BUILD == 'true' && steps.vars.outputs.RELEASE == 'true' }}
+        if: ${{ steps.vars.outputs.RELEASE == 'true' }}
         run: |
           if ! git show-ref --verify --quiet refs/tags/${{ steps.vars.outputs.BRANCH }}; then
             echo "Tag ${{ steps.vars.outputs.BRANCH }} does not exist in the repository."
@@ -149,7 +86,7 @@ jobs:
           fi
 
       - name: Check if branch exists in the repository
-        if: ${{ steps.should_build.outputs.BUILD == 'true' && steps.vars.outputs.RELEASE == 'false' }}
+        if: ${{ steps.vars.outputs.RELEASE == 'false' }}
         run: |
           if ! git show-ref --verify --quiet refs/heads/${{ steps.vars.outputs.BRANCH }}; then
             echo "Branch ${{ steps.vars.outputs.BRANCH }} does not exist in the repository."
@@ -164,7 +101,6 @@ jobs:
           echo "BRANCH_PREFIX=${{ steps.vars.outputs.BRANCH }}-${TIMESTAMP}" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
-        if: ${{ steps.should_build.outputs.BUILD == 'true' }}
         uses: docker/setup-buildx-action@v3
 
       - name: Log into GitHub Container Registry
@@ -172,10 +108,10 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.CR_PAT || secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push ${{ matrix.image.name }} image (non-release)
-        if: ${{ steps.should_build.outputs.BUILD == 'true' && steps.vars.outputs.RELEASE == 'false' }}
+        if: ${{ steps.vars.outputs.RELEASE == 'false' }}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -189,7 +125,7 @@ jobs:
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache,mode=max
 
       - name: Build and push ${{ matrix.image.name }} image (release)
-        if: ${{ steps.should_build.outputs.BUILD == 'true' && steps.vars.outputs.RELEASE == 'true' }}
+        if: ${{ steps.vars.outputs.RELEASE == 'true' }}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -202,28 +138,6 @@ jobs:
           push: true
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}:buildcache,mode=max
-      
-      - name: Pull and re-tag existing image for ${{ matrix.image.name }}
-        if: ${{ steps.should_build.outputs.BUILD == 'false' }}
-        run: |
-          SOURCE_TAG="${{ steps.vars.outputs.PREVIOUS_TAG }}"
-          if [ "${{ steps.vars.outputs.RELEASE }}" == "true" ]; then
-            NEW_TAG="${{ steps.vars.outputs.BRANCH }}"
-          else
-            NEW_TAG="${{ steps.prefix.outputs.BRANCH_PREFIX }}"
-          fi
-          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/${{ matrix.image.name }}"
-          
-          echo "Pulling ${IMAGE_NAME}:${SOURCE_TAG}"
-          docker pull "${IMAGE_NAME}:${SOURCE_TAG}"
-          
-          echo "Re-tagging to ${IMAGE_NAME}:${NEW_TAG}"
-          docker tag "${IMAGE_NAME}:${SOURCE_TAG}" "${IMAGE_NAME}:${NEW_TAG}"
-          
-          echo "Pushing ${IMAGE_NAME}:${NEW_TAG}"
-          docker push "${IMAGE_NAME}:${NEW_TAG}"
-          
-          echo "✅ Skipped building ${{ matrix.image.name }}, re-tagged from ${SOURCE_TAG} to ${NEW_TAG}"
       
       - name: Return image tag
         id: image_tag
@@ -251,15 +165,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Create summary
-        run: |
-          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Image Tags" >> $GITHUB_STEP_SUMMARY
-          echo "- **Frontend**: ${{ needs.build.outputs.frontend_tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Backend**: ${{ needs.build.outputs.backend_tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Manager**: ${{ needs.build.outputs.manager_tag }}" >> $GITHUB_STEP_SUMMARY
-          
       - name: Set outputs
         id: set_outputs
         run: |
