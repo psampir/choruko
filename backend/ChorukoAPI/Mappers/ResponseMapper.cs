@@ -77,7 +77,8 @@ public static class ResponseMapper
             return new ObjectResult(validationProblemDetails) { StatusCode = validationProblemDetails.Status };
         }
 
-        modelState.AddModelError(validationKey, serviceResponse.Message ?? "An error occurred.");
+        string key = validationKey ?? string.Empty;
+        modelState.AddModelError(key, serviceResponse.Message ?? "An error occurred.");
 
         validationProblemDetails = new ValidationProblemDetails(modelState)
         {
