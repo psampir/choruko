@@ -18,6 +18,26 @@ on:
         description: 'Branch to build from'
         type: string
         required: true
+      build_frontend:
+        description: 'Build frontend image?'
+        type: boolean
+        required: false
+        default: true
+      build_backend:
+        description: 'Build backend image?'
+        type: boolean
+        required: false
+        default: true
+      build_manager:
+        description: 'Build manager image?'
+        type: boolean
+        required: false
+        default: true
+      previous_tag:
+        description: 'Previous tag to use for skipped images (e.g., dev-202412021530 or latest)'
+        type: string
+        required: false
+        default: 'latest'
   push:
     branches:
       - dev
@@ -65,6 +85,10 @@ jobs:
     with:
       branch: ${{ needs.prepare.outputs.branch }}
       release: false
+      build_frontend: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_frontend || true }}
+      build_backend: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_backend || true }}
+      build_manager: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_manager || true }}
+      previous_tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.previous_tag || 'latest' }}
   
   deploy:
     needs: [prepare, build]
