@@ -82,6 +82,7 @@ jobs:
   build:
     needs: prepare
     uses: ./.github/workflows/build.yml
+    secrets: inherit
     with:
       branch: ${{ needs.prepare.outputs.branch }}
       release: false
