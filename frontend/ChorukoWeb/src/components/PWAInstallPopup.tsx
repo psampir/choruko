@@ -35,9 +35,10 @@ const PWAInstallPopup: React.FC<PWAInstallPopupProps> = ({ onClose, open }) => {
           <div className="pwa-install-section">
             <h3>iPhone & iPad</h3>
             <ol>
-              <li>Tap the <strong>Share</strong> button <span className="share-icon">⬆️</span></li>
-              <li>Scroll and tap <strong>"Add to Home Screen"</strong></li>
-              <li>Tap <strong>"Add"</strong></li>
+              <li>Tap the <strong>menu</strong> (⋯) in the browser</li>
+              <li>Tap <strong>"Share"</strong></li>
+              <li>Tap <strong>"More"</strong></li>
+              <li>Tap <strong>"Add to Home Screen"</strong></li>
             </ol>
           </div>
         )}
