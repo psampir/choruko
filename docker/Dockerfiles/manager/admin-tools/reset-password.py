@@ -2,7 +2,7 @@ import os, requests
 from colorama import Fore, Style
 
 # Set up environment variables for backend connection
-API_URL = "http://backend:8080/api/Admin/users/resetPassword"
+API_URL = "http://backend:8080/api/Admin/users/reset-password"
 DB_USERNAME = os.getenv('DB_USERNAME')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 
