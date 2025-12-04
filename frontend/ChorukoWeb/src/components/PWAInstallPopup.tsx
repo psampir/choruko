@@ -33,7 +33,7 @@ const PWAInstallPopup: React.FC<PWAInstallPopupProps> = ({ onClose, open }) => {
 
         {isIOS && (
           <div className="pwa-install-section">
-            <h3>iPhone & iPad</h3>
+            <h3>iPhone & iPad (Safari)</h3>
             <ol>
               <li>Tap the <strong>menu</strong> (⋯) in the browser</li>
               <li>Tap <strong>"Share"</strong></li>
@@ -45,7 +45,7 @@ const PWAInstallPopup: React.FC<PWAInstallPopupProps> = ({ onClose, open }) => {
 
         {isAndroid && (
           <div className="pwa-install-section">
-            <h3>Android</h3>
+            <h3>Android (Chrome)</h3>
             <ol>
               <li>Tap the <strong>menu</strong> (⋮) in the browser</li>
               <li>Tap <strong>"Add to Home Screen"</strong></li>
