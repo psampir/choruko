@@ -15,7 +15,7 @@ const PWAInstallPopup: React.FC<PWAInstallPopupProps> = ({ onClose, open }) => {
     const userAgent = window.navigator.userAgent.toLowerCase();
     const ios = /iphone|ipad|ipod/.test(userAgent);
     const android = /android/.test(userAgent);
-    
+
     setIsIOS(ios);
     setIsAndroid(android);
   }, []);
@@ -47,7 +47,7 @@ const PWAInstallPopup: React.FC<PWAInstallPopupProps> = ({ onClose, open }) => {
             <h3>Android</h3>
             <ol>
               <li>Tap the <strong>menu</strong> (⋮) in the browser</li>
-              <li>Tap <strong>"Install app"</strong></li>
+              <li>Tap <strong>"Add to Home Screen"</strong></li>
               <li>Tap <strong>"Install"</strong></li>
             </ol>
           </div>
