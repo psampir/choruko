@@ -14,6 +14,7 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using Microsoft.Extensions.Options;
 using ChorukoAPI.Mappers;
+using System.Globalization;
 
 namespace ChorukoAPI.Services.Implementation;
 
@@ -32,12 +33,12 @@ public class HouseholdService(DataContext _context,
 
         if (user == null)
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "User not found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, "", "",new List<HouseholdParticipantResponse>()), "User not found.", HttpStatusCode.NotFound);
         }
 
         if (string.IsNullOrEmpty(user.HouseholdId))
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
+            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null,"" ,"", new List<HouseholdParticipantResponse>()), "User is not part of any household.", HttpStatusCode.BadRequest);
         }
 
         var household = await _context.Households
@@ -47,7 +48,8 @@ public class HouseholdService(DataContext _context,
 
         if (household == null)
         {
-            return ServiceResponseFactory.Error(new HouseholdInfoResponse("", "", "", "", "", 0, null, new List<HouseholdParticipantResponse>()), "Household not found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error
+                (new HouseholdInfoResponse("", "", "", "", "", 0, null, "","", new List<HouseholdParticipantResponse>()), "Household not found.", HttpStatusCode.NotFound);
         }
 
         return ServiceResponseFactory.Success(await _mapper.Map(household));
@@ -81,6 +83,7 @@ public class HouseholdService(DataContext _context,
         {
             Id = Guid.NewGuid().ToString(), 
             Name = request.Name,
+            CurrencyCode = request.CurrencyCode.ToUpper(),
             AdminId = user.Id, 
             Participants = new List<User>(),
             ProfilePicturePath = profilePicturePath 
@@ -205,7 +208,7 @@ public class HouseholdService(DataContext _context,
     {
         if (file.Length > _options.Value.MaxFileSize)
         {
-            return ServiceResponseFactory.Error<string>(null, $"File size must not exceed {_options.Value.MaxFileSize / 1024 / 1024}MB.", HttpStatusCode.RequestEntityTooLarge);
+            return ServiceResponseFactory.Error<string>(null, $"File size too large. Maximum allowed size is {_options.Value.MaxFileSize / 1024 / 1024}MB.", HttpStatusCode.RequestEntityTooLarge);
         }
         
         var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
@@ -360,84 +363,6 @@ public class HouseholdService(DataContext _context,
         return ServiceResponseFactory.Success(
             response,
             "User was successfully removed from the household.",
-            HttpStatusCode.OK
-        );
-    }
-
-    public async Task<ServiceResponse<OperationResultDto>> AddUserToHouseholdAsync(string userIdToAdd, string currentUserId)
-    {
-        var currentUser = await _userManager.FindByIdAsync(currentUserId);
-        if (currentUser == null)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user not found.", HttpStatusCode.NotFound);
-        }
-
-        var currentUserRoles = await _userManager.GetRolesAsync(currentUser);
-        if (currentUser.HouseholdId == null)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Current user does not belong to a household.", HttpStatusCode.BadRequest);
-        }
-
-        var userToAdd = await _userManager.FindByIdAsync(userIdToAdd);
-        if (userToAdd == null)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "User to add not found.", HttpStatusCode.NotFound);
-        }
-        
-        var household = await _context.Households
-            .Include(h => h.Participants)
-            .FirstOrDefaultAsync(h => h.Id == currentUser.HouseholdId);
-            
-        if (household == null)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
-        }
-        
-        if (userToAdd.HouseholdId != null)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "User to add already belongs to a household.", HttpStatusCode.Conflict);
-        }
-        
-        var userToAddRoles = await _userManager.GetRolesAsync(userToAdd);
-        if (!userToAddRoles.Contains("None"))
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Only users with the 'None' role can be added to a household.", HttpStatusCode.Forbidden);
-        }
-        
-        userToAdd.HouseholdId = household.Id;
-        household.Participants.Add(userToAdd);
-        
-        var removeRoleResult = await _userManager.RemoveFromRoleAsync(userToAdd, "None");
-        if (!removeRoleResult.Succeeded)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to remove 'None' role from user.", HttpStatusCode.InternalServerError);
-        }
-
-        var addRoleResult = await _userManager.AddToRoleAsync(userToAdd, "Participant");
-        if (!addRoleResult.Succeeded)
-        {
-            return ServiceResponseFactory.Error<OperationResultDto>(null, "Failed to assign 'Participant' role to user.", HttpStatusCode.InternalServerError);
-        }
-
-        _context.Users.Update(userToAdd);
-        
-        await _context.SaveChangesAsync();
-        
-        var response = new OperationResultDto
-        {
-            Operation = "AddUserToHousehold",
-            Timestamp = DateTime.UtcNow,
-            Metadata = new Dictionary<string, object>
-            {
-                { "HouseholdId", household.Id },
-                { "UserId", userToAdd.Id },
-                { "UserName", userToAdd.FirstName + " " + userToAdd.LastName }
-            }
-        };
-
-        return ServiceResponseFactory.Success(
-            response,
-            "User was successfully added to the household.",
             HttpStatusCode.OK
         );
     }
@@ -763,5 +688,64 @@ public class HouseholdService(DataContext _context,
             "Household admin was successfully set and roles were swapped.",
             HttpStatusCode.OK
         );
+    }
+    
+    private string GetCurrencySymbolFromIso(string isoCurrencyCode)
+    {
+        try
+        {
+            var region = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+                .Select(c => new RegionInfo(c.Name))
+                .FirstOrDefault(r => r.ISOCurrencySymbol.Equals(isoCurrencyCode, StringComparison.InvariantCultureIgnoreCase));
+
+            return region?.CurrencySymbol ?? isoCurrencyCode; 
+        }
+        catch
+        {
+            return isoCurrencyCode;
+        }
+    }
+    
+    public async Task<ServiceResponse<OperationResultDto>> ChangeHouseholdCurrencyAsync(ChangeCurrencyRequest request, string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return ServiceResponseFactory.Error<OperationResultDto>(null, "User not found.", HttpStatusCode.NotFound);
+
+        var userRoles = await _userManager.GetRolesAsync(user);
+        if (!userRoles.Contains("HouseholdAdmin"))
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Only household admins can change the currency settings.", HttpStatusCode.Forbidden);
+        }
+
+        if (string.IsNullOrWhiteSpace(request.NewCurrencyCode) || request.NewCurrencyCode.Length != 3)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Invalid currency code format.", HttpStatusCode.BadRequest);
+        }
+
+        var household = await _context.Households.FirstOrDefaultAsync(h => h.Id == user.HouseholdId);
+        if (household == null)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Household not found.", HttpStatusCode.NotFound);
+        }
+
+        var oldCurrency = household.CurrencyCode;
+        household.CurrencyCode = request.NewCurrencyCode.ToUpper();
+
+        _context.Households.Update(household);
+        await _context.SaveChangesAsync();
+
+        var response = new OperationResultDto
+        {
+            Operation = "ChangeCurrency",
+            Timestamp = DateTime.UtcNow,
+            Metadata = new Dictionary<string, object>
+            {
+                { "HouseholdId", household.Id },
+                { "OldCurrency", oldCurrency },
+                { "NewCurrency", household.CurrencyCode }
+            }
+        };
+
+        return ServiceResponseFactory.Success(response, "Household currency updated successfully.", HttpStatusCode.OK);
     }
 }

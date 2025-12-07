@@ -7,6 +7,7 @@ import "./ManageAccount.scss";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Popup from "../../../components/Popup";
+import NotificationBar from "../../../components/NotificationBar";
 import ProfileDefaultIconLight from "../../../assets/svg/light/profile-icon-light.svg";
 import arrowLeftLight from "../../../assets/svg/light/arrow-left.svg";
 import ProfileDefaultIconDark from "../../../assets/svg/dark/profile-icon-light.svg";
@@ -49,9 +50,11 @@ const ManageAccount: React.FC = () => {
       const pictureUrl = getProfilePictureUrl(user.profilePicturePath);
       if (pictureUrl) {
         setProfileImageSrc(pictureUrl);
+      } else {
+        setProfileImageSrc(ProfileDefaultIcon);
       }
     }
-  }, [user]);
+  }, [user, ProfileDefaultIcon]);
 
   const [notification, setNotification] = useState<{
     message: string;
@@ -169,19 +172,17 @@ const ManageAccount: React.FC = () => {
 
   return (
     <div className="manage-account">
+      <NotificationBar
+        message={notification.message}
+        isVisible={notification.isVisible}
+        type={notification.type}
+      />
       <img
         className="back-arrow"
         src={arrowLeft}
         alt="Back"
         onClick={() => navigate(-1)}
       />
-      <div
-        className={`notification-bar notification-bar--${notification.type} ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
-      >
-        <span>{notification.message}</span>
-      </div>
 
       <h1 className="manage-account__template-name">Manage Account</h1>
       <div className="account-header">

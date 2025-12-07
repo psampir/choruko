@@ -19,8 +19,12 @@ services:
       dockerfile: docker/Dockerfiles/backend/Dockerfile
     container_name: choruko_backend
     restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
     env_file:
       - .env
+    ports:
+      - "8080:8080"
     volumes:
       - ${APP_DATA_LOCATION}:/app/wwwroot/uploads
       - /etc/localtime:/etc/localtime:ro

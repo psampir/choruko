@@ -64,17 +64,6 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         return result.ToApiResponse("Delete participant");
     }
     
-    [HttpPost("{userIdToAdd}/add")]
-    [Authorize(Roles="HouseholdAdmin")]
-    public async Task<ActionResult<ApiResponse<OperationResultDto>>> AddUserToHousehold([FromRoute] string userIdToAdd)
-    {
-        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
-        var result = await _householdService.AddUserToHouseholdAsync(userIdToAdd, currentUserId);
-
-        return result.ToApiResponse("Add participant");
-    }
-
     [HttpDelete("delete")]
     [Authorize(Roles="HouseholdAdmin")]
     public async Task<ActionResult<ApiResponse<OperationResultDto>>> DeleteHousehold()
@@ -110,6 +99,27 @@ public class HouseholdController(IHouseholdService _householdService) : Controll
         var result = await _householdService.RenameHouseholdAsync(userId, request.NewName);
 
         return result.ToApiResponse("Rename household");
+    }
+    
+    [HttpPatch("change-currency")]
+    [Authorize(Roles = "HouseholdAdmin")]
+    public async Task<ActionResult<ApiResponse<OperationResultDto>>> ChangeCurrency([FromBody] ChangeCurrencyRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<OperationResultDto>(null, "User not authenticated.").ToApiResponse());
+        }
+
+        var result = await _householdService.ChangeHouseholdCurrencyAsync(request, userId);
+
+        return result.ToApiResponse("Change household currency");
     }
     
     [HttpPost("leave")]

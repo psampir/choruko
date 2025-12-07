@@ -104,11 +104,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "👋 New task was created!",
-                body = $"{request.Name}, deadline:{request.DeadLine}!",
+                title = "✅ New task created",
+                body = $"{request.Name} - Deadline: {request.DeadLine}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/tasks"
             }); 
             
             var receivers = household.Participants
@@ -207,11 +207,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             {
                 var newAssigneePayload = System.Text.Json.JsonSerializer.Serialize(new
                 {
-                    title = "🔔 You've been added to a task!",
-                    body = $"You were added to '{householdTask.Name}' by {creatorName}.",
+                    title = "🔔 Added to task",
+                    body = $"You were added to '{householdTask.Name}' by {creatorName}",
                     icon = "/icons/icon-192x192.png",
                     badge = "/icons/icon-96x96.png",
-                    url = $"/tasks/{householdTask.Id}"
+                    url = "/tasks"
                 });
                 notificationTasks.Add(NotificationHandler.SendNotificationAsync(newlyAddedAssignees, newAssigneePayload));
             }
@@ -220,11 +220,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             {
                 var editedPayload = System.Text.Json.JsonSerializer.Serialize(new
                 {
-                    title = "👋 Task info was edited!",
-                    body = $"{request.Name}, deadline:{request.DeadLine.ToShortDateString()}!",
+                    title = "✏️ Task edited",
+                    body = $"{request.Name} - Deadline: {request.DeadLine.ToShortDateString()}",
                     icon = "/icons/icon-192x192.png",
                     badge = "/icons/icon-96x96.png",
-                    url = $"/tasks/{householdTask.Id}"
+                    url = "/tasks"
                 });
                 notificationTasks.Add(NotificationHandler.SendNotificationAsync(existingAssignees, editedPayload));
             }
@@ -317,11 +317,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 New assignee in task!",
-            body = $"{householdTask.Name}, assignee:{user.FirstName} {user.LastName}!",
+            title = "➕ New assignee",
+            body = $"{user.FirstName} {user.LastName} joined '{householdTask.Name}'",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
-            url = "/"
+            url = "/tasks"
         });
 
         if (userId != householdTask.CreatorId)
@@ -380,11 +380,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 User left task!",
-            body = $"{householdTask.Name}, assignee:{user.FirstName} {user.LastName}!",
+            title = "➖ Assignee left",
+            body = $"{user.FirstName} {user.LastName} left '{householdTask.Name}'",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
-            url = "/"
+            url = "/tasks"
         });
 
         if (userId != householdTask.CreatorId)
@@ -435,11 +435,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 Task was completed!",
-            body = $"{householdTask.Name}!",
+            title = "✅ Task completed",
+            body = $"{householdTask.Name}",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
-            url = "/"
+            url = "/tasks"
         });
 
         var receivers = householdTask.Assignees
@@ -512,11 +512,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         var payload = System.Text.Json.JsonSerializer.Serialize(new
         {
-            title = "👋 Task was reopened!",
-            body = $"{householdTask.Name}!",
+            title = "🔄 Task reopened",
+            body = $"{householdTask.Name}",
             icon = "/icons/icon-192x192.png",
             badge = "/icons/icon-96x96.png",
-            url = "/"
+            url = "/tasks"
         });
 
         var receivers = householdTask.Assignees

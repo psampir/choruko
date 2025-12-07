@@ -57,6 +57,7 @@ const applyTheme = (theme: ThemeType) => {
       "var(--color-dark-error-bg-secondary)"
     );
   } else {
+    // Light mode: Reference light theme variables
     root.style.setProperty("--color-primary", "var(--color-light-primary)");
     root.style.setProperty("--color-secondary", "var(--color-light-secondary)");
     root.style.setProperty(
@@ -94,7 +95,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [theme, setThemeState] = useState<ThemeType>(() => {
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    const initialTheme = (savedTheme as ThemeType) || "light";
+    const initialTheme = (savedTheme as ThemeType) || "system";
     // Apply theme immediately during initialization
     applyTheme(initialTheme);
     return initialTheme;

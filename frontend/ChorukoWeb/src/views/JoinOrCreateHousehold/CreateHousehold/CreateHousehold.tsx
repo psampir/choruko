@@ -1,16 +1,20 @@
 import "./CreateHousehold.scss";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import NavbarMobile from "../../../components/NavbarMobile";
+import NotificationBar from "../../../components/NotificationBar";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
 import { useHousehold } from "../../../contexts/HouseholdContext";
 import { useIsDarkTheme } from "../../../utils/iconUtils";
+import { POPULAR_CURRENCIES } from "../../../utils/currencies";
 import householdIconLight from "../../../assets/svg/light/householdDefault.svg";
 import householdIconDark from "../../../assets/svg/dark/householdDefault.svg";
 import arrowLeftIconLight from "../../../assets/svg/light/arrow-left.svg";
 import arrowLeftIconDark from "../../../assets/svg/dark/arrow-left.svg";
+import checkIconLight from "../../../assets/svg/light/check.svg";
+import checkIconDark from "../../../assets/svg/dark/check.svg";
 import householdService from "../../../services/householdService";
 
 // Create new household with name and optional profile picture
@@ -21,9 +25,12 @@ function CreateHousehold() {
   const isDark = useIsDarkTheme();
   const householdIcon = isDark ? householdIconDark : householdIconLight;
   const arrowLeftIcon = isDark ? arrowLeftIconDark : arrowLeftIconLight;
+  const checkIcon = isDark ? checkIconDark : checkIconLight;
   const [householdName, setHouseholdName] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(householdIcon);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("USD");
+  const [currencyCollapsed, setCurrencyCollapsed] = useState(true);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{
     message: string;
@@ -45,6 +52,12 @@ function CreateHousehold() {
       setNotification({ message: "", isVisible: false, type: "success" });
     }, 3000);
   };
+
+  useEffect(() => {
+    if (!selectedImage) {
+      setImagePreview(householdIcon);
+    }
+  }, [householdIcon, selectedImage]);
 
   // Trigger file input click for image selection
   const handleImageSelect = () => {
@@ -82,6 +95,7 @@ function CreateHousehold() {
     try {
       const result = await householdService.createHousehold({
         name: householdName.trim(),
+        currencyCode: selectedCurrency,
         profilePicture: selectedImage || undefined,
       });
 
@@ -109,19 +123,17 @@ function CreateHousehold() {
   return (
     <div className="create-household">
       <NavbarMobile />
+      <NotificationBar
+        message={notification.message}
+        isVisible={notification.isVisible}
+        type={notification.type}
+      />
       <img
-        className="create-household back-arrow"
+        className="back-arrow"
         src={arrowLeftIcon}
         alt="back-arrow"
         onClick={() => navigate(-1)}
       />
-      <div
-        className={`notification-bar notification-bar--${notification.type} ${
-          notification.isVisible ? "notification-bar--visible" : ""
-        }`}
-      >
-        <span>{notification.message}</span>
-      </div>
 
       <h1>Create Household</h1>
       <img
@@ -151,6 +163,47 @@ function CreateHousehold() {
           setHouseholdName(e.target.value)
         }
       />
+
+      {/* Currency Selection */}
+      <div
+        className={`participants-list ${
+          currencyCollapsed ? "participants-list--collapsed" : ""
+        }`}
+      >
+        <div
+          className="participants-list__header"
+          onClick={() => setCurrencyCollapsed(!currencyCollapsed)}
+        >
+          SELECT CURRENCY
+          <span className="dropdown__arrow">&#9660;</span>
+        </div>
+        {!currencyCollapsed && (
+          <div className="participants-list__content">
+            {POPULAR_CURRENCIES.map((currency) => (
+              <div
+                className={`activity ${
+                  selectedCurrency === currency.code ? "activity--selected" : ""
+                }`}
+                key={currency.code}
+                onClick={() => setSelectedCurrency(currency.code)}
+              >
+                <div className="activity-data">
+                  <span className="currency-code">{currency.code}</span>
+                  <p>{currency.name}</p>
+                </div>
+                {selectedCurrency === currency.code && (
+                  <img
+                    src={checkIcon}
+                    alt="Selected"
+                    className="check-icon"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <Button
         variant="primary"
         className="create-btn"

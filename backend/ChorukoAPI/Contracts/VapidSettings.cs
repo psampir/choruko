@@ -2,9 +2,9 @@
 
 public class VapidSettings
 {
-    public string PublicKey { get; set; }
+    public required string PublicKey { get; set; }
 
-    public string PrivateKey { get; set; }
+    public required string PrivateKey { get; set; }
 
-    public string Subject { get; set; }
+    public required string Subject { get; set; }
 }

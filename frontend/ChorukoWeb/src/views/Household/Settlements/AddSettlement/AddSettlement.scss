@@ -35,8 +35,8 @@
     justify-content: center;
 
     img {
-      width: 33px;
-      height: 33px;
+      width: 46px;
+      height: 46px;
     }
   }
 
@@ -44,6 +44,8 @@
     margin: 0;
     color: var(--color-text-primary);
     text-align: center;
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-semibold);
   }
 
   &__section {
@@ -168,10 +170,7 @@
     .participants-list__content {
       width: 100%;
       padding-top: 33px;
-      max-height: calc(
-        2 * (var(--spacing-md) + var(--spacing-lg) + var(--spacing-3xl) + 30px) +
-          33px
-      );
+      max-height: calc(2 * (var(--spacing-md) + var(--spacing-lg) + var(--spacing-3xl) + 30px) + 33px);
       overflow-y: auto;
 
       &::-webkit-scrollbar {

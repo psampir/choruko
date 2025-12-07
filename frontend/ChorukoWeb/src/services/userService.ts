@@ -34,7 +34,7 @@ class UserService {
         return { success: true, message: "Name changed successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to change name" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to change name" };
       }
     } catch (error) {
       console.error("Error changing name:", error);
@@ -63,7 +63,7 @@ class UserService {
         return { success: true, message: "Password changed successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to change password" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to change password" };
       }
     } catch (error) {
       console.error("Error changing password:", error);
@@ -107,7 +107,7 @@ class UserService {
         return { success: true, message: "Account deleted successfully" };
       } else {
         const errorText = await response.text();
-        return { success: false, message: errorText || "Failed to delete account" };
+        return { success: false, message: parseErrorMessage(errorText) || "Failed to delete account" };
       }
     } catch (error) {
       console.error("Error deleting account:", error);

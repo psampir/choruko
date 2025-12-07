@@ -13,7 +13,7 @@ public class EmailService : IEmailService
     private readonly string _smtpUser;
     private readonly string _smtpPass;
     private readonly string _smtpFrom;
-    private readonly string _domainName;
+    private readonly string _serverUrl;
     
     public EmailService(
         string smtpHost, 
@@ -21,14 +21,14 @@ public class EmailService : IEmailService
         string smtpUser, 
         string smtpPass, 
         string smtpFrom,
-        string domainName)
+        string serverUrl)
     {
         _smtpHost = smtpHost;
         _smtpPort = smtpPort;
         _smtpUser = smtpUser;
         _smtpPass = smtpPass;
         _smtpFrom = smtpFrom;
-        _domainName = domainName;
+        _serverUrl = serverUrl;
     }
 
     public async Task SendPasswordResetEmailAsync(string email, string resetToken)
@@ -37,7 +37,7 @@ public class EmailService : IEmailService
         {
             using (var client = new SmtpClient(_smtpHost, _smtpPort))
             {
-                var resetLink = $"https://{_domainName}/reset-password?email={WebUtility.UrlEncode(email)}&token={WebUtility.UrlEncode(resetToken)}";
+                var resetLink = $"{_serverUrl}/reset-password?email={WebUtility.UrlEncode(email)}&token={WebUtility.UrlEncode(resetToken)}";
 
                 client.EnableSsl = true;
                 client.UseDefaultCredentials = false;

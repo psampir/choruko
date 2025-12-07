@@ -42,7 +42,6 @@ class AuthService {
   // Login user
   async login(email: string, password: string) {
     try {
-      console.log("📡 Sending login request...");
       const response = await fetch(`${apiBaseUrl}/Auth/login`, {
         method: "POST",
         headers: {
@@ -52,23 +51,16 @@ class AuthService {
         body: JSON.stringify({ email, password }),
       });
 
-      console.log("📨 Login response status:", response.status);
-      console.log("📨 Login response headers:", Object.fromEntries(response.headers.entries()));
-
       const responseText = await response.text();
-      console.log("📨 Login response body:", responseText);
 
       if (response.ok) {
         try {
           const data = JSON.parse(responseText);
-          console.log("📨 Parsed login response:", data);
 
           // Check if the actual login succeeded
           if (data.result && data.result.succeeded) {
-            console.log("✅ Login successful!");
             return { success: true, message: "Login successful" };
           } else {
-            console.log("❌ Login failed - invalid credentials");
             return {
               success: false,
               message: data.message || "Invalid email or password"
@@ -79,7 +71,6 @@ class AuthService {
           return { success: false, message: "Failed to parse server response" };
         }
       } else {
-        console.log("❌ Login request failed with status:", response.status);
         return { success: false, message: responseText };
       }
     } catch (error) {
@@ -100,8 +91,8 @@ class AuthService {
         const data = await response.json();
         // The API returns { isSuccessful: boolean, result: UserInfoResponse }
         if (data.isSuccessful && data.result) {
-          return { 
-            authenticated: true, 
+          return {
+            authenticated: true,
             user: data.result
           };
         } else {
@@ -130,6 +121,83 @@ class AuthService {
       }
     } catch (error) {
       return { success: false };
+    }
+  }
+
+  // Forgot password - sends reset email
+  async forgotPassword(email: string) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email }),
+      });
+
+      const responseText = await response.text();
+
+      if (response.ok) {
+        try {
+          const data = JSON.parse(responseText);
+          return { 
+            success: true, 
+            message: data.message || "If an account exists for this email, a password reset link has been sent."
+          };
+        } catch (parseError) {
+          return { 
+            success: true, 
+            message: "If an account exists for this email, a password reset link has been sent."
+          };
+        }
+      } else {
+        return { success: false, message: responseText };
+      }
+    } catch (error) {
+      console.error("Forgot password request error:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
+  // Reset password with token
+  async resetPassword(email: string, token: string, newPassword: string, confirmPassword: string) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/Auth/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ 
+          email, 
+          token, 
+          newPassword, 
+          confirmPassword 
+        }),
+      });
+
+      const responseText = await response.text();
+
+      if (response.ok) {
+        try {
+          const data = JSON.parse(responseText);
+          return { 
+            success: true, 
+            message: data.message || "Password has been successfully reset."
+          };
+        } catch (parseError) {
+          return { 
+            success: true, 
+            message: "Password has been successfully reset."
+          };
+        }
+      } else {
+        return { success: false, message: responseText };
+      }
+    } catch (error) {
+      console.error("Reset password request error:", error);
+      return { success: false, message: "Network error occurred" };
     }
   }
 }

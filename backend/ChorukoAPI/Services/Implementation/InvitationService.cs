@@ -56,16 +56,16 @@ public class InvitationService(DataContext context,
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"👋 You were invited to household by {household.Admin.FirstName}!",
-                body = $"Household name: {household.Name}!",
+                title = $"📬 Household invitation from {household.Admin.FirstName}",
+                body = $"{household.Name}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
                 url = "/"
             });
 
-            if (userEmail != userToAdd.Id)
+            if (userId != userToAdd.Id)
             {
-                await pushNotificationService.SendNotificationAsync(userEmail, payload);
+                await pushNotificationService.SendNotificationAsync(userToAdd.Id, payload);
             }
 
 
@@ -202,6 +202,7 @@ public class InvitationService(DataContext context,
             household.Participants.Add(newParticipant);
 
             context.Users.Update(newParticipant);
+            context.Invitations.Remove(invitation);
 
             await context.SaveChangesAsync();
 
@@ -250,7 +251,7 @@ public class InvitationService(DataContext context,
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "You accepted this invitation", HttpStatusCode.BadRequest);
             }
 
-            invitation.Status = InvitationStatus.Declined;
+            context.Invitations.Remove(invitation);
 
             await context.SaveChangesAsync();
 

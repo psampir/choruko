@@ -89,11 +89,11 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"👋 {creator.FirstName} requested money from you!",
-                body = $"{request.Description}, amount: {request.Amount}!",
+                title = $"💰 Payment request from {creator.FirstName}",
+                body = $"{request.Description} - Amount: {request.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             await NotificationHandler.SendNotificationAsync(unsettledUsers.Select(receiver => receiver.Id).ToList(), payload);
@@ -195,11 +195,11 @@ public class SettlementService(
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "👋 Settlement was updated!",
-                body = $"{request.Description}, amount: {request.Amount}!",
+                title = "✏️ Settlement updated",
+                body = $"{request.Description} - Amount: {request.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             await NotificationHandler.SendNotificationAsync(settlement.UnsettledUsers.Select(receiver => receiver.Id).ToList(), payload);
@@ -259,6 +259,8 @@ public class SettlementService(
         {
             var settlements = await _context.Settlements
                 .Include(s => s.Creator)
+                .Include(s => s.SettledUsers)
+                .Include(s => s.UnsettledUsers)
                 .Where(s => s.HouseholdId == householdId)
                 .AsNoTracking()
                 .ToListAsync();
@@ -328,15 +330,24 @@ public class SettlementService(
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a creator of the settlement", HttpStatusCode.NotFound);
 
             settlement.Status = SettlementStatus.Completed;
+            
+            // Move all unsettled users to settled when creator marks as done
+            if (settlement.UnsettledUsers != null && settlement.UnsettledUsers.Any())
+            {
+                settlement.SettledUsers ??= new List<User>();
+                settlement.SettledUsers.AddRange(settlement.UnsettledUsers);
+                settlement.UnsettledUsers.Clear();
+            }
+            
             await _context.SaveChangesAsync();
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "👋 Settlement was completed!",
-                body = $"{settlement.Description}, amount: {settlement.Amount}!",
+                title = "✅ Settlement completed",
+                body = $"{settlement.Description} - Amount: {settlement.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             var notificationTasks = new List<Task>();
@@ -399,15 +410,24 @@ public class SettlementService(
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "User is not a creator of the settlement", HttpStatusCode.NotFound);
 
             settlement.Status = SettlementStatus.Pending;
+            
+            // Move all settled users back to unsettled when creator reopens
+            if (settlement.SettledUsers != null && settlement.SettledUsers.Any())
+            {
+                settlement.UnsettledUsers ??= new List<User>();
+                settlement.UnsettledUsers.AddRange(settlement.SettledUsers);
+                settlement.SettledUsers.Clear();
+            }
+            
             await _context.SaveChangesAsync();
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = "👋 Settlement was reopened",
-                body = $"{settlement.Description}, amount: {settlement.Amount}!",
+                title = "🔄 Settlement reopened",
+                body = $"{settlement.Description} - Amount: {settlement.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             var notificationTasks = new List<Task>();
@@ -490,15 +510,21 @@ public class SettlementService(
             settlement.UnsettledUsers.Remove(user);
             settlement.SettledUsers.Add(user);
 
+            // Auto-complete settlement if all payers have paid
+            if (settlement.UnsettledUsers.Count == 0)
+            {
+                settlement.Status = SettlementStatus.Completed;
+            }
+
             await _context.SaveChangesAsync();
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"👋 {user.FirstName} completed the payment",
-                body = $"{settlement.Description}, amount: {settlement.Amount}!",
+                title = $"✅ Payment completed by {user.FirstName}",
+                body = $"{settlement.Description} - Amount: {settlement.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             await pushNotificationService.SendNotificationAsync(settlement.CreatorId, payload);
@@ -559,16 +585,22 @@ public class SettlementService(
             settlement.SettledUsers.Remove(user);
             settlement.UnsettledUsers.Add(user);
 
+            // Reopen settlement if someone marks as unpaid
+            if (settlement.Status == SettlementStatus.Completed)
+            {
+                settlement.Status = SettlementStatus.Pending;
+            }
+
             await _context.SaveChangesAsync();
 
 
             var payload = System.Text.Json.JsonSerializer.Serialize(new
             {
-                title = $"👋 {user.FirstName} cancelled the payment",
-                body = $"{settlement.Description}, amount: {settlement.Amount}!",
+                title = $"❌ Payment cancelled by {user.FirstName}",
+                body = $"{settlement.Description} - Amount: {settlement.Amount}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/settlements"
             });
 
             await pushNotificationService.SendNotificationAsync(settlement.CreatorId, payload);

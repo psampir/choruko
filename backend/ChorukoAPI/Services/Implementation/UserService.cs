@@ -31,7 +31,13 @@ public class UserService(
 
     public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
     {
-        var user = await _userManager.GetUserAsync(_contextAccessor.HttpContext?.User);
+        var httpContext = _contextAccessor.HttpContext;
+        if (httpContext?.User == null)
+        {
+            return ServiceResponseFactory.Error(new UserInfoResponse("", "", "", "", null, null, 0, 0, 0), "User not found.");
+        }
+
+        var user = await _userManager.GetUserAsync(httpContext.User);
 
         if (user == null)
         {
@@ -285,7 +291,7 @@ public class UserService(
                 {
                     return ServiceResponseFactory.Error<OperationResultDto>(
                         null, 
-                        "Cannot delete account. You are the sole administrator of your household. Please transfer ownership or delete the household first.", 
+                        "Please transfer household ownership or delete it first.", 
                         HttpStatusCode.Forbidden
                     );
                 }

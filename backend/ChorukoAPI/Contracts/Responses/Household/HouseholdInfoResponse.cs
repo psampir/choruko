@@ -8,4 +8,6 @@ public record HouseholdInfoResponse(
     string AdminLastName,
     int ParticipantsCount,
     string? ProfilePictureUrl,
+    string CurrencySymbol,
+    string ISOCurrencySymbol,
     List<HouseholdParticipantResponse> Participants);

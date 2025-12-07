@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations;
 namespace ChorukoAPI.Contracts.Responses.Activity;
 public class ActivityResponse
 {
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     public int PointsAwarded { get; set; }
 }
