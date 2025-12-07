@@ -13,6 +13,7 @@ interface InvitationResponse {
   createdAt: string;
   receiverId: string;
   householdImagePath: string;
+  status: "Pending" | "Accepted" | "Declined";
 }
 
 class InvitationService {
