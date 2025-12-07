@@ -138,7 +138,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request)
+    public async Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request, string userId)
     {
         try
         {
@@ -153,6 +153,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             if (householdTask.Status == Models.TaskStatus.Completed)
             {
                 return ServiceResponseFactory.Error<OperationResultDto>(null, $"Cannot edit a completed task. Please mark it as uncompleted first.", HttpStatusCode.BadRequest);
+            }
+
+            if (householdTask.CreatorId != userId)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, $"Only task creator can edit a task.", HttpStatusCode.BadRequest);
             }
 
             var oldAssigneeIds = householdTask.Assignees.Select(a => a.Id).ToHashSet();

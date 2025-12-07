@@ -29,6 +29,11 @@ public class InvitationService(DataContext context,
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "No users were found", HttpStatusCode.NotFound);
             }
 
+            if (userToAdd.Household is not null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "This user already belongs to a household", HttpStatusCode.BadRequest);
+            }
+
             var household = await context.Households.FirstOrDefaultAsync(h => h.Id == householdId);
 
             if (household == null)

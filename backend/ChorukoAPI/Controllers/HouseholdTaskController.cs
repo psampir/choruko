@@ -37,7 +37,14 @@ namespace ChorukoAPI.Controllers
         [Authorize(Roles = "HouseholdAdmin,Participant")]
         public async Task<ActionResult<ApiResponse<OperationResultDto>>> EditHouseholdTaskAsync([FromRoute] string taskId, EditHouseholdTaskRequest request)
         {
-            var result = await householdTaskService.EditHouseholdTaskAsync(taskId, request);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
+            }
+
+            var result = await householdTaskService.EditHouseholdTaskAsync(taskId, request, userId);
 
             return result.ToCreatedApiResponse("Edit task");
         }

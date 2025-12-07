@@ -163,7 +163,7 @@ public class SettlementController(ISettlementService settlementService) : Contro
             return Unauthorized(ServiceResponseFactory.Error<HouseholdResponse>(null, "User not authenticated.").ToApiResponse());
         }
 
-        var result = await settlementService.DeleteSettlement(settlementId);
+        var result = await settlementService.DeleteSettlement(settlementId, userId);
 
         return result.ToCreatedApiResponse("Delete settlement");
     }
