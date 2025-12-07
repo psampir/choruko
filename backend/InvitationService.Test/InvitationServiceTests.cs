@@ -29,9 +29,7 @@ public class InvitationServiceTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        var configurationMock = new Mock<IConfiguration>().Object;
-
-        _context = new DataContext(options, configurationMock);
+        _context = new DataContext(options);
 
         _pushNotificationServiceMock = new Mock<IPushNotificationService>();
         _mapperMock = new Mock<IMapper<Invitation, InvitationResponse>>();
@@ -91,6 +89,7 @@ public class InvitationServiceTests
             Id = "existing-household",
             Name = "Existing",
             AdminId = admin.Id,
+            CurrencyCode = "USD",
             Admin = admin
         };
 
@@ -176,6 +175,7 @@ public class InvitationServiceTests
             Id = householdId,
             Name = "Test Household",
             AdminId = admin.Id,
+            CurrencyCode = "USD",
             Admin = admin,
             Participants = new List<User>()
         };
@@ -242,6 +242,7 @@ public class InvitationServiceTests
             Id = "h-1",
             Name = "Test Household",
             AdminId = admin.Id,
+            CurrencyCode = "USD",
             Admin = admin
         };
 
@@ -269,7 +270,10 @@ public class InvitationServiceTests
             {
                 Id = "inv-1",
                 ReceiverId = userId,
-                HouseholdName = "Test Household"
+                HouseholdName = "Test Household",
+                HouseholdImagePath = "",
+                InviterFirstName = sender.FirstName,
+                InviterLastName = sender.LastName,
             });
 
         // Act
@@ -335,6 +339,7 @@ public class InvitationServiceTests
             Id = "h-1",
             Name = "Test Household",
             AdminId = admin.Id,
+            CurrencyCode = "USD",
             Admin = admin
         };
 
@@ -362,7 +367,10 @@ public class InvitationServiceTests
             {
                 Id = invitationId,
                 ReceiverId = "user-123",
-                HouseholdName = "Test Household"
+                HouseholdName = "Test Household",
+                HouseholdImagePath = "",
+                InviterFirstName = sender.FirstName,
+                InviterLastName = sender.LastName
             });
 
         // Act
@@ -414,6 +422,7 @@ public class InvitationServiceTests
             Name = "Test Household",
             AdminId = admin.Id,
             Admin = admin,
+            CurrencyCode = "USD",
             Participants = new List<User>()
         };
 
@@ -453,6 +462,7 @@ public class InvitationServiceTests
         Assert.Equal("You already belong to a household.", result.Message);
     }
 
+
     [Fact]
     public async Task AcceptInvitation_UserNotInNoneRole_ReturnsForbidden()
     {
@@ -474,6 +484,7 @@ public class InvitationServiceTests
             Name = "Test Household",
             AdminId = admin.Id,
             Admin = admin,
+            CurrencyCode = "USD",
             Participants = new List<User>()
         };
 
@@ -537,6 +548,7 @@ public class InvitationServiceTests
             Name = "Test Household",
             AdminId = admin.Id,
             Admin = admin,
+            CurrencyCode = "USD",
             Participants = new List<User>()
         };
 
@@ -642,6 +654,7 @@ public class InvitationServiceTests
             Id = "h-1",
             Name = "Test Household",
             AdminId = admin.Id,
+            CurrencyCode = "USD",
             Admin = admin
         };
 
@@ -708,6 +721,7 @@ public class InvitationServiceTests
             Id = "h-1",
             Name = "Test Household",
             AdminId = admin.Id,
+            CurrencyCode = "USD",
             Admin = admin
         };
 
@@ -738,7 +752,9 @@ public class InvitationServiceTests
         Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         Assert.NotNull(result.Result);
         Assert.Equal("DeclineInvitation", result.Result.Operation);
-        Assert.Equal(InvitationStatus.Declined, invitation.Status);
+
+        var updatedInvitation = await _context.Invitations.FindAsync(invitationId);
+        Assert.Null(updatedInvitation);
     }
 
     #endregion
