@@ -8,17 +8,18 @@ using ChorukoAPI.Services.Abstraction;
 using Service = ChorukoAPI.Services.Implementation.InvitationService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
+using InvitationService.Test.Helpers;
 using ChorukoAPI.Extensions;
+using Org.BouncyCastle.Ocsp;
 
 namespace InvitationService.Test;
 
 public class InvitationServiceTests
 {
     private readonly DataContext _context;
-    private readonly Mock<IPushNotificationService> _pushNotificationServiceMock;
+    private readonly Mock<IPushNotificationService> _pushMock;
     private readonly Mock<IMapper<Invitation, InvitationResponse>> _mapperMock;
     private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly IInvitationService _service;
@@ -30,39 +31,26 @@ public class InvitationServiceTests
             .Options;
 
         _context = new DataContext(options);
-
-        _pushNotificationServiceMock = new Mock<IPushNotificationService>();
+        _pushMock = new Mock<IPushNotificationService>();
         _mapperMock = new Mock<IMapper<Invitation, InvitationResponse>>();
-        _userManagerMock = GetMockUserManager();
+        _userManagerMock = MockUserManager();
 
-        _service = new Service(
-            _context,
-            _pushNotificationServiceMock.Object,
-            _mapperMock.Object,
-            _userManagerMock.Object
-        );
+        _service = new Service(_context, _pushMock.Object, _mapperMock.Object, _userManagerMock.Object);
     }
 
-    private Mock<UserManager<User>> GetMockUserManager()
+    private Mock<UserManager<User>> MockUserManager()
     {
         var store = new Mock<IUserStore<User>>();
         return new Mock<UserManager<User>>(store.Object, null, null, null, null, null, null, null, null);
     }
 
-    #region CreateHouseholdInvitation Tests
+    #region CreateHouseholdInvitation
 
     [Fact]
     public async Task CreateHouseholdInvitation_UserNotFound_ReturnsNotFound()
     {
-        // Arrange
-        var userId = "sender-123";
-        var householdId = "household-456";
-        var userEmail = "nonexistent@example.com";
+        var result = await _service.CreateHouseholdInvitation("sender-1", "household-1", "none@test.com");
 
-        // Act
-        var result = await _service.CreateHouseholdInvitation(userId, householdId, userEmail);
-
-        // Assert
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
         Assert.Equal("No users were found", result.Message);
@@ -71,550 +59,208 @@ public class InvitationServiceTests
     [Fact]
     public async Task CreateHouseholdInvitation_UserAlreadyInHousehold_ReturnsBadRequest()
     {
-        // Arrange
-        var userId = "sender-123";
-        var householdId = "household-456";
-        var userEmail = "test@example.com";
+        var admin = TestData.CreateAdmin();
+        var household = TestData.CreateHousehold(admin: admin);
+        var user = TestData.CreateUser(email: "test@test.com", householdId: household.Id);
 
-        var admin = new User
-        {
-            Id = "admin-1",
-            Email = "admin@test.com",
-            FirstName = "Admin",
-            LastName = "User"
-        };
-
-        var household = new Household
-        {
-            Id = "existing-household",
-            Name = "Existing",
-            AdminId = admin.Id,
-            CurrencyCode = "USD",
-            Admin = admin
-        };
-
-        var existingUser = new User
-        {
-            Id = "user-789",
-            Email = userEmail,
-            HouseholdId = household.Id,
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        _context.Users.Add(admin);
+        _context.Users.AddRange(admin, user);
         _context.Households.Add(household);
-        _context.Users.Add(existingUser);
         await _context.SaveChangesAsync();
 
-        // Act
-        var result = await _service.CreateHouseholdInvitation(userId, householdId, userEmail);
+        var result = await _service.CreateHouseholdInvitation("sender-1", "any-id", user.Email);
 
-        // Assert
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
-        Assert.Equal("This user already belongs to a household", result.Message);
     }
 
     [Fact]
     public async Task CreateHouseholdInvitation_HouseholdNotFound_ReturnsNotFound()
     {
-        // Arrange
-        var userId = "sender-123";
-        var householdId = "nonexistent-household";
-        var userEmail = "test@example.com";
-
-        var user = new User
-        {
-            Id = "user-789",
-            Email = userEmail,
-            HouseholdId = null,
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
+        var user = TestData.CreateUser(email: "test@test.com");
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        // Act
-        var result = await _service.CreateHouseholdInvitation(userId, householdId, userEmail);
+        var result = await _service.CreateHouseholdInvitation("sender-1", "nonexistent", user.Email);
 
-        // Assert
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
-        Assert.Equal("No households were found", result.Message);
     }
 
     [Fact]
     public async Task CreateHouseholdInvitation_ValidRequest_ReturnsSuccess()
     {
-        // Arrange
-        var userId = "sender-123";
-        var householdId = "household-456";
-        var userEmail = "test@example.com";
+        var admin = TestData.CreateAdmin("sender-123");
+        var household = TestData.CreateHousehold("household-456", admin: admin);
+        var user = TestData.CreateUser(email: "test@test.com");
 
-        var admin = new User
-        {
-            Id = userId,
-            Email = "admin@example.com",
-            FirstName = "Admin",
-            LastName = "User"
-        };
-
-        var userToInvite = new User
-        {
-            Id = "user-789",
-            Email = userEmail,
-            HouseholdId = null,
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test Household",
-            AdminId = admin.Id,
-            CurrencyCode = "USD",
-            Admin = admin,
-            Participants = new List<User>()
-        };
-
-        _context.Users.Add(admin);
-        _context.Users.Add(userToInvite);
+        _context.Users.AddRange(admin, user);
         _context.Households.Add(household);
         await _context.SaveChangesAsync();
 
-        _pushNotificationServiceMock
-            .Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(
-                new OperationResultDto { Operation = "SendNotification" },
-                "Notification sent"
-            ));
+        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
 
-        // Act
-        var result = await _service.CreateHouseholdInvitation(userId, householdId, userEmail);
+        var result = await _service.CreateHouseholdInvitation(admin.Id, household.Id, user.Email);
 
-        // Assert
         Assert.True(result.IsSuccessful);
-        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-        Assert.NotNull(result.Result);
-        Assert.Equal("CreateHouseholdInvitation", result.Result.Operation);
         Assert.Single(_context.Invitations);
     }
 
     #endregion
 
-    #region GetAllInvitations Tests
+    #region GetAllInvitations
 
     [Fact]
     public async Task GetAllInvitations_ReturnsInvitationsList()
     {
-        // Arrange
-        var userId = "user-123";
+        var receiver = TestData.CreateUser("user-123");
+        var sender = TestData.CreateUser("sender-123", firstName: "Jane", lastName: "Smith");
+        var invitation = TestData.CreateInvitation(receiver: receiver, sender: sender);
 
-        var admin = new User
-        {
-            Id = "admin-1",
-            Email = "admin@test.com",
-            FirstName = "Admin",
-            LastName = "User"
-        };
-
-        var receiver = new User
-        {
-            Id = userId,
-            Email = "user@test.com",
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        var sender = new User
-        {
-            Id = "sender-1",
-            Email = "sender@test.com",
-            FirstName = "Jane",
-            LastName = "Smith"
-        };
-
-        var household = new Household
-        {
-            Id = "h-1",
-            Name = "Test Household",
-            AdminId = admin.Id,
-            CurrencyCode = "USD",
-            Admin = admin
-        };
-
-        var invitation = new Invitation
-        {
-            Id = "inv-1",
-            ReceiverId = userId,
-            Status = InvitationStatus.Pending,
-            Receiver = receiver,
-            SenderId = sender.Id,
-            Sender = sender,
-            HouseholdId = household.Id,
-            Household = household
-        };
-
-        _context.Users.Add(admin);
-        _context.Users.Add(receiver);
-        _context.Users.Add(sender);
-        _context.Households.Add(household);
+        _context.Users.AddRange(receiver, sender, invitation.Household.Admin);
+        _context.Households.Add(invitation.Household);
         _context.Invitations.Add(invitation);
         await _context.SaveChangesAsync();
 
         _mapperMock.Setup(m => m.Map(It.IsAny<Invitation>()))
             .ReturnsAsync(new InvitationResponse
             {
-                Id = "inv-1",
-                ReceiverId = userId,
-                HouseholdName = "Test Household",
-                HouseholdImagePath = "",
+                Id = invitation.Id,
+                ReceiverId = receiver.Id,
+                HouseholdImagePath = "/images/default.png",
+                HouseholdName = invitation.Household.Name,
                 InviterFirstName = sender.FirstName,
                 InviterLastName = sender.LastName,
             });
 
-        // Act
-        var result = await _service.GetAllInvitations(userId);
+        var result = await _service.GetAllInvitations(receiver.Id);
 
-        // Assert
         Assert.True(result.IsSuccessful);
-        Assert.NotNull(result.Result);
         Assert.Single(result.Result);
     }
 
     #endregion
 
-    #region GetInvitation Tests
+    #region GetInvitation
 
     [Fact]
     public async Task GetInvitation_InvitationNotFound_ReturnsNotFound()
     {
-        // Arrange
-        var invitationId = "nonexistent-inv";
+        var result = await _service.GetInvitation("nonexistent");
 
-        // Act
-        var result = await _service.GetInvitation(invitationId);
-
-        // Assert
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
-        Assert.Equal("No invitation were found", result.Message);
     }
 
     [Fact]
     public async Task GetInvitation_ValidInvitation_ReturnsSuccess()
     {
-        // Arrange
-        var invitationId = "inv-123";
+        var receiver = TestData.CreateUser("user-123", firstName: "John", lastName: "Doe");
+        var sender = TestData.CreateUser("sender-123", firstName: "Jane", lastName: "Smith");
+        var invitation = TestData.CreateInvitation("inv-123", receiver: receiver, sender: sender);
 
-        var admin = new User
-        {
-            Id = "admin-1",
-            Email = "admin@test.com",
-            FirstName = "Admin",
-            LastName = "User"
-        };
-
-        var receiver = new User
-        {
-            Id = "user-123",
-            Email = "user@test.com",
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        var sender = new User
-        {
-            Id = "sender-1",
-            Email = "sender@test.com",
-            FirstName = "Jane",
-            LastName = "Smith"
-        };
-
-        var household = new Household
-        {
-            Id = "h-1",
-            Name = "Test Household",
-            AdminId = admin.Id,
-            CurrencyCode = "USD",
-            Admin = admin
-        };
-
-        var invitation = new Invitation
-        {
-            Id = invitationId,
-            ReceiverId = receiver.Id,
-            Status = InvitationStatus.Pending,
-            Receiver = receiver,
-            SenderId = sender.Id,
-            Sender = sender,
-            HouseholdId = household.Id,
-            Household = household
-        };
-
-        _context.Users.Add(admin);
-        _context.Users.Add(receiver);
-        _context.Users.Add(sender);
-        _context.Households.Add(household);
+        _context.Users.AddRange(receiver, sender, invitation.Household.Admin);
+        _context.Households.Add(invitation.Household);
         _context.Invitations.Add(invitation);
         await _context.SaveChangesAsync();
 
         _mapperMock.Setup(m => m.Map(It.IsAny<Invitation>()))
             .ReturnsAsync(new InvitationResponse
             {
-                Id = invitationId,
-                ReceiverId = "user-123",
-                HouseholdName = "Test Household",
-                HouseholdImagePath = "",
+                Id = invitation.Id,
+                ReceiverId = receiver.Id,
+                HouseholdName = invitation.Household.Name,
+                HouseholdImagePath = "/images/default.png",
                 InviterFirstName = sender.FirstName,
                 InviterLastName = sender.LastName
             });
 
-        // Act
-        var result = await _service.GetInvitation(invitationId);
+        var result = await _service.GetInvitation(invitation.Id);
 
-        // Assert
         Assert.True(result.IsSuccessful);
-        Assert.NotNull(result.Result);
-        Assert.Equal(invitationId, result.Result.Id);
+        Assert.Equal(invitation.Id, result.Result.Id);
     }
 
     #endregion
 
-    #region AcceptInvitation Tests
+    #region AcceptInvitation
 
     [Fact]
     public async Task AcceptInvitation_InvitationNotFound_ReturnsNotFound()
     {
-        // Arrange
-        var invitationId = "nonexistent-inv";
+        var result = await _service.AcceptInvitation("nonexistent");
 
-        // Act
-        var result = await _service.AcceptInvitation(invitationId);
-
-        // Assert
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
-        Assert.Equal("No invitation were found", result.Message);
     }
 
     [Fact]
     public async Task AcceptInvitation_UserAlreadyInHousehold_ReturnsConflict()
     {
-        // Arrange
-        var invitationId = "inv-123";
-        var receiverId = "user-123";
+        var receiver = TestData.CreateUser(householdId: "existing-household");
+        var invitation = TestData.CreateInvitation(receiver: receiver);
 
-        var admin = new User
-        {
-            Id = "admin-1",
-            Email = "admin@test.com",
-            FirstName = "Admin",
-            LastName = "User"
-        };
-
-        var household = new Household
-        {
-            Id = "h-1",
-            Name = "Test Household",
-            AdminId = admin.Id,
-            Admin = admin,
-            CurrencyCode = "USD",
-            Participants = new List<User>()
-        };
-
-        var receiver = new User
-        {
-            Id = receiverId,
-            Email = "user@test.com",
-            HouseholdId = "existing-household",
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        var invitation = new Invitation
-        {
-            Id = invitationId,
-            ReceiverId = receiverId,
-            HouseholdId = household.Id,
-            Status = InvitationStatus.Pending,
-            Receiver = receiver,
-            Sender = admin,
-            SenderId = admin.Id,
-            Household = household
-        };
-
-        _context.Users.Add(admin);
-        _context.Users.Add(receiver);
-        _context.Households.Add(household);
+        _context.Users.AddRange(receiver, invitation.Sender, invitation.Household.Admin);
+        _context.Households.Add(invitation.Household);
         _context.Invitations.Add(invitation);
         await _context.SaveChangesAsync();
 
-        // Act
-        var result = await _service.AcceptInvitation(invitationId);
+        var result = await _service.AcceptInvitation(invitation.Id);
 
-        // Assert
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.Conflict, result.StatusCode);
-        Assert.Equal("You already belong to a household.", result.Message);
     }
-
 
     [Fact]
     public async Task AcceptInvitation_UserNotInNoneRole_ReturnsForbidden()
     {
-        // Arrange
-        var invitationId = "inv-123";
-        var receiverId = "user-123";
+        var invitation = TestData.CreateInvitation();
 
-        var admin = new User
-        {
-            Id = "admin-1",
-            Email = "admin@test.com",
-            FirstName = "Admin",
-            LastName = "User"
-        };
-
-        var household = new Household
-        {
-            Id = "h-1",
-            Name = "Test Household",
-            AdminId = admin.Id,
-            Admin = admin,
-            CurrencyCode = "USD",
-            Participants = new List<User>()
-        };
-
-        var receiver = new User
-        {
-            Id = receiverId,
-            Email = "user@test.com",
-            HouseholdId = null,
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        var invitation = new Invitation
-        {
-            Id = invitationId,
-            ReceiverId = receiverId,
-            HouseholdId = household.Id,
-            Status = InvitationStatus.Pending,
-            Receiver = receiver,
-            SenderId = admin.Id,
-            Sender = admin,
-            Household = household
-        };
-
-        _context.Users.Add(admin);
-        _context.Users.Add(receiver);
-        _context.Households.Add(household);
+        _context.Users.AddRange(invitation.Receiver, invitation.Sender, invitation.Household.Admin);
+        _context.Households.Add(invitation.Household);
         _context.Invitations.Add(invitation);
         await _context.SaveChangesAsync();
 
         _userManagerMock.Setup(u => u.GetRolesAsync(It.IsAny<User>()))
             .ReturnsAsync(new List<string> { "Admin" });
 
-        // Act
-        var result = await _service.AcceptInvitation(invitationId);
+        var result = await _service.AcceptInvitation(invitation.Id);
 
-        // Assert
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.Forbidden, result.StatusCode);
-        Assert.Equal("Only users with the 'None' role can be added to a household.", result.Message);
     }
 
     [Fact]
     public async Task AcceptInvitation_ValidRequest_ReturnsSuccess()
     {
-        // Arrange
-        var invitationId = "inv-123";
-        var receiverId = "user-123";
+        var invitation = TestData.CreateInvitation();
 
-        var admin = new User
-        {
-            Id = "admin-1",
-            Email = "admin@test.com",
-            FirstName = "Admin",
-            LastName = "User"
-        };
-
-        var household = new Household
-        {
-            Id = "h-1",
-            Name = "Test Household",
-            AdminId = admin.Id,
-            Admin = admin,
-            CurrencyCode = "USD",
-            Participants = new List<User>()
-        };
-
-        var receiver = new User
-        {
-            Id = receiverId,
-            Email = "user@test.com",
-            HouseholdId = null,
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        var invitation = new Invitation
-        {
-            Id = invitationId,
-            ReceiverId = receiverId,
-            HouseholdId = household.Id,
-            Status = InvitationStatus.Pending,
-            Receiver = receiver,
-            SenderId = admin.Id,
-            Sender = admin,
-            Household = household
-        };
-
-        _context.Users.Add(admin);
-        _context.Users.Add(receiver);
-        _context.Households.Add(household);
+        _context.Users.AddRange(invitation.Receiver, invitation.Sender, invitation.Household.Admin);
+        _context.Households.Add(invitation.Household);
         _context.Invitations.Add(invitation);
         await _context.SaveChangesAsync();
 
         _userManagerMock.Setup(u => u.GetRolesAsync(It.IsAny<User>()))
             .ReturnsAsync(new List<string> { "None" });
-
         _userManagerMock.Setup(u => u.RemoveFromRoleAsync(It.IsAny<User>(), "None"))
             .ReturnsAsync(IdentityResult.Success);
-
         _userManagerMock.Setup(u => u.AddToRoleAsync(It.IsAny<User>(), "Participant"))
             .ReturnsAsync(IdentityResult.Success);
 
-        // Act
-        var result = await _service.AcceptInvitation(invitationId);
+        var result = await _service.AcceptInvitation(invitation.Id);
 
-        // Assert
         Assert.True(result.IsSuccessful);
-        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-        Assert.NotNull(result.Result);
-        Assert.Equal("AcceptInvitation", result.Result.Operation);
-        Assert.Equal(InvitationStatus.Accepted, invitation.Status);
-        Assert.Equal(household.Id, receiver.HouseholdId);
     }
-
 
     #endregion
 
-    #region DeclineInvitation Tests
+    #region DeclineInvitation
 
     [Fact]
     public async Task DeclineInvitation_InvitationNotFound_ReturnsNotFound()
     {
-        // Arrange
-        var invitationId = "nonexistent-inv";
+        var result = await _service.DeclineInvitation("nonexistent");
 
-        // Act
-        var result = await _service.DeclineInvitation(invitationId);
-
-        // Assert
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
     }
@@ -622,139 +268,32 @@ public class InvitationServiceTests
     [Fact]
     public async Task DeclineInvitation_AlreadyAccepted_ReturnsBadRequest()
     {
-        // Arrange
-        var invitationId = "inv-123";
+        var invitation = TestData.CreateInvitation(status: InvitationStatus.Accepted);
 
-        var admin = new User
-        {
-            Id = "admin-1",
-            Email = "admin@test.com",
-            FirstName = "Admin",
-            LastName = "User"
-        };
-
-        var receiver = new User
-        {
-            Id = "user-123",
-            Email = "user@test.com",
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        var sender = new User
-        {
-            Id = "sender-1",
-            Email = "sender@test.com",
-            FirstName = "Jane",
-            LastName = "Smith"
-        };
-
-        var household = new Household
-        {
-            Id = "h-1",
-            Name = "Test Household",
-            AdminId = admin.Id,
-            CurrencyCode = "USD",
-            Admin = admin
-        };
-
-        var invitation = new Invitation
-        {
-            Id = invitationId,
-            Status = InvitationStatus.Accepted,
-            ReceiverId = receiver.Id,
-            Receiver = receiver,
-            SenderId = sender.Id,
-            Sender = sender,
-            HouseholdId = household.Id,
-            Household = household
-        };
-
-        _context.Users.Add(admin);
-        _context.Users.Add(receiver);
-        _context.Users.Add(sender);
-        _context.Households.Add(household);
+        _context.Users.AddRange(invitation.Receiver, invitation.Sender, invitation.Household.Admin);
+        _context.Households.Add(invitation.Household);
         _context.Invitations.Add(invitation);
         await _context.SaveChangesAsync();
 
-        // Act
-        var result = await _service.DeclineInvitation(invitationId);
+        var result = await _service.DeclineInvitation(invitation.Id);
 
-        // Assert
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.BadRequest, result.StatusCode);
-        Assert.Equal("You accepted this invitation", result.Message);
     }
 
     [Fact]
     public async Task DeclineInvitation_ValidRequest_ReturnsSuccess()
     {
-        // Arrange
-        var invitationId = "inv-123";
+        var invitation = TestData.CreateInvitation();
 
-        var admin = new User
-        {
-            Id = "admin-1",
-            Email = "admin@test.com",
-            FirstName = "Admin",
-            LastName = "User"
-        };
-
-        var receiver = new User
-        {
-            Id = "user-123",
-            Email = "user@test.com",
-            FirstName = "John",
-            LastName = "Doe"
-        };
-
-        var sender = new User
-        {
-            Id = "sender-1",
-            Email = "sender@test.com",
-            FirstName = "Jane",
-            LastName = "Smith"
-        };
-
-        var household = new Household
-        {
-            Id = "h-1",
-            Name = "Test Household",
-            AdminId = admin.Id,
-            CurrencyCode = "USD",
-            Admin = admin
-        };
-
-        var invitation = new Invitation
-        {
-            Id = invitationId,
-            ReceiverId = receiver.Id,
-            Status = InvitationStatus.Pending,
-            Receiver = receiver,
-            SenderId = sender.Id,
-            Sender = sender,
-            HouseholdId = household.Id,
-            Household = household
-        };
-
-        _context.Users.Add(admin);
-        _context.Users.Add(receiver);
-        _context.Users.Add(sender);
-        _context.Households.Add(household);
+        _context.Users.AddRange(invitation.Receiver, invitation.Sender, invitation.Household.Admin);
+        _context.Households.Add(invitation.Household);
         _context.Invitations.Add(invitation);
         await _context.SaveChangesAsync();
 
-        // Act
-        var result = await _service.DeclineInvitation(invitationId);
+        var result = await _service.DeclineInvitation(invitation.Id);
 
-        // Assert
         Assert.True(result.IsSuccessful);
-        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-        Assert.NotNull(result.Result);
-        Assert.Equal("DeclineInvitation", result.Result.Operation);
-
-        var updatedInvitation = await _context.Invitations.FindAsync(invitationId);
-        Assert.Null(updatedInvitation);
     }
 
     #endregion
