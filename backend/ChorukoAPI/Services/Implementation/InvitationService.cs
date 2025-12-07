@@ -202,7 +202,6 @@ public class InvitationService(DataContext context,
             household.Participants.Add(newParticipant);
 
             context.Users.Update(newParticipant);
-            context.Invitations.Remove(invitation);
 
             await context.SaveChangesAsync();
 
@@ -251,7 +250,7 @@ public class InvitationService(DataContext context,
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "You accepted this invitation", HttpStatusCode.BadRequest);
             }
 
-            context.Invitations.Remove(invitation);
+            invitation.Status = InvitationStatus.Declined;
 
             await context.SaveChangesAsync();
 

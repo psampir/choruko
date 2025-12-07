@@ -250,6 +250,8 @@ public class InvitationServiceTests
         var result = await _service.AcceptInvitation(invitation.Id);
 
         Assert.True(result.IsSuccessful);
+        var updated = await _context.Invitations.FindAsync(invitation.Id);
+        Assert.Equal(InvitationStatus.Accepted, updated.Status);
     }
 
     #endregion
@@ -294,6 +296,8 @@ public class InvitationServiceTests
         var result = await _service.DeclineInvitation(invitation.Id);
 
         Assert.True(result.IsSuccessful);
+        var updated = await _context.Invitations.FindAsync(invitation.Id);
+        Assert.Equal(InvitationStatus.Declined, updated.Status);
     }
 
     #endregion
