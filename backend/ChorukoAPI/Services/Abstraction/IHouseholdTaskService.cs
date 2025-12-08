@@ -13,7 +13,7 @@ public interface IHouseholdTaskService
     Task<ServiceResponse<OperationResultDto>> AssignUserToTask(string taskId, string userId);
     Task<ServiceResponse<OperationResultDto>> UnAssignUserFromTask(string taskId, string userId);
     Task<ServiceResponse<OperationResultDto>> CreateHouseholdTaskAsync(string householdId, CreateHouseholdTaskRequest request, string userId);
-    Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request);
+    Task<ServiceResponse<OperationResultDto>> EditHouseholdTaskAsync(string taskId, EditHouseholdTaskRequest request, string userId);
     Task<ServiceResponse<List<HouseholdTaskResponse>>> GetAllHouseholdTaskAsync(string householdId);
     Task<ServiceResponse<HouseholdTaskResponse>> GetHouseholdTaskByIdAsync(string taskId);
     Task<ServiceResponse<OperationResultDto>> MarkTaskAsCompleted(string taskId, string userId);

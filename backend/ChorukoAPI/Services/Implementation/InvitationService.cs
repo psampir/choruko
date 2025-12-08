@@ -29,6 +29,11 @@ public class InvitationService(DataContext context,
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "No user was found with this email", HttpStatusCode.NotFound);
             }
 
+            if (userToAdd.Household is not null)
+            {
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "This user already belongs to a household", HttpStatusCode.BadRequest);
+            }
+
             var household = await context.Households.FirstOrDefaultAsync(h => h.Id == householdId);
 
             if (household == null)
@@ -197,7 +202,6 @@ public class InvitationService(DataContext context,
             household.Participants.Add(newParticipant);
 
             context.Users.Update(newParticipant);
-            context.Invitations.Remove(invitation);
 
             await context.SaveChangesAsync();
 
@@ -246,7 +250,7 @@ public class InvitationService(DataContext context,
                 return ServiceResponseFactory.Error<OperationResultDto>(null, "You accepted this invitation", HttpStatusCode.BadRequest);
             }
 
-            context.Invitations.Remove(invitation);
+            invitation.Status = InvitationStatus.Declined;
 
             await context.SaveChangesAsync();
 

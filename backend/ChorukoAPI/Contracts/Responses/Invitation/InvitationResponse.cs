@@ -1,4 +1,6 @@
-﻿namespace ChorukoAPI.Contracts.Responses.Invitation;
+﻿using ChorukoAPI.Models;
+
+namespace ChorukoAPI.Contracts.Responses.Invitation;
 
 public class InvitationResponse
 {
@@ -13,4 +15,6 @@ public class InvitationResponse
     public required string InviterFirstName { get; set; }
 
     public required string InviterLastName { get; set; }
+
+    public required InvitationStatus Status { get; set; }
 }

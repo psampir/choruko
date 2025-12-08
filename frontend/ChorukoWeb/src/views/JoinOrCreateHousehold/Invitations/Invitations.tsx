@@ -57,7 +57,7 @@ function Invitations() {
     try {
       const result = await invitationService.getAllInvitations();
       if (result.success && result.data) {
-        setInvitations(result.data);
+        setInvitations(result.data.filter(inv => inv.status === "Pending"));
       } else {
         showNotification(
           result.message || "Failed to load invitations",
