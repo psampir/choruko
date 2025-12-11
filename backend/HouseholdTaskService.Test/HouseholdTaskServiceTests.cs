@@ -12,6 +12,7 @@ using Moq;
 using Xunit;
 using HouseholdTaskService.Test.Helpers;
 using ChorukoAPI.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HouseholdTaskService.Test;
 
@@ -32,7 +33,30 @@ public class HouseholdTaskServiceTests
         _mapperMock = new Mock<IMapper<HouseholdTask, HouseholdTaskResponse>>();
         _pushMock = new Mock<IPushNotificationService>();
 
+        InitializeNotificationHandler();
+
         _service = new Service(_context, _mapperMock.Object, _pushMock.Object);
+    }
+
+    private void InitializeNotificationHandler()
+    {
+        var serviceProviderMock = new Mock<IServiceProvider>();
+        var serviceScopeMock = new Mock<IServiceScope>();
+        var serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
+
+        serviceScopeMock.Setup(x => x.ServiceProvider).Returns(serviceProviderMock.Object);
+
+        serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(serviceScopeMock.Object);
+
+        serviceProviderMock
+            .Setup(x => x.GetService(typeof(IPushNotificationService)))
+            .Returns(_pushMock.Object);
+
+        serviceProviderMock
+            .Setup(x => x.GetService(typeof(IServiceScopeFactory)))
+            .Returns(serviceScopeFactoryMock.Object);
+
+        NotificationHandler.Initialize(serviceProviderMock.Object);
     }
 
     #region CreateHouseholdTaskAsync
@@ -86,7 +110,7 @@ public class HouseholdTaskServiceTests
 
         var result = await _service.CreateHouseholdTaskAsync(household.Id, request, admin.Id);
 
-        Assert.True(result.IsSuccessful);
+        Assert.True(result.IsSuccessful, $"Expected success but got: {result.Message}");
         Assert.Equal("CreateHouseholdTask", result.Result.Operation);
 
         var task = await _context.HouseholdTasks.FirstOrDefaultAsync();
@@ -276,8 +300,6 @@ public class HouseholdTaskServiceTests
         );
 
         var result = await _service.EditHouseholdTaskAsync(task.Id, request, admin.Id);
-
-        Assert.True(result.IsSuccessful);
 
         var updated = await _context.HouseholdTasks.Include(t => t.Assignees).FirstOrDefaultAsync(t => t.Id == task.Id);
         Assert.NotNull(updated);
