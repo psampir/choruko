@@ -343,6 +343,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         return ServiceResponseFactory.Success(response, "User successfully assigned to household task.");
     }
+
     public async Task<ServiceResponse<OperationResultDto>> UnAssignUserFromTask(string taskId, string userId)
     {
         var user = await _context.Users
@@ -363,7 +364,6 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Task not found.", HttpStatusCode.NotFound);
         }
 
-        // Prevent unassigning from completed tasks
         if (householdTask.Status == Models.TaskStatus.Completed)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot unassign from a completed task. Please mark it as uncompleted first.", HttpStatusCode.BadRequest);
@@ -371,7 +371,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         user.AssignedTasks.Remove(householdTask);
 
-        if (householdTask.Assignees.Count == 0)
+        if (householdTask.Assignees.Count == 1)
         {
             householdTask.Status = Models.TaskStatus.Unassigned;
         }
@@ -397,11 +397,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             Operation = "UnAssignUserFromTask",
             Timestamp = DateTime.UtcNow,
             Metadata = new Dictionary<string, object>
-            {
-                { "TaskName", householdTask.Name},
-                { "UserName", user.FirstName + " " + user.LastName },
-                { "UnAssigned", true }
-            }
+        {
+            { "TaskName", householdTask.Name},
+            { "UserName", user.FirstName + " " + user.LastName },
+            { "UnAssigned", true }
+        }
         };
 
         return ServiceResponseFactory.Success(response, "User successfully unassigned from household task.");
