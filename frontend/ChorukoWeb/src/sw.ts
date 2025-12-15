@@ -26,13 +26,12 @@ self.addEventListener('activate', () => {
   self.clients.claim();
 });
 
-// Minimal fetch handler - only intercept same-origin requests
-self.addEventListener('fetch', (event: FetchEvent) => {
-  // Skip cross-origin requests (like fonts from bunny.net) - let browser handle them
-  if (!event.request.url.startsWith(self.location.origin)) {
-    return;
-  }
-  event.respondWith(fetch(event.request));
+// Minimal fetch handler - don't intercept requests, let browser handle naturally
+self.addEventListener('fetch', (_event: FetchEvent) => {
+  // Don't intercept any requests - just let them pass through
+  // This prevents "Failed to fetch" errors from blocking the app
+  // Workbox precaching will still work for offline support
+  return;
 });
 // (If you add runtime caching, implement it here.)
 
