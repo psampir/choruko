@@ -26,7 +26,7 @@ public class InvitationService(DataContext context,
 
             if (userToAdd == null)
             {
-                return ServiceResponseFactory.Error<OperationResultDto>(null, "No users were found", HttpStatusCode.NotFound);
+                return ServiceResponseFactory.Error<OperationResultDto>(null, "No user was found with this email", HttpStatusCode.NotFound);
             }
 
             if (userToAdd.Household is not null)
@@ -60,7 +60,7 @@ public class InvitationService(DataContext context,
                 body = $"{household.Name}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/invitations"
             });
 
             if (userId != userToAdd.Id)

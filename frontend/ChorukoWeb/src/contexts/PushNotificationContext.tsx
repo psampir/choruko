@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import pushNotificationService from '../services/pushNotificationService';
 
 // Helper function to convert VAPID key
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function urlBase64ToUint8Array(base64String: string): BufferSource {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
     .replace(/-/g, '+')
@@ -133,10 +133,25 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
 
       // Subscribe to push manager
       const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.subscribe({
+      
+      // Check for existing subscription first (iOS specific workaround)
+      const existingSubscription = await registration.pushManager.getSubscription();
+      if (existingSubscription) {
+        console.log('Found existing subscription, unsubscribing first...');
+        await existingSubscription.unsubscribe();
+      }
+
+      // Add timeout for iOS (30 seconds)
+      const subscribePromise = registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey),
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Subscription timeout - please try again')), 30000)
+      );
+
+      const subscription = await Promise.race([subscribePromise, timeoutPromise]);
 
       // Extract subscription data
       const subscriptionJson = subscription.toJSON();
@@ -162,6 +177,7 @@ export const PushNotificationProvider: React.FC<PushNotificationProviderProps> =
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(`Error subscribing: ${errorMessage}`);
+      console.error('Subscription error:', err);
       return false;
     } finally {
       setIsLoading(false);

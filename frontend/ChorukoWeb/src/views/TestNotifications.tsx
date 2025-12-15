@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useIsDarkTheme } from '../utils/iconUtils';
 import pushNotificationService from '../services/pushNotificationService';
 
 const TestNotifications: React.FC = () => {
+  const navigate = useNavigate();
+  const isDark = useIsDarkTheme();
   const [log, setLog] = useState<string[]>([]);
   const [vapidKey, setVapidKey] = useState<string>('');
 
@@ -16,6 +20,23 @@ const TestNotifications: React.FC = () => {
     addLog(`PushManager: ${'PushManager' in window}`);
     addLog(`Notification: ${'Notification' in window}`);
     addLog(`Notification permission: ${Notification?.permission || 'N/A'}`);
+    
+    // Check for iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isStandalone = ('standalone' in (window.navigator as any)) && 
+                        (window.navigator as any).standalone;
+    
+    if (isIOS) {
+      addLog('--- iOS Detected ---');
+      addLog(`Running as PWA (standalone): ${isStandalone}`);
+      if (!isStandalone) {
+        addLog('⚠️  iOS requires app to be installed via "Add to Home Screen"');
+        addLog('⚠️  Push notifications ONLY work in standalone mode on iOS');
+      }
+    }
+    
+    addLog(`User Agent: ${navigator.userAgent.substring(0, 60)}...`);
   };
 
   const requestPermission = async () => {
@@ -57,11 +78,21 @@ const TestNotifications: React.FC = () => {
       const registration = await navigator.serviceWorker.ready;
       addLog('✅ Service worker ready');
 
+      // Check for existing subscription first (iOS specific)
+      const existingSub = await registration.pushManager.getSubscription();
+      if (existingSub) {
+        addLog('⚠️  Found existing subscription, unsubscribing first...');
+        await existingSub.unsubscribe();
+        addLog('✅ Old subscription removed');
+      }
+
       const publicKey = vapidKey || await pushNotificationService.getPublicKey();
       if (!publicKey) {
         addLog('❌ No VAPID key available');
         return;
       }
+
+      addLog(`VAPID key length: ${publicKey.length}`);
 
       // Helper function
       const urlBase64ToUint8Array = (base64String: string) => {
@@ -75,10 +106,22 @@ const TestNotifications: React.FC = () => {
         return outputArray;
       };
 
-      const subscription = await registration.pushManager.subscribe({
+      const applicationServerKey = urlBase64ToUint8Array(publicKey);
+      addLog(`Application server key created (${applicationServerKey.length} bytes)`);
+
+      addLog('Calling pushManager.subscribe() - this may take a moment on iOS...');
+      
+      // Add timeout for iOS (30 seconds)
+      const subscribePromise = registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
+        applicationServerKey: applicationServerKey,
       });
+
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Subscription timeout after 30s - iOS may require retry')), 30000)
+      );
+
+      const subscription = await Promise.race([subscribePromise, timeoutPromise]);
 
       addLog('✅ Browser subscription created');
 
@@ -102,6 +145,13 @@ const TestNotifications: React.FC = () => {
       }
     } catch (error) {
       addLog(`❌ ERROR: ${error}`);
+      if (error instanceof Error) {
+        addLog(`Error name: ${error.name}`);
+        addLog(`Error message: ${error.message}`);
+        if (error.stack) {
+          addLog(`Stack: ${error.stack.substring(0, 200)}...`);
+        }
+      }
     }
   };
 
@@ -162,9 +212,53 @@ const TestNotifications: React.FC = () => {
     }
   };
 
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isStandalone = ('standalone' in (window.navigator as any)) && 
+                      (window.navigator as any).standalone;
+
+  const backgroundColor = isDark ? '#1a1a1a' : '#ffffff';
+  const textColor = isDark ? '#e0e0e0' : '#333333';
+  const logBgColor = isDark ? '#0d0d0d' : '#f5f5f5';
+  const logTextColor = isDark ? '#00ff00' : '#00aa00';
+
   return (
-    <div style={{ padding: '20px', fontFamily: 'monospace' }}>
-      <h1>🔔 Push Notifications Test</h1>
+    <div style={{ padding: '20px', fontFamily: 'monospace', backgroundColor, color: textColor, minHeight: '100vh' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+        <button 
+          onClick={() => navigate(-1)} 
+          style={{ 
+            ...buttonStyle, 
+            backgroundColor: '#6c757d',
+            fontSize: '18px',
+            padding: '8px 12px'
+          }}
+        >
+          ← Back
+        </button>
+        <h1 style={{ margin: 0 }}>🔔 Push Test</h1>
+      </div>
+
+      {isIOS && !isStandalone && (
+        <div style={{
+          backgroundColor: isDark ? '#4a3f00' : '#fff3cd',
+          color: isDark ? '#ffeb99' : '#856404',
+          padding: '15px',
+          borderRadius: '5px',
+          marginBottom: '20px',
+          border: `1px solid ${isDark ? '#8a7500' : '#ffc107'}`
+        }}>
+          <strong>⚠️ iOS Users:</strong> Push notifications only work when the app is installed to your home screen.
+          <br />
+          <strong>Steps:</strong>
+          <ol style={{ margin: '10px 0', paddingLeft: '20px' }}>
+            <li>Tap the Share button <span style={{ fontSize: '20px' }}>⎙</span> in Safari</li>
+            <li>Select "Add to Home Screen"</li>
+            <li>Open the app from your home screen</li>
+            <li>Return to this page and test notifications</li>
+          </ol>
+        </div>
+      )}
 
       <div style={{ marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
         <button onClick={checkSupport} style={buttonStyle}>1. Check Support</button>
@@ -178,24 +272,24 @@ const TestNotifications: React.FC = () => {
       </div>
 
       <div style={{
-        backgroundColor: '#fff',
-        color: '#00ff00',
+        backgroundColor: logBgColor,
         padding: '15px',
         borderRadius: '5px',
         height: '400px',
         overflowY: 'auto',
         fontSize: '12px',
-        lineHeight: '1.6'
+        lineHeight: '1.6',
+        border: `1px solid ${isDark ? '#333' : '#ddd'}`
       }}>
         {log.length === 0 ? (
-          <div style={{ color: '#666' }}>Click buttons above to test push notifications...</div>
+          <div style={{ color: isDark ? '#00ff00' : '#999' }}>Click buttons above to test push notifications...</div>
         ) : (
-          log.map((entry, i) => <div key={i}>{entry}</div>)
+          log.map((entry, i) => <div key={i} style={{ color: logTextColor }}>{entry}</div>)
         )}
       </div>
 
       {vapidKey && (
-        <div style={{ marginTop: '20px', fontSize: '10px', color: '#666' }}>
+        <div style={{ marginTop: '20px', fontSize: '10px', color: isDark ? '#888' : '#666' }}>
           VAPID Key: {vapidKey}
         </div>
       )}

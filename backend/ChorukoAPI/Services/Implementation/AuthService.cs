@@ -59,7 +59,7 @@ public class AuthService(UserManager<User> _userManager, RoleManager<IdentityRol
         }
 
         var result = await _signInManager.PasswordSignInAsync(
-            user, request.Password, isPersistent: false, lockoutOnFailure: false);
+            user, request.Password, isPersistent: true, lockoutOnFailure: false);
         
         if (!result.Succeeded)
         {
