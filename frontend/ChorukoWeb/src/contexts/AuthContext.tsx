@@ -81,16 +81,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkAuth = async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
+      
+      // Load from cache immediately (optimistic UI)
+      const cachedUser = localStorage.getItem('choruko_user');
+      if (cachedUser) {
+        try {
+          const parsedUser = JSON.parse(cachedUser);
+          setUser(parsedUser);
+        } catch (e) {
+          console.error('Failed to parse cached user', e);
+          localStorage.removeItem('choruko_user');
+        }
+      }
+      
       const result = await authService.checkStatus();
 
       if (result.authenticated && result.user) {
+        // Backend confirmed authentication - update cache
         setUser(result.user);
+        localStorage.setItem('choruko_user', JSON.stringify(result.user));
+      } else if (result.networkError) {
+        // Network error - keep cached user if exists (offline mode)
+        console.log('Network error during auth check - staying in offline mode');
+        if (!cachedUser) {
+          // No cached user and network error - can't authenticate
+          setUser(null);
+        }
       } else {
+        // Backend says not authenticated (401, invalid session, etc.) - clear everything
+        console.log('Backend returned not authenticated - logging out');
         setUser(null);
+        localStorage.removeItem('choruko_user');
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
-      setUser(null);
+      console.error("Auth check failed unexpectedly:", error);
+      // Unexpected error - keep cached user if exists
+      const cachedUser = localStorage.getItem('choruko_user');
+      if (!cachedUser) {
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -112,6 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (authResult.authenticated && authResult.user) {
           setUser(authResult.user);
+          localStorage.setItem('choruko_user', JSON.stringify(authResult.user));
           return {
             success: true,
             message: result.message,
@@ -178,12 +208,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await authService.logout();
       setUser(null);
       setError(null);
+      localStorage.removeItem('choruko_user');
 
       // window.location.href = '/';
     } catch (error) {
       console.error("Logout error:", error);
       // Even if logout fails on server, clear local state
       setUser(null);
+      localStorage.removeItem('choruko_user');
     } finally {
       setLoading(false);
     }
@@ -193,6 +225,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const clearAuth = () => {
     setUser(null);
     setError(null);
+    localStorage.removeItem('choruko_user');
   };
 
   // Check auth on component mount
