@@ -226,12 +226,12 @@ const Settlements: React.FC = () => {
           </div>
           <div className="settlement__info">
             <p className="settlement__name">
-              {isCreator 
+              {isCreator
                 ? `${settlement.settledUserIds.length}/${settlement.settledUserIds.length + settlement.unsettledUserIds.length} paid`
                 : formatCurrency(
-                    settlement.amount / (settlement.settledUserIds.length + settlement.unsettledUserIds.length + 1),
-                    currencySymbol
-                  )
+                  settlement.amount / (settlement.settledUserIds.length + settlement.unsettledUserIds.length + 1),
+                  currencySymbol
+                )
               }
             </p>
             <p className="settlement__description">{settlement.description}</p>
@@ -242,6 +242,13 @@ const Settlements: React.FC = () => {
                 src={settlement.status === "unpaid" ? settlementIcon : checkIcon}
                 alt="Settlement status icon"
               />
+              {isCreator ? (
+                <span className="settlement__creator-label">Creator</span>
+              ) : settlement.settledUserIds.includes(user?.id || '') ? (
+                <span className="settlement__creator-label">Paid</span>
+              ) : (
+                <span className="settlement__creator-label">Unpaid</span>
+              )}
             </span>
           )}
         </div>
@@ -355,9 +362,9 @@ const Settlements: React.FC = () => {
               <div className="amount-per-person">
                 {selectedBackendSettlement && (selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0) > 0
                   ? formatCurrency(
-                      selectedSettlement.amount / ((selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0) + 1),
-                      currencySymbol
-                    )
+                    selectedSettlement.amount / ((selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0) + 1),
+                    currencySymbol
+                  )
                   : formatCurrency(selectedSettlement.amount, currencySymbol)}{" "}
                 per person
               </div>
