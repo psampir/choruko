@@ -110,8 +110,12 @@ const AddSettlement: React.FC = () => {
 
     // Validate amount
     const amountNum = parseFloat(amountSpent);
-    if (amountNum <= 0 || isNaN(amountNum)) {
+    if (isNaN(amountNum) || amountNum <= 0) {
       setErrorMessage("Amount must be greater than 0");
+      return;
+    }
+    if (amountNum > 99999999.99) {
+      setErrorMessage("Amount cannot exceed 99,999,999.99");
       return;
     }
 
@@ -264,6 +268,9 @@ const AddSettlement: React.FC = () => {
             currencySymbol={currencySymbol}
             placeholder="Amount spent"
             value={amountSpent}
+            min="0.01"
+            max="99999999.99"
+            step="0.01"
             onChange={(e) => {
               const value = e.target.value;
               // Allow only numbers and decimal point
