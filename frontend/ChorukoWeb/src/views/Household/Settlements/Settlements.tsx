@@ -44,6 +44,8 @@ interface UISettlement {
   amount: number;
   settledUsers: Assignee[];
   unsettledUsers: Assignee[];
+  settledUserIds: string[];
+  unsettledUserIds: string[];
 }
 
 const Settlements: React.FC = () => {
@@ -94,6 +96,8 @@ const Settlements: React.FC = () => {
           avatar: getProfilePictureUrl(backendSettlement.creator.profilePicturePath),
         },
         amount: backendSettlement.amount,
+        settledUserIds: backendSettlement.settledUserIds || [],
+        unsettledUserIds: backendSettlement.unsettledUserIds || [],
         settledUsers: (backendSettlement.settledUserIds || []).map(id => ({
           id,
           name: '',
@@ -191,6 +195,9 @@ const Settlements: React.FC = () => {
       settlement.unsettledUsers.some(u => u.id === user.id)
     );
 
+    // Check if current user is the creator
+    const isCreator = user && settlement.author.id === user.id;
+
     return (
       <div
         className={`settlement ${isFirst ? "settlement--first" : ""} ${isLast ? "settlement--last" : ""
@@ -219,7 +226,13 @@ const Settlements: React.FC = () => {
           </div>
           <div className="settlement__info">
             <p className="settlement__name">
-              {formatCurrency(settlement.amount, currencySymbol)}
+              {isCreator 
+                ? `${settlement.settledUserIds.length}/${settlement.settledUserIds.length + settlement.unsettledUserIds.length} paid`
+                : formatCurrency(
+                    settlement.amount / (settlement.settledUserIds.length + settlement.unsettledUserIds.length + 1),
+                    currencySymbol
+                  )
+              }
             </p>
             <p className="settlement__description">{settlement.description}</p>
           </div>
@@ -342,7 +355,7 @@ const Settlements: React.FC = () => {
               <div className="amount-per-person">
                 {selectedBackendSettlement && (selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0) > 0
                   ? formatCurrency(
-                      selectedSettlement.amount / ((selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0)),
+                      selectedSettlement.amount / ((selectedBackendSettlement.unsettledUsers?.length || 0) + (selectedBackendSettlement.settledUsers?.length || 0) + 1),
                       currencySymbol
                     )
                   : formatCurrency(selectedSettlement.amount, currencySymbol)}{" "}
