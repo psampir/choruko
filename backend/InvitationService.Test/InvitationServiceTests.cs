@@ -127,10 +127,11 @@ public class InvitationServiceTests
             {
                 Id = invitation.Id,
                 ReceiverId = receiver.Id,
-                HouseholdImagePath = "/images/default.png",
                 HouseholdName = invitation.Household.Name,
+                HouseholdImagePath = "/images/default.png",
                 InviterFirstName = sender.FirstName,
                 InviterLastName = sender.LastName,
+                Status = invitation.Status
             });
 
         var result = await _service.GetAllInvitations(receiver.Id);
@@ -172,7 +173,8 @@ public class InvitationServiceTests
                 HouseholdName = invitation.Household.Name,
                 HouseholdImagePath = "/images/default.png",
                 InviterFirstName = sender.FirstName,
-                InviterLastName = sender.LastName
+                InviterLastName = sender.LastName,
+                Status = invitation.Status,
             });
 
         var result = await _service.GetInvitation(invitation.Id);
