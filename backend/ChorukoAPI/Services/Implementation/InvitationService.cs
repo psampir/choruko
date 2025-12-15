@@ -60,7 +60,7 @@ public class InvitationService(DataContext context,
                 body = $"{household.Name}",
                 icon = "/icons/icon-192x192.png",
                 badge = "/icons/icon-96x96.png",
-                url = "/"
+                url = "/invitations"
             });
 
             if (userId != userToAdd.Id)
