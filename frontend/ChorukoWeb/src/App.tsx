@@ -209,9 +209,9 @@ function AppRoutes() {
           }
         />
 
-        {/* Test route for push notifications */}
+        {/* Hidden dev route for push notifications testing */}
         <Route
-          path="/test-notifications"
+          path="/dev-push-test"
           element={
             <ProtectedRoute>
               <AppLayout>

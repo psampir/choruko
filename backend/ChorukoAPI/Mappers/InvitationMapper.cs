@@ -14,7 +14,8 @@ public class InvitationMapper : IMapper<Invitation, InvitationResponse>
             HouseholdName = source.Household.Name,
             HouseholdImagePath = source.Household.ProfilePicturePath,
             InviterFirstName = source.Sender.FirstName,
-            InviterLastName = source.Sender.LastName
+            InviterLastName = source.Sender.LastName,
+            Status = source.Status
         };
     }
 }

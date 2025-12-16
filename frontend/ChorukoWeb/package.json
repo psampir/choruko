@@ -1,8 +1,9 @@
 {
   "name": "choruko",
   "private": true,
-  "version": "v1.0.0",
+  "version": "v1.0.1",
   "type": "module",
+  "license": "AGPL-3.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

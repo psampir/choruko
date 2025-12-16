@@ -15,5 +15,5 @@ public interface ISettlementService
     Task<ServiceResponse<OperationResultDto>> MarAsUnPaid(string settlementId, string userId);
     Task<ServiceResponse<OperationResultDto>> MarkAsDone(string settlementId, string userId);
     Task<ServiceResponse<OperationResultDto>> UnMarkAsDone(string settlementId, string userId);
-    Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string settlementId);
+    Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string settlementId, string userId);
 }

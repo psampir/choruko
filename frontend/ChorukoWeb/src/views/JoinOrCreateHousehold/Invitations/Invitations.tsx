@@ -57,7 +57,7 @@ function Invitations() {
     try {
       const result = await invitationService.getAllInvitations();
       if (result.success && result.data) {
-        setInvitations(result.data);
+        setInvitations(result.data.filter(inv => inv.status === "Pending"));
       } else {
         showNotification(
           result.message || "Failed to load invitations",
@@ -203,14 +203,14 @@ function Invitations() {
             </p>
             <div style={{ display: "flex", gap: "var(--spacing-md)", marginTop: "var(--spacing-md)" }}>
               <Button
-                variant="primary"
+                variant="primary-popup"
                 onClick={handleAccept}
                 disabled={loading}
               >
                 {loading ? "Accepting..." : "Accept"}
               </Button>
               <Button
-                variant="red"
+                variant="red-popup"
                 onClick={handleDecline}
                 disabled={loading}
               >

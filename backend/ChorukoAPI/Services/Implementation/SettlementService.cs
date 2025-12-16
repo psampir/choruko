@@ -224,12 +224,17 @@ public class SettlementService(
         }
     }
 
-    public async Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string settlementId)
+    public async Task<ServiceResponse<OperationResultDto>> DeleteSettlement(string settlementId, string userId)
     {
         var settlement = await _context.Settlements.FirstOrDefaultAsync(s => s.Id == settlementId);
         if (settlement == null)
         {
             return ServiceResponseFactory.Error<OperationResultDto>(null, "No settlement found", HttpStatusCode.NotFound);
+        }
+
+        if (settlement.CreatorId != userId)
+        {
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Settlements can only be removed by their creators", HttpStatusCode.BadRequest);
         }
 
         _context.Settlements.Remove(settlement);

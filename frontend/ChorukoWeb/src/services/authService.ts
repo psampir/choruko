@@ -99,10 +99,13 @@ class AuthService {
           return { authenticated: false };
         }
       } else {
+        // Backend returned error (401, 403, etc.) - user is not authenticated
         return { authenticated: false };
       }
     } catch (error) {
-      return { authenticated: false };
+      // Network error (offline, timeout, DNS error, etc.)
+      // Return error flag so AuthContext can keep cached user
+      return { authenticated: false, networkError: true };
     }
   }
 

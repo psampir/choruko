@@ -1,6 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChorukoAPI", "ChorukoAPI\ChorukoAPI.csproj", "{3ADF1368-1013-47F5-B2E2-CC5EAF6A10DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvitationService.Test", "InvitationService.Test\InvitationService.Test.csproj", "{86CB6080-839A-4A53-9414-7F28097FC5B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HouseholdTaskService.Test", "HouseholdTaskService.Test\HouseholdTaskService.Test.csproj", "{EBFD0269-9910-4653-A276-241EB6E4D73E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActivityService.Test", "ActivityService.Test\ActivityService.Test.csproj", "{75EB21B5-771A-49BE-9CB0-A5F3E9719861}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettlementService.Test", "SettlementService.Test\SettlementService.Test.csproj", "{66387088-796A-437B-A8A2-83773F43B76B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HouseholdService.Test", "HouseholdService.Test\HouseholdService.Test.csproj", "{AE9F924C-B9A0-401E-88A8-2095796A9BB9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +23,28 @@ Global
 		{3ADF1368-1013-47F5-B2E2-CC5EAF6A10DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ADF1368-1013-47F5-B2E2-CC5EAF6A10DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ADF1368-1013-47F5-B2E2-CC5EAF6A10DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86CB6080-839A-4A53-9414-7F28097FC5B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86CB6080-839A-4A53-9414-7F28097FC5B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86CB6080-839A-4A53-9414-7F28097FC5B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86CB6080-839A-4A53-9414-7F28097FC5B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBFD0269-9910-4653-A276-241EB6E4D73E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBFD0269-9910-4653-A276-241EB6E4D73E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBFD0269-9910-4653-A276-241EB6E4D73E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBFD0269-9910-4653-A276-241EB6E4D73E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75EB21B5-771A-49BE-9CB0-A5F3E9719861}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75EB21B5-771A-49BE-9CB0-A5F3E9719861}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75EB21B5-771A-49BE-9CB0-A5F3E9719861}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75EB21B5-771A-49BE-9CB0-A5F3E9719861}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66387088-796A-437B-A8A2-83773F43B76B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66387088-796A-437B-A8A2-83773F43B76B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66387088-796A-437B-A8A2-83773F43B76B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66387088-796A-437B-A8A2-83773F43B76B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE9F924C-B9A0-401E-88A8-2095796A9BB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE9F924C-B9A0-401E-88A8-2095796A9BB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE9F924C-B9A0-401E-88A8-2095796A9BB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE9F924C-B9A0-401E-88A8-2095796A9BB9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

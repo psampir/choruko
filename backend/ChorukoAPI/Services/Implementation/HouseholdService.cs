@@ -505,20 +505,7 @@ public class HouseholdService(DataContext _context,
         
         if (userRoles.Contains("HouseholdAdmin"))
         {
-            int adminCount = 0;
-            foreach (var participant in household.Participants)
-            {
-                var roles = await _userManager.GetRolesAsync(participant);
-                if (roles.Contains("HouseholdAdmin"))
-                {
-                    adminCount++;
-                }
-            }
-            
-            if (adminCount <= 1)
-            {
-                return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot leave. A household must have at least one admin.", HttpStatusCode.Forbidden);
-            }
+            return ServiceResponseFactory.Error<OperationResultDto>(null, "Cannot leave household. Household admin must transfer admin rights or delete the household.", HttpStatusCode.Forbidden);
         }
         
         user.HouseholdId = null;
@@ -668,8 +655,11 @@ public class HouseholdService(DataContext _context,
         }
         
         await _context.SaveChangesAsync();
+        
+        // Invalidate cookie for new admin (might be offline when promoted)
+        await _userManager.UpdateSecurityStampAsync(newAdmin);
+        
         await _signInManager.RefreshSignInAsync(currentAdmin);
-        await _signInManager.RefreshSignInAsync(newAdmin);
 
         var response = new OperationResultDto
         {
