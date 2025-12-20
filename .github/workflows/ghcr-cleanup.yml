@@ -18,18 +18,18 @@ jobs:
         with:
           package-name: 'choruko-frontend'
           package-type: 'container'
-          min-versions-to-keep: 3
+          min-versions-to-keep: 10
 
       - name: Delete old choruko-backend versions  
         uses: actions/delete-package-versions@v5
         with:
           package-name: 'choruko-backend'
           package-type: 'container'
-          min-versions-to-keep: 3
+          min-versions-to-keep: 10
 
       - name: Delete old choruko-manager versions
         uses: actions/delete-package-versions@v5
         with:
           package-name: 'choruko-manager'
           package-type: 'container'
-          min-versions-to-keep: 3
+          min-versions-to-keep: 10
