@@ -41,7 +41,7 @@ public class ActivityController(IActivityService _activityService) : ControllerB
     }
 
     [HttpGet("{householdId}")]
-    [Authorize(Roles = "HouseholdAdmin,HouseholdMember")]
+    [Authorize(Roles = "HouseholdAdmin,Participant")]
     public async Task<ActionResult<ApiResponse<List<ActivityResponse>>>> GetActivities([FromRoute] string householdId)
     {
         var result = await _activityService.GetActivitiesAsync(householdId);
@@ -49,7 +49,7 @@ public class ActivityController(IActivityService _activityService) : ControllerB
     }
 
     [HttpGet("{householdId}/{activityId}")]
-    [Authorize(Roles = "HouseholdAdmin,HouseholdMember")]
+    [Authorize(Roles = "HouseholdAdmin,Participant")]
     public async Task<ActionResult<ApiResponse<ActivityResponse>>> GetActivity([FromRoute] string householdId, [FromRoute] string activityId)
     {
         var result = await _activityService.GetActivityByIdAsync(activityId);
