@@ -68,6 +68,7 @@ jobs:
   
   deploy:
     needs: [prepare, build]
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
     uses: ./.github/workflows/deploy.yml
     with:
       frontend_image: ${{ needs.build.outputs.frontend_image }}
@@ -80,5 +81,6 @@ jobs:
       CR_PAT: ${{ secrets.CR_PAT }}
   
   ghcr_cleanup:
-    needs: deploy
+    needs: [prepare, build]
+    if: ${{ always() && needs.build.result == 'success' }}
     uses: ./.github/workflows/ghcr-cleanup.yml

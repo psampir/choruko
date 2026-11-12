@@ -53,6 +53,9 @@ concurrency:
 jobs:
   
   deploy:
+    # Deploy is opt-in: set the repository variable DEPLOY_ENABLED=true and
+    # provide SERVER_IP_ADDRESS, SSH_PRIVATE_KEY and CR_PAT secrets.
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
