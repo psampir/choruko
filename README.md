@@ -17,3 +17,4 @@ For the complete license terms, see the [LICENSE](LICENSE) file.
 ## Guides
 - [Installing Choruko](docs/guides/install.md)
 - [Setting up development environment](docs/guides/set-up-dev-env.md)
+- [CI/CD](docs/guides/ci-cd.md)

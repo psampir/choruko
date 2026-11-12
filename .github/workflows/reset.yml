@@ -21,6 +21,8 @@ concurrency:
 jobs:
   
   reset:
+    # Requires a deploy target: see DEPLOY_ENABLED in docs/guides/ci-cd.md.
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
