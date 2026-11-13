@@ -53,7 +53,7 @@ public class InvitationServiceTests
 
         Assert.False(result.IsSuccessful);
         Assert.Equal(HttpStatusCode.NotFound, result.StatusCode);
-        Assert.Equal("No users were found", result.Message);
+        Assert.Equal("No user was found with this email", result.Message);
     }
 
     [Fact]
