@@ -46,6 +46,24 @@ jobs:
       - name: Test
         run: dotnet test backend/ChorukoAPI.sln --no-build --configuration Release --logger "console;verbosity=minimal"
 
+  backend-alpine:
+    name: Backend (Alpine)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test on Alpine (musl)
+        run: |
+          docker run --rm \
+            -v "$PWD:/src" \
+            -w /src \
+            -e DOTNET_CLI_TELEMETRY_OPTOUT=1 \
+            -e DOTNET_NOLOGO=1 \
+            mcr.microsoft.com/dotnet/sdk:9.0-alpine \
+            dotnet test backend/HouseholdService.Test/HouseholdService.Test.csproj --configuration Release
+
   frontend:
     name: Frontend
     runs-on: ubuntu-latest

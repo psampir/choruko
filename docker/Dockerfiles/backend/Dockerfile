@@ -15,8 +15,17 @@ RUN dotnet restore ./ChorukoAPI.csproj
 # Copy the source code
 COPY backend/ChorukoAPI/ ./
 
-# Build the app
-RUN dotnet publish -c Release -o out
+# Build for the target architecture with the matching musl RID. A portable
+# publish would copy native assets for every platform (hundreds of MB).
+ARG TARGETARCH=amd64
+RUN case "${TARGETARCH:-amd64}" in \
+        amd64) RID=linux-musl-x64 ;; \
+        arm64) RID=linux-musl-arm64 ;; \
+        arm)   RID=linux-musl-arm ;; \
+        386)   RID=linux-musl-x86 ;; \
+        *)     RID=linux-musl-x64 ;; \
+    esac && \
+    dotnet publish -c Release -r "$RID" --self-contained false -o out
 
 ### Stage 2: Run ASP.NET Core app
 

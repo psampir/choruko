@@ -1,17 +1,16 @@
-﻿using System.Net;
+using System.Net;
 using ChorukoAPI.Contracts;
 using ChorukoAPI.Contracts.Requests.Household;
 using ChorukoAPI.Contracts.Responses.Household;
 using ChorukoAPI.Data;
+using ChorukoAPI.Extensions;
 using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Service = ChorukoAPI.Services.Implementation.HouseholdService;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 using HouseholdService.Test.Helpers;
@@ -23,11 +22,10 @@ public class HouseholdServiceTests : IDisposable
     private readonly DataContext _context;
     private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly Mock<SignInManager<User>> _signInManagerMock;
-    private readonly Mock<IWebHostEnvironment> _webHostEnvironmentMock;
+    private readonly Mock<IImageProcessor> _imageProcessorMock;
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<IMapper<Household, HouseholdInfoResponse>> _mapperMock;
     private readonly Mock<IPushNotificationService> _pushMock;
-    private readonly Mock<IOptions<ImageSettings>> _optionsMock;
     private readonly IHouseholdService _service;
 
     public HouseholdServiceTests()
@@ -39,28 +37,19 @@ public class HouseholdServiceTests : IDisposable
         _context = new DataContext(options);
         _userManagerMock = GetMockUserManager();
         _signInManagerMock = GetMockSignInManager(_userManagerMock);
-        _webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
         _mapperMock = new Mock<IMapper<Household, HouseholdInfoResponse>>();
         _pushMock = new Mock<IPushNotificationService>();
-        _optionsMock = new Mock<IOptions<ImageSettings>>();
-
-        _optionsMock.Setup(x => x.Value).Returns(new ImageSettings
-        {
-            MaxFileSize = 5 * 1024 * 1024,
-            AllowedFormats = new[] { ".jpg", ".jpeg", ".png" },
-            MinDimension = 100,
-            MaxDimension = 2000
-        });
-
-        _webHostEnvironmentMock.Setup(x => x.WebRootPath).Returns(Path.GetTempPath());
+        _imageProcessorMock = new Mock<IImageProcessor>();
+        _imageProcessorMock
+            .Setup(x => x.ProcessAsync(It.IsAny<IFormFile?>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ServiceResponseFactory.Success<string>(null, "No profile picture provided.", HttpStatusCode.OK));
 
         _service = new Service(
             _context,
+            _imageProcessorMock.Object,
             _userManagerMock.Object,
-            _webHostEnvironmentMock.Object,
             _signInManagerMock.Object,
-            _optionsMock.Object,
             _httpContextAccessorMock.Object,
             _mapperMock.Object,
             _pushMock.Object
