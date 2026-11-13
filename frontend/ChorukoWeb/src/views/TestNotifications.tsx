@@ -24,8 +24,8 @@ const TestNotifications: React.FC = () => {
     // Check for iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const isStandalone = ('standalone' in (window.navigator as any)) && 
-                        (window.navigator as any).standalone;
+    const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
+    const isStandalone = navigatorWithStandalone.standalone === true;
     
     if (isIOS) {
       addLog('--- iOS Detected ---');
@@ -214,8 +214,8 @@ const TestNotifications: React.FC = () => {
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isStandalone = ('standalone' in (window.navigator as any)) && 
-                      (window.navigator as any).standalone;
+  const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
+  const isStandalone = navigatorWithStandalone.standalone === true;
 
   const backgroundColor = isDark ? '#1a1a1a' : '#ffffff';
   const textColor = isDark ? '#e0e0e0' : '#333333';

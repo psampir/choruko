@@ -3,7 +3,7 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import ErrorMessage from "../../components/ErrorMessage";
 import authService from "../../services/authService";
-import { parseErrorMessage } from "../../utils/errorUtils";
+import { getErrorMessage, parseErrorMessage } from "../../utils/errorUtils";
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface ResetPasswordProps {
@@ -75,8 +75,8 @@ function ResetPassword({ onLoginClick }: ResetPasswordProps) {
         const errorMsg = parseErrorMessage(result.message || "Failed to send reset email");
         setError(errorMsg);
       }
-    } catch (error: any) {
-      const errorMsg = parseErrorMessage(error.message || "Network error occurred");
+    } catch (error: unknown) {
+      const errorMsg = parseErrorMessage(getErrorMessage(error) || "Network error occurred");
       setError(errorMsg);
     } finally {
       setLoading(false);

@@ -24,6 +24,16 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // Unused catch bindings are common in this codebase; `_`-prefixed
+      // parameters and destructured values are intentionally unused.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrors: 'none',
+        },
+      ],
     },
   },
 )
