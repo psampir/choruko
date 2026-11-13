@@ -153,6 +153,8 @@ builder.Services.AddScoped<IPasswordGenerator, PasswordGenerator>();
 
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 
+builder.Services.AddScoped<IImageProcessor, ImageProcessor>();
+
 builder.Services.AddScoped<IActivityService, ActivityService>();
 
 builder.Services.AddScoped<IHouseholdTaskService, HouseholdTaskService>();

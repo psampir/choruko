@@ -22,6 +22,10 @@
 - **Backend** — `dotnet restore`, `dotnet build`, `dotnet test` on
   `backend/ChorukoAPI.sln` (.NET 9). Tests use EF Core InMemory, so no database is
   needed.
+- **Backend (Alpine)** — runs the `HouseholdService.Test` project (including the
+  image-processing tests) inside `mcr.microsoft.com/dotnet/sdk:9.0-alpine`. This
+  verifies that the SkiaSharp native library loads on musl, as it must in the
+  production `aspnet:9.0-alpine` image.
 - **Frontend** — `npm ci`, `npm run lint`, `npm run build` in `frontend/ChorukoWeb`
   (Node 22).
 

@@ -38,7 +38,7 @@ who owes whom.
 | Layer | Stack |
 |---|---|
 | Frontend | React 19, TypeScript, Vite, SCSS, React Router, `vite-plugin-pwa` |
-| Backend | ASP.NET Core 9, EF Core 9, ASP.NET Core Identity (cookie auth) |
+| Backend | ASP.NET Core 9, EF Core 9, ASP.NET Core Identity (cookie auth), SkiaSharp for image processing |
 | Database | PostgreSQL 17 |
 | Packaging | Docker images for frontend, backend and a migration/admin manager |
 | CI/CD | GitHub Actions (build, tests, GHCR images), Docker Compose |
