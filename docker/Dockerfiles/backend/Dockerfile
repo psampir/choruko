@@ -21,7 +21,7 @@ RUN dotnet publish -c Release -o out
 ### Stage 2: Run ASP.NET Core app
 
 # Use a lightweight ASP.NET Core runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:11.0-alpine
 
 WORKDIR /app
 
