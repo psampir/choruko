@@ -1,7 +1,7 @@
 ### Stage 1: Build ASP.NET Core app
 
 # Use the .NET SDK image for building the app
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0-alpine AS build
 
 # Set the working directory in the container
 WORKDIR /src
