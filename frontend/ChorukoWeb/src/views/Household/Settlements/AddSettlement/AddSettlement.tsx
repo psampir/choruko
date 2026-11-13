@@ -60,7 +60,7 @@ const AddSettlement: React.FC = () => {
 
       // Set selected assignees (unsettled users)
       if (editSettlement.unsettledUsers && Array.isArray(editSettlement.unsettledUsers)) {
-        const assigneeIds = editSettlement.unsettledUsers.map((u: any) => u.id);
+        const assigneeIds = editSettlement.unsettledUsers.map((u: { id: string }) => u.id);
         setSelectedAssignees(assigneeIds);
       }
     }

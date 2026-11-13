@@ -82,7 +82,7 @@ const AddTask: React.FC = () => {
 
       // Set selected assignees
       if (editTask.assignees && Array.isArray(editTask.assignees)) {
-        const assigneeIds = editTask.assignees.map((a: any) => a.id);
+        const assigneeIds = editTask.assignees.map((a: { id: string }) => a.id);
         setSelectedAssignees(assigneeIds);
       }
     }

@@ -1,5 +1,9 @@
 [← Back to Setup Development Environment](./set-up-dev-env.md)
 
+> **Note:** this guide covers the current PWA build. PWA is planned to be replaced
+> by native app shells (Android APK and an iOS home-screen web clip); this document
+> will be updated or removed as part of that change.
+
 # Testing PWA on mobile devices
 This guide will help you test the Progressive Web App (PWA) features of Choruko on mobile devices using Android Studio's emulator.
 

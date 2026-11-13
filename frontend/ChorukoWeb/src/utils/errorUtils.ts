@@ -1,4 +1,10 @@
 /**
+ * Extracts a message from an unknown thrown value.
+ */
+export const getErrorMessage = (error: unknown): string | undefined =>
+  error instanceof Error ? error.message : undefined;
+
+/**
  * Parses error messages from backend API responses
  * Handles both validation error format and custom API error format
  */

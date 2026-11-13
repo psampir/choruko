@@ -31,7 +31,7 @@ const manifestIcons: ManifestIcon[] = iconsJson.icons.map(i => {
 // https://vite.dev/config/
 export default defineConfig({
   define: {
-    'import.meta.env.VITE_APP_VERSION': JSON.stringify(packageJson.version)
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(`v${packageJson.version}`)
   },
   server: {
     host: true, // Allow access from other devices on the network

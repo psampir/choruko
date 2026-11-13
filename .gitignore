@@ -595,3 +595,6 @@ dist-ssr
 # App and DB files
 app_data/
 db_data/
+
+# Local scratch notes (not part of the repository)
+/ideas/
