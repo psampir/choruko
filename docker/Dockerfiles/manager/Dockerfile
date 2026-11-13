@@ -39,7 +39,7 @@ RUN TARGET_ARCH=$(cat /tmp/target-arch) && \
 ### Stage 2: Run migrations and provide admin tools
 
 # Use a lightweight alpine image
-FROM alpine:3.22
+FROM alpine:3.24
 
 # Add architecture labels for better tracking
 ARG TARGETARCH
