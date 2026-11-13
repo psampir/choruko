@@ -40,21 +40,15 @@ sliding expiration.
 - If `ENABLE_EMAILS=true`, `SERVER_URL` must be the public URL of the instance;
   otherwise password-reset links point to the wrong place.
 
-## PWA cannot be installed
+## "Copy topic" does nothing
 
-Installation and Web Push require a **secure context**:
+The clipboard API needs a **secure context**: HTTPS with a certificate the device
+trusts, or `http://localhost` / `http://127.0.0.1`. On `http://192.168.x.x` the app
+falls back to a hidden text area, which some mobile browsers still refuse. Select the
+topic by hand, or serve the instance over HTTPS.
 
-- HTTPS with a certificate the device trusts, or
-- `http://localhost` / `http://127.0.0.1` on the same machine.
-
-`http://192.168.x.x` is not a secure context. The app itself works there, but the
-service worker does not register, the install prompt does not appear and push does
-not work. A self-signed certificate that the browser only bypasses by hand is not
-enough.
-
-The service worker and manifest are generated at build time. In development, use
-`npm run build && npm run preview` to test PWA behaviour; `npm run dev` does not
-register a worker.
+Everything else, including notifications, works over plain HTTP: delivery happens
+between the backend and the ntfy server, not in the browser.
 
 ## Notifications (ntfy) do not arrive
 
@@ -71,9 +65,9 @@ register a worker.
 6. `PUBLIC_APP_URL` must be the URL users actually open, otherwise notification
    links point to the wrong place.
 
-Legacy Web Push (PWA) is being retired. `/dev-push-test` and
-`POST /api/PushSubscription/test` still exercise it, but business notifications no
-longer use the Web Push path.
+Legacy Web Push is being retired: the backend still exposes
+`POST /api/PushSubscription/test`, but the frontend no longer registers a service
+worker and business notifications go through `INotifier` only.
 
 ## Picture upload fails
 

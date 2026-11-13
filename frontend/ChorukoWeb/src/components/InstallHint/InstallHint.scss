@@ -1,0 +1,41 @@
+@use "../../styles/variables";
+
+.install-hint {
+  max-width: 450px;
+
+  &__section {
+    text-align: left;
+    margin-bottom: var(--spacing-xl);
+
+    p {
+      margin: 0 0 var(--spacing-lg) 0;
+      font-size: var(--font-size-body);
+      color: var(--color-text-primary);
+      line-height: 1.5;
+    }
+
+    ol {
+      margin: 0;
+      padding-left: var(--spacing-2xl);
+
+      li {
+        margin-bottom: var(--spacing-sm);
+        font-size: var(--font-size-body);
+        line-height: 1.6;
+        color: var(--color-text-primary);
+
+        strong {
+          color: var(--color-secondary);
+          font-weight: var(--font-weight-semibold);
+        }
+      }
+    }
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: var(--font-size-body2);
+    color: var(--color-text-secondary);
+    text-align: center;
+  }
+}

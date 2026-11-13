@@ -7,7 +7,7 @@ React 19 + TypeScript + Vite + SCSS. Part of the [Choruko](../../README.md) proj
 ```bash
 npm install
 npm run dev      # http://localhost:3000, proxies /api and /uploads to :5180
-npm run build    # tsc -b && vite build (also generates the PWA manifest and service worker)
+npm run build    # tsc -b && vite build
 npm run lint
 ```
 
@@ -20,4 +20,4 @@ including the backend and database.
 - `src/contexts` — per-domain state; call a service, then refresh
 - `src/services` — API clients (`fetch`, cookie auth)
 - `src/components` — shared UI, one folder per component
-- `src/sw.ts` — service worker (PWA: precache, push)
+- `src/components/InstallHint` — add-to-home-screen (iOS) and Android app hint

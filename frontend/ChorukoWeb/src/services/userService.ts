@@ -115,6 +115,41 @@ class UserService {
     }
   }
 
+  // Get (and lazily create) the user's ntfy topic
+  async getNotificationTopic() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/User/notification-topic`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.isSuccessful && data.result) {
+          return {
+            success: true,
+            topic: data.result as string,
+            message: data.message || "Notification topic loaded",
+          };
+        }
+        return {
+          success: false,
+          message: data.message || "Failed to load the notification topic",
+        };
+      }
+
+      const errorText = await response.text();
+      return {
+        success: false,
+        message:
+          parseErrorMessage(errorText) || "Failed to load the notification topic",
+      };
+    } catch (error) {
+      console.error("Error loading notification topic:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
   // Get user info (already handled in authService, but can be added here for completeness)
   async getUserInfo() {
     try {

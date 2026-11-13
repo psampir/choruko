@@ -74,8 +74,8 @@
 
 /* Additional bottom padding for pages with bottom nav */
 .app:has(.bottom-nav) .main-content {
-  padding-bottom: var(--navbar-height);
-  /* Space for bottom navbar */
+  padding-bottom: calc(var(--navbar-height) + env(safe-area-inset-bottom));
+  /* Space for bottom navbar, plus the iOS home indicator */
 }
 
 /* Additional top padding for notched devices */

@@ -89,10 +89,6 @@ The backend is an ASP.NET Core application.
 ## Frontend Setup
 The frontend is a React application built with Vite.
 
-> PWA installability requirements:
-> - The app must be served over HTTPS, or from a local development environment using localhost or 127.0.0.1 — with or without a port number.
-> - The PWA manifest and service worker are generated at build time by vite-plugin-pwa; run a production build before testing installation.
-
 1. **Install dependencies:**
   Install exactly the versions from the lockfile:
 
@@ -103,7 +99,7 @@ The frontend is a React application built with Vite.
     Use `npm install --prefix frontend/ChorukoWeb` only when you change
     `package.json`.
 
-2. **Build (generates PWA manifest and service worker):**
+2. **Build (production bundle in `dist/`):**
     ```bash
     npm run build --prefix frontend/ChorukoWeb
     ```
@@ -143,8 +139,6 @@ Once you have completed the backend and frontend setup, you can run the applicat
 
 2. **Frontend:**
 
-    **a)** Without PWA features (development mode):
-
     Open another terminal window and navigate to the `frontend/ChorukoWeb` directory.
 
       ```bash
@@ -152,33 +146,25 @@ Once you have completed the backend and frontend setup, you can run the applicat
       ```
 
       To start the frontend development server, run the following command:
-    
+
       ```bash
       npm run dev
       ```
-    
+
       The web application will be available at `http://localhost:3000`.
 
-    ---
-
-    **b)** With PWA features (production mode):
-
-    Open another terminal window and navigate to the `frontend/ChorukoWeb` directory.
-
-      ```bash
-      cd frontend/ChorukoWeb
-      ```
-
-    In order to enable PWA, you need to build the production version and serve it locally (PWA requires manifest and service worker generated at build time):
+    To serve the production build instead:
 
     ```bash
     npm run build
     npm run preview
     ```
 
-    The PWA will be available at `http://localhost:3000`.
+    `npm run preview` proxies `/api` and `/uploads` to the backend, exactly like the
+    development server.
 
-    To test PWA features locally, follow the guide: [Testing PWA Mobile](test-pwa-mobile.md).
+    To test the UI on a phone or emulator, follow
+    [Testing on mobile](test-mobile.md).
 
 ## What's Next?
 Now that you have your development environment set up, you might want to explore the following:

@@ -9,7 +9,6 @@ React single-page app. They talk JSON over HTTP and authenticate with a cookie.
 flowchart LR
     subgraph Browser
         SPA[React 19 SPA]
-        SW[Service worker<br/>precache + legacy push]
     end
 
     subgraph Docker
@@ -31,7 +30,6 @@ flowchart LR
     MGR -->|EF bundle| DB
     API -->|ntfy HTTP| NTFY
     NTFY --> NTFYAPP
-    API -->|legacy Web Push| SW
 ```
 
 ## Backend
@@ -106,7 +104,6 @@ router; every route is lazy-loaded.
 | `services/` | Small `fetch` clients with `credentials: "include"`. |
 | `components/` | Shared UI; one folder per component with its SCSS. |
 | `utils/` | Formatting, icons, images, error parsing. |
-| `sw.ts` | Service worker: precache, legacy push, notification click. |
 
 The provider order is significant: `Auth → User → Household → Activity → Task →
 Settlement`. Task and settlement contexts wait for `householdInfo.id`, which comes
@@ -122,7 +119,8 @@ from the household context, which depends on the authenticated user.
   users who settled and users who still owe.
 - `Invitation` links a sender, a receiver and a household, with a status and sent date.
 - `User.NtfyTopic` stores the user's private ntfy topic for notifications.
-- `PushSubscription` stores a browser endpoint and its keys (legacy Web Push).
+- `PushSubscription` stores a browser endpoint and its keys (legacy Web Push, not
+  used by business logic and scheduled for removal).
 
 All ids are GUID strings. Timestamps are stored as `timestamp without time zone`.
 Entities use `virtual` navigations because EF Core lazy loading is enabled; services

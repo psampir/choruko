@@ -85,11 +85,10 @@ Uploaded pictures are stored under `APP_DATA_LOCATION` and served by the backend
 
 - `uploads/users/` — profile pictures
 - `uploads/households/` — household pictures
-- `uploads/vapid-keys.json` — generated Web Push keys
+- `uploads/vapid-keys.json` — generated Web Push keys (legacy, unused by ntfy)
 
-Keep the directory writable by the container. Back it up together with the database;
-the VAPID keys must survive a redeploy, otherwise existing push subscriptions stop
-working.
+Keep the directory writable by the container and back it up together with the
+database.
 
 ## Timezone
 
@@ -120,9 +119,11 @@ Supported formats by default: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`.
 The container serves plain HTTP on port 80 and terminates nothing. Put a reverse
 proxy in front of it if the instance is reachable from other machines:
 
-- PWA installation and Web Push require a secure context: HTTPS with a trusted
-  certificate, or `localhost`.
-- The rest of the app works over plain HTTP on a trusted LAN.
+- The app and ntfy notifications work over plain HTTP on a trusted LAN.
+- Add HTTPS with a trusted certificate when the instance is reachable from other
+  machines, so the session cookie and password are not sent in clear text.
+- The clipboard API needs a secure context; on plain HTTP the **Copy Topic** button
+  falls back to selecting the text.
 - Forward the original `Host` header. The backend does not currently process
   `X-Forwarded-*` headers, so cookie security and generated links rely on
   `SERVER_URL` and on the proxy preserving the host.
