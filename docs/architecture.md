@@ -14,7 +14,7 @@ flowchart LR
 
     subgraph Docker
         N[Nginx<br/>static + /api proxy]
-        API[ASP.NET Core 9 API]
+        API[ASP.NET Core 10 API]
         MGR[Manager<br/>migrations + admin tools]
         DB[(PostgreSQL 17)]
     end

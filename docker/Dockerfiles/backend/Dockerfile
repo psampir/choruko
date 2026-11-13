@@ -1,7 +1,7 @@
 ### Stage 1: Build ASP.NET Core app
 
 # Use the .NET SDK image for building the app
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 
 # Set the working directory in the container
 WORKDIR /src
@@ -30,7 +30,7 @@ RUN case "${TARGETARCH:-amd64}" in \
 ### Stage 2: Run ASP.NET Core app
 
 # Use a lightweight ASP.NET Core runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine
 
 WORKDIR /app
 
