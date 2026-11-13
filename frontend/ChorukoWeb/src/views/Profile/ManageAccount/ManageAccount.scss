@@ -71,6 +71,72 @@
       gap: var(--spacing-md);
       margin-bottom: var(--spacing-xl);
     }
+
+    &.notifications {
+      margin-top: var(--spacing-4xl);
+      gap: var(--spacing-md);
+      padding: var(--spacing-2xl);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-lg);
+      background: var(--color-background-secondary);
+    }
+  }
+
+  &__section-title {
+    font-size: var(--font-size-h5);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+    text-align: center;
+  }
+
+  &__section-text {
+    margin: 0;
+    font-size: var(--font-size-body2);
+    line-height: 1.5;
+    color: var(--color-text-primary);
+    text-align: center;
+
+    &--muted {
+      color: var(--color-text-secondary);
+    }
+
+    &--error {
+      color: var(--color-error-bg);
+    }
+
+    a {
+      color: var(--color-text-primary);
+      text-decoration: underline;
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+  }
+
+  &__topic {
+    width: 100%;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-standard);
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-family-monospace, monospace);
+    font-size: var(--font-size-body2);
+    text-align: center;
+    word-break: break-all;
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
+  &__steps {
+    margin: 0;
+    padding-left: var(--spacing-2xl);
+    font-size: var(--font-size-body2);
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+
+    li {
+      margin-bottom: var(--spacing-xs);
+    }
   }
 
   .delete-account__btn {

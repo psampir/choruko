@@ -12,9 +12,10 @@ manager that applies database migrations and provides admin tools, and PostgreSQ
 - Optional: a reverse proxy and a TLS certificate if the instance is reachable from
   other machines
 
-Plain HTTP is enough for a trusted LAN. HTTPS is required for the PWA features
-(installation and push notifications); see
-[Reverse proxy and HTTPS](#reverse-proxy-and-https).
+Plain HTTP is enough for a trusted LAN. Notifications go out through ntfy and do
+not need HTTPS on this instance. Add
+[Reverse proxy and HTTPS](#reverse-proxy-and-https) when the instance is reachable
+from other machines, so passwords and session cookies are not sent in clear text.
 
 ## Step 1 — download the deployment files
 
@@ -111,12 +112,13 @@ preferred ACME client.
 |---|---|---|
 | Tasks, settlements, invitations | ✅ | ✅ |
 | Picture uploads | ✅ | ✅ |
-| PWA installation | ❌ | ✅ |
-| Web Push notifications | ❌ | ✅ |
-| Offline app shell | ❌ | ✅ |
+| Add to home screen / web clip | ✅ | ✅ |
+| ntfy notifications | ✅ | ✅ |
+| Password and session protection | ❌ | ✅ |
 
-A certificate the browser only accepts after a manual warning bypass does **not**
-count as a secure context: the service worker stays disabled.
+Notifications travel from the backend to your ntfy server, so this instance does not
+need to be reachable from the phone. A certificate the browser only accepts after a
+manual warning bypass gives no real protection, but everything still works.
 
 ## Reset a password
 
@@ -163,5 +165,6 @@ Common problems and their fixes are in [troubleshooting](troubleshooting.md).
 - [ ] `DB_PASSWORD` changed from the default.
 - [ ] `.env` not world-readable and not committed to git.
 - [ ] HTTPS with a trusted certificate if reachable from other machines.
+- [ ] `NTFY_BASE_URL` reachable from the backend, and users subscribed to their topic.
 - [ ] Backups scheduled and a restore tested.
 - [ ] The host firewall exposes only the proxy ports (80/443), not PostgreSQL.
