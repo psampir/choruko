@@ -9,6 +9,7 @@ using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -21,7 +22,8 @@ public class UserService(
     IHttpContextAccessor _contextAccessor, 
     DataContext _context, 
     IImageProcessor _imageProcessor,
-    IMapper<User, UserInfoResponse> _mapper) : IUserService
+    IMapper<User, UserInfoResponse> _mapper,
+    IOptions<NtfySettings> _ntfyOptions) : IUserService
 {
 
     public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
@@ -41,12 +43,15 @@ public class UserService(
 
         return ServiceResponseFactory.Success(await _mapper.Map(user));
     }
-    public async Task<ServiceResponse<string>> GetOrCreateNotificationTopicAsync(string userId)
+    public async Task<ServiceResponse<NotificationSettingsResponse>> GetNotificationSettingsAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return ServiceResponseFactory.Error<string>(null, "User not found.", HttpStatusCode.NotFound);
+            return ServiceResponseFactory.Error<NotificationSettingsResponse>(
+                null,
+                "User not found.",
+                HttpStatusCode.NotFound);
         }
 
         if (string.IsNullOrWhiteSpace(user.NtfyTopic))
@@ -56,14 +61,18 @@ public class UserService(
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
-                return ServiceResponseFactory.Error<string>(
+                return ServiceResponseFactory.Error<NotificationSettingsResponse>(
                     null,
                     "Failed to save the notification topic.",
                     HttpStatusCode.InternalServerError);
             }
         }
 
-        return ServiceResponseFactory.Success(user.NtfyTopic!, "Notification topic.");
+        var settings = new NotificationSettingsResponse(
+            user.NtfyTopic!,
+            _ntfyOptions.Value.BaseUrl ?? string.Empty);
+
+        return ServiceResponseFactory.Success(settings, "Notification settings.");
     }
 
     public async Task<ServiceResponse<OperationResultDto>> ChangeUserNamesAsync(ChangeUserNamesRequest request, string userId)

@@ -42,6 +42,7 @@ const ManageAccount: React.FC = () => {
   const [profileImageSrc, setProfileImageSrc] =
     useState<string>(ProfileDefaultIcon);
   const [topic, setTopic] = useState<string>("");
+  const [ntfyBaseUrl, setNtfyBaseUrl] = useState<string>("");
   const [topicError, setTopicError] = useState<string | null>(null);
   const [topicLoading, setTopicLoading] = useState<boolean>(true);
 
@@ -50,14 +51,17 @@ const ManageAccount: React.FC = () => {
     let cancelled = false;
 
     const loadTopic = async () => {
-      const result = await userService.getNotificationTopic();
+      const result = await userService.getNotificationSettings();
       if (cancelled) return;
 
       if (result.success && result.topic) {
         setTopic(result.topic);
+        setNtfyBaseUrl(result.ntfyBaseUrl ?? "");
         setTopicError(null);
       } else {
-        setTopicError(result.message || "Failed to load the notification topic");
+        setTopicError(
+          result.message || "Failed to load the notification settings"
+        );
       }
       setTopicLoading(false);
     };
@@ -320,19 +324,22 @@ const ManageAccount: React.FC = () => {
               <ol className="manage-account__steps">
                 <li>Install the ntfy app on your phone.</li>
                 <li>
-                  Add a subscription on the ntfy server your Choruko instance
-                  uses, with the topic above.
+                  Add a subscription
+                  {ntfyBaseUrl ? (
+                    <>
+                      {" "}
+                      to <span className="manage-account__server">{ntfyBaseUrl}</span>{" "}
+                    </>
+                  ) : (
+                    " to the ntfy server your instance uses "
+                  )}
+                  with the topic above.
                 </li>
                 <li>Notifications from Choruko will arrive there.</li>
               </ol>
               <p className="manage-account__section-text manage-account__section-text--muted">
-                Without the ntfy server address from whoever runs this instance,
-                try{" "}
-                <a href="https://ntfy.sh" target="_blank" rel="noreferrer">
-                  ntfy.sh
-                </a>
-                . Treat the topic like a password; anyone who knows it can read
-                your notifications.
+                Treat the topic like a password; anyone who knows it can read your
+                notifications.
               </p>
             </>
           )}

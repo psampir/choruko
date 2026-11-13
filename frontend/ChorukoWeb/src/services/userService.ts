@@ -115,26 +115,27 @@ class UserService {
     }
   }
 
-  // Get (and lazily create) the user's ntfy topic
-  async getNotificationTopic() {
+  // Get (and lazily create) the user's ntfy topic plus the server address
+  async getNotificationSettings() {
     try {
-      const response = await fetch(`${apiBaseUrl}/User/notification-topic`, {
+      const response = await fetch(`${apiBaseUrl}/User/notification-settings`, {
         method: "GET",
         credentials: "include",
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (data.isSuccessful && data.result) {
+        if (data.isSuccessful && data.result?.topic) {
           return {
             success: true,
-            topic: data.result as string,
-            message: data.message || "Notification topic loaded",
+            topic: data.result.topic as string,
+            ntfyBaseUrl: (data.result.ntfyBaseUrl ?? "") as string,
+            message: data.message || "Notification settings loaded",
           };
         }
         return {
           success: false,
-          message: data.message || "Failed to load the notification topic",
+          message: data.message || "Failed to load the notification settings",
         };
       }
 
@@ -142,10 +143,11 @@ class UserService {
       return {
         success: false,
         message:
-          parseErrorMessage(errorText) || "Failed to load the notification topic",
+          parseErrorMessage(errorText) ||
+          "Failed to load the notification settings",
       };
     } catch (error) {
-      console.error("Error loading notification topic:", error);
+      console.error("Error loading notification settings:", error);
       return { success: false, message: "Network error occurred" };
     }
   }

@@ -11,7 +11,6 @@ using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;

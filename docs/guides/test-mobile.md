@@ -69,6 +69,6 @@ session cookie and password are not sent in clear text.
 ## Notifications
 
 The app does not show notifications by itself. Log in, open **Manage Account**, copy
-your topic from the **Notifications** section and subscribe to it in the ntfy app on
-the same server the backend uses (`NTFY_BASE_URL`). The topic is per user and
+your topic and the server address from the **Notifications** section, and subscribe
+to it in the ntfy app. The topic is per user and
 unguessable; treat it like a password.

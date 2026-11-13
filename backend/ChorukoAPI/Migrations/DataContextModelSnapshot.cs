@@ -165,86 +165,6 @@ namespace ChorukoAPI.Migrations
                     b.ToTable("Invitations");
                 });
 
-            modelBuilder.Entity("ChorukoAPI.Models.Notification", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<string>("HouseholdTaskId")
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<string>("InvitationId")
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<byte>("NotificationType")
-                        .HasColumnType("smallint");
-
-                    b.Property<string>("ReceiverId")
-                        .IsRequired()
-                        .HasColumnType("varchar(36)");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("timestamp");
-
-                    b.Property<string>("SettlementId")
-                        .HasColumnType("varchar(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HouseholdTaskId");
-
-                    b.HasIndex("InvitationId");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SettlementId");
-
-                    b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("ChorukoAPI.Models.PushSubscription", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("AuthKey")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Endpoint")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastUsedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("P256dhKey")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserAgent")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Endpoint")
-                        .IsUnique();
-
-                    b.ToTable("PushSubscriptions");
-                });
-
             modelBuilder.Entity("ChorukoAPI.Models.Settlement", b =>
                 {
                     b.Property<string>("Id")
@@ -664,35 +584,6 @@ namespace ChorukoAPI.Migrations
                     b.Navigation("Receiver");
 
                     b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("ChorukoAPI.Models.Notification", b =>
-                {
-                    b.HasOne("ChorukoAPI.Models.HouseholdTask", "HouseholdTask")
-                        .WithMany()
-                        .HasForeignKey("HouseholdTaskId");
-
-                    b.HasOne("ChorukoAPI.Models.Invitation", "Invitation")
-                        .WithMany()
-                        .HasForeignKey("InvitationId");
-
-                    b.HasOne("ChorukoAPI.Models.User", "Receiver")
-                        .WithMany()
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ChorukoAPI.Models.Settlement", "Settlement")
-                        .WithMany()
-                        .HasForeignKey("SettlementId");
-
-                    b.Navigation("HouseholdTask");
-
-                    b.Navigation("Invitation");
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Settlement");
                 });
 
             modelBuilder.Entity("ChorukoAPI.Models.Settlement", b =>

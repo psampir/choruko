@@ -12,10 +12,8 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
     public DbSet<Household> Households { get; set; }
     public DbSet<HouseholdTask> HouseholdTasks { get; set; }
     public DbSet<Invitation> Invitations { get; set; }
-    public DbSet<Notification> Notifications { get; set; }
     public DbSet<Settlement> Settlements { get; set; }
     public DbSet<TaskReward> TaskRewards { get; set; }
-    public DbSet<PushSubscription> PushSubscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -71,10 +69,6 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
             .HasForeignKey(s => s.CreatorId)
             .OnDelete(DeleteBehavior.Restrict);
         
-        builder.Entity<PushSubscription>()
-            .HasIndex(sub => sub.Endpoint)
-            .IsUnique();
-
         // Many-to-Many для SettledUsers
         builder.Entity<Settlement>()
             .HasMany(s => s.SettledUsers)

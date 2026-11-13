@@ -138,9 +138,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.Configure<ImageSettings>(
     builder.Configuration.GetSection(ImageSettings.SectionName));
 
-builder.Services.Configure<VapidSettings>(
-    builder.Configuration.GetSection("VapidSettings"));
-
 builder.Services.Configure<NtfySettings>(options =>
 {
     options.BaseUrl = config["NTFY_BASE_URL"] ?? string.Empty;
@@ -190,7 +187,6 @@ builder.Services.AddScoped<IMapper<Settlement, SettlementWithoutUsersResponse>, 
 builder.Services.AddScoped<IMapper<Invitation, InvitationResponse>, InvitationMapper>();
 
 builder.Services.AddScoped<ISettlementService, SettlementService>();
-builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 
 builder.Services.AddHostedService<PointsResetService>();
 builder.Services.AddHostedService<InvitationsDeleteService>();
@@ -212,19 +208,6 @@ builder.Services.AddCors(options =>
                 .AllowCredentials();
         });
 });
-
-// Generate VAPID keys if they don't exist
-if (!VapidKeysChecker.CheckVapidKeys())
-{
-    VapidKeysGenerator.GenerateKeys();
-}
-else
-{
-    Console.WriteLine("VAPID keys already configured.");
-}
-
-// Load VAPID keys from file into configuration
-VapidKeysLoader.LoadVapidKeys(builder.Configuration);
 
 var app = builder.Build();
 
@@ -258,6 +241,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-NotificationHandler.Initialize(app.Services);
 
 app.Run();

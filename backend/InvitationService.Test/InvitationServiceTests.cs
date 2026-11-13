@@ -13,7 +13,6 @@ using Moq;
 using Xunit;
 using InvitationService.Test.Helpers;
 using ChorukoAPI.Extensions;
-using Org.BouncyCastle.Ocsp;
 
 namespace InvitationService.Test;
 
