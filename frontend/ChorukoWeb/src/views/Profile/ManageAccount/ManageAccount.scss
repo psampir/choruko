@@ -127,6 +127,13 @@
     user-select: auto;
   }
 
+  &__server {
+    font-family: var(--font-family-monospace, monospace);
+    word-break: break-all;
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
   &__steps {
     margin: 0;
     padding-left: var(--spacing-2xl);

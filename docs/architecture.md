@@ -36,8 +36,7 @@ flowchart LR
 
 `backend/ChorukoAPI` is the whole API. `Program.cs` is the composition root: database
 connection, Identity, cookie settings, CORS, DI registrations, hosted services and
-notification configuration (ntfy, plus the legacy VAPID bootstrap). Start reading
-there.
+notification configuration (`INotifier` with ntfy). Start reading there.
 
 | Directory | Responsibility |
 |---|---|
@@ -45,9 +44,9 @@ there.
 | `Contracts/` | Request DTOs, response DTOs, `ApiResponse<T>` and the internal `ServiceResponse<T>`. |
 | `Services/` | Business rules and `INotifier` delivery. Interfaces in `Abstraction/`, implementations next to them, timed jobs in `Background/`. |
 | `Data/` | `DataContext` (EF Core) and model configuration. |
-| `Models/` | Entities: `User`, `Household`, `HouseholdTask`, `Activity`, `Settlement`, `Invitation`, `PushSubscription` (legacy). |
+| `Models/` | Entities: `User`, `Household`, `HouseholdTask`, `Activity`, `Settlement`, `Invitation`. |
 | `Mappers/` | `IMapper<TEntity, TResponse>` implementations. Entities never leave the API. |
-| `Extensions/` | `ServiceResponseFactory`, `ResponseMapper`, legacy notification helper, VAPID helpers. |
+| `Extensions/` | `ServiceResponseFactory`, `ResponseMapper`. |
 | `Migrations/` | EF Core migrations, applied by the `manager` container. |
 
 ### Request flow
@@ -119,8 +118,6 @@ from the household context, which depends on the authenticated user.
   users who settled and users who still owe.
 - `Invitation` links a sender, a receiver and a household, with a status and sent date.
 - `User.NtfyTopic` stores the user's private ntfy topic for notifications.
-- `PushSubscription` stores a browser endpoint and its keys (legacy Web Push, not
-  used by business logic and scheduled for removal).
 
 All ids are GUID strings. Timestamps are stored as `timestamp without time zone`.
 Entities use `virtual` navigations because EF Core lazy loading is enabled; services

@@ -54,8 +54,9 @@ between the backend and the ntfy server, not in the browser.
 
 1. `NOTIFIER=ntfy` and `NTFY_BASE_URL` must point to an ntfy server reachable from
    the backend.
-2. The user needs a topic from `GET /api/User/notification-topic` and must be
-   subscribed to it in the ntfy app.
+2. The user needs the topic and server address shown in **Manage Account →
+   Notifications** (`GET /api/User/notification-settings`) and must be subscribed
+   to that topic in the ntfy app.
 3. A self-hosted ntfy server must be reachable from the phone. For background
    delivery on iOS, set `NTFY_UPSTREAM_BASE_URL=https://ntfy.sh` on the ntfy server
    (or use `https://ntfy.sh` directly).
@@ -65,9 +66,9 @@ between the backend and the ntfy server, not in the browser.
 6. `PUBLIC_APP_URL` must be the URL users actually open, otherwise notification
    links point to the wrong place.
 
-Legacy Web Push is being retired: the backend still exposes
-`POST /api/PushSubscription/test`, but the frontend no longer registers a service
-worker and business notifications go through `INotifier` only.
+Web Push, VAPID and the `PushSubscriptions` table were removed; notifications go
+through `INotifier` only. `/dev-push-test` and `/api/PushSubscription/*` no longer
+exist.
 
 ## Picture upload fails
 

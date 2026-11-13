@@ -1,4 +1,4 @@
-﻿using ChorukoAPI.Contracts.Responses;
+using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Responses.User;
 using ChorukoAPI.Contracts.Requests.User;
 using ChorukoAPI.Mappers;
@@ -26,19 +26,19 @@ public class UserController(IUserService _userService) : ControllerBase
         return result.ToApiResponse("UserInfo");
     }
 
-    [HttpGet("notification-topic")]
+    [HttpGet("notification-settings")]
     [Authorize]
-    public async Task<ActionResult<ApiResponse<string>>> GetNotificationTopic()
+    public async Task<ActionResult<ApiResponse<NotificationSettingsResponse>>> GetNotificationSettings()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized(ServiceResponseFactory.Error<string>(null, "User ID not found in token.").ToApiResponse());
+            return Unauthorized(ServiceResponseFactory.Error<NotificationSettingsResponse>(null, "User ID not found in token.").ToApiResponse());
         }
 
-        var result = await _userService.GetOrCreateNotificationTopicAsync(userId);
+        var result = await _userService.GetNotificationSettingsAsync(userId);
 
-        return result.ToApiResponse("Notification topic");
+        return result.ToApiResponse("Notification settings");
     }
     
     [HttpPut("change-names")]

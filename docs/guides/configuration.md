@@ -15,7 +15,7 @@ adjust it. Do not commit `.env` — it contains secrets.
 |---|---|---|
 | `CHORUKO_VERSION` | `release` | Image tag to deploy: `release`, `latest`, or a version such as `v1.0.2`. |
 | `CHORUKO_PORT` | `2467` | Host port for the web interface. The container always listens on port 80. |
-| `APP_DATA_LOCATION` | `./app_data` | Host directory for uploaded pictures and generated VAPID keys. |
+| `APP_DATA_LOCATION` | `./app_data` | Host directory for uploaded pictures. |
 | `DB_DATA_LOCATION` | `./db_data` | Host directory for PostgreSQL data. Network shares are not supported. |
 
 `APP_DATA_LOCATION` and `DB_DATA_LOCATION` are bind mounts. Back them up; see
@@ -70,8 +70,9 @@ private topic; the backend posts to it and the user subscribes in the ntfy app.
 | `PUBLIC_APP_URL` | — | Public URL of this Choruko instance, used to build notification links (for example `https://choruko.example.com`). |
 
 The per-user topic is created on demand by
-`GET /api/User/notification-topic` and stored in `User.NtfyTopic`. It is an
-unguessable random name; treat it like a secret.
+`GET /api/User/notification-settings` (returned together with `NTFY_BASE_URL`, which
+**Manage Account → Notifications** shows to the user) and stored in
+`User.NtfyTopic`. It is an unguessable random name; treat it like a secret.
 
 A self-hosted ntfy server works directly for Android. The iOS ntfy app needs a
 public HTTPS endpoint for background delivery; set `NTFY_UPSTREAM_BASE_URL` on the
@@ -85,10 +86,10 @@ Uploaded pictures are stored under `APP_DATA_LOCATION` and served by the backend
 
 - `uploads/users/` — profile pictures
 - `uploads/households/` — household pictures
-- `uploads/vapid-keys.json` — generated Web Push keys (legacy, unused by ntfy)
 
 Keep the directory writable by the container and back it up together with the
-database.
+database. A `vapid-keys.json` left over from older releases is no longer read and can
+be deleted.
 
 ## Timezone
 

@@ -9,7 +9,6 @@ using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Net;
 
 namespace ChorukoAPI.Services.Implementation;

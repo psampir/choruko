@@ -6,8 +6,8 @@ Choruko keeps state in two places:
 
 1. **PostgreSQL** — users, households, tasks, activities, settlements, invitations,
    points and subscriptions.
-2. **App data directory** (`APP_DATA_LOCATION`) — profile pictures, household
-   pictures and the generated VAPID keys.
+2. **App data directory** (`APP_DATA_LOCATION`) — profile pictures and household
+   pictures.
 
 Keep `.env` with them; it contains the database password and SMTP settings.
 
@@ -16,12 +16,12 @@ Keep `.env` with them; it contains the database password and SMTP settings.
 | Item | Where | Why |
 |---|---|---|
 | Database dump | PostgreSQL | all relational data |
-| `APP_DATA_LOCATION` | host directory | uploaded pictures and push keys |
+| `APP_DATA_LOCATION` | host directory | uploaded pictures |
 | `.env` | next to `docker-compose.yml` | secrets and configuration |
 | `docker-compose.yml` | next to `.env` | exact deployment definition |
 
-Losing the VAPID keys does not break the app, but every existing push subscription
-stops working and users have to subscribe again.
+Notifications do not need anything from here: the backend posts to ntfy using
+`NTFY_BASE_URL`, so keep that value in `.env`.
 
 ## Database dump
 

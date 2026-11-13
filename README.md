@@ -142,8 +142,6 @@ keeps per-domain React contexts that call small `fetch`-based services. See
 
 ## Roadmap
 
-- Retire the remaining legacy Web Push backend code; notifications already go
-  through ntfy.
 - Run the app on a LAN without TLS and ship Android/iOS app shells.
 - More tests around controllers and authentication.
 
