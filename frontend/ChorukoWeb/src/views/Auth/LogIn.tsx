@@ -5,7 +5,7 @@ import PWAInstallPopup from "../../components/PWAInstallPopup";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { parseErrorMessage } from "../../utils/errorUtils";
+import { getErrorMessage, parseErrorMessage } from "../../utils/errorUtils";
 
 interface LogInProps {
   onModeChange: (mode: string) => void;
@@ -27,8 +27,9 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
 
   useEffect(() => {
     // Check if app is running in standalone mode (PWA installed)
+    const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                         (window.navigator as any).standalone === true;
+                         navigatorWithStandalone.standalone === true;
     
     // Check if on mobile device
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -62,10 +63,10 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
         );
         setLocalError(errorMsg);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle network errors
       const errorMsg = parseErrorMessage(
-        error.message ||
+        getErrorMessage(error) ||
           "Connection failed. Please check your internet and try again."
       );
       setLocalError(errorMsg);

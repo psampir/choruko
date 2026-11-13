@@ -94,16 +94,38 @@ The frontend is a React application built with Vite.
 > - The PWA manifest and service worker are generated at build time by vite-plugin-pwa; run a production build before testing installation.
 
 1. **Install dependencies:**
-  Install the required npm packages:
+  Install exactly the versions from the lockfile:
 
     ```bash
-    npm install --prefix frontend/ChorukoWeb
+    npm ci --prefix frontend/ChorukoWeb
     ```
+
+    Use `npm install --prefix frontend/ChorukoWeb` only when you change
+    `package.json`.
 
 2. **Build (generates PWA manifest and service worker):**
     ```bash
     npm run build --prefix frontend/ChorukoWeb
     ```
+
+## Checks
+
+Run these before opening a pull request:
+
+```bash
+# backend: build and all service tests
+dotnet test backend/ChorukoAPI.sln
+
+# one test class or one test
+dotnet test backend/ChorukoAPI.sln --filter "FullyQualifiedName~HouseholdTaskServiceTests"
+dotnet test backend/ChorukoAPI.sln --filter "FullyQualifiedName~CreateHouseholdTask"
+
+# frontend: lint and production build
+npm run lint --prefix frontend/ChorukoWeb
+npm run build --prefix frontend/ChorukoWeb
+```
+
+The same checks run in CI on every pull request (`.github/workflows/ci.yml`).
 
 ## Running the Application
 Once you have completed the backend and frontend setup, you can run the application.
@@ -161,4 +183,5 @@ Once you have completed the backend and frontend setup, you can run the applicat
 ## What's Next?
 Now that you have your development environment set up, you might want to explore the following:
 - **API documentation:** Once the backend is running, you can access the Swagger UI at [http://localhost:5180/swagger](http://localhost:5180/swagger) to explore the API endpoints.
-- **Project architecture:** Learn more about the project's structure and design by reading the documents in the [/docs/UML](../UML/) directory.
+- **Project architecture:** Learn more about the structure and design in the [architecture guide](../architecture.md).
+- **Contributing:** Branch flow, commit conventions and the pull request checklist are in [CONTRIBUTING.md](../../CONTRIBUTING.md).

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { getErrorMessage } from "../../utils/errorUtils";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import { useAuth } from "../../contexts/AuthContext";
@@ -70,11 +71,11 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
         // Handle backend validation errors
         setLocalError(parseErrorMessage(result.message || "Sign up failed."));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle network errors
       setLocalError(
         parseErrorMessage(
-          error?.message || "Connection failed. Please try again."
+          getErrorMessage(error) || "Connection failed. Please try again."
         )
       );
     }

@@ -19,8 +19,9 @@ function AuthContainer() {
 
   useEffect(() => {
     // Check if app is running in standalone mode (PWA installed)
+    const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                         (window.navigator as any).standalone === true;
+                         navigatorWithStandalone.standalone === true;
     
     // Check if on mobile device
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);

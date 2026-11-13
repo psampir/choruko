@@ -4,7 +4,7 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import ErrorMessage from "../../components/ErrorMessage";
 import authService from "../../services/authService";
-import { parseErrorMessage } from "../../utils/errorUtils";
+import { getErrorMessage, parseErrorMessage } from "../../utils/errorUtils";
 import "./Auth.scss";
 import RaccoonLogo from "../../components/RaccoonLogo";
 
@@ -70,8 +70,8 @@ function ResetPassword() {
         const errorMsg = parseErrorMessage(result.message || "Failed to reset password");
         setError(errorMsg);
       }
-    } catch (error: any) {
-      const errorMsg = parseErrorMessage(error.message || "Network error occurred");
+    } catch (error: unknown) {
+      const errorMsg = parseErrorMessage(getErrorMessage(error) || "Network error occurred");
       setError(errorMsg);
     } finally {
       setLoading(false);

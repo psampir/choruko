@@ -1,0 +1,12 @@
+# Canonical author identities for git shortlog and log.
+# This only changes display; commit hashes are untouched.
+
+Paweł Sampir <pawel.sampir@gmail.com>
+Paweł Sampir <pawel.sampir@gmail.com> <106076713+psampir@users.noreply.github.com>
+
+Andrii Lykhvar <andrii.lykhvar@semantika.pl>
+Andrii Lykhvar <andrii.lykhvar@semantika.pl> <rpap380@gmail.com>
+Andrii Lykhvar <andrii.lykhvar@semantika.pl> <elemtros@gmail.com>
+Andrii Lykhvar <andrii.lykhvar@semantika.pl> <120269626+Elemtro@users.noreply.github.com>
+
+Andrii Tomkiv <134852477+TAndrii789@users.noreply.github.com>
