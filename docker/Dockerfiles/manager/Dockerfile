@@ -1,7 +1,7 @@
 ## Stage 1: Build the .NET EF migrations bundle
 
 # Use the .NET SDK image for building the EF migrations bundle
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0-alpine AS build
 
 # Set the working directory in the container
 WORKDIR /src
