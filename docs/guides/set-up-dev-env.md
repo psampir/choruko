@@ -8,7 +8,7 @@ This guide will help you set up your development environment for Choruko.
 ## Prerequisites
 - [Docker](https://docs.docker.com/get-docker/)
 - [Node.js](https://nodejs.org/en/download/)
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Python 3](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
 - [Git LFS](https://git-lfs.github.com/) (for handling PNG images)

@@ -1,7 +1,7 @@
 ### Stage 1: Build React app
 
 # Use the Node.js image for building the app
-FROM node:24.2-alpine AS build
+FROM node:24-alpine AS build
 
 # Set the working directory in the container
 WORKDIR /src
@@ -21,7 +21,7 @@ RUN npm run build
 #### Stage 2: Serve the React app with Nginx
 
 # Use a lightweight Nginx image for serving the app
-FROM nginx:1.28.0-alpine-slim
+FROM nginx:1.31.8-alpine-slim
 
 # Copy the built app from the build stage
 COPY --from=build /src/dist /usr/share/nginx/html
