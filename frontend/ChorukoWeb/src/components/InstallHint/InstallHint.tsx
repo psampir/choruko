@@ -18,7 +18,11 @@ const InstallHint: React.FC<InstallHintProps> = ({ open, onClose }) => {
     const capacitor = (
       window as Window & { Capacitor?: { isNativePlatform?: () => boolean } }
     ).Capacitor;
-    setIsNative(capacitor?.isNativePlatform?.() ?? false);
+    // The Android shell appends "ChorukoApp/<version>" to the user agent.
+    const isShellApp =
+      /chorukoapp\//i.test(window.navigator.userAgent) ||
+      (capacitor?.isNativePlatform?.() ?? false);
+    setIsNative(isShellApp);
 
     const userAgent = window.navigator.userAgent.toLowerCase();
     if (/iphone|ipad|ipod/.test(userAgent)) {

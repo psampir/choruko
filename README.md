@@ -96,6 +96,7 @@ The most important variables:
 ## Development
 
 - [Setting up the development environment](docs/guides/set-up-dev-env.md)
+- [Building the Android app](docs/guides/android-app.md)
 - Short version:
 
   ```bash
@@ -137,12 +138,14 @@ keeps per-domain React contexts that call small `fetch`-based services. See
 | `backend/ChorukoAPI` | API, services, EF Core models and migrations |
 | `backend/*.Test` | xUnit tests for each service |
 | `frontend/ChorukoWeb` | React SPA |
+| `android` | Android shell (WebView + server address screen) |
 | `docker` | Dockerfiles and Compose files |
 | `docs` | installation, development, architecture, operations |
 
 ## Roadmap
 
-- Run the app on a LAN without TLS and ship Android/iOS app shells.
+- Run the app on a LAN without TLS.
+- Native iOS shell, if a web clip turns out to be too limited.
 - More tests around controllers and authentication.
 
 ## Contributing

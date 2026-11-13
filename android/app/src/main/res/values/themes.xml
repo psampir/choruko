@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/web_background</item>
+        <item name="android:statusBarColor">@color/web_background</item>
+        <item name="android:navigationBarColor">@color/web_background</item>
+    </style>
+
+    <style name="SetupTheme" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/setup_background</item>
+        <item name="android:statusBarColor">@color/setup_background</item>
+        <item name="android:navigationBarColor">@color/setup_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+</resources>

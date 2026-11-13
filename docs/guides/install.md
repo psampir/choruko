@@ -63,6 +63,17 @@ Open `http://localhost:2467` (or `http://<server-ip>:2467`).
    appears in their `/invitations` page.
 4. Optionally configure SMTP later so users can reset their own passwords.
 
+## Mobile
+
+Users can open the instance in a phone browser and add it to the home screen on iOS.
+On Android there is also an APK on
+[GitHub Releases](https://github.com/psampir/choruko/releases): it asks for the
+instance address on first launch, so the same APK works with every deployment. See
+[the Android app guide](android-app.md).
+
+Notifications do not need a mobile app: they arrive through the ntfy app, which each
+user subscribes to with the topic shown in **Manage Account → Notifications**.
+
 ## Reverse proxy and HTTPS
 
 The containers speak plain HTTP on `${CHORUKO_PORT}`. Terminate TLS in front of them
