@@ -25,7 +25,6 @@ public class HouseholdServiceTests : IDisposable
     private readonly Mock<IImageProcessor> _imageProcessorMock;
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<IMapper<Household, HouseholdInfoResponse>> _mapperMock;
-    private readonly Mock<IPushNotificationService> _pushMock;
     private readonly IHouseholdService _service;
 
     public HouseholdServiceTests()
@@ -39,7 +38,6 @@ public class HouseholdServiceTests : IDisposable
         _signInManagerMock = GetMockSignInManager(_userManagerMock);
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
         _mapperMock = new Mock<IMapper<Household, HouseholdInfoResponse>>();
-        _pushMock = new Mock<IPushNotificationService>();
         _imageProcessorMock = new Mock<IImageProcessor>();
         _imageProcessorMock
             .Setup(x => x.ProcessAsync(It.IsAny<IFormFile?>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -51,8 +49,7 @@ public class HouseholdServiceTests : IDisposable
             _userManagerMock.Object,
             _signInManagerMock.Object,
             _httpContextAccessorMock.Object,
-            _mapperMock.Object,
-            _pushMock.Object
+            _mapperMock.Object
         );
     }
 

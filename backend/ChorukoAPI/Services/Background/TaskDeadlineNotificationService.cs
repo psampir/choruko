@@ -1,13 +1,16 @@
+using ChorukoAPI.Contracts.Notifications;
 using ChorukoAPI.Data;
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Models;
+using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChorukoAPI.Services.Background;
 
 public class TaskDeadlineNotificationService(
     ILogger<TaskDeadlineNotificationService> logger,
-    IServiceScopeFactory scopeFactory) : BackgroundService
+    IServiceScopeFactory scopeFactory,
+    INotifier notifier) : BackgroundService
 {
     private readonly TimeSpan _checkInterval = TimeSpan.FromHours(1);
     private readonly HashSet<string> _notifiedTasksReminder = [];
@@ -161,7 +164,7 @@ public class TaskDeadlineNotificationService(
         // Send notifications
         if (userIdsToNotify.Count > 0)
         {
-            await NotificationHandler.SendNotificationAsync(userIdsToNotify, payload);
+            await notifier.SendAsync(userIdsToNotify, AppNotification.FromJson(payload));
         }
     }
 

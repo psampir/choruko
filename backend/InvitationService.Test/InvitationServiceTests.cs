@@ -1,5 +1,6 @@
-﻿using System.Net;
+using System.Net;
 using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Notifications;
 using ChorukoAPI.Contracts.Responses.Invitation;
 using ChorukoAPI.Data;
 using ChorukoAPI.Mappers;
@@ -19,7 +20,7 @@ namespace InvitationService.Test;
 public class InvitationServiceTests
 {
     private readonly DataContext _context;
-    private readonly Mock<IPushNotificationService> _pushMock;
+    private readonly Mock<INotifier> _notifierMock;
     private readonly Mock<IMapper<Invitation, InvitationResponse>> _mapperMock;
     private readonly Mock<UserManager<User>> _userManagerMock;
     private readonly IInvitationService _service;
@@ -31,11 +32,11 @@ public class InvitationServiceTests
             .Options;
 
         _context = new DataContext(options);
-        _pushMock = new Mock<IPushNotificationService>();
+        _notifierMock = new Mock<INotifier>();
         _mapperMock = new Mock<IMapper<Invitation, InvitationResponse>>();
         _userManagerMock = MockUserManager();
 
-        _service = new Service(_context, _pushMock.Object, _mapperMock.Object, _userManagerMock.Object);
+        _service = new Service(_context, _notifierMock.Object, _mapperMock.Object, _userManagerMock.Object);
     }
 
     private Mock<UserManager<User>> MockUserManager()
@@ -97,8 +98,8 @@ public class InvitationServiceTests
         _context.Households.Add(household);
         await _context.SaveChangesAsync();
 
-        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
+        _notifierMock.Setup(p => p.SendAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<AppNotification>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var result = await _service.CreateHouseholdInvitation(admin.Id, household.Id, user.Email);
 

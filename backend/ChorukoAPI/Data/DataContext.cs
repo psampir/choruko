@@ -32,6 +32,10 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
         });
 
         builder.Entity<User>()
+            .HasIndex(u => u.NtfyTopic)
+            .IsUnique();
+
+        builder.Entity<User>()
             .HasOne(u => u.Household)
             .WithMany(h => h.Participants)
             .HasForeignKey(u => u.HouseholdId)

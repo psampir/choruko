@@ -1,5 +1,6 @@
-﻿using System.Net;
+using System.Net;
 using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Notifications;
 using ChorukoAPI.Contracts.Requests.Task;
 using ChorukoAPI.Contracts.Responses.Task;
 using ChorukoAPI.Data;
@@ -20,7 +21,7 @@ public class HouseholdTaskServiceTests
 {
     private readonly DataContext _context;
     private readonly Mock<IMapper<HouseholdTask, HouseholdTaskResponse>> _mapperMock;
-    private readonly Mock<IPushNotificationService> _pushMock;
+    private readonly Mock<INotifier> _notifierMock;
     private readonly IHouseholdTaskService _service;
 
     public HouseholdTaskServiceTests()
@@ -31,32 +32,10 @@ public class HouseholdTaskServiceTests
 
         _context = new DataContext(options);
         _mapperMock = new Mock<IMapper<HouseholdTask, HouseholdTaskResponse>>();
-        _pushMock = new Mock<IPushNotificationService>();
+        _notifierMock = new Mock<INotifier>();
 
-        InitializeNotificationHandler();
 
-        _service = new Service(_context, _mapperMock.Object, _pushMock.Object);
-    }
-
-    private void InitializeNotificationHandler()
-    {
-        var serviceProviderMock = new Mock<IServiceProvider>();
-        var serviceScopeMock = new Mock<IServiceScope>();
-        var serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
-
-        serviceScopeMock.Setup(x => x.ServiceProvider).Returns(serviceProviderMock.Object);
-
-        serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(serviceScopeMock.Object);
-
-        serviceProviderMock
-            .Setup(x => x.GetService(typeof(IPushNotificationService)))
-            .Returns(_pushMock.Object);
-
-        serviceProviderMock
-            .Setup(x => x.GetService(typeof(IServiceScopeFactory)))
-            .Returns(serviceScopeFactoryMock.Object);
-
-        NotificationHandler.Initialize(serviceProviderMock.Object);
+        _service = new Service(_context, _mapperMock.Object, _notifierMock.Object);
     }
 
     #region CreateHouseholdTaskAsync
@@ -441,8 +420,8 @@ public class HouseholdTaskServiceTests
         _context.HouseholdTasks.Add(task);
         await _context.SaveChangesAsync();
 
-        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
+        _notifierMock.Setup(p => p.SendAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<AppNotification>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var result = await _service.AssignUserToTask(task.Id, user.Id);
 
@@ -488,8 +467,8 @@ public class HouseholdTaskServiceTests
         _context.HouseholdTasks.Add(task);
         await _context.SaveChangesAsync();
 
-        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
+        _notifierMock.Setup(p => p.SendAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<AppNotification>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var result = await _service.UnAssignUserFromTask(task.Id, user.Id);
 
@@ -535,8 +514,8 @@ public class HouseholdTaskServiceTests
         _context.HouseholdTasks.Add(task);
         await _context.SaveChangesAsync();
 
-        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
+        _notifierMock.Setup(p => p.SendAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<AppNotification>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var result = await _service.MarkTaskAsCompleted(task.Id, admin.Id);
 
@@ -607,8 +586,8 @@ public class HouseholdTaskServiceTests
         _context.HouseholdTasks.Add(task);
         await _context.SaveChangesAsync();
 
-        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
+        _notifierMock.Setup(p => p.SendAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<AppNotification>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var result = await _service.UnMarkTaskAsCompleted(task.Id, admin.Id);
 

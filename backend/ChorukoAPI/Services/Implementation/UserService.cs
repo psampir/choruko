@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using ChorukoAPI.Mappers;
 
@@ -40,6 +41,31 @@ public class UserService(
 
         return ServiceResponseFactory.Success(await _mapper.Map(user));
     }
+    public async Task<ServiceResponse<string>> GetOrCreateNotificationTopicAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<string>(null, "User not found.", HttpStatusCode.NotFound);
+        }
+
+        if (string.IsNullOrWhiteSpace(user.NtfyTopic))
+        {
+            user.NtfyTopic = $"choruko-{Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLowerInvariant()}";
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return ServiceResponseFactory.Error<string>(
+                    null,
+                    "Failed to save the notification topic.",
+                    HttpStatusCode.InternalServerError);
+            }
+        }
+
+        return ServiceResponseFactory.Success(user.NtfyTopic!, "Notification topic.");
+    }
+
     public async Task<ServiceResponse<OperationResultDto>> ChangeUserNamesAsync(ChangeUserNamesRequest request, string userId)
     {
         if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))

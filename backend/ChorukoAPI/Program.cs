@@ -141,6 +141,24 @@ builder.Services.Configure<ImageSettings>(
 builder.Services.Configure<VapidSettings>(
     builder.Configuration.GetSection("VapidSettings"));
 
+builder.Services.Configure<NtfySettings>(options =>
+{
+    options.BaseUrl = config["NTFY_BASE_URL"] ?? string.Empty;
+    options.Token = config["NTFY_TOKEN"] ?? string.Empty;
+    options.PublicAppUrl = config["PUBLIC_APP_URL"] ?? string.Empty;
+});
+
+builder.Services.AddHttpClient("ntfy");
+
+if (string.Equals(config["NOTIFIER"], "ntfy", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddSingleton<INotifier, NtfyNotifier>();
+}
+else
+{
+    builder.Services.AddSingleton<INotifier, NoOpNotifier>();
+}
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthorization();

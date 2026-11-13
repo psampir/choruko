@@ -57,6 +57,27 @@ email service, and users can only get a new password through the `manager` conta
 When `ENABLE_EMAILS=true`, the backend refuses to start if any of the required SMTP
 values or `SERVER_URL` is missing.
 
+## Notifications (ntfy)
+
+Choruko delivers notifications through [ntfy](https://ntfy.sh). Each user gets a
+private topic; the backend posts to it and the user subscribes in the ntfy app.
+
+| Variable | Default | Description |
+|---|---|---|
+| `NOTIFIER` | `none` | `ntfy` enables delivery; `none` logs and drops notifications. |
+| `NTFY_BASE_URL` | — | ntfy server base URL, for example `http://192.168.1.10:2586` (self-hosted) or `https://ntfy.sh`. |
+| `NTFY_TOKEN` | — | Optional bearer token when the ntfy server uses access control. |
+| `PUBLIC_APP_URL` | — | Public URL of this Choruko instance, used to build notification links (for example `https://choruko.example.com`). |
+
+The per-user topic is created on demand by
+`GET /api/User/notification-topic` and stored in `User.NtfyTopic`. It is an
+unguessable random name; treat it like a secret.
+
+A self-hosted ntfy server works directly for Android. The iOS ntfy app needs a
+public HTTPS endpoint for background delivery; set `NTFY_UPSTREAM_BASE_URL` on the
+ntfy server to relay through `https://ntfy.sh`, or use `https://ntfy.sh` directly
+if you do not mind notifications passing through a third party.
+
 ## Storage
 
 Uploaded pictures are stored under `APP_DATA_LOCATION` and served by the backend at

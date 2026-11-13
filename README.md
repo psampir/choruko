@@ -25,8 +25,8 @@ who owes whom.
   dishes* — 10 points). Five defaults are created with a new household.
 - **Leaderboard** — monthly, yearly and all-time points per participant.
 - **Settlements** — shared expenses with per-person settle/unsettle tracking.
-- **Push notifications** — new, edited and completed tasks, deadlines, invitations
-  and settlements (PWA / Web Push).
+- **Notifications** — new, edited and completed tasks, deadlines, invitations and
+  settlements, delivered through ntfy (self-hosted or ntfy.sh).
 - **Roles** — household admin, participant, and a locked-down "no household" role
   for new accounts.
 - **Mobile-first UI** — light and dark themes, installable PWA.
@@ -85,6 +85,10 @@ The most important variables:
 | `ENABLE_EMAILS` | `false` | enable SMTP password-reset emails |
 | `SMTP_*` | — | SMTP host, port, credentials and sender |
 | `SERVER_URL` | — | public URL used in email links |
+| `NOTIFIER` | `none` | `ntfy` enables notifications through ntfy |
+| `NTFY_BASE_URL` | — | ntfy server base URL (self-hosted or `https://ntfy.sh`) |
+| `NTFY_TOKEN` | — | optional ntfy access token |
+| `PUBLIC_APP_URL` | — | public URL used in notification links |
 | `TZ` | host timezone | container timezone |
 
 ## Development
@@ -136,9 +140,8 @@ keeps per-domain React contexts that call small `fetch`-based services. See
 
 ## Roadmap
 
-- Simpler self-hosting: run the app on a LAN without TLS, with notifications moved
-  to a dedicated push service.
-- Optional Android and iOS app shells.
+- Remove the legacy PWA/Web Push path; notifications now go through ntfy.
+- Run the app on a LAN without TLS and ship Android/iOS app shells.
 - More tests around controllers and authentication.
 
 ## Contributing
