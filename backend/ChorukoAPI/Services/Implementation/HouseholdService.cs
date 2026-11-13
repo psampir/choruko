@@ -19,8 +19,7 @@ public class HouseholdService(DataContext _context,
     UserManager<User> _userManager,
     SignInManager<User> _signInManager,
     IHttpContextAccessor _contextAccessor,
-    IMapper<Household, HouseholdInfoResponse> _mapper,
-    IPushNotificationService pushNotificationService) : IHouseholdService
+    IMapper<Household, HouseholdInfoResponse> _mapper) : IHouseholdService
 {
     public async Task<ServiceResponse<HouseholdInfoResponse>> GetHouseholdInfoAsync()
     {

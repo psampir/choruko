@@ -9,7 +9,7 @@ React single-page app. They talk JSON over HTTP and authenticate with a cookie.
 flowchart LR
     subgraph Browser
         SPA[React 19 SPA]
-        SW[Service worker<br/>precache + push]
+        SW[Service worker<br/>precache + legacy push]
     end
 
     subgraph Docker
@@ -19,29 +19,37 @@ flowchart LR
         DB[(PostgreSQL 17)]
     end
 
+    subgraph Notifications
+        NTFY[ntfy server]
+        NTFYAPP[ntfy app]
+    end
+
     SPA -->|fetch, cookie| N
     N -->|/api| API
     N -->|/uploads| API
     API -->|EF Core| DB
     MGR -->|EF bundle| DB
-    API -->|Web Push| SW
+    API -->|ntfy HTTP| NTFY
+    NTFY --> NTFYAPP
+    API -->|legacy Web Push| SW
 ```
 
 ## Backend
 
 `backend/ChorukoAPI` is the whole API. `Program.cs` is the composition root: database
-connection, Identity, cookie settings, CORS, DI registrations, hosted services and the
-VAPID bootstrap. Start reading there.
+connection, Identity, cookie settings, CORS, DI registrations, hosted services and
+notification configuration (ntfy, plus the legacy VAPID bootstrap). Start reading
+there.
 
 | Directory | Responsibility |
 |---|---|
 | `Controllers/` | HTTP surface. Route, `[Authorize(Roles = …)]`, read the caller id, call a service, map the result. |
 | `Contracts/` | Request DTOs, response DTOs, `ApiResponse<T>` and the internal `ServiceResponse<T>`. |
-| `Services/` | Business rules. Interfaces in `Abstraction/`, implementations next to them, timed jobs in `Background/`. |
+| `Services/` | Business rules and `INotifier` delivery. Interfaces in `Abstraction/`, implementations next to them, timed jobs in `Background/`. |
 | `Data/` | `DataContext` (EF Core) and model configuration. |
-| `Models/` | Entities: `User`, `Household`, `HouseholdTask`, `Activity`, `Settlement`, `Invitation`, `PushSubscription`. |
+| `Models/` | Entities: `User`, `Household`, `HouseholdTask`, `Activity`, `Settlement`, `Invitation`, `PushSubscription` (legacy). |
 | `Mappers/` | `IMapper<TEntity, TResponse>` implementations. Entities never leave the API. |
-| `Extensions/` | `ServiceResponseFactory`, `ResponseMapper`, notification helper, VAPID helpers. |
+| `Extensions/` | `ServiceResponseFactory`, `ResponseMapper`, legacy notification helper, VAPID helpers. |
 | `Migrations/` | EF Core migrations, applied by the `manager` container. |
 
 ### Request flow
@@ -51,12 +59,12 @@ A mutating request, for example completing a task:
 1. `HouseholdTaskController.MarkTaskAsCompleted` checks the route and the caller.
 2. `HouseholdTaskService` loads the task with its assignees and activity, adds the
    activity's points to each assignee, sets the status and saves.
-3. The service builds a push payload and hands it to `IPushNotificationService`.
+3. The service builds an `AppNotification` and hands it to `INotifier`
+   (`NtfyNotifier` or `NoOpNotifier`).
 4. The service returns `ServiceResponse<OperationResultDto>`.
 5. The controller maps it with `ToApiResponse()` to
    `{ result, message, isSuccessful }`.
-6. The frontend context refreshes its data and the service worker shows the
-   notification.
+6. The frontend context refreshes its data and the ntfy app shows the notification.
 
 Expected failures are values, not exceptions: services return a failed
 `ServiceResponse` with an HTTP status, and `ResponseMapper` turns it into a
@@ -98,7 +106,7 @@ router; every route is lazy-loaded.
 | `services/` | Small `fetch` clients with `credentials: "include"`. |
 | `components/` | Shared UI; one folder per component with its SCSS. |
 | `utils/` | Formatting, icons, images, error parsing. |
-| `sw.ts` | Service worker: precache, push, notification click. |
+| `sw.ts` | Service worker: precache, legacy push, notification click. |
 
 The provider order is significant: `Auth → User → Household → Activity → Task →
 Settlement`. Task and settlement contexts wait for `householdInfo.id`, which comes
@@ -113,7 +121,8 @@ from the household context, which depends on the authenticated user.
 - `Settlement` belongs to a household, has an amount and two many-to-many sets:
   users who settled and users who still owe.
 - `Invitation` links a sender, a receiver and a household, with a status and sent date.
-- `PushSubscription` stores a browser endpoint and its keys.
+- `User.NtfyTopic` stores the user's private ntfy topic for notifications.
+- `PushSubscription` stores a browser endpoint and its keys (legacy Web Push).
 
 All ids are GUID strings. Timestamps are stored as `timestamp without time zone`.
 Entities use `virtual` navigations because EF Core lazy loading is enabled; services

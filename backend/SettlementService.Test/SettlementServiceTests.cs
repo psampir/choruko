@@ -1,5 +1,6 @@
-﻿using System.Net;
+using System.Net;
 using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Notifications;
 using ChorukoAPI.Contracts.Requests.Settlement;
 using ChorukoAPI.Contracts.Responses.Settlement;
 using ChorukoAPI.Data;
@@ -21,7 +22,7 @@ public class SettlementServiceTests : IDisposable
     private readonly DataContext _context;
     private readonly Mock<IMapper<Settlement, SettlementResponse>> _mapperMock;
     private readonly Mock<IMapper<Settlement, SettlementWithoutUsersResponse>> _withoutUsersMapperMock;
-    private readonly Mock<IPushNotificationService> _pushMock;
+    private readonly Mock<INotifier> _notifierMock;
     private readonly ISettlementService _service;
 
     public SettlementServiceTests()
@@ -33,31 +34,10 @@ public class SettlementServiceTests : IDisposable
         _context = new DataContext(options);
         _mapperMock = new Mock<IMapper<Settlement, SettlementResponse>>();
         _withoutUsersMapperMock = new Mock<IMapper<Settlement, SettlementWithoutUsersResponse>>();
-        _pushMock = new Mock<IPushNotificationService>();
+        _notifierMock = new Mock<INotifier>();
 
-        InitializeNotificationHandler();
 
-        _service = new Service(_context, _mapperMock.Object, _withoutUsersMapperMock.Object, _pushMock.Object);
-    }
-
-    private void InitializeNotificationHandler()
-    {
-        var serviceProviderMock = new Mock<IServiceProvider>();
-        var serviceScopeMock = new Mock<IServiceScope>();
-        var serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
-
-        serviceScopeMock.Setup(x => x.ServiceProvider).Returns(serviceProviderMock.Object);
-        serviceScopeFactoryMock.Setup(x => x.CreateScope()).Returns(serviceScopeMock.Object);
-
-        serviceProviderMock
-            .Setup(x => x.GetService(typeof(IPushNotificationService)))
-            .Returns(_pushMock.Object);
-
-        serviceProviderMock
-            .Setup(x => x.GetService(typeof(IServiceScopeFactory)))
-            .Returns(serviceScopeFactoryMock.Object);
-
-        NotificationHandler.Initialize(serviceProviderMock.Object);
+        _service = new Service(_context, _mapperMock.Object, _withoutUsersMapperMock.Object, _notifierMock.Object);
     }
 
     public void Dispose()
@@ -459,8 +439,8 @@ public class SettlementServiceTests : IDisposable
         _context.Settlements.Add(settlement);
         await _context.SaveChangesAsync();
 
-        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
+        _notifierMock.Setup(p => p.SendAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<AppNotification>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var result = await _service.MarkAsDone(settlement.Id, admin.Id);
 
@@ -498,8 +478,8 @@ public class SettlementServiceTests : IDisposable
         _context.Settlements.Add(settlement);
         await _context.SaveChangesAsync();
 
-        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
+        _notifierMock.Setup(p => p.SendAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<AppNotification>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var result = await _service.UnMarkAsDone(settlement.Id, admin.Id);
 
@@ -568,8 +548,8 @@ public class SettlementServiceTests : IDisposable
         _context.Settlements.Add(settlement);
         await _context.SaveChangesAsync();
 
-        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
+        _notifierMock.Setup(p => p.SendAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<AppNotification>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var result = await _service.MarkAsPaid(settlement.Id, user1.Id);
 
@@ -607,8 +587,8 @@ public class SettlementServiceTests : IDisposable
         _context.Settlements.Add(settlement);
         await _context.SaveChangesAsync();
 
-        _pushMock.Setup(p => p.SendNotificationAsync(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(ServiceResponseFactory.Success(new OperationResultDto(), "OK"));
+        _notifierMock.Setup(p => p.SendAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<AppNotification>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var result = await _service.MarAsUnPaid(settlement.Id, user1.Id);
 

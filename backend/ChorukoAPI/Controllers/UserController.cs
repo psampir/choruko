@@ -25,6 +25,21 @@ public class UserController(IUserService _userService) : ControllerBase
 
         return result.ToApiResponse("UserInfo");
     }
+
+    [HttpGet("notification-topic")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<string>>> GetNotificationTopic()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<string>(null, "User ID not found in token.").ToApiResponse());
+        }
+
+        var result = await _userService.GetOrCreateNotificationTopicAsync(userId);
+
+        return result.ToApiResponse("Notification topic");
+    }
     
     [HttpPut("change-names")]
     [Authorize]

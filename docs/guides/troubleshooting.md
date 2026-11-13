@@ -56,20 +56,24 @@ The service worker and manifest are generated at build time. In development, use
 `npm run build && npm run preview` to test PWA behaviour; `npm run dev` does not
 register a worker.
 
-## Push notifications do not arrive
+## Notifications (ntfy) do not arrive
 
-1. The browser must have notification permission.
-2. The site must be a secure context (see above).
-3. On iOS, Web Push requires iOS 16.4+ and the app must be installed on the home
-   screen.
-4. `APP_DATA_LOCATION` must keep `vapid-keys.json` across redeploys. If it is lost,
-   every subscription becomes invalid; users must subscribe again.
-5. Check the backend log for `No push subscriptions found` or `WebPush error`.
-6. Test the pipeline from the hidden development page `/dev-push-test`, or call
-   `POST /api/PushSubscription/test` while logged in.
+1. `NOTIFIER=ntfy` and `NTFY_BASE_URL` must point to an ntfy server reachable from
+   the backend.
+2. The user needs a topic from `GET /api/User/notification-topic` and must be
+   subscribed to it in the ntfy app.
+3. A self-hosted ntfy server must be reachable from the phone. For background
+   delivery on iOS, set `NTFY_UPSTREAM_BASE_URL=https://ntfy.sh` on the ntfy server
+   (or use `https://ntfy.sh` directly).
+4. If the ntfy server uses access control, set `NTFY_TOKEN`.
+5. Check the backend log for `NTFY_BASE_URL is not configured` or
+   `ntfy delivery failed`.
+6. `PUBLIC_APP_URL` must be the URL users actually open, otherwise notification
+   links point to the wrong place.
 
-The browser subscription is stored in the `PushSubscriptions` table. A stale
-subscription is removed automatically when the push service returns `410 Gone`.
+Legacy Web Push (PWA) is being retired. `/dev-push-test` and
+`POST /api/PushSubscription/test` still exercise it, but business notifications no
+longer use the Web Push path.
 
 ## Picture upload fails
 
