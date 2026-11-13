@@ -12,6 +12,9 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
+      # Never delete tagged versions: `release` is the default image tag in
+      # docker-compose, and `latest`/version tags must survive as well.
+      # Only untagged layers and old build cache entries are pruned.
 
       - name: Delete old choruko-frontend versions
         uses: actions/delete-package-versions@v5
@@ -19,6 +22,7 @@ jobs:
           package-name: 'choruko-frontend'
           package-type: 'container'
           min-versions-to-keep: 10
+          delete-only-untagged-versions: true
 
       - name: Delete old choruko-backend versions  
         uses: actions/delete-package-versions@v5
@@ -26,6 +30,7 @@ jobs:
           package-name: 'choruko-backend'
           package-type: 'container'
           min-versions-to-keep: 10
+          delete-only-untagged-versions: true
 
       - name: Delete old choruko-manager versions
         uses: actions/delete-package-versions@v5
@@ -33,3 +38,4 @@ jobs:
           package-name: 'choruko-manager'
           package-type: 'container'
           min-versions-to-keep: 10
+          delete-only-untagged-versions: true
