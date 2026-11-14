@@ -40,8 +40,15 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # The runner image ships the SDK, but not always the platform this project
+      # compiles against. android-actions/setup-android fails on current runner
+      # images (it asks sdkmanager for a "tools" package that no longer exists), so
+      # use the SDK that is already there.
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager="$(command -v sdkmanager || find "$ANDROID_HOME" -name sdkmanager -type f | head -1)"
+          yes | "$sdkmanager" --licenses > /dev/null || true
+          "$sdkmanager" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Decode signing keystore
         if: github.event_name == 'workflow_dispatch'
