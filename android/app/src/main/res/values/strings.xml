@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Choruko</string>
+    <string name="setup_description">Enter the address of your Choruko instance.</string>
+    <string name="server_hint">https://choruko.example.com</string>
+    <string name="server_error_invalid">That does not look like a server address. Use http:// or https:// and a host name.</string>
+    <string name="connect_action">Connect</string>
+    <string name="setup_notifications_hint">Notifications arrive through the ntfy app, not this one.</string>
+    <string name="exit_title">Close Choruko?</string>
+    <string name="exit_action">Close app</string>
+    <string name="change_server_action">Change server</string>
+</resources>

@@ -1,0 +1,110 @@
+name: Android
+
+# Builds the Android shell (android/). Pull requests only check that the project
+# compiles; a manual run with a version also signs the APK and attaches it to a
+# GitHub release.
+permissions:
+  contents: write
+
+on:
+  pull_request:
+    paths:
+      - 'android/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version name for the APK, for example 1.1.0'
+        type: string
+        required: true
+      attach_release:
+        description: 'Upload the APK to the GitHub release tagged v<version>'
+        type: boolean
+        required: true
+        default: true
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # The runner image ships the SDK, but not always the platform this project
+      # compiles against. android-actions/setup-android fails on current runner
+      # images (it asks sdkmanager for a "tools" package that no longer exists), so
+      # use the SDK that is already there.
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager="$(command -v sdkmanager || find "$ANDROID_HOME" -name sdkmanager -type f | head -1)"
+          yes | "$sdkmanager" --licenses > /dev/null || true
+          "$sdkmanager" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Decode signing keystore
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not configured for this repository."
+            exit 1
+          fi
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/choruko-release.jks"
+
+      - name: Build release APK
+        working-directory: android
+        env:
+          CHORUKO_VERSION_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.0.0-dev' }}
+          CHORUKO_VERSION_CODE: ${{ github.run_number }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            export CHORUKO_KEYSTORE_PATH="$RUNNER_TEMP/choruko-release.jks"
+            export CHORUKO_KEYSTORE_PASSWORD="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"
+            export CHORUKO_KEY_ALIAS="${{ secrets.ANDROID_KEY_ALIAS }}"
+            export CHORUKO_KEY_PASSWORD="${{ secrets.ANDROID_KEY_PASSWORD }}"
+          fi
+          ./gradlew --no-daemon assembleRelease
+
+      - name: Name the APK
+        id: apk
+        run: |
+          mkdir -p android/app/build/outputs/apk/release/named
+          target="android/app/build/outputs/apk/release/named"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            name="choruko-${GITHUB_SHA::7}-v${{ inputs.version }}.apk"
+          else
+            name="choruko-unsigned-${GITHUB_SHA::7}.apk"
+          fi
+          cp "$(find android/app/build/outputs/apk/release -maxdepth 1 -name '*.apk' | head -1)" "$target/$name"
+          echo "path=$target/$name" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: choruko-android
+          path: ${{ steps.apk.outputs.path }}
+          if-no-files-found: error
+
+      - name: Attach APK to the release
+        if: github.event_name == 'workflow_dispatch' && inputs.attach_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: v${{ inputs.version }}
+          APK: ${{ steps.apk.outputs.path }}
+        run: |
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release $TAG does not exist. Publish the release first."
+            exit 1
+          fi
+          gh release upload "$TAG" "$APK" --clobber
