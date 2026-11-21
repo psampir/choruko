@@ -596,5 +596,6 @@ dist-ssr
 app_data/
 db_data/
 
-# Local scratch notes (not part of the repository)
+# Local scratch notes and build artifacts (not part of the repository)
 /ideas/
+/artifacts/
