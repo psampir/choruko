@@ -64,9 +64,20 @@ repository:
 | `CHORUKO_KEYSTORE_PATH` | path to the `.jks` file |
 | `CHORUKO_KEYSTORE_PASSWORD` | keystore password |
 | `CHORUKO_KEY_ALIAS` | key alias |
-| `CHORUKO_KEY_PASSWORD` | key password |
+| `CHORUKO_KEY_PASSWORD` | key password (defaults to the keystore password) |
 | `CHORUKO_VERSION_NAME` | version name, for example `1.1.0` |
 | `CHORUKO_VERSION_CODE` | integer version code |
+
+For local builds the same values can live in `android/keystore.properties`, which is
+git-ignored — see `android/keystore.properties.example`. That keeps the passwords out
+of your shell history:
+
+```properties
+storeFile=/home/you/choruko-release.jks
+storePassword=...
+keyAlias=choruko
+keyPassword=...
+```
 
 Generating a keystore (do this once and keep it safe):
 
