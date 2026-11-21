@@ -42,6 +42,7 @@ class WebActivity : Activity() {
 
         webView = WebView(this)
         setContentView(webView)
+        webView.applySystemBarInsets()
 
         webView.setBackgroundColor(Color.BLACK)
 

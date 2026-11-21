@@ -5,6 +5,7 @@
         <item name="android:windowBackground">@color/web_background</item>
         <item name="android:statusBarColor">@color/web_background</item>
         <item name="android:navigationBarColor">@color/web_background</item>
+        <item name="android:windowLightNavigationBar">false</item>
     </style>
 
     <style name="SetupTheme" parent="android:Theme.Material.Light.NoActionBar">
@@ -12,6 +13,7 @@
         <item name="android:statusBarColor">@color/setup_background</item>
         <item name="android:navigationBarColor">@color/setup_background</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
 </resources>

@@ -30,6 +30,7 @@ class MainActivity : Activity() {
         }
 
         setContentView(R.layout.activity_setup)
+        findViewById<android.view.View>(android.R.id.content).applySystemBarInsets()
 
         val input = findViewById<EditText>(R.id.server_url)
         val error = findViewById<TextView>(R.id.server_error)
