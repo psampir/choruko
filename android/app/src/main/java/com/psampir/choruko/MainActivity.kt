@@ -10,8 +10,8 @@ import android.widget.TextView
 
 /**
  * First launch (or a "change server" request): asks for the address of the Choruko
- * instance and remembers it. The APK therefore works against any self-hosted
- * installation without a rebuild.
+ * instance, verifies that it really serves Choruko, and remembers it. The APK
+ * therefore works against any self-hosted installation without a rebuild.
  */
 class MainActivity : Activity() {
 
@@ -30,7 +30,10 @@ class MainActivity : Activity() {
         }
 
         setContentView(R.layout.activity_setup)
-        findViewById<android.view.View>(android.R.id.content).applySystemBarInsets()
+        findViewById<View>(android.R.id.content).apply {
+            applySystemBarInsets()
+            requestApplyInsets()
+        }
 
         val input = findViewById<EditText>(R.id.server_url)
         val error = findViewById<TextView>(R.id.server_error)
@@ -43,14 +46,49 @@ class MainActivity : Activity() {
         save.setOnClickListener {
             val normalized = ServerStore.normalize(input.text.toString())
             if (normalized == null) {
-                error.text = getString(R.string.server_error_invalid)
-                error.visibility = View.VISIBLE
+                showError(error, R.string.server_error_invalid)
                 return@setOnClickListener
             }
 
-            ServerStore.write(this, normalized)
-            openWeb(normalized)
+            verifyAndOpen(normalized, save, error)
         }
+    }
+
+    /**
+     * The address is only stored once it answers with the Choruko page, so a typo or
+     * a random URL does not leave the app pointed at something that is not Choruko.
+     */
+    private fun verifyAndOpen(url: String, save: Button, error: TextView) {
+        save.isEnabled = false
+        save.text = getString(R.string.connect_action_progress)
+        error.visibility = View.GONE
+
+        Thread {
+            val result = ChorukoProbe.check(url)
+
+            runOnUiThread {
+                save.isEnabled = true
+                save.text = getString(R.string.connect_action)
+
+                when (result) {
+                    ChorukoProbe.Result.OK -> {
+                        ServerStore.write(this, url)
+                        openWeb(url)
+                    }
+
+                    ChorukoProbe.Result.NOT_CHORUKO ->
+                        showError(error, R.string.server_error_not_choruko)
+
+                    ChorukoProbe.Result.UNREACHABLE ->
+                        showError(error, R.string.server_error_unreachable)
+                }
+            }
+        }.start()
+    }
+
+    private fun showError(error: TextView, message: Int) {
+        error.text = getString(message)
+        error.visibility = View.VISIBLE
     }
 
     private fun openWeb(url: String) {

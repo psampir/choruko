@@ -42,7 +42,12 @@ class WebActivity : Activity() {
 
         webView = WebView(this)
         setContentView(webView)
-        webView.applySystemBarInsets()
+        // Insets are dispatched to the content frame, not to the WebView inside it,
+        // which consumes them when it comes from a Material theme.
+        findViewById<android.view.View>(android.R.id.content).apply {
+            applySystemBarInsets()
+            requestApplyInsets()
+        }
 
         webView.setBackgroundColor(Color.BLACK)
 
