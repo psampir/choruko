@@ -7,6 +7,7 @@ import RaccoonLogo from "../../components/RaccoonLogo";
 import { useAuth } from "../../contexts/AuthContext";
 import InstallHint from "../../components/InstallHint";
 import Button from "../../components/Button";
+import { isShellApp } from "../../utils/nativeApp";
 
 type AuthView = "login" | "signup" | "resetPassword";
 
@@ -26,8 +27,8 @@ function AuthContainer() {
     // Check if on mobile device
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
-    // Show install button only if: not in standalone mode and on mobile
-    if (!isStandalone && isMobile) {
+    // Show the install button only outside the shell app and outside standalone mode
+    if (!isStandalone && isMobile && !isShellApp()) {
       setShowInstallButton(true);
     }
   }, []);

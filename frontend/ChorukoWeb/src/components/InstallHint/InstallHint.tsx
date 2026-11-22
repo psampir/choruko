@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Popup from "../Popup/Popup";
 import Button from "../Button";
 import "./InstallHint.scss";
+import { isShellApp } from "../../utils/nativeApp";
 
 interface InstallHintProps {
   open: boolean;
@@ -15,14 +16,7 @@ const InstallHint: React.FC<InstallHintProps> = ({ open, onClose }) => {
   const [isNative, setIsNative] = useState(false);
 
   useEffect(() => {
-    const capacitor = (
-      window as Window & { Capacitor?: { isNativePlatform?: () => boolean } }
-    ).Capacitor;
-    // The Android shell appends "ChorukoApp/<version>" to the user agent.
-    const isShellApp =
-      /chorukoapp\//i.test(window.navigator.userAgent) ||
-      (capacitor?.isNativePlatform?.() ?? false);
-    setIsNative(isShellApp);
+    setIsNative(isShellApp());
 
     const userAgent = window.navigator.userAgent.toLowerCase();
     if (/iphone|ipad|ipod/.test(userAgent)) {
