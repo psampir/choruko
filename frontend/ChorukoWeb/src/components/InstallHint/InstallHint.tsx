@@ -3,6 +3,7 @@ import Popup from "../Popup/Popup";
 import Button from "../Button";
 import "./InstallHint.scss";
 import { isShellApp } from "../../utils/nativeApp";
+import { isAndroidBrowser, openInApp } from "../../utils/openInApp";
 
 interface InstallHintProps {
   open: boolean;
@@ -62,6 +63,15 @@ const InstallHint: React.FC<InstallHintProps> = ({ open, onClose }) => {
           >
             Download the Android app
           </Button>
+          {isAndroidBrowser() && (
+            <button
+              type="button"
+              className="install-hint__link"
+              onClick={() => openInApp()}
+            >
+              Already installed? Open in the app
+            </button>
+          )}
         </div>
       )}
 

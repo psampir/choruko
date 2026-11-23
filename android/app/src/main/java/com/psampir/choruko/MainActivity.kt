@@ -18,15 +18,26 @@ class MainActivity : Activity() {
 
     companion object {
         const val ACTION_CHANGE_SERVER = "com.psampir.choruko.CHANGE_SERVER"
+
+        /** Server suggested by a chorukoapp:// link; the user still confirms it. */
+        const val EXTRA_PREFILL_SERVER = "com.psampir.choruko.EXTRA_PREFILL_SERVER"
+
+        /** Page to open once the address is accepted. */
+        const val EXTRA_OPEN_PATH = "com.psampir.choruko.EXTRA_OPEN_PATH"
     }
+
+    private var openPath: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val saved = ServerStore.read(this)
-        val forceSetup = intent.action == ACTION_CHANGE_SERVER
+        val prefill = intent.getStringExtra(EXTRA_PREFILL_SERVER)
+        openPath = intent.getStringExtra(EXTRA_OPEN_PATH).orEmpty()
+        val forceSetup = intent.action == ACTION_CHANGE_SERVER || prefill != null
+
         if (saved != null && !forceSetup) {
-            openWeb(saved)
+            openWeb(join(saved, openPath))
             return
         }
 
@@ -40,7 +51,9 @@ class MainActivity : Activity() {
         val error = findViewById<TextView>(R.id.server_error)
         val save = findViewById<Button>(R.id.server_save)
 
-        if (forceSetup && saved != null) {
+        if (prefill != null) {
+            input.setText(prefill)
+        } else if (forceSetup && saved != null) {
             input.setText(saved)
         }
 
@@ -74,7 +87,7 @@ class MainActivity : Activity() {
                 when (result) {
                     ChorukoProbe.Result.OK -> {
                         ServerStore.write(this, url)
-                        openWeb(url)
+                        openWeb(join(url, openPath))
                     }
 
                     ChorukoProbe.Result.NOT_CHORUKO ->
@@ -96,6 +109,9 @@ class MainActivity : Activity() {
      * Starts the WebView in a fresh task, so a previous server's page does not stay
      * underneath it in the back stack.
      */
+    private fun join(server: String, path: String): String =
+        server.trimEnd('/') + path.ifEmpty { "/" }
+
     private fun openWeb(url: String) {
         startActivity(
             Intent(this, WebActivity::class.java)

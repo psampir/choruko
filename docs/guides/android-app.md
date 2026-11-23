@@ -28,6 +28,25 @@ To point the app at a different instance later, use any of:
 The current address stays saved until a new one passes the check, so backing out of
 the address screen keeps it.
 
+## Opening the app from a browser
+
+On Android, the site tries to hand the page over to the app once per browser
+session. Chromium browsers (Chrome, Edge, Brave, Samsung Internet, Opera) do this
+silently: if the app is installed it opens, and if it is not the browser stays on
+the same page. Firefox has no equivalent, so there the **Already installed? Open in
+the app** link in the install hint does the same on tap.
+
+The link carries the current server and page, so the app opens the same instance at
+the same place. A server that differs from the saved one opens the address screen
+with the link's server pre-filled, so a second instance is never opened silently.
+`?stay=1` in the address, or simply staying on the page, keeps the browser for the
+rest of the session.
+
+The web page cannot see which apps are installed — this attempt is the only
+mechanism browsers allow. Custom-scheme links (`chorukoapp://`) are not App Links:
+those would require a fixed HTTPS domain baked into the APK, which does not fit
+self-hosted instances.
+
 ## What the app does
 
 - Shows the same interface as the browser, in a full-screen WebView.
