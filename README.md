@@ -12,7 +12,7 @@ who owes whom.
 [![CI](https://github.com/psampir/choruko/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/psampir/choruko/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/psampir/choruko)](https://github.com/psampir/choruko/releases)
 
-> Current release: **v1.1.0**. Notifications are delivered through the ntfy app, so
+> Current release: **v1.1.1**. Notifications are delivered through the ntfy app, so
 > a plain-HTTP instance on a trusted network is enough. Add a reverse proxy with a
 > TLS certificate when the instance is reachable from other machines. See the
 > [installation guide](docs/guides/install.md).
@@ -67,7 +67,7 @@ The images are published on GHCR:
 - `ghcr.io/psampir/choruko-backend`
 - `ghcr.io/psampir/choruko-manager`
 
-For upgrades, backups, reverse proxy and HTTPS, see the
+For upgrades, backups and the optional HTTPS setup, see the
 [installation guide](docs/guides/install.md).
 
 ## Configuration
