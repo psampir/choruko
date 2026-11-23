@@ -71,6 +71,84 @@
       gap: var(--spacing-md);
       margin-bottom: var(--spacing-xl);
     }
+
+    // Same frame as the inputs and collapsible sections: 2px accent border,
+    // 10px radius, secondary background.
+    &.notifications {
+      margin-top: var(--spacing-4xl);
+      gap: var(--spacing-md);
+      padding: var(--spacing-2xl);
+      border: 2px solid var(--color-secondary);
+      border-radius: var(--border-radius-standard);
+      background-color: var(--color-background-secondary);
+    }
+  }
+
+  &__section-title {
+    font-size: var(--font-size-h5);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+    text-align: center;
+  }
+
+  &__section-text {
+    margin: 0;
+    font-size: var(--font-size-body2);
+    line-height: 1.5;
+    color: var(--color-text-primary);
+    text-align: center;
+
+    &--muted {
+      color: var(--color-text-secondary);
+    }
+
+    &--error {
+      color: var(--color-error-bg);
+    }
+
+    a {
+      color: var(--color-text-primary);
+      text-decoration: underline;
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+  }
+
+  // The topic reads like a read-only input: same border and radius, on the page
+  // surface so it stands out from the secondary-background card.
+  &__topic {
+    width: 100%;
+    box-sizing: border-box;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-standard);
+    background-color: var(--color-background);
+    border: 2px solid var(--color-secondary);
+    font-family: var(--font-family-monospace, monospace);
+    font-size: var(--font-size-body2);
+    text-align: center;
+    word-break: break-all;
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
+  &__server {
+    font-family: var(--font-family-monospace, monospace);
+    word-break: break-all;
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
+  &__steps {
+    margin: 0;
+    padding-left: var(--spacing-2xl);
+    font-size: var(--font-size-body2);
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+
+    li {
+      margin-bottom: var(--spacing-xs);
+    }
   }
 
   .delete-account__btn {

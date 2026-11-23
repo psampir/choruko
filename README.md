@@ -12,9 +12,10 @@ who owes whom.
 [![CI](https://github.com/psampir/choruko/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/psampir/choruko/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/psampir/choruko)](https://github.com/psampir/choruko/releases)
 
-> Current release: **v1.0.2**. Self-hosting currently needs HTTPS for the PWA
-> features (install and push); the rest of the app also works over plain HTTP on a
-> trusted network. See the [installation guide](docs/guides/install.md).
+> Current release: **v1.1.0**. Notifications are delivered through the ntfy app, so
+> a plain-HTTP instance on a trusted network is enough. Add a reverse proxy with a
+> TLS certificate when the instance is reachable from other machines. See the
+> [installation guide](docs/guides/install.md).
 
 ## Features
 
@@ -25,11 +26,12 @@ who owes whom.
   dishes* — 10 points). Five defaults are created with a new household.
 - **Leaderboard** — monthly, yearly and all-time points per participant.
 - **Settlements** — shared expenses with per-person settle/unsettle tracking.
-- **Push notifications** — new, edited and completed tasks, deadlines, invitations
-  and settlements (PWA / Web Push).
+- **Notifications** — new, edited and completed tasks, deadlines, invitations and
+  settlements, delivered through ntfy (self-hosted or ntfy.sh).
 - **Roles** — household admin, participant, and a locked-down "no household" role
   for new accounts.
-- **Mobile-first UI** — light and dark themes, installable PWA.
+- **Mobile-first UI** — light and dark themes, add-to-home-screen web clip on iOS
+  and a native Android app from GitHub Releases.
 - **Optional email** — SMTP password reset, or a command-line password reset in the
   `manager` container when email is disabled.
 
@@ -37,8 +39,8 @@ who owes whom.
 
 | Layer | Stack |
 |---|---|
-| Frontend | React 19, TypeScript, Vite, SCSS, React Router, `vite-plugin-pwa` |
-| Backend | ASP.NET Core 9, EF Core 9, ASP.NET Core Identity (cookie auth) |
+| Frontend | React 19, TypeScript, Vite, SCSS, React Router |
+| Backend | ASP.NET Core 10, EF Core 10, ASP.NET Core Identity (cookie auth), SkiaSharp for image processing |
 | Database | PostgreSQL 17 |
 | Packaging | Docker images for frontend, backend and a migration/admin manager |
 | CI/CD | GitHub Actions (build, tests, GHCR images), Docker Compose |
@@ -85,11 +87,16 @@ The most important variables:
 | `ENABLE_EMAILS` | `false` | enable SMTP password-reset emails |
 | `SMTP_*` | — | SMTP host, port, credentials and sender |
 | `SERVER_URL` | — | public URL used in email links |
+| `NOTIFIER` | `none` | `ntfy` enables notifications through ntfy |
+| `NTFY_BASE_URL` | — | ntfy server base URL (self-hosted or `https://ntfy.sh`) |
+| `NTFY_TOKEN` | — | optional ntfy access token |
+| `PUBLIC_APP_URL` | — | public URL used in notification links |
 | `TZ` | host timezone | container timezone |
 
 ## Development
 
 - [Setting up the development environment](docs/guides/set-up-dev-env.md)
+- [Building the Android app](docs/guides/android-app.md)
 - Short version:
 
   ```bash
@@ -116,7 +123,7 @@ The most important variables:
 React 19 SPA (Vite)
         │  cookie auth, JSON
         ▼
-ASP.NET Core 9 Web API  ──►  EF Core  ──►  PostgreSQL 17
+ASP.NET Core 10 Web API  ──►  EF Core  ──►  PostgreSQL 17
         │
         └── background services (points reset, deadline reminders, cleanup)
 ```
@@ -130,15 +137,15 @@ keeps per-domain React contexts that call small `fetch`-based services. See
 |---|---|
 | `backend/ChorukoAPI` | API, services, EF Core models and migrations |
 | `backend/*.Test` | xUnit tests for each service |
-| `frontend/ChorukoWeb` | React SPA and PWA |
+| `frontend/ChorukoWeb` | React SPA |
+| `android` | Android shell (WebView + server address screen) |
 | `docker` | Dockerfiles and Compose files |
 | `docs` | installation, development, architecture, operations |
 
 ## Roadmap
 
-- Simpler self-hosting: run the app on a LAN without TLS, with notifications moved
-  to a dedicated push service.
-- Optional Android and iOS app shells.
+- Run the app on a LAN without TLS.
+- Native iOS shell, if a web clip turns out to be too limited.
 - More tests around controllers and authentication.
 
 ## Contributing

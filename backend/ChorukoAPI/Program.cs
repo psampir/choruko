@@ -22,11 +22,11 @@ builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("oauth2", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    options.AddSecurityDefinition("oauth2", new Microsoft.OpenApi.OpenApiSecurityScheme
     {
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        In = Microsoft.OpenApi.ParameterLocation.Header,
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey
+        Type = Microsoft.OpenApi.SecuritySchemeType.ApiKey
     });
     options.OperationFilter<Swashbuckle.AspNetCore.Filters.SecurityRequirementsOperationFilter>();
 });
@@ -138,8 +138,24 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.Configure<ImageSettings>(
     builder.Configuration.GetSection(ImageSettings.SectionName));
 
-builder.Services.Configure<VapidSettings>(
-    builder.Configuration.GetSection("VapidSettings"));
+builder.Services.Configure<NtfySettings>(options =>
+{
+    options.BaseUrl = config["NTFY_BASE_URL"] ?? string.Empty;
+    options.Token = config["NTFY_TOKEN"] ?? string.Empty;
+    options.PublicAppUrl = config["PUBLIC_APP_URL"] ?? string.Empty;
+});
+
+builder.Services.AddHttpClient("ntfy");
+builder.Services.AddMemoryCache();
+
+if (string.Equals(config["NOTIFIER"], "ntfy", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddSingleton<INotifier, NtfyNotifier>();
+}
+else
+{
+    builder.Services.AddSingleton<INotifier, NoOpNotifier>();
+}
 
 builder.Services.AddHttpContextAccessor();
 
@@ -152,6 +168,8 @@ builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
 builder.Services.AddScoped<IPasswordGenerator, PasswordGenerator>();
 
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
+
+builder.Services.AddScoped<IImageProcessor, ImageProcessor>();
 
 builder.Services.AddScoped<IActivityService, ActivityService>();
 
@@ -170,7 +188,6 @@ builder.Services.AddScoped<IMapper<Settlement, SettlementWithoutUsersResponse>, 
 builder.Services.AddScoped<IMapper<Invitation, InvitationResponse>, InvitationMapper>();
 
 builder.Services.AddScoped<ISettlementService, SettlementService>();
-builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 
 builder.Services.AddHostedService<PointsResetService>();
 builder.Services.AddHostedService<InvitationsDeleteService>();
@@ -192,19 +209,6 @@ builder.Services.AddCors(options =>
                 .AllowCredentials();
         });
 });
-
-// Generate VAPID keys if they don't exist
-if (!VapidKeysChecker.CheckVapidKeys())
-{
-    VapidKeysGenerator.GenerateKeys();
-}
-else
-{
-    Console.WriteLine("VAPID keys already configured.");
-}
-
-// Load VAPID keys from file into configuration
-VapidKeysLoader.LoadVapidKeys(builder.Configuration);
 
 var app = builder.Build();
 
@@ -238,6 +242,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-NotificationHandler.Initialize(app.Services);
 
 app.Run();

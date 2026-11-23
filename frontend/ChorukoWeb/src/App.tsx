@@ -12,12 +12,10 @@ import { ActivityProvider } from "./contexts/ActivityContext";
 import { TaskProvider } from "./contexts/TaskContext";
 import { SettlementProvider } from "./contexts/SettlementContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { PushNotificationProvider } from "./contexts/PushNotificationContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import NavbarMobile from "./components/NavbarMobile/NavbarMobile";
 import BottomNav from "./components/BottomNav/BottomNav";
 import { useAuth } from "./contexts/AuthContext";
-import PushNotificationHandler from "./components/PushNotificationHandler";
 import AdminPromotionHandler from "./components/AdminPromotionHandler";
 
 // Lazy load route components
@@ -34,7 +32,6 @@ const Leaderboard = lazy(() => import("./views/Household/Leaderboard/Leaderboard
 const ManageAccount = lazy(() => import("./views/Profile/ManageAccount/ManageAccount"));
 const ManageHousehold = lazy(() => import("./views/Profile/ManageHousehold/ManageHousehold"));
 const Activities = lazy(() => import("./views/Profile/ManageHousehold/Activities/Activities"));
-const TestNotifications = lazy(() => import("./views/TestNotifications"));
 
 // Layout component for protected pages with top navbar
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -61,13 +58,29 @@ function MainAppLayout({ children }: { children: React.ReactNode }) {
 
 // Component to handle the root route intelligently
 function RootRedirect() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, hasHousehold, loading } = useAuth();
 
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
-  return <Navigate to={isAuthenticated ? "/leaderboard" : "/login"} replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Navigate to={hasHousehold ? "/leaderboard" : "/joinOrCreateHousehold"} replace />;
+}
+
+// A signed-in user who lands on /login (for example with Back) goes to the app.
+// No loading branch: it would unmount the form while a sign-in request runs.
+function LoginRoute() {
+  const { isAuthenticated, hasHousehold } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to={hasHousehold ? "/leaderboard" : "/joinOrCreateHousehold"} replace />;
+  }
+
+  return <AuthContainer />;
 }
 
 function AppRoutes() {
@@ -78,7 +91,7 @@ function AppRoutes() {
         <Route path="/" element={<RootRedirect />} />
 
         {/* Public routes */}
-        <Route path="/login" element={<AuthContainer />} />
+        <Route path="/login" element={<LoginRoute />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected routes with layout */}
@@ -209,18 +222,6 @@ function AppRoutes() {
           }
         />
 
-        {/* Hidden dev route for push notifications testing */}
-        <Route
-          path="/dev-push-test"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <TestNotifications />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
         {/* Catch-all for unknown routes */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
@@ -237,13 +238,10 @@ function App() {
             <ActivityProvider>
               <TaskProvider>
                 <SettlementProvider>
-                  <PushNotificationProvider>
-                    <Router>
-                      <PushNotificationHandler />
-                      <AdminPromotionHandler />
-                      <AppRoutes />
-                    </Router>
-                  </PushNotificationProvider>
+                  <Router>
+                    <AdminPromotionHandler />
+                    <AppRoutes />
+                  </Router>
                 </SettlementProvider>
               </TaskProvider>
             </ActivityProvider>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the dark theme of the web interface. -->
+    <color name="setup_background">#000000</color>
+    <color name="setup_text">#E8E9EA</color>
+    <color name="setup_text_secondary">#C3C3C3</color>
+    <color name="setup_error">#FF7285</color>
+    <color name="setup_accent">#55AD9B</color>
+    <color name="setup_surface">#1E1E1E</color>
+    <color name="setup_button_text">#000000</color>
+    <color name="web_background">#000000</color>
+    <color name="ic_launcher_background">#55AD9B</color>
+</resources>

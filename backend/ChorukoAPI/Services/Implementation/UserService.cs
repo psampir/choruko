@@ -1,4 +1,4 @@
-﻿using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts;
 using ChorukoAPI.Contracts.Requests.User;
 using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Responses.User;
@@ -6,16 +6,15 @@ using ChorukoAPI.Data;
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Threading.Tasks;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Formats.Jpeg;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using ChorukoAPI.Contracts.Notifications;
+using System.Net;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 using ChorukoAPI.Mappers;
 
 namespace ChorukoAPI.Services.Implementation;
@@ -24,10 +23,13 @@ public class UserService(
     UserManager<User> _userManager, 
     IHttpContextAccessor _contextAccessor, 
     DataContext _context, 
-    IWebHostEnvironment _webHostEnvironment,
-    IOptions<ImageSettings> _options,
-    IMapper<User, UserInfoResponse> _mapper) : IUserService
+    IImageProcessor _imageProcessor,
+    IMapper<User, UserInfoResponse> _mapper,
+    IOptions<NtfySettings> _ntfyOptions,
+    INotifier _notifier,
+    IMemoryCache _cache) : IUserService
 {
+    private static readonly TimeSpan TestNotificationCooldown = TimeSpan.FromSeconds(30);
 
     public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
     {
@@ -46,6 +48,86 @@ public class UserService(
 
         return ServiceResponseFactory.Success(await _mapper.Map(user));
     }
+    public async Task<ServiceResponse<NotificationSettingsResponse>> GetNotificationSettingsAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return ServiceResponseFactory.Error<NotificationSettingsResponse>(
+                null,
+                "User not found.",
+                HttpStatusCode.NotFound);
+        }
+
+        if (string.IsNullOrWhiteSpace(user.NtfyTopic))
+        {
+            user.NtfyTopic = $"choruko-{Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLowerInvariant()}";
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return ServiceResponseFactory.Error<NotificationSettingsResponse>(
+                    null,
+                    "Failed to save the notification topic.",
+                    HttpStatusCode.InternalServerError);
+            }
+        }
+
+        var settings = new NotificationSettingsResponse(
+            user.NtfyTopic!,
+            _ntfyOptions.Value.BaseUrl ?? string.Empty);
+
+        return ServiceResponseFactory.Success(settings, "Notification settings.");
+    }
+
+    public async Task<ServiceResponse<string>> SendTestNotificationAsync(string userId)
+    {
+        var cooldownKey = $"notification-test:{userId}";
+        if (_cache.TryGetValue(cooldownKey, out _))
+        {
+            return ServiceResponseFactory.Error<string>(
+                null,
+                "Wait a moment before sending another test notification.",
+                HttpStatusCode.TooManyRequests);
+        }
+
+        // Creates the topic on the first call, the same way the settings page does.
+        var settings = await GetNotificationSettingsAsync(userId);
+        if (!settings.IsSuccessful)
+        {
+            return ServiceResponseFactory.Error<string>(
+                null,
+                settings.Message ?? "Failed to load the notification settings.",
+                settings.StatusCode);
+        }
+
+        var result = await _notifier.SendTestAsync(userId);
+        _cache.Set(cooldownKey, true, TestNotificationCooldown);
+
+        return result.Status switch
+        {
+            NotificationTestStatus.Sent => ServiceResponseFactory.Success(
+                "sent",
+                "Test notification sent. Check the ntfy app."),
+            NotificationTestStatus.Disabled => ServiceResponseFactory.Error<string>(
+                null,
+                "Notifications are disabled on this server (NOTIFIER is not set to ntfy).",
+                HttpStatusCode.ServiceUnavailable),
+            NotificationTestStatus.NotConfigured => ServiceResponseFactory.Error<string>(
+                null,
+                "Notifications are enabled, but NTFY_BASE_URL is not configured on this server.",
+                HttpStatusCode.ServiceUnavailable),
+            NotificationTestStatus.NoTopic => ServiceResponseFactory.Error<string>(
+                null,
+                "No notification topic is assigned to this account.",
+                HttpStatusCode.Conflict),
+            _ => ServiceResponseFactory.Error<string>(
+                null,
+                $"The ntfy server did not accept the notification: {result.Detail}",
+                HttpStatusCode.BadGateway),
+        };
+    }
+
     public async Task<ServiceResponse<OperationResultDto>> ChangeUserNamesAsync(ChangeUserNamesRequest request, string userId)
     {
         if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
@@ -101,7 +183,7 @@ public class UserService(
         
         var oldProfilePicturePath = user.ProfilePicturePath;
         
-        var uploadResponse = await UploadProfilePicture(request.ProfilePicture);
+        var uploadResponse = await _imageProcessor.ProcessAsync(request.ProfilePicture, "users");
 
         if (!uploadResponse.IsSuccessful)
         {
@@ -120,7 +202,7 @@ public class UserService(
             {
                 try
                 {
-                    DeleteProfilePicture(newProfilePicturePath);
+                    _imageProcessor.Delete(newProfilePicturePath);
                 }
                 catch (Exception cleanupEx) 
                 {
@@ -134,7 +216,7 @@ public class UserService(
             {
                 try
                 {
-                    DeleteProfilePicture(oldProfilePicturePath);
+                    _imageProcessor.Delete(oldProfilePicturePath);
                 }
                 catch (Exception cleanupEx)
                 {
@@ -161,102 +243,13 @@ public class UserService(
         }
         catch (Exception dbEx)
         {
-            DeleteProfilePicture(newProfilePicturePath); 
+            _imageProcessor.Delete(newProfilePicturePath); 
             return ServiceResponseFactory.Error<OperationResultDto>(
                 null, 
                 $"An unexpected error occurred during database update: {dbEx.Message}", 
                 HttpStatusCode.InternalServerError
             );
         }
-    }
-    private async Task<ServiceResponse<string>> ValidateAndProcessImage(IFormFile file)
-    {
-        if (file.Length > _options.Value.MaxFileSize)
-        {
-            return ServiceResponseFactory.Error<string>(null, $"File size must not exceed {_options.Value.MaxFileSize / 1024 / 1024}MB.", HttpStatusCode.RequestEntityTooLarge);
-        }
-        
-        var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!_options.Value.AllowedFormats.Contains(fileExtension))
-        {
-            return ServiceResponseFactory.Error<string>(null, $"Invalid file format. Only {string.Join(", ", _options.Value.AllowedFormats)} are allowed.", HttpStatusCode.UnsupportedMediaType);
-        }
-
-        string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "users"); // Note: users folder
-        if (!Directory.Exists(uploadsFolder))
-        {
-            Directory.CreateDirectory(uploadsFolder);
-        }
-        
-        string uniqueFileName = Guid.NewGuid().ToString() + ".jpg";
-        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-        try
-        {
-            using (var memoryStream = new MemoryStream())
-            {
-                await file.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
-
-                using (Image image = await Image.LoadAsync(memoryStream))
-                {
-                    if (image.Width < _options.Value.MinDimension || image.Height < _options.Value.MinDimension)
-                    {
-                        return ServiceResponseFactory.Error<string>(null, $"Image dimensions are too small. Minimum required: {_options.Value.MinDimension}x{_options.Value.MinDimension} pixels.", HttpStatusCode.BadRequest);
-                    }
-                    
-                    if (image.Width > _options.Value.MaxDimension || image.Height > _options.Value.MaxDimension)
-                    {
-                        image.Mutate(x => x.Resize(new ResizeOptions
-                        {
-                            Size = new Size(_options.Value.MaxDimension, _options.Value.MaxDimension),
-                            Mode = ResizeMode.Crop
-                        }));
-                    }
-                    
-                    await image.SaveAsJpegAsync(filePath, new JpegEncoder { Quality = 100 });
-                }
-            }
-
-            string profilePicturePath = Path.Combine("uploads", "users", uniqueFileName).Replace("\\", "/");
-            return ServiceResponseFactory.Success(profilePicturePath, "Profile picture processed successfully.", HttpStatusCode.OK);
-        }
-        catch (ImageFormatException)
-        {
-            return ServiceResponseFactory.Error<string>(null, "The file is not a valid or recognizable image.", HttpStatusCode.UnsupportedMediaType);
-        }
-        catch (Exception ex)
-        {
-            return ServiceResponseFactory.Error<string>(null, $"Failed to process image: {ex.Message}", HttpStatusCode.InternalServerError);
-        }
-    }
-    private async Task<ServiceResponse<string>> UploadProfilePicture(IFormFile? file)
-    {
-        if (file == null)
-        {
-            return ServiceResponseFactory.Success<string>(null, "No profile picture provided.", HttpStatusCode.OK);
-        }
-
-        // Delegate all validation, processing, and saving to the new method
-        var processingResponse = await ValidateAndProcessImage(file);
-
-        if (!processingResponse.IsSuccessful)
-        {
-            // Return the error generated by the validation/processing method
-            return processingResponse;
-        }
-
-        // Return success with the file path
-        return ServiceResponseFactory.Success(
-            processingResponse.Result!,
-            "Profile picture uploaded and processed successfully.",
-            HttpStatusCode.OK
-        );
-    }
-    private void DeleteProfilePicture(string filePath)
-    {
-        string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, filePath);
-        System.IO.File.Delete(fullPath);
     }
     public async Task<ServiceResponse<OperationResultDto>> DeleteSelfAsync(string userId)
     {
@@ -300,7 +293,7 @@ public class UserService(
         
         if (!string.IsNullOrEmpty(user.ProfilePicturePath))
         {
-            DeleteProfilePicture(user.ProfilePicturePath);
+            _imageProcessor.Delete(user.ProfilePicturePath);
         }
         
         var result = await _userManager.DeleteAsync(user);

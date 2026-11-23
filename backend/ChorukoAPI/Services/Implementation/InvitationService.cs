@@ -1,5 +1,6 @@
-﻿using ChorukoAPI.Contracts.Responses;
+using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Notifications;
 using ChorukoAPI.Extensions;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
@@ -14,7 +15,7 @@ using Microsoft.AspNetCore.Identity;
 namespace ChorukoAPI.Services.Implementation;
 
 public class InvitationService(DataContext context,
-    IPushNotificationService pushNotificationService,
+    INotifier notifier,
     IMapper<Invitation, InvitationResponse> mapper,
     UserManager<User> userManager) : IInvitationService
 {
@@ -65,7 +66,7 @@ public class InvitationService(DataContext context,
 
             if (userId != userToAdd.Id)
             {
-                await pushNotificationService.SendNotificationAsync(userToAdd.Id, payload);
+                await notifier.SendAsync(new[] { userToAdd.Id }, AppNotification.FromJson(payload));
             }
 
 

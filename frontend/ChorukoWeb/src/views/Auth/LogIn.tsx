@@ -1,7 +1,7 @@
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import ErrorMessage from "../../components/ErrorMessage";
-import PWAInstallPopup from "../../components/PWAInstallPopup";
+import InstallHint from "../../components/InstallHint";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -23,10 +23,10 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState("");
-  const [showPWAPopup, setShowPWAPopup] = useState(false);
+  const [showInstallHint, setShowInstallHint] = useState(false);
 
   useEffect(() => {
-    // Check if app is running in standalone mode (PWA installed)
+    // Check if app is running in standalone mode (home screen)
     const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
                          navigatorWithStandalone.standalone === true;
@@ -35,11 +35,11 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     // Check if user already dismissed the popup (stored in localStorage)
-    const hasSeenPopup = localStorage.getItem('pwa-install-popup-dismissed');
+    const hasSeenPopup = localStorage.getItem('install-hint-dismissed');
     
     // Show popup only if: not in standalone mode, on mobile, and hasn't dismissed before
     if (!isStandalone && isMobile && !hasSeenPopup) {
-      setShowPWAPopup(true);
+      setShowInstallHint(true);
     }
   }, []);
   const handleLogin = async (e: React.FormEvent) => {
@@ -51,10 +51,11 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
 
       if (result.success) {
         // Navigate to leaderboard if has household, else to household setup
+        // Replace /login in the history so Back does not return to the form
         if (result.hasHousehold) {
-          navigate("/leaderboard");
+          navigate("/leaderboard", { replace: true });
         } else {
-          navigate("/joinOrCreateHousehold");
+          navigate("/joinOrCreateHousehold", { replace: true });
         }
       } else {
         // Handle backend authentication errors
@@ -73,14 +74,14 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
     }
   };
 
-  const handleClosePWAPopup = () => {
-    setShowPWAPopup(false);
-    localStorage.setItem('pwa-install-popup-dismissed', 'true');
+  const handleCloseInstallHint = () => {
+    setShowInstallHint(false);
+    localStorage.setItem('install-hint-dismissed', 'true');
   };
 
   return (
     <>
-      <PWAInstallPopup open={showPWAPopup} onClose={handleClosePWAPopup} />
+      <InstallHint open={showInstallHint} onClose={handleCloseInstallHint} />
       
       <ErrorMessage
         message={localError || authError || ""}
@@ -95,17 +96,24 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
       <form onSubmit={handleLogin} className="login__form">
         <div className="login__input-container">
           <Input
+            id="login-email"
             className="login__input-email"
             type="email"
             placeholder="Email"
+            name="email"
+            autoComplete="username"
+            inputMode="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
 
           <Input
+            id="login-password"
             type="password"
             placeholder="Password"
+            name="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

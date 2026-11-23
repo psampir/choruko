@@ -29,3 +29,11 @@ a network (including as a web service or SaaS application), you MUST:
 
 For questions about licensing or commercial use, please open an issue at
 https://github.com/psampir/choruko/issues.
+
+================================================================================
+
+Android app typeface:
+
+Asap, Copyright 2019 The Asap Project Authors
+(https://github.com/googlefonts/asap), licensed under the SIL Open Font
+License 1.1. The full licence text is in android/third_party/asap/OFL.txt.

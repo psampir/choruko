@@ -1,7 +1,7 @@
 ## Stage 1: Build the .NET EF migrations bundle
 
 # Use the .NET SDK image for building the EF migrations bundle
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 
 # Set the working directory in the container
 WORKDIR /src
@@ -39,7 +39,7 @@ RUN TARGET_ARCH=$(cat /tmp/target-arch) && \
 ### Stage 2: Run migrations and provide admin tools
 
 # Use a lightweight alpine image
-FROM alpine:3.22
+FROM alpine:3.24
 
 # Add architecture labels for better tracking
 ARG TARGETARCH

@@ -1,4 +1,5 @@
-﻿using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Notifications;
 using ChorukoAPI.Contracts.Requests.Household;
 using ChorukoAPI.Contracts.Requests.Task;
 using ChorukoAPI.Contracts.Responses;
@@ -10,7 +11,6 @@ using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
@@ -18,7 +18,7 @@ using System.Security.Claims;
 
 namespace ChorukoAPI.Services.Implementation;
 
-public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, HouseholdTaskResponse> _mapper, IPushNotificationService pushNotificationService) : IHouseholdTaskService
+public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, HouseholdTaskResponse> _mapper, INotifier notifier) : IHouseholdTaskService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateHouseholdTaskAsync(string householdId, CreateHouseholdTaskRequest request, string userId)
     {
@@ -116,7 +116,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                 .Select(receiver => receiver.Id)
                 .ToList();
 
-            await NotificationHandler.SendNotificationAsync(receivers, payload);
+            await notifier.SendAsync(receivers, AppNotification.FromJson(payload));
 
             var response = new OperationResultDto
             {
@@ -213,7 +213,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                     badge = "/icons/icon-96x96.png",
                     url = "/tasks"
                 });
-                notificationTasks.Add(NotificationHandler.SendNotificationAsync(newlyAddedAssignees, newAssigneePayload));
+                notificationTasks.Add(notifier.SendAsync(newlyAddedAssignees, AppNotification.FromJson(newAssigneePayload)));
             }
 
             if (existingAssignees.Any())
@@ -226,7 +226,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
                     badge = "/icons/icon-96x96.png",
                     url = "/tasks"
                 });
-                notificationTasks.Add(NotificationHandler.SendNotificationAsync(existingAssignees, editedPayload));
+                notificationTasks.Add(notifier.SendAsync(existingAssignees, AppNotification.FromJson(editedPayload)));
             }
 
             if (notificationTasks.Any())
@@ -326,7 +326,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         if (userId != householdTask.CreatorId)
         {
-            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+            await notifier.SendAsync(new[] { householdTask.CreatorId }, AppNotification.FromJson(payload));
         }
 
         var response = new OperationResultDto
@@ -389,7 +389,7 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
 
         if (userId != householdTask.CreatorId)
         {
-            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+            await notifier.SendAsync(new[] { householdTask.CreatorId }, AppNotification.FromJson(payload));
         }
 
         var response = new OperationResultDto
@@ -447,11 +447,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             .Select(receiver => receiver.Id)
             .ToList();
 
-        await NotificationHandler.SendNotificationAsync(receivers, payload);
+        await notifier.SendAsync(receivers, AppNotification.FromJson(payload));
 
         if (userId != householdTask.CreatorId)
         {
-            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+            await notifier.SendAsync(new[] { householdTask.CreatorId }, AppNotification.FromJson(payload));
         }
 
         var response = new OperationResultDto
@@ -524,11 +524,11 @@ public class HouseholdTaskService(DataContext _context, IMapper<HouseholdTask, H
             .Select(receiver => receiver.Id)
             .ToList();
 
-        await NotificationHandler.SendNotificationAsync(receivers, payload);
+        await notifier.SendAsync(receivers, AppNotification.FromJson(payload));
 
         if (userId != householdTask.CreatorId)
         {
-            await pushNotificationService.SendNotificationAsync(householdTask.CreatorId, payload);
+            await notifier.SendAsync(new[] { householdTask.CreatorId }, AppNotification.FromJson(payload));
         }
 
         var response = new OperationResultDto

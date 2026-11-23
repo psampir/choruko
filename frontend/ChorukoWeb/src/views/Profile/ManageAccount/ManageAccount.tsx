@@ -13,6 +13,8 @@ import arrowLeftLight from "../../../assets/svg/light/arrow-left.svg";
 import ProfileDefaultIconDark from "../../../assets/svg/dark/profile-icon-light.svg";
 import arrowLeftDark from "../../../assets/svg/dark/arrow-left.svg";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
+import userService from "../../../services/userService";
+import { isShellApp } from "../../../utils/nativeApp";
 
 // User account management - update name, password, and profile picture
 const ManageAccount: React.FC = () => {
@@ -40,6 +42,38 @@ const ManageAccount: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [profileImageSrc, setProfileImageSrc] =
     useState<string>(ProfileDefaultIcon);
+  const [topic, setTopic] = useState<string>("");
+  const [ntfyBaseUrl, setNtfyBaseUrl] = useState<string>("");
+  const [topicError, setTopicError] = useState<string | null>(null);
+  const [topicLoading, setTopicLoading] = useState<boolean>(true);
+  const [testSending, setTestSending] = useState<boolean>(false);
+
+  // Load (and lazily create) the ntfy topic assigned to this user
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadTopic = async () => {
+      const result = await userService.getNotificationSettings();
+      if (cancelled) return;
+
+      if (result.success && result.topic) {
+        setTopic(result.topic);
+        setNtfyBaseUrl(result.ntfyBaseUrl ?? "");
+        setTopicError(null);
+      } else {
+        setTopicError(
+          result.message || "Failed to load the notification settings"
+        );
+      }
+      setTopicLoading(false);
+    };
+
+    loadTopic();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Initialize form values and profile picture from user data
   useEffect(() => {
@@ -158,6 +192,42 @@ const ManageAccount: React.FC = () => {
     document.getElementById("profile-image-input")?.click();
   };
 
+  // Clipboard API needs a secure context, so keep a fallback for plain HTTP
+  const handleCopyTopic = async () => {
+    if (!topic) return;
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(topic);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = topic;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      showNotification("Topic copied to clipboard", "success");
+    } catch (error) {
+      console.error("Error copying notification topic:", error);
+      showNotification("Copy failed - select the topic manually", "error");
+    }
+  };
+
+  const handleSendTestNotification = async () => {
+    setTestSending(true);
+    const result = await userService.sendTestNotification();
+    setTestSending(false);
+    showNotification(result.message, result.success ? "success" : "error");
+  };
+
+  // The Android shell intercepts this scheme and opens its server address screen
+  const handleChangeServer = () => {
+    window.location.href = "chorukoapp://change-server";
+  };
+
   const handleDeleteAccount = async () => {
     const result = await deleteAccount();
 
@@ -225,12 +295,16 @@ const ManageAccount: React.FC = () => {
           <Input
             variant="password"
             placeholder="New Password"
+            name="new-password"
+            autoComplete="new-password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
           <Input
             variant="password"
             placeholder="Confirm New Password"
+            name="confirm-password"
+            autoComplete="new-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
@@ -243,6 +317,71 @@ const ManageAccount: React.FC = () => {
             {userLoading ? "Changing..." : "Change Password"}
           </Button>
         </div>
+        <div className="manage-account__main-section notifications">
+          <h2 className="manage-account__section-title">Notifications</h2>
+          <p className="manage-account__section-text">
+            Choruko sends notifications through the ntfy app. Subscribe to this
+            private topic in ntfy and you will get task, settlement and
+            invitation updates.
+          </p>
+
+          {topicLoading ? (
+            <p className="manage-account__section-text manage-account__section-text--muted">
+              Loading your topic...
+            </p>
+          ) : topicError ? (
+            <p className="manage-account__section-text manage-account__section-text--error">
+              {topicError}
+            </p>
+          ) : (
+            <>
+              <code className="manage-account__topic">{topic}</code>
+              <Button variant="primary" type="button" onClick={handleCopyTopic}>
+                Copy Topic
+              </Button>
+              <Button
+                variant="primary"
+                type="button"
+                onClick={handleSendTestNotification}
+                disabled={testSending}
+              >
+                {testSending ? "Sending..." : "Send Test"}
+              </Button>
+              <ol className="manage-account__steps">
+                <li>Install the ntfy app on your phone.</li>
+                <li>
+                  Add a subscription
+                  {ntfyBaseUrl ? (
+                    <>
+                      {" "}
+                      to <span className="manage-account__server">{ntfyBaseUrl}</span>{" "}
+                    </>
+                  ) : (
+                    " to the ntfy server your instance uses "
+                  )}
+                  with the topic above.
+                </li>
+                <li>Notifications from Choruko will arrive there.</li>
+              </ol>
+              <p className="manage-account__section-text manage-account__section-text--muted">
+                Treat the topic like a password; anyone who knows it can read your
+                notifications.
+              </p>
+            </>
+          )}
+        </div>
+        {isShellApp() && (
+          <div className="manage-account__main-section notifications">
+            <h2 className="manage-account__section-title">Server</h2>
+            <p className="manage-account__section-text manage-account__section-text--muted">
+              This app is connected to{" "}
+              <span className="manage-account__server">{window.location.origin}</span>.
+            </p>
+            <Button variant="primary" type="button" onClick={handleChangeServer}>
+              Change Server
+            </Button>
+          </div>
+        )}
         <Button
           variant="red"
           className="delete-account__btn"

@@ -13,9 +13,9 @@ adjust it. Do not commit `.env` — it contains secrets.
 
 | Variable | Default | Description |
 |---|---|---|
-| `CHORUKO_VERSION` | `release` | Image tag to deploy: `release`, `latest`, or a version such as `v1.0.2`. |
+| `CHORUKO_VERSION` | `release` | Image tag to deploy: `release`, `latest`, or a version such as `v1.1.0`. |
 | `CHORUKO_PORT` | `2467` | Host port for the web interface. The container always listens on port 80. |
-| `APP_DATA_LOCATION` | `./app_data` | Host directory for uploaded pictures and generated VAPID keys. |
+| `APP_DATA_LOCATION` | `./app_data` | Host directory for uploaded pictures. |
 | `DB_DATA_LOCATION` | `./db_data` | Host directory for PostgreSQL data. Network shares are not supported. |
 
 `APP_DATA_LOCATION` and `DB_DATA_LOCATION` are bind mounts. Back them up; see
@@ -57,6 +57,28 @@ email service, and users can only get a new password through the `manager` conta
 When `ENABLE_EMAILS=true`, the backend refuses to start if any of the required SMTP
 values or `SERVER_URL` is missing.
 
+## Notifications (ntfy)
+
+Choruko delivers notifications through [ntfy](https://ntfy.sh). Each user gets a
+private topic; the backend posts to it and the user subscribes in the ntfy app.
+
+| Variable | Default | Description |
+|---|---|---|
+| `NOTIFIER` | `none` | `ntfy` enables delivery; `none` logs and drops notifications. |
+| `NTFY_BASE_URL` | — | ntfy server base URL, for example `http://192.168.1.10:2586` (self-hosted) or `https://ntfy.sh`. |
+| `NTFY_TOKEN` | — | Optional bearer token when the ntfy server uses access control. |
+| `PUBLIC_APP_URL` | — | Public URL of this Choruko instance, used to build notification links (for example `https://choruko.example.com`). |
+
+The per-user topic is created on demand by
+`GET /api/User/notification-settings` (returned together with `NTFY_BASE_URL`, which
+**Manage Account → Notifications** shows to the user) and stored in
+`User.NtfyTopic`. It is an unguessable random name; treat it like a secret.
+
+A self-hosted ntfy server works directly for Android. The iOS ntfy app needs a
+public HTTPS endpoint for background delivery; set `NTFY_UPSTREAM_BASE_URL` on the
+ntfy server to relay through `https://ntfy.sh`, or use `https://ntfy.sh` directly
+if you do not mind notifications passing through a third party.
+
 ## Storage
 
 Uploaded pictures are stored under `APP_DATA_LOCATION` and served by the backend at
@@ -64,11 +86,10 @@ Uploaded pictures are stored under `APP_DATA_LOCATION` and served by the backend
 
 - `uploads/users/` — profile pictures
 - `uploads/households/` — household pictures
-- `uploads/vapid-keys.json` — generated Web Push keys
 
-Keep the directory writable by the container. Back it up together with the database;
-the VAPID keys must survive a redeploy, otherwise existing push subscriptions stop
-working.
+Keep the directory writable by the container and back it up together with the
+database. A `vapid-keys.json` left over from older releases is no longer read and can
+be deleted.
 
 ## Timezone
 
@@ -99,9 +120,11 @@ Supported formats by default: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`.
 The container serves plain HTTP on port 80 and terminates nothing. Put a reverse
 proxy in front of it if the instance is reachable from other machines:
 
-- PWA installation and Web Push require a secure context: HTTPS with a trusted
-  certificate, or `localhost`.
-- The rest of the app works over plain HTTP on a trusted LAN.
+- The app and ntfy notifications work over plain HTTP on a trusted LAN.
+- Add HTTPS with a trusted certificate when the instance is reachable from other
+  machines, so the session cookie and password are not sent in clear text.
+- The clipboard API needs a secure context; on plain HTTP the **Copy Topic** button
+  falls back to selecting the text.
 - Forward the original `Host` header. The backend does not currently process
   `X-Forwarded-*` headers, so cookie security and generated links rely on
   `SERVER_URL` and on the proxy preserving the host.

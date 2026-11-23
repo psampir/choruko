@@ -21,6 +21,10 @@ public class User : IdentityUser
 
     public string? ProfilePicturePath { get; set; }
 
+    [StringLength(64)]
+    [Column(TypeName = "varchar(64)")]
+    public string? NtfyTopic { get; set; }
+
     public virtual List<HouseholdTask>? AssignedTasks { get; set; }
     
     public int PointsCurrentMonth { get; set; }

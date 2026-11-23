@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Long-press the launcher icon to point the app at another instance. -->
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="change_server"
+        android:shortcutLongLabel="@string/change_server_long"
+        android:shortcutShortLabel="@string/change_server_action">
+        <intent
+            android:action="com.psampir.choruko.CHANGE_SERVER"
+            android:targetClass="com.psampir.choruko.MainActivity"
+            android:targetPackage="psampir.choruko" />
+    </shortcut>
+</shortcuts>

@@ -41,6 +41,17 @@
   }
 }
 
+/* The rule above disables selection everywhere; form fields need it back so
+   long-press offers Paste and Autofill. */
+input,
+textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
 #root {
   display: flex;
   flex-direction: column;
@@ -74,8 +85,8 @@
 
 /* Additional bottom padding for pages with bottom nav */
 .app:has(.bottom-nav) .main-content {
-  padding-bottom: var(--navbar-height);
-  /* Space for bottom navbar */
+  padding-bottom: calc(var(--navbar-height) + env(safe-area-inset-bottom));
+  /* Space for bottom navbar, plus the iOS home indicator */
 }
 
 /* Additional top padding for notched devices */

@@ -1,4 +1,5 @@
-﻿using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts;
+using ChorukoAPI.Contracts.Notifications;
 using ChorukoAPI.Contracts.Requests.Settlement;
 using ChorukoAPI.Contracts.Responses;
 using ChorukoAPI.Contracts.Responses.Settlement;
@@ -8,7 +9,6 @@ using ChorukoAPI.Mappers;
 using ChorukoAPI.Models;
 using ChorukoAPI.Services.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Net;
 
 namespace ChorukoAPI.Services.Implementation;
@@ -17,7 +17,7 @@ public class SettlementService(
     DataContext _context,
     IMapper<Settlement, SettlementResponse> _mapper,
     IMapper<Settlement, SettlementWithoutUsersResponse> mapper,
-    IPushNotificationService pushNotificationService) : ISettlementService
+    INotifier notifier) : ISettlementService
 {
     public async Task<ServiceResponse<OperationResultDto>> CreateSettlement(string householdId, CreateSettlementRequest request, string userId)
     {
@@ -96,7 +96,7 @@ public class SettlementService(
                 url = "/settlements"
             });
 
-            await NotificationHandler.SendNotificationAsync(unsettledUsers.Select(receiver => receiver.Id).ToList(), payload);
+            await notifier.SendAsync(unsettledUsers.Select(receiver => receiver.Id).ToList(), AppNotification.FromJson(payload));
 
             var result = new OperationResultDto
             {
@@ -202,7 +202,7 @@ public class SettlementService(
                 url = "/settlements"
             });
 
-            await NotificationHandler.SendNotificationAsync(settlement.UnsettledUsers.Select(receiver => receiver.Id).ToList(), payload);
+            await notifier.SendAsync(settlement.UnsettledUsers.Select(receiver => receiver.Id).ToList(), AppNotification.FromJson(payload));
 
             var op = new OperationResultDto
             {
@@ -356,7 +356,7 @@ public class SettlementService(
             {
                 notificationTasks.AddRange(
                     settlement.SettledUsers.Select(receiver =>
-                        pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                        notifier.SendAsync(new[] { receiver.Id }, AppNotification.FromJson(payload)))
                 );
             }
 
@@ -364,7 +364,7 @@ public class SettlementService(
             {
                 notificationTasks.AddRange(
                     settlement.UnsettledUsers.Select(receiver =>
-                        pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                        notifier.SendAsync(new[] { receiver.Id }, AppNotification.FromJson(payload)))
                 );
             }
 
@@ -436,7 +436,7 @@ public class SettlementService(
             {
                 notificationTasks.AddRange(
                     settlement.SettledUsers.Select(receiver =>
-                        pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                        notifier.SendAsync(new[] { receiver.Id }, AppNotification.FromJson(payload)))
                 );
             }
 
@@ -444,7 +444,7 @@ public class SettlementService(
             {
                 notificationTasks.AddRange(
                     settlement.UnsettledUsers.Select(receiver =>
-                        pushNotificationService.SendNotificationAsync(receiver.Id, payload))
+                        notifier.SendAsync(new[] { receiver.Id }, AppNotification.FromJson(payload)))
                 );
             }
 
@@ -527,7 +527,7 @@ public class SettlementService(
                 url = "/settlements"
             });
 
-            await pushNotificationService.SendNotificationAsync(settlement.CreatorId, payload);
+            await notifier.SendAsync(new[] { settlement.CreatorId }, AppNotification.FromJson(payload));
 
             var result = new OperationResultDto
             {
@@ -603,7 +603,7 @@ public class SettlementService(
                 url = "/settlements"
             });
 
-            await pushNotificationService.SendNotificationAsync(settlement.CreatorId, payload);
+            await notifier.SendAsync(new[] { settlement.CreatorId }, AppNotification.FromJson(payload));
 
             var result = new OperationResultDto
             {

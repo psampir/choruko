@@ -40,36 +40,39 @@ sliding expiration.
 - If `ENABLE_EMAILS=true`, `SERVER_URL` must be the public URL of the instance;
   otherwise password-reset links point to the wrong place.
 
-## PWA cannot be installed
+## "Copy topic" does nothing
 
-Installation and Web Push require a **secure context**:
+The clipboard API needs a **secure context**: HTTPS with a certificate the device
+trusts, or `http://localhost` / `http://127.0.0.1`. On `http://192.168.x.x` the app
+falls back to a hidden text area, which some mobile browsers still refuse. Select the
+topic by hand, or serve the instance over HTTPS.
 
-- HTTPS with a certificate the device trusts, or
-- `http://localhost` / `http://127.0.0.1` on the same machine.
+Everything else, including notifications, works over plain HTTP: delivery happens
+between the backend and the ntfy server, not in the browser.
 
-`http://192.168.x.x` is not a secure context. The app itself works there, but the
-service worker does not register, the install prompt does not appear and push does
-not work. A self-signed certificate that the browser only bypasses by hand is not
-enough.
+## Notifications (ntfy) do not arrive
 
-The service worker and manifest are generated at build time. In development, use
-`npm run build && npm run preview` to test PWA behaviour; `npm run dev` does not
-register a worker.
+Start with **Manage Account → Notifications → Send Test**. It reports the reason
+directly: notifications disabled (`NOTIFIER`), `NTFY_BASE_URL` missing, or the
+status the ntfy server returned. A test can be sent once every 30 seconds.
 
-## Push notifications do not arrive
+1. `NOTIFIER=ntfy` and `NTFY_BASE_URL` must point to an ntfy server reachable from
+   the backend.
+2. The user needs the topic and server address shown in **Manage Account →
+   Notifications** (`GET /api/User/notification-settings`) and must be subscribed
+   to that topic in the ntfy app.
+3. A self-hosted ntfy server must be reachable from the phone. For background
+   delivery on iOS, set `NTFY_UPSTREAM_BASE_URL=https://ntfy.sh` on the ntfy server
+   (or use `https://ntfy.sh` directly).
+4. If the ntfy server uses access control, set `NTFY_TOKEN`.
+5. Check the backend log for `NTFY_BASE_URL is not configured` or
+   `ntfy delivery failed`.
+6. `PUBLIC_APP_URL` must be the URL users actually open, otherwise notification
+   links point to the wrong place.
 
-1. The browser must have notification permission.
-2. The site must be a secure context (see above).
-3. On iOS, Web Push requires iOS 16.4+ and the app must be installed on the home
-   screen.
-4. `APP_DATA_LOCATION` must keep `vapid-keys.json` across redeploys. If it is lost,
-   every subscription becomes invalid; users must subscribe again.
-5. Check the backend log for `No push subscriptions found` or `WebPush error`.
-6. Test the pipeline from the hidden development page `/dev-push-test`, or call
-   `POST /api/PushSubscription/test` while logged in.
-
-The browser subscription is stored in the `PushSubscriptions` table. A stale
-subscription is removed automatically when the push service returns `410 Gone`.
+Web Push, VAPID and the `PushSubscriptions` table were removed; notifications go
+through `INotifier` only. `/dev-push-test` and `/api/PushSubscription/*` no longer
+exist.
 
 ## Picture upload fails
 
