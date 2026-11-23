@@ -58,13 +58,29 @@ function MainAppLayout({ children }: { children: React.ReactNode }) {
 
 // Component to handle the root route intelligently
 function RootRedirect() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, hasHousehold, loading } = useAuth();
 
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
-  return <Navigate to={isAuthenticated ? "/leaderboard" : "/login"} replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Navigate to={hasHousehold ? "/leaderboard" : "/joinOrCreateHousehold"} replace />;
+}
+
+// A signed-in user who lands on /login (for example with Back) goes to the app.
+// No loading branch: it would unmount the form while a sign-in request runs.
+function LoginRoute() {
+  const { isAuthenticated, hasHousehold } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to={hasHousehold ? "/leaderboard" : "/joinOrCreateHousehold"} replace />;
+  }
+
+  return <AuthContainer />;
 }
 
 function AppRoutes() {
@@ -75,7 +91,7 @@ function AppRoutes() {
         <Route path="/" element={<RootRedirect />} />
 
         {/* Public routes */}
-        <Route path="/login" element={<AuthContainer />} />
+        <Route path="/login" element={<LoginRoute />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected routes with layout */}

@@ -66,7 +66,8 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
       const result = await register(formData);
 
       if (result.success) {
-        navigate("/dashboard");
+        // register() signs the user in; a new account has no household yet
+        navigate("/joinOrCreateHousehold", { replace: true });
       } else {
         // Handle backend validation errors
         setLocalError(parseErrorMessage(result.message || "Sign up failed."));

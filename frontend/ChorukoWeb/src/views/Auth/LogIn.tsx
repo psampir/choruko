@@ -51,10 +51,11 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
 
       if (result.success) {
         // Navigate to leaderboard if has household, else to household setup
+        // Replace /login in the history so Back does not return to the form
         if (result.hasHousehold) {
-          navigate("/leaderboard");
+          navigate("/leaderboard", { replace: true });
         } else {
-          navigate("/joinOrCreateHousehold");
+          navigate("/joinOrCreateHousehold", { replace: true });
         }
       } else {
         // Handle backend authentication errors
