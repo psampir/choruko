@@ -22,13 +22,6 @@ object ServerStore {
             .apply()
     }
 
-    fun clear(context: Context) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .edit()
-            .remove(KEY_SERVER_URL)
-            .apply()
-    }
-
     /**
      * Accepts "host", "host:port" and full URLs, and returns a URL that ends with
      * a slash. Returns null when the value cannot be a server address.

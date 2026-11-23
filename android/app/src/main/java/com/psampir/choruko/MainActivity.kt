@@ -9,21 +9,22 @@ import android.widget.EditText
 import android.widget.TextView
 
 /**
- * First launch (or a "change server" request): asks for the address of the Choruko
+ * First launch, or a "change server" request from the launcher shortcut, Manage
+ * Account or the connection error screen: asks for the address of the Choruko
  * instance, verifies that it really serves Choruko, and remembers it. The APK
  * therefore works against any self-hosted installation without a rebuild.
  */
 class MainActivity : Activity() {
 
     companion object {
-        const val EXTRA_FORCE_SETUP = "com.psampir.choruko.EXTRA_FORCE_SETUP"
+        const val ACTION_CHANGE_SERVER = "com.psampir.choruko.CHANGE_SERVER"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val saved = ServerStore.read(this)
-        val forceSetup = intent.getBooleanExtra(EXTRA_FORCE_SETUP, false)
+        val forceSetup = intent.action == ACTION_CHANGE_SERVER
         if (saved != null && !forceSetup) {
             openWeb(saved)
             return
@@ -91,9 +92,15 @@ class MainActivity : Activity() {
         error.visibility = View.VISIBLE
     }
 
+    /**
+     * Starts the WebView in a fresh task, so a previous server's page does not stay
+     * underneath it in the back stack.
+     */
     private fun openWeb(url: String) {
         startActivity(
-            Intent(this, WebActivity::class.java).putExtra(WebActivity.EXTRA_URL, url)
+            Intent(this, WebActivity::class.java)
+                .putExtra(WebActivity.EXTRA_URL, url)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         )
         finish()
     }

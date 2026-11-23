@@ -9,7 +9,9 @@
     <string name="connect_action">Connect</string>
     <string name="connect_action_progress">Connecting…</string>
     <string name="setup_notifications_hint">Notifications arrive through the ntfy app, not this one.</string>
-    <string name="exit_title">Close Choruko?</string>
-    <string name="exit_action">Close app</string>
     <string name="change_server_action">Change server</string>
+    <string name="change_server_long">Change Choruko server</string>
+    <string name="connection_error_title">Can\'t reach Choruko</string>
+    <string name="connection_error_message">%1$s is not responding. Check that the server is running and that you are on the right network.</string>
+    <string name="retry_action">Retry</string>
 </resources>

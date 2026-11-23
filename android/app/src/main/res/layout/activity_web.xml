@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/web_background">
+
+    <WebView
+        android:id="@+id/web_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:id="@+id/connection_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/setup_background"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/connection_error_title"
+            android:textColor="@color/setup_text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/connection_error_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:textColor="@color/setup_text_secondary"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/connection_retry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:backgroundTint="@color/setup_accent"
+            android:text="@string/retry_action"
+            android:textColor="@color/setup_button_text"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/connection_change_server"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/setup_surface"
+            android:text="@string/change_server_action"
+            android:textColor="@color/setup_text"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</FrameLayout>
