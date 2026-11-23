@@ -14,6 +14,7 @@ import ProfileDefaultIconDark from "../../../assets/svg/dark/profile-icon-light.
 import arrowLeftDark from "../../../assets/svg/dark/arrow-left.svg";
 import { getProfilePictureUrl } from "../../../utils/imageUtils";
 import userService from "../../../services/userService";
+import { isShellApp } from "../../../utils/nativeApp";
 
 // User account management - update name, password, and profile picture
 const ManageAccount: React.FC = () => {
@@ -45,6 +46,7 @@ const ManageAccount: React.FC = () => {
   const [ntfyBaseUrl, setNtfyBaseUrl] = useState<string>("");
   const [topicError, setTopicError] = useState<string | null>(null);
   const [topicLoading, setTopicLoading] = useState<boolean>(true);
+  const [testSending, setTestSending] = useState<boolean>(false);
 
   // Load (and lazily create) the ntfy topic assigned to this user
   useEffect(() => {
@@ -214,6 +216,18 @@ const ManageAccount: React.FC = () => {
     }
   };
 
+  const handleSendTestNotification = async () => {
+    setTestSending(true);
+    const result = await userService.sendTestNotification();
+    setTestSending(false);
+    showNotification(result.message, result.success ? "success" : "error");
+  };
+
+  // The Android shell intercepts this scheme and opens its server address screen
+  const handleChangeServer = () => {
+    window.location.href = "chorukoapp://change-server";
+  };
+
   const handleDeleteAccount = async () => {
     const result = await deleteAccount();
 
@@ -321,6 +335,14 @@ const ManageAccount: React.FC = () => {
               <Button variant="primary" type="button" onClick={handleCopyTopic}>
                 Copy Topic
               </Button>
+              <Button
+                variant="primary"
+                type="button"
+                onClick={handleSendTestNotification}
+                disabled={testSending}
+              >
+                {testSending ? "Sending..." : "Send Test"}
+              </Button>
               <ol className="manage-account__steps">
                 <li>Install the ntfy app on your phone.</li>
                 <li>
@@ -344,6 +366,18 @@ const ManageAccount: React.FC = () => {
             </>
           )}
         </div>
+        {isShellApp() && (
+          <div className="manage-account__main-section notifications">
+            <h2 className="manage-account__section-title">Server</h2>
+            <p className="manage-account__section-text manage-account__section-text--muted">
+              This app is connected to{" "}
+              <span className="manage-account__server">{window.location.origin}</span>.
+            </p>
+            <Button variant="primary" type="button" onClick={handleChangeServer}>
+              Change Server
+            </Button>
+          </div>
+        )}
         <Button
           variant="red"
           className="delete-account__btn"

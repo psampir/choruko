@@ -9,7 +9,9 @@ using ChorukoAPI.Services.Abstraction;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using ChorukoAPI.Contracts.Notifications;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -23,8 +25,11 @@ public class UserService(
     DataContext _context, 
     IImageProcessor _imageProcessor,
     IMapper<User, UserInfoResponse> _mapper,
-    IOptions<NtfySettings> _ntfyOptions) : IUserService
+    IOptions<NtfySettings> _ntfyOptions,
+    INotifier _notifier,
+    IMemoryCache _cache) : IUserService
 {
+    private static readonly TimeSpan TestNotificationCooldown = TimeSpan.FromSeconds(30);
 
     public async Task<ServiceResponse<UserInfoResponse>> GetUserInfoAsync()
     {
@@ -73,6 +78,54 @@ public class UserService(
             _ntfyOptions.Value.BaseUrl ?? string.Empty);
 
         return ServiceResponseFactory.Success(settings, "Notification settings.");
+    }
+
+    public async Task<ServiceResponse<string>> SendTestNotificationAsync(string userId)
+    {
+        var cooldownKey = $"notification-test:{userId}";
+        if (_cache.TryGetValue(cooldownKey, out _))
+        {
+            return ServiceResponseFactory.Error<string>(
+                null,
+                "Wait a moment before sending another test notification.",
+                HttpStatusCode.TooManyRequests);
+        }
+
+        // Creates the topic on the first call, the same way the settings page does.
+        var settings = await GetNotificationSettingsAsync(userId);
+        if (!settings.IsSuccessful)
+        {
+            return ServiceResponseFactory.Error<string>(
+                null,
+                settings.Message ?? "Failed to load the notification settings.",
+                settings.StatusCode);
+        }
+
+        var result = await _notifier.SendTestAsync(userId);
+        _cache.Set(cooldownKey, true, TestNotificationCooldown);
+
+        return result.Status switch
+        {
+            NotificationTestStatus.Sent => ServiceResponseFactory.Success(
+                "sent",
+                "Test notification sent. Check the ntfy app."),
+            NotificationTestStatus.Disabled => ServiceResponseFactory.Error<string>(
+                null,
+                "Notifications are disabled on this server (NOTIFIER is not set to ntfy).",
+                HttpStatusCode.ServiceUnavailable),
+            NotificationTestStatus.NotConfigured => ServiceResponseFactory.Error<string>(
+                null,
+                "Notifications are enabled, but NTFY_BASE_URL is not configured on this server.",
+                HttpStatusCode.ServiceUnavailable),
+            NotificationTestStatus.NoTopic => ServiceResponseFactory.Error<string>(
+                null,
+                "No notification topic is assigned to this account.",
+                HttpStatusCode.Conflict),
+            _ => ServiceResponseFactory.Error<string>(
+                null,
+                $"The ntfy server did not accept the notification: {result.Detail}",
+                HttpStatusCode.BadGateway),
+        };
     }
 
     public async Task<ServiceResponse<OperationResultDto>> ChangeUserNamesAsync(ChangeUserNamesRequest request, string userId)

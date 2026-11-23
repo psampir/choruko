@@ -40,6 +40,21 @@ public class UserController(IUserService _userService) : ControllerBase
 
         return result.ToApiResponse("Notification settings");
     }
+
+    [HttpPost("notification-test")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<string>>> SendTestNotification()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(ServiceResponseFactory.Error<string>(null, "User ID not found in token.").ToApiResponse());
+        }
+
+        var result = await _userService.SendTestNotificationAsync(userId);
+
+        return result.ToApiResponse("Notification test");
+    }
     
     [HttpPut("change-names")]
     [Authorize]
