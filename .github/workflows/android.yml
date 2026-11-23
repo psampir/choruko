@@ -66,14 +66,14 @@ jobs:
         env:
           CHORUKO_VERSION_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '0.0.0-dev' }}
           CHORUKO_VERSION_CODE: ${{ github.run_number }}
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            export CHORUKO_KEYSTORE_PATH="$RUNNER_TEMP/choruko-release.jks"
-            export CHORUKO_KEYSTORE_PASSWORD="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"
-            export CHORUKO_KEY_ALIAS="${{ secrets.ANDROID_KEY_ALIAS }}"
-            export CHORUKO_KEY_PASSWORD="${{ secrets.ANDROID_KEY_PASSWORD }}"
-          fi
-          ./gradlew --no-daemon assembleRelease
+          # On pull requests the keystore is not decoded, so the file does not exist
+          # and Gradle builds an unsigned APK. Secrets go through env, never through
+          # the shell, where a quote would break the script.
+          CHORUKO_KEYSTORE_PATH: ${{ runner.temp }}/choruko-release.jks
+          CHORUKO_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          CHORUKO_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          CHORUKO_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon assembleRelease
 
       - name: Name the APK
         id: apk
