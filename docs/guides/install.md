@@ -9,13 +9,9 @@ manager that applies database migrations and provides admin tools, and PostgreSQ
 
 - Docker with the Compose plugin
 - About 1 GB of free disk space for images and data
-- Optional: a reverse proxy and a TLS certificate if the instance is reachable from
-  other machines
 
-Plain HTTP is enough for a trusted LAN. Notifications go out through ntfy and do
-not need HTTPS on this instance. Add
-[Reverse proxy and HTTPS](#reverse-proxy-and-https) when the instance is reachable
-from other machines, so passwords and session cookies are not sent in clear text.
+Plain HTTP is enough for a trusted LAN: notifications go out through ntfy and do not
+need HTTPS here.
 
 ## Step 1 — download the deployment files
 
@@ -74,62 +70,14 @@ instance address on first launch, so the same APK works with every deployment. S
 Notifications do not need a mobile app: they arrive through the ntfy app, which each
 user subscribes to with the topic shown in **Manage Account → Notifications**.
 
-## Reverse proxy and HTTPS
+## Optional: HTTPS
 
-The containers speak plain HTTP on `${CHORUKO_PORT}`. Terminate TLS in front of them
-and forward everything to that port. Do not expose the backend directly.
-
-### Caddy
-
-Caddy obtains and renews certificates automatically:
-
-```caddyfile
-choruko.example.com {
-    reverse_proxy 127.0.0.1:2467
-}
-```
-
-### Nginx
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name choruko.example.com;
-
-    ssl_certificate     /etc/letsencrypt/live/choruko.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/choruko.example.com/privkey.pem;
-
-    # picture uploads
-    client_max_body_size 10m;
-
-    location / {
-        proxy_pass http://127.0.0.1:2467;
-        proxy_http_version 1.1;
-
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-Add a port-80 server that redirects to HTTPS, and obtain certificates with your
-preferred ACME client.
-
-### What HTTPS buys you
-
-| Feature | HTTP on a LAN | HTTPS with a trusted certificate |
-|---|---|---|
-| Tasks, settlements, invitations | ✅ | ✅ |
-| Picture uploads | ✅ | ✅ |
-| Add to home screen / web clip | ✅ | ✅ |
-| ntfy notifications | ✅ | ✅ |
-| Password and session protection | ❌ | ✅ |
-
-Notifications travel from the backend to your ntfy server, so this instance does not
-need to be reachable from the phone. A certificate the browser only accepts after a
-manual warning bypass gives no real protection, but everything still works.
+The containers speak plain HTTP on `${CHORUKO_PORT}`. On a trusted LAN that is
+enough. If the instance is reachable from other machines, put any reverse proxy with
+a trusted certificate in front of it, forward everything to that port and keep the
+original `Host` header; never expose the backend directly. Otherwise passwords and
+the session cookie travel in clear text, and the clipboard API behind **Copy Topic**
+is unavailable.
 
 ## Reset a password
 

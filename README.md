@@ -67,7 +67,7 @@ The images are published on GHCR:
 - `ghcr.io/psampir/choruko-backend`
 - `ghcr.io/psampir/choruko-manager`
 
-For upgrades, backups, reverse proxy and HTTPS, see the
+For upgrades, backups and the optional HTTPS setup, see the
 [installation guide](docs/guides/install.md).
 
 ## Configuration
