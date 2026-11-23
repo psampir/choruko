@@ -70,6 +70,12 @@ typeface as the web interface, bundled under `android/app/src/main/res/font` fro
 the SIL OFL 1.1 release (`android/third_party/asap/OFL.txt`). The WebView loads Asap
 from Bunny Fonts with the rest of the SPA, so nothing else is needed there.
 
+## Package
+
+The APK is published as `psampir.choruko`. It is not on Google Play, so the
+identifier follows the project rather than a company domain; changing it after the
+first release would make Android treat the build as a different app.
+
 ## Requirements
 
 Android 8.0 (API 26) or newer.

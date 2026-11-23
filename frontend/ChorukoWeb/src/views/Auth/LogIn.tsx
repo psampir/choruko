@@ -96,6 +96,7 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
       <form onSubmit={handleLogin} className="login__form">
         <div className="login__input-container">
           <Input
+            id="login-email"
             className="login__input-email"
             type="email"
             placeholder="Email"
@@ -108,6 +109,7 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
           />
 
           <Input
+            id="login-password"
             type="password"
             placeholder="Password"
             name="password"

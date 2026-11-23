@@ -40,7 +40,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.psampir.choruko"
+        applicationId = "psampir.choruko"
         minSdk = 26
         targetSdk = 35
         versionCode = versionCodeFromEnv

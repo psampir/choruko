@@ -7,7 +7,9 @@
     <WebView
         android:id="@+id/web_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:importantForAccessibility="yes"
+        android:importantForAutofill="yes" />
 
     <LinearLayout
         android:id="@+id/connection_error"

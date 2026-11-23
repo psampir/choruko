@@ -10,6 +10,6 @@
         <intent
             android:action="com.psampir.choruko.CHANGE_SERVER"
             android:targetClass="com.psampir.choruko.MainActivity"
-            android:targetPackage="com.psampir.choruko" />
+            android:targetPackage="psampir.choruko" />
     </shortcut>
 </shortcuts>

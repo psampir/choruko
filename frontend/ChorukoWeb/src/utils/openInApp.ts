@@ -1,6 +1,6 @@
 import { isShellApp } from "./nativeApp";
 
-const ANDROID_APP_PACKAGE = "com.psampir.choruko";
+const ANDROID_APP_PACKAGE = "psampir.choruko";
 
 /**
  * Android browsers cannot see which apps are installed, so "detection" is an
