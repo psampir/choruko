@@ -17,6 +17,7 @@
     </style>
 
     <style name="SetupTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:fontFamily">@font/asap</item>
         <item name="android:windowBackground">@color/setup_background</item>
         <item name="android:statusBarColor">@color/setup_background</item>
         <item name="android:navigationBarColor">@color/setup_background</item>

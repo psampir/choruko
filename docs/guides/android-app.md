@@ -63,6 +63,13 @@ ntfy, so install the ntfy app and subscribe to the topic shown in
 **Manage Account → Notifications**. **Send Test** there sends a notification to that
 topic and reports why it failed if it did.
 
+## Typeface
+
+The native screens (server address, connection error) use **Asap**, the same
+typeface as the web interface, bundled under `android/app/src/main/res/font` from
+the SIL OFL 1.1 release (`android/third_party/asap/OFL.txt`). The WebView loads Asap
+from Bunny Fonts with the rest of the SPA, so nothing else is needed there.
+
 ## Requirements
 
 Android 8.0 (API 26) or newer.

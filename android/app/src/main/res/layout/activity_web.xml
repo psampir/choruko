@@ -20,6 +20,7 @@
         android:visibility="gone">
 
         <TextView
+        android:fontFamily="@font/asap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/connection_error_title"
@@ -28,6 +29,7 @@
             android:textStyle="bold" />
 
         <TextView
+        android:fontFamily="@font/asap"
             android:id="@+id/connection_error_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,6 +39,7 @@
             android:textSize="16sp" />
 
         <Button
+        android:fontFamily="@font/asap"
             android:id="@+id/connection_retry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,6 +50,7 @@
             android:textStyle="bold" />
 
         <Button
+        android:fontFamily="@font/asap"
             android:id="@+id/connection_change_server"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
