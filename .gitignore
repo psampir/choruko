@@ -599,3 +599,6 @@ db_data/
 # Local scratch notes and build artifacts (not part of the repository)
 /ideas/
 /artifacts/
+
+# Playwright MCP session data
+/.playwright-mcp/
