@@ -112,7 +112,7 @@ jobs:
 
       - name: Build and push ${{ matrix.image.name }} image (non-release)
         if: ${{ steps.vars.outputs.RELEASE == 'false' }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.image.dockerfile }}
@@ -126,7 +126,7 @@ jobs:
 
       - name: Build and push ${{ matrix.image.name }} image (release)
         if: ${{ steps.vars.outputs.RELEASE == 'true' }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.image.dockerfile }}
