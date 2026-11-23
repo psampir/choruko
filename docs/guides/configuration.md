@@ -13,7 +13,7 @@ adjust it. Do not commit `.env` — it contains secrets.
 
 | Variable | Default | Description |
 |---|---|---|
-| `CHORUKO_VERSION` | `release` | Image tag to deploy: `release`, `latest`, or a version such as `v1.1.0`. |
+| `CHORUKO_VERSION` | `release` | Image tag to deploy: `release`, `latest`, or a version such as `v1.1.1`. |
 | `CHORUKO_PORT` | `2467` | Host port for the web interface. The container always listens on port 80. |
 | `APP_DATA_LOCATION` | `./app_data` | Host directory for uploaded pictures. |
 | `DB_DATA_LOCATION` | `./db_data` | Host directory for PostgreSQL data. Network shares are not supported. |
