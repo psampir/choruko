@@ -52,6 +52,10 @@ between the backend and the ntfy server, not in the browser.
 
 ## Notifications (ntfy) do not arrive
 
+Start with **Manage Account → Notifications → Send Test**. It reports the reason
+directly: notifications disabled (`NOTIFIER`), `NTFY_BASE_URL` missing, or the
+status the ntfy server returned. A test can be sent once every 30 seconds.
+
 1. `NOTIFIER=ntfy` and `NTFY_BASE_URL` must point to an ntfy server reachable from
    the backend.
 2. The user needs the topic and server address shown in **Manage Account →

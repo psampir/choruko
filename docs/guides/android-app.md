@@ -16,10 +16,17 @@ Choruko, over HTTPS or plain HTTP on a LAN.
 2. Allow installing apps from your browser or file manager when Android asks.
 3. Open **Choruko** and enter your instance address, for example
    `https://choruko.example.com` or `http://192.168.1.10:2467`.
-4. Tap **Connect**.
+4. Tap **Connect**. The app checks that the address really serves Choruko before it
+   saves it.
 
-To point the app at a different instance later, press Back while the page cannot go
-back any further and choose **Change server**.
+To point the app at a different instance later, use any of:
+
+- long-press the Choruko icon and choose **Change server**;
+- **Manage Account → Server → Change Server** inside the app;
+- **Change server** on the screen shown when the instance cannot be reached.
+
+The current address stays saved until a new one passes the check, so backing out of
+the address screen keeps it.
 
 ## What the app does
 
@@ -29,10 +36,13 @@ back any further and choose **Change server**.
   other sites in your browser.
 - Adds `ChorukoApp/<version>` to the user agent, so the web interface knows not to
   offer the "download the Android app" hint.
+- Back walks the page history and then sends the app to the background, like other
+  Android apps.
 
 The app does **not** receive push notifications. Choruko sends notifications through
 ntfy, so install the ntfy app and subscribe to the topic shown in
-**Manage Account → Notifications**.
+**Manage Account → Notifications**. **Send Test** there sends a notification to that
+topic and reports why it failed if it did.
 
 ## Requirements
 
