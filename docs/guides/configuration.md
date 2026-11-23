@@ -117,20 +117,11 @@ Supported formats by default: `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`.
 
 ## Reverse proxy
 
-The container serves plain HTTP on port 80 and terminates nothing. Put a reverse
-proxy in front of it if the instance is reachable from other machines:
-
-- The app and ntfy notifications work over plain HTTP on a trusted LAN.
-- Add HTTPS with a trusted certificate when the instance is reachable from other
-  machines, so the session cookie and password are not sent in clear text.
-- The clipboard API needs a secure context; on plain HTTP the **Copy Topic** button
-  falls back to selecting the text.
-- Forward the original `Host` header. The backend does not currently process
-  `X-Forwarded-*` headers, so cookie security and generated links rely on
-  `SERVER_URL` and on the proxy preserving the host.
-
-See the [installation guide](install.md#reverse-proxy-and-https) for Caddy and Nginx
-examples.
+The container serves plain HTTP on port 80 and terminates nothing, which is fine on a
+trusted LAN. Behind a reverse proxy, forward everything to that port and preserve the
+original `Host` header: the backend does not process `X-Forwarded-*`, so cookie
+security and generated links rely on `SERVER_URL` and on the proxy keeping the host.
+See [Optional: HTTPS](install.md#optional-https).
 
 ## Minimal `.env`
 

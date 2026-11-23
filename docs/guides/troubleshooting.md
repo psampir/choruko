@@ -42,13 +42,10 @@ sliding expiration.
 
 ## "Copy topic" does nothing
 
-The clipboard API needs a **secure context**: HTTPS with a certificate the device
-trusts, or `http://localhost` / `http://127.0.0.1`. On `http://192.168.x.x` the app
-falls back to a hidden text area, which some mobile browsers still refuse. Select the
-topic by hand, or serve the instance over HTTPS.
-
-Everything else, including notifications, works over plain HTTP: delivery happens
-between the backend and the ntfy server, not in the browser.
+The clipboard API needs a secure context (HTTPS or `localhost`). On plain HTTP the
+app falls back to a hidden text area, which some mobile browsers still refuse; select
+the topic by hand or serve the instance over HTTPS. Notifications themselves do not
+need it: delivery happens between the backend and the ntfy server.
 
 ## Notifications (ntfy) do not arrive
 
