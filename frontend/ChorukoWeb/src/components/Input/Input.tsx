@@ -33,8 +33,10 @@ const Input: React.FC<InputProps> = ({
   // Detect password either by variant or incoming type for convenience
   const isPassword = variant === "password" || props.type === "password";
 
-  // Prevent incoming type from overriding our controlled type
-  const { type: _ignoredType, ...restProps } = props;
+  // The password variant controls its own type (show/hide); every other variant
+  // keeps the caller's type, so email fields stay type="email" for autofill.
+  const { type: _ignoredType, ...passwordProps } = props;
+  const restProps = isPassword ? passwordProps : props;
 
   const variantClass = isPassword
     ? "input--password"

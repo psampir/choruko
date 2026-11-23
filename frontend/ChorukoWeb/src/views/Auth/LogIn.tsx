@@ -99,6 +99,9 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
             className="login__input-email"
             type="email"
             placeholder="Email"
+            name="email"
+            autoComplete="username"
+            inputMode="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -107,6 +110,8 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
           <Input
             type="password"
             placeholder="Password"
+            name="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
