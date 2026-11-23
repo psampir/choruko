@@ -51,10 +51,11 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
 
       if (result.success) {
         // Navigate to leaderboard if has household, else to household setup
+        // Replace /login in the history so Back does not return to the form
         if (result.hasHousehold) {
-          navigate("/leaderboard");
+          navigate("/leaderboard", { replace: true });
         } else {
-          navigate("/joinOrCreateHousehold");
+          navigate("/joinOrCreateHousehold", { replace: true });
         }
       } else {
         // Handle backend authentication errors
@@ -95,17 +96,24 @@ export const LogIn: React.FC<LogInProps> = ({ onModeChange }) => {
       <form onSubmit={handleLogin} className="login__form">
         <div className="login__input-container">
           <Input
+            id="login-email"
             className="login__input-email"
             type="email"
             placeholder="Email"
+            name="email"
+            autoComplete="username"
+            inputMode="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
 
           <Input
+            id="login-password"
             type="password"
             placeholder="Password"
+            name="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

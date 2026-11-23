@@ -66,7 +66,8 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
       const result = await register(formData);
 
       if (result.success) {
-        navigate("/dashboard");
+        // register() signs the user in; a new account has no household yet
+        navigate("/joinOrCreateHousehold", { replace: true });
       } else {
         // Handle backend validation errors
         setLocalError(parseErrorMessage(result.message || "Sign up failed."));
@@ -98,6 +99,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
             type="text"
             name="firstName"
             placeholder="First Name"
+            autoComplete="given-name"
             value={formData.firstName}
             onChange={handleInputChange}
             required
@@ -107,6 +109,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
             type="text"
             name="lastName"
             placeholder="Last Name"
+            autoComplete="family-name"
             value={formData.lastName}
             onChange={handleInputChange}
             required
@@ -116,6 +119,8 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
             type="email"
             name="email"
             placeholder="Email"
+            autoComplete="username"
+            inputMode="email"
             value={formData.email}
             onChange={handleInputChange}
             required
@@ -125,6 +130,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
             type="password"
             name="password"
             placeholder="Password"
+            autoComplete="new-password"
             value={formData.password}
             onChange={handleInputChange}
             required
@@ -134,6 +140,7 @@ export const SignUp: React.FC<SignUpProps> = ({ onModeChange }) => {
             type="password"
             name="confirmPassword"
             placeholder="Confirm Password"
+            autoComplete="new-password"
             value={formData.confirmPassword}
             onChange={handleInputChange}
             required

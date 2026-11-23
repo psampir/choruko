@@ -115,6 +115,34 @@ class UserService {
     }
   }
 
+  // Ask the backend to send a test notification to the user's ntfy topic
+  async sendTestNotification() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/User/notification-test`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const text = await response.text();
+
+      if (response.ok) {
+        const data = text ? JSON.parse(text) : {};
+        return {
+          success: true,
+          message: data.message || "Test notification sent. Check the ntfy app.",
+        };
+      }
+
+      return {
+        success: false,
+        message:
+          parseErrorMessage(text) || "Failed to send the test notification",
+      };
+    } catch (error) {
+      console.error("Error sending test notification:", error);
+      return { success: false, message: "Network error occurred" };
+    }
+  }
+
   // Get (and lazily create) the user's ntfy topic plus the server address
   async getNotificationSettings() {
     try {

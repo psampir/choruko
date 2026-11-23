@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -9,10 +11,28 @@ val versionCodeFromEnv = System.getenv("CHORUKO_VERSION_CODE")?.toIntOrNull() ?:
 /**
  * Release signing comes from the environment so the keystore never lives in the
  * repository: CHORUKO_KEYSTORE_PATH, CHORUKO_KEYSTORE_PASSWORD,
- * CHORUKO_KEY_ALIAS, CHORUKO_KEY_PASSWORD. Local builds without them produce an
- * unsigned release APK, which is enough to check that the project compiles.
+ * CHORUKO_KEY_ALIAS, CHORUKO_KEY_PASSWORD. For local builds the same values can sit
+ * in android/keystore.properties, which is git-ignored:
+ *
+ *   storeFile=/home/you/choruko-release.jks
+ *   storePassword=...
+ *   keyAlias=choruko
+ *   keyPassword=...
+ *
+ * Without either source the build produces an unsigned release APK, which is enough
+ * to check that the project compiles.
  */
-val keystorePath = System.getenv("CHORUKO_KEYSTORE_PATH")
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+}
+
+fun signingValue(env: String, property: String): String? =
+    System.getenv(env)?.takeIf { it.isNotBlank() } ?: keystoreProperties.getProperty(property)
+
+val keystorePath = signingValue("CHORUKO_KEYSTORE_PATH", "storeFile")
 val hasSigningKey = !keystorePath.isNullOrBlank() && file(keystorePath).exists()
 
 android {
@@ -20,7 +40,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.psampir.choruko"
+        applicationId = "psampir.choruko"
         minSdk = 26
         targetSdk = 35
         versionCode = versionCodeFromEnv
@@ -35,9 +55,10 @@ android {
         if (hasSigningKey) {
             create("release") {
                 storeFile = file(keystorePath!!)
-                storePassword = System.getenv("CHORUKO_KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("CHORUKO_KEY_ALIAS")
-                keyPassword = System.getenv("CHORUKO_KEY_PASSWORD")
+                storePassword = signingValue("CHORUKO_KEYSTORE_PASSWORD", "storePassword")
+                keyAlias = signingValue("CHORUKO_KEY_ALIAS", "keyAlias")
+                keyPassword = signingValue("CHORUKO_KEY_PASSWORD", "keyPassword")
+                    ?: signingValue("CHORUKO_KEYSTORE_PASSWORD", "storePassword")
             }
         }
     }

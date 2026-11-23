@@ -146,6 +146,7 @@ builder.Services.Configure<NtfySettings>(options =>
 });
 
 builder.Services.AddHttpClient("ntfy");
+builder.Services.AddMemoryCache();
 
 if (string.Equals(config["NOTIFIER"], "ntfy", StringComparison.OrdinalIgnoreCase))
 {

@@ -12,7 +12,7 @@ const ProtectedRoute: React.FC<ProtectedRoute> = ({children}) => {
     return <div className='loading'>Loading...</div>;
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />; 
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />; 
 }
 
 export default ProtectedRoute;

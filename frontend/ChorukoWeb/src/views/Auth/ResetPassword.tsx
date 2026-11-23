@@ -125,6 +125,8 @@ function ResetPassword() {
                   <Input
                     type="password"
                     placeholder="New Password"
+                    name="new-password"
+                    autoComplete="new-password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
@@ -133,6 +135,8 @@ function ResetPassword() {
                   <Input
                     type="password"
                     placeholder="Confirm New Password"
+                    name="confirm-password"
+                    autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required

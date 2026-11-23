@@ -80,8 +80,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
     // Call the optional onTabChange callback
     onTabChange?.(tabId);
 
-    // Navigate to the route
-    navigate(route);
+    // Tabs replace each other, so Back leaves the app instead of replaying tabs
+    navigate(route, { replace: true });
   };
 
   return (

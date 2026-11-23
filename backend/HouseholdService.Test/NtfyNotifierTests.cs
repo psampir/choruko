@@ -57,10 +57,12 @@ public class NtfyNotifierTests : IDisposable
             new[] { "user-1", "user-2", "user-1" },
             new AppNotification("Task completed", "Wash the dishes", "/tasks"));
 
+        // ntfy parses JSON only when it is published to the server root.
         Assert.Equal(2, handler.Requests.Count);
+        Assert.All(handler.Requests, request => Assert.Equal("http://ntfy.local/", request.Uri.ToString()));
         Assert.Equal(
-            new[] { "http://ntfy.local/choruko-topic-one", "http://ntfy.local/choruko-topic-two" },
-            handler.Requests.Select(request => request.Uri.ToString()).OrderBy(uri => uri));
+            new[] { "choruko-topic-one", "choruko-topic-two" },
+            handler.Requests.Select(request => ReadTopic(request.Body)).OrderBy(topic => topic));
 
         var first = handler.Requests[0];
         Assert.Equal(HttpMethod.Post, first.Method);
@@ -68,6 +70,7 @@ public class NtfyNotifierTests : IDisposable
         Assert.Contains("\"title\":\"Task completed\"", first.Body);
         Assert.Contains("\"message\":\"Wash the dishes\"", first.Body);
         Assert.Contains("\"click\":\"http://choruko.local/tasks\"", first.Body);
+        Assert.DoesNotContain("\"tags\"", first.Body);
     }
 
     [Fact]
@@ -95,6 +98,79 @@ public class NtfyNotifierTests : IDisposable
 
         Assert.Empty(handler.Requests);
     }
+
+    [Fact]
+    public async Task SendTestAsync_UserWithTopic_PostsAndReportsSent()
+    {
+        await SeedUser("user-1", "choruko-topic-one");
+
+        var handler = new RecordingHandler();
+        var notifier = CreateNotifier(handler, "http://ntfy.local", "", "http://choruko.local");
+
+        var result = await notifier.SendTestAsync("user-1");
+
+        Assert.Equal(NotificationTestStatus.Sent, result.Status);
+        var request = Assert.Single(handler.Requests);
+        Assert.Equal("http://ntfy.local/", request.Uri.ToString());
+        Assert.Equal("choruko-topic-one", ReadTopic(request.Body));
+        Assert.Contains("Test notification", request.Body);
+        Assert.Contains("\"click\":\"http://choruko.local/manageAccount\"", request.Body);
+    }
+
+    [Fact]
+    public async Task SendTestAsync_UserWithoutTopic_ReportsNoTopic()
+    {
+        await SeedUser("user-1", null);
+
+        var handler = new RecordingHandler();
+        var notifier = CreateNotifier(handler, "http://ntfy.local", "", "");
+
+        var result = await notifier.SendTestAsync("user-1");
+
+        Assert.Equal(NotificationTestStatus.NoTopic, result.Status);
+        Assert.Empty(handler.Requests);
+    }
+
+    [Fact]
+    public async Task SendTestAsync_MissingBaseUrl_ReportsNotConfigured()
+    {
+        await SeedUser("user-1", "choruko-topic-one");
+
+        var handler = new RecordingHandler();
+        var notifier = CreateNotifier(handler, "", "", "");
+
+        var result = await notifier.SendTestAsync("user-1");
+
+        Assert.Equal(NotificationTestStatus.NotConfigured, result.Status);
+        Assert.Empty(handler.Requests);
+    }
+
+    [Fact]
+    public async Task SendTestAsync_ServerError_ReportsFailedWithDetail()
+    {
+        await SeedUser("user-1", "choruko-topic-one");
+
+        var handler = new RecordingHandler(HttpStatusCode.InternalServerError);
+        var notifier = CreateNotifier(handler, "http://ntfy.local", "", "");
+
+        var result = await notifier.SendTestAsync("user-1");
+
+        Assert.Equal(NotificationTestStatus.Failed, result.Status);
+        Assert.Contains("500", result.Detail);
+    }
+
+    [Fact]
+    public async Task NoOpNotifier_SendTestAsync_ReportsDisabled()
+    {
+        var notifier = new NoOpNotifier(NullLogger<NoOpNotifier>.Instance);
+
+        var result = await notifier.SendTestAsync("user-1");
+
+        Assert.Equal(NotificationTestStatus.Disabled, result.Status);
+    }
+
+    private static string? ReadTopic(string body)
+        => System.Text.Json.JsonDocument.Parse(body).RootElement.GetProperty("topic").GetString();
 
     private NtfyNotifier CreateNotifier(
         RecordingHandler handler,
@@ -129,7 +205,7 @@ public class NtfyNotifierTests : IDisposable
         public HttpClient CreateClient(string name) => client;
     }
 
-    private sealed class RecordingHandler : HttpMessageHandler
+    private sealed class RecordingHandler(HttpStatusCode statusCode = HttpStatusCode.OK) : HttpMessageHandler
     {
         public List<RecordedRequest> Requests { get; } = [];
 
@@ -147,7 +223,7 @@ public class NtfyNotifierTests : IDisposable
                 request.Headers.Authorization?.ToString(),
                 body));
 
-            return new HttpResponseMessage(HttpStatusCode.OK);
+            return new HttpResponseMessage(statusCode);
         }
     }
 

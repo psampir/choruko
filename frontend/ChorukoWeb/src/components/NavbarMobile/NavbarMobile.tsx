@@ -106,7 +106,7 @@ const NavbarMobile = () => {
     try {
       await logout();
       setProfileOpen(false); // Close the profile popup
-      navigate("/auth"); // Navigate to auth page after logout
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -126,7 +126,7 @@ const NavbarMobile = () => {
         // Refresh auth state to update hasHousehold flag
         await checkAuth(false);
         // Redirect to join or create household page
-        navigate("/joinOrCreateHousehold");
+        navigate("/joinOrCreateHousehold", { replace: true });
       } else {
         setError(result.message || "Failed to leave household");
       }

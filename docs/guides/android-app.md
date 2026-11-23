@@ -16,10 +16,36 @@ Choruko, over HTTPS or plain HTTP on a LAN.
 2. Allow installing apps from your browser or file manager when Android asks.
 3. Open **Choruko** and enter your instance address, for example
    `https://choruko.example.com` or `http://192.168.1.10:2467`.
-4. Tap **Connect**.
+4. Tap **Connect**. The app checks that the address really serves Choruko before it
+   saves it.
 
-To point the app at a different instance later, press Back while the page cannot go
-back any further and choose **Change server**.
+To point the app at a different instance later, use any of:
+
+- long-press the Choruko icon and choose **Change server**;
+- **Manage Account → Server → Change Server** inside the app;
+- **Change server** on the screen shown when the instance cannot be reached.
+
+The current address stays saved until a new one passes the check, so backing out of
+the address screen keeps it.
+
+## Opening the app from a browser
+
+On Android, the site tries to hand the page over to the app once per browser
+session. Chromium browsers (Chrome, Edge, Brave, Samsung Internet, Opera) do this
+silently: if the app is installed it opens, and if it is not the browser stays on
+the same page. Firefox has no equivalent, so there the **Already installed? Open in
+the app** link in the install hint does the same on tap.
+
+The link carries the current server and page, so the app opens the same instance at
+the same place. A server that differs from the saved one opens the address screen
+with the link's server pre-filled, so a second instance is never opened silently.
+`?stay=1` in the address, or simply staying on the page, keeps the browser for the
+rest of the session.
+
+The web page cannot see which apps are installed — this attempt is the only
+mechanism browsers allow. Custom-scheme links (`chorukoapp://`) are not App Links:
+those would require a fixed HTTPS domain baked into the APK, which does not fit
+self-hosted instances.
 
 ## What the app does
 
@@ -29,10 +55,26 @@ back any further and choose **Change server**.
   other sites in your browser.
 - Adds `ChorukoApp/<version>` to the user agent, so the web interface knows not to
   offer the "download the Android app" hint.
+- Back walks the page history and then sends the app to the background, like other
+  Android apps.
 
 The app does **not** receive push notifications. Choruko sends notifications through
 ntfy, so install the ntfy app and subscribe to the topic shown in
-**Manage Account → Notifications**.
+**Manage Account → Notifications**. **Send Test** there sends a notification to that
+topic and reports why it failed if it did.
+
+## Typeface
+
+The native screens (server address, connection error) use **Asap**, the same
+typeface as the web interface, bundled under `android/app/src/main/res/font` from
+the SIL OFL 1.1 release (`android/third_party/asap/OFL.txt`). The WebView loads Asap
+from Bunny Fonts with the rest of the SPA, so nothing else is needed there.
+
+## Package
+
+The APK is published as `psampir.choruko`. It is not on Google Play, so the
+identifier follows the project rather than a company domain; changing it after the
+first release would make Android treat the build as a different app.
 
 ## Requirements
 
@@ -64,9 +106,20 @@ repository:
 | `CHORUKO_KEYSTORE_PATH` | path to the `.jks` file |
 | `CHORUKO_KEYSTORE_PASSWORD` | keystore password |
 | `CHORUKO_KEY_ALIAS` | key alias |
-| `CHORUKO_KEY_PASSWORD` | key password |
+| `CHORUKO_KEY_PASSWORD` | key password (defaults to the keystore password) |
 | `CHORUKO_VERSION_NAME` | version name, for example `1.1.0` |
 | `CHORUKO_VERSION_CODE` | integer version code |
+
+For local builds the same values can live in `android/keystore.properties`, which is
+git-ignored — see `android/keystore.properties.example`. That keeps the passwords out
+of your shell history:
+
+```properties
+storeFile=/home/you/choruko-release.jks
+storePassword=...
+keyAlias=choruko
+keyPassword=...
+```
 
 Generating a keystore (do this once and keep it safe):
 

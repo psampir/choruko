@@ -5,13 +5,20 @@
         <item name="android:windowBackground">@color/web_background</item>
         <item name="android:statusBarColor">@color/web_background</item>
         <item name="android:navigationBarColor">@color/web_background</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:colorAccent">@color/setup_accent</item>
     </style>
 
-    <style name="SetupTheme" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="SetupTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:fontFamily">@font/asap</item>
         <item name="android:windowBackground">@color/setup_background</item>
         <item name="android:statusBarColor">@color/setup_background</item>
         <item name="android:navigationBarColor">@color/setup_background</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:colorAccent">@color/setup_accent</item>
+        <item name="android:textColorPrimary">@color/setup_text</item>
+        <item name="android:textColorSecondary">@color/setup_text_secondary</item>
     </style>
 
 </resources>

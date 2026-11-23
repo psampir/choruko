@@ -41,6 +41,17 @@
   }
 }
 
+/* The rule above disables selection everywhere; form fields need it back so
+   long-press offers Paste and Autofill. */
+input,
+textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
 #root {
   display: flex;
   flex-direction: column;

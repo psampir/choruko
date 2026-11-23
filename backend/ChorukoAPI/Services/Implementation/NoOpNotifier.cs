@@ -13,4 +13,9 @@ public sealed class NoOpNotifier(ILogger<NoOpNotifier> logger) : INotifier
         logger.LogDebug("Notifications are disabled; skipping '{Title}'.", notification.Title);
         return Task.CompletedTask;
     }
+
+    public Task<NotificationTestResult> SendTestAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult(new NotificationTestResult(NotificationTestStatus.Disabled));
 }
