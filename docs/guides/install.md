@@ -155,7 +155,7 @@ docker compose logs -f manager backend
 ```
 
 `CHORUKO_VERSION=release` tracks the newest stable release. Pin a version tag such as
-`v1.0.2` if you prefer controlled upgrades.
+`v1.1.0` if you prefer controlled upgrades.
 
 ## Backup and restore
 
