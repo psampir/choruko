@@ -118,7 +118,7 @@ docker compose ps
 docker compose logs -f manager backend
 ```
 
-Pin `CHORUKO_VERSION` to a version tag (for example `v1.1.0`) if you want to control
+Pin `CHORUKO_VERSION` to a version tag (for example `v1.1.1`) if you want to control
 upgrades instead of tracking `release`.
 
 ## Test the restore
