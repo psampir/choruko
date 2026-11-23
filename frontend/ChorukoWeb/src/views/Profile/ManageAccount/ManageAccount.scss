@@ -72,13 +72,15 @@
       margin-bottom: var(--spacing-xl);
     }
 
+    // Same frame as the inputs and collapsible sections: 2px accent border,
+    // 10px radius, secondary background.
     &.notifications {
       margin-top: var(--spacing-4xl);
       gap: var(--spacing-md);
       padding: var(--spacing-2xl);
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius-lg);
-      background: var(--color-background-secondary);
+      border: 2px solid var(--color-secondary);
+      border-radius: var(--border-radius-standard);
+      background-color: var(--color-background-secondary);
     }
   }
 
@@ -113,12 +115,15 @@
     }
   }
 
+  // The topic reads like a read-only input: same border and radius, on the page
+  // surface so it stands out from the secondary-background card.
   &__topic {
     width: 100%;
+    box-sizing: border-box;
     padding: var(--spacing-md);
     border-radius: var(--border-radius-standard);
-    background: var(--color-background);
-    border: 1px solid var(--color-border);
+    background-color: var(--color-background);
+    border: 2px solid var(--color-secondary);
     font-family: var(--font-family-monospace, monospace);
     font-size: var(--font-size-body2);
     text-align: center;
