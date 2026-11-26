@@ -4,9 +4,9 @@
 
 Choruko keeps state in two places:
 
-1. **PostgreSQL** — users, households, tasks, activities, settlements, invitations,
+1. **PostgreSQL**: users, households, tasks, activities, settlements, invitations,
    points and subscriptions.
-2. **App data directory** (`APP_DATA_LOCATION`) — profile pictures and household
+2. **App data directory** (`APP_DATA_LOCATION`): profile pictures and household
    pictures.
 
 Keep `.env` with them; it contains the database password and SMTP settings.

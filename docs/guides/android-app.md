@@ -42,7 +42,7 @@ with the link's server pre-filled, so a second instance is never opened silently
 `?stay=1` in the address, or simply staying on the page, keeps the browser for the
 rest of the session.
 
-The web page cannot see which apps are installed — this attempt is the only
+The web page cannot see which apps are installed; this attempt is the only
 mechanism browsers allow. Custom-scheme links (`chorukoapp://`) are not App Links:
 those would require a fixed HTTPS domain baked into the APK, which does not fit
 self-hosted instances.
@@ -111,7 +111,7 @@ repository:
 | `CHORUKO_VERSION_CODE` | integer version code |
 
 For local builds the same values can live in `android/keystore.properties`, which is
-git-ignored — see `android/keystore.properties.example`. That keeps the passwords out
+git-ignored; see `android/keystore.properties.example`. That keeps the passwords out
 of your shell history:
 
 ```properties

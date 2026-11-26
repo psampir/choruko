@@ -7,7 +7,7 @@ live in `.env`, next to `docker-compose.yml`. The backend reads the same variabl
 from the process environment, so the same values work outside Docker.
 
 Copy [`docker/compose/example.env`](../../docker/compose/example.env) to `.env` and
-adjust it. Do not commit `.env` — it contains secrets.
+adjust it. Do not commit `.env`; it contains secrets.
 
 ## Compose variables
 
@@ -47,12 +47,12 @@ email service, and users can only get a new password through the `manager` conta
 | Variable | Default | Description |
 |---|---|---|
 | `ENABLE_EMAILS` | `false` | `true` enables SMTP. |
-| `SMTP_HOST` | — | SMTP server, for example `smtp.example.com`. Required when emails are enabled. |
+| `SMTP_HOST` | - | SMTP server, for example `smtp.example.com`. Required when emails are enabled. |
 | `SMTP_PORT` | `587` | `587` for STARTTLS, `465` for implicit TLS. |
-| `SMTP_USERNAME` | — | SMTP user. Required when emails are enabled. |
-| `SMTP_PASSWORD` | — | SMTP password or app password. Required when emails are enabled. |
-| `SMTP_FROM` | — | Sender identity, for example `Choruko <no-reply@example.com>`. Required. |
-| `SERVER_URL` | — | Public URL of your instance, used in reset links, for example `https://choruko.example.com`. Required. |
+| `SMTP_USERNAME` | - | SMTP user. Required when emails are enabled. |
+| `SMTP_PASSWORD` | - | SMTP password or app password. Required when emails are enabled. |
+| `SMTP_FROM` | - | Sender identity, for example `Choruko <no-reply@example.com>`. Required. |
+| `SERVER_URL` | - | Public URL of your instance, used in reset links, for example `https://choruko.example.com`. Required. |
 
 When `ENABLE_EMAILS=true`, the backend refuses to start if any of the required SMTP
 values or `SERVER_URL` is missing.
@@ -65,9 +65,9 @@ private topic; the backend posts to it and the user subscribes in the ntfy app.
 | Variable | Default | Description |
 |---|---|---|
 | `NOTIFIER` | `none` | `ntfy` enables delivery; `none` logs and drops notifications. |
-| `NTFY_BASE_URL` | — | ntfy server base URL, for example `http://192.168.1.10:2586` (self-hosted) or `https://ntfy.sh`. |
-| `NTFY_TOKEN` | — | Optional bearer token when the ntfy server uses access control. |
-| `PUBLIC_APP_URL` | — | Public URL of this Choruko instance, used to build notification links (for example `https://choruko.example.com`). |
+| `NTFY_BASE_URL` | - | ntfy server base URL, for example `http://192.168.1.10:2586` (self-hosted) or `https://ntfy.sh`. |
+| `NTFY_TOKEN` | - | Optional bearer token when the ntfy server uses access control. |
+| `PUBLIC_APP_URL` | - | Public URL of this Choruko instance, used to build notification links (for example `https://choruko.example.com`). |
 
 The per-user topic is created on demand by
 `GET /api/User/notification-settings` (returned together with `NTFY_BASE_URL`, which
@@ -84,8 +84,8 @@ if you do not mind notifications passing through a third party.
 Uploaded pictures are stored under `APP_DATA_LOCATION` and served by the backend at
 `/uploads/...`. The directory contains:
 
-- `uploads/users/` — profile pictures
-- `uploads/households/` — household pictures
+- `uploads/users/`: profile pictures
+- `uploads/households/`: household pictures
 
 Keep the directory writable by the container and back it up together with the
 database. A `vapid-keys.json` left over from older releases is no longer read and can

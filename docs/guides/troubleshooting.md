@@ -17,7 +17,7 @@ is unhealthy, the backend never starts.
 
 ## The web interface does not load
 
-- `docker compose ps` — all four containers should be `running`, `database` and
+- `docker compose ps`: all four containers should be `running`, `database` and
   `manager` `healthy`.
 - Check the host port: `CHORUKO_PORT` defaults to `2467`.
 - If a reverse proxy returns `502` or `504`, it cannot reach the frontend container.
@@ -82,10 +82,10 @@ exist.
 
 ## Database errors
 
-- `password authentication failed` — `.env` and the PostgreSQL volume disagree.
+- `password authentication failed`: `.env` and the PostgreSQL volume disagree.
   Changing `DB_PASSWORD` on an existing installation requires changing the role in
   PostgreSQL too.
-- `relation "..." does not exist` — migrations did not run. Check
+- `relation "..." does not exist`: migrations did not run. Check
   `docker compose logs manager`.
 - To open a shell:
 

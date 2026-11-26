@@ -19,14 +19,14 @@
 
 `CI` runs on every pull request and on pushes to `dev` and `main`:
 
-- **Backend** — `dotnet restore`, `dotnet build`, `dotnet test` on
+- **Backend**: `dotnet restore`, `dotnet build`, `dotnet test` on
   `backend/ChorukoAPI.sln` (.NET 10). Tests use EF Core InMemory, so no database is
   needed.
-- **Backend (Alpine)** — runs the `HouseholdService.Test` project (including the
+- **Backend (Alpine)**: runs the `HouseholdService.Test` project (including the
   image-processing tests) inside `mcr.microsoft.com/dotnet/sdk:10.0-alpine`. This
   verifies that the SkiaSharp native library loads on musl, as it must in the
   production `aspnet:10.0-alpine` image.
-- **Frontend** — `npm ci`, `npm run lint`, `npm run build` in `frontend/ChorukoWeb`
+- **Frontend**: `npm ci`, `npm run lint`, `npm run build` in `frontend/ChorukoWeb`
   (Node 24).
 
 The workflow uses `permissions: contents: read` and no secrets, so it is safe for
@@ -81,9 +81,9 @@ stable deployments.
 - **Secret scanning** and **push protection**.
 - **Dependabot alerts**; version updates are configured in
   `.github/dependabot.yml` for NuGet, npm, GitHub Actions and Docker.
-- **CodeQL** — enable the `push`/`pull_request` triggers in `.github/workflows/codeql.yml`
+- **CodeQL**: enable the `push`/`pull_request` triggers in `.github/workflows/codeql.yml`
   after the repository is public; CodeQL is not available on private repositories
   without GitHub Advanced Security.
-- **GHCR packages** — set `choruko-frontend`, `choruko-backend` and
+- **GHCR packages**: set `choruko-frontend`, `choruko-backend` and
   `choruko-manager` to public, otherwise `docker pull` from the README quick start
   will fail for anonymous users.
