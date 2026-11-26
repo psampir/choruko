@@ -1,5 +1,5 @@
-<p align="center">
-  <img src="frontend/ChorukoWeb/src/assets/svg/raccoon-waving.svg" width="140" alt="Choruko raccoon" />
+<p align="left">
+  <img src="frontend/ChorukoWeb/src/assets/svg/raccoon-waving.svg" width="96" alt="Choruko logo">
 </p>
 
 # Choruko
@@ -13,7 +13,7 @@ who owes whom.
 > TLS certificate when the instance is reachable from other machines. See the
 > [installation guide](docs/guides/install.md).
 
-## Features
+## What it does
 
 - **Households**: create a household, invite people by email, transfer admin rights.
 - **Chores ("tasks")**: name, description, deadline, assignees, participant limit,
