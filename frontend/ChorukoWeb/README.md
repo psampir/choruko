@@ -16,8 +16,8 @@ including the backend and database.
 
 ## Layout
 
-- `src/views` — route screens, lazy-loaded from `App.tsx`
-- `src/contexts` — per-domain state; call a service, then refresh
-- `src/services` — API clients (`fetch`, cookie auth)
-- `src/components` — shared UI, one folder per component
-- `src/components/InstallHint` — add-to-home-screen (iOS) and Android app hint
+- `src/views`: route screens, lazy-loaded from `App.tsx`
+- `src/contexts`: per-domain state; call a service, then refresh
+- `src/services`: API clients (`fetch`, cookie auth)
+- `src/components`: shared UI, one folder per component
+- `src/components/InstallHint`: add-to-home-screen (iOS) and Android app hint

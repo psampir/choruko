@@ -13,7 +13,7 @@ manager that applies database migrations and provides admin tools, and PostgreSQ
 Plain HTTP is enough for a trusted LAN: notifications go out through ntfy and do not
 need HTTPS here.
 
-## Step 1 — download the deployment files
+## Step 1: download the deployment files
 
 ```bash
 mkdir choruko && cd choruko
@@ -22,7 +22,7 @@ curl -fsSLO https://raw.githubusercontent.com/psampir/choruko/refs/heads/main/do
 curl -fsSL -o .env https://raw.githubusercontent.com/psampir/choruko/refs/heads/main/docker/compose/example.env
 ```
 
-## Step 2 — configure
+## Step 2: configure
 
 Edit `.env`. At minimum, change the database password:
 
@@ -36,7 +36,7 @@ Use only `A-Z`, `a-z`, `0-9`. The full list of variables is in
 Set `CHORUKO_PORT` if port `2467` is taken. Set `SERVER_URL` only if you enable email;
 it must be the public URL of the instance.
 
-## Step 3 — start
+## Step 3: start
 
 ```bash
 docker compose up -d
@@ -50,7 +50,7 @@ docker compose logs -f manager backend
 
 Open `http://localhost:2467` (or `http://<server-ip>:2467`).
 
-## Step 4 — first account and household
+## Step 4: first account and household
 
 1. Register the first account.
 2. Create a household. The creator becomes the household admin and five default
