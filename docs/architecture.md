@@ -71,10 +71,10 @@ Expected failures are values, not exceptions: services return a failed
 
 Roles are part of the product model:
 
-- `None` — a fresh account, no household.
-- `Participant` — member of a household.
-- `HouseholdAdmin` — member and administrator.
-- `Admin` — reserved for administrative tooling.
+- `None`: a fresh account, no household.
+- `Participant`: member of a household.
+- `HouseholdAdmin`: member and administrator.
+- `Admin`: reserved for administrative tooling.
 
 Registration creates a `None` user. Creating a household promotes the creator to
 `HouseholdAdmin` and seeds five default activities. Accepting an invitation moves a

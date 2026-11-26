@@ -10,6 +10,19 @@ updates:
       - dependency-name: "*"
         update-types:
           - version-update:semver-major
+    groups:
+      # SkiaSharp refuses to run when the managed package and the native assets are
+      # bumped apart ("native libSkiaSharp 156.0 is incompatible", 157 required), so
+      # always propose them together.
+      skiasharp:
+        patterns:
+          - "SkiaSharp*"
+      test-dependencies:
+        patterns:
+          - "xunit*"
+          - "Moq*"
+          - "Microsoft.NET.Test.Sdk"
+          - "coverlet*"
 
   - package-ecosystem: npm
     directory: /frontend/ChorukoWeb
@@ -20,12 +33,21 @@ updates:
       - dependency-name: "*"
         update-types:
           - version-update:semver-major
+    groups:
+      # Lint and build tooling churns together and never ships, so one pull request
+      # is easier to review than a dozen.
+      dev-tooling:
+        dependency-type: development
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: docker
     directory: /docker/Dockerfiles/backend

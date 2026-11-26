@@ -1,16 +1,12 @@
-# Choruko
-
 <p align="center">
   <img src="frontend/ChorukoWeb/src/assets/svg/raccoon-waving.svg" width="140" alt="Choruko raccoon" />
 </p>
 
+# Choruko
+
 **Choruko** is a self-hosted household management app for shared chores, points and
 settlements. One household, several people, one place to agree on who does what and
 who owes whom.
-
-[![License: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg)](LICENSE)
-[![CI](https://github.com/psampir/choruko/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/psampir/choruko/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/psampir/choruko)](https://github.com/psampir/choruko/releases)
 
 > Current release: **v1.1.1**. Notifications are delivered through the ntfy app, so
 > a plain-HTTP instance on a trusted network is enough. Add a reverse proxy with a
@@ -19,20 +15,20 @@ who owes whom.
 
 ## Features
 
-- **Households** — create a household, invite people by email, transfer admin rights.
-- **Chores ("tasks")** — name, description, deadline, assignees, participant limit,
+- **Households**: create a household, invite people by email, transfer admin rights.
+- **Chores ("tasks")**: name, description, deadline, assignees, participant limit,
   creation and completion. Overdue and upcoming tasks are highlighted.
-- **Activities** — reusable chore types with a point value (for example *Wash the
-  dishes* — 10 points). Five defaults are created with a new household.
-- **Leaderboard** — monthly, yearly and all-time points per participant.
-- **Settlements** — shared expenses with per-person settle/unsettle tracking.
-- **Notifications** — new, edited and completed tasks, deadlines, invitations and
+- **Activities**: reusable chore types with a point value (for example *Wash the
+  dishes* - 10 points). Five defaults are created with a new household.
+- **Leaderboard**: monthly, yearly and all-time points per participant.
+- **Settlements**: shared expenses with per-person settle/unsettle tracking.
+- **Notifications**: new, edited and completed tasks, deadlines, invitations and
   settlements, delivered through ntfy (self-hosted or ntfy.sh).
-- **Roles** — household admin, participant, and a locked-down "no household" role
+- **Roles**: household admin, participant, and a locked-down "no household" role
   for new accounts.
-- **Mobile-first UI** — light and dark themes, add-to-home-screen web clip on iOS
+- **Mobile-first UI**: light and dark themes, add-to-home-screen web clip on iOS
   and a native Android app from GitHub Releases.
-- **Optional email** — SMTP password reset, or a command-line password reset in the
+- **Optional email**: SMTP password reset, or a command-line password reset in the
   `manager` container when email is disabled.
 
 ## Tech stack
@@ -81,16 +77,16 @@ The most important variables:
 | `CHORUKO_PORT` | `2467` | host port for the web interface |
 | `APP_DATA_LOCATION` | `./app_data` | profile and household pictures |
 | `DB_DATA_LOCATION` | `./db_data` | PostgreSQL data directory |
-| `DB_PASSWORD` | `postgres` | database password — change it |
+| `DB_PASSWORD` | `postgres` | database password; change it |
 | `DB_USERNAME` | `postgres` | database user |
 | `DB_DATABASE_NAME` | `choruko` | database name |
 | `ENABLE_EMAILS` | `false` | enable SMTP password-reset emails |
-| `SMTP_*` | — | SMTP host, port, credentials and sender |
-| `SERVER_URL` | — | public URL used in email links |
+| `SMTP_*` | - | SMTP host, port, credentials and sender |
+| `SERVER_URL` | - | public URL used in email links |
 | `NOTIFIER` | `none` | `ntfy` enables notifications through ntfy |
-| `NTFY_BASE_URL` | — | ntfy server base URL (self-hosted or `https://ntfy.sh`) |
-| `NTFY_TOKEN` | — | optional ntfy access token |
-| `PUBLIC_APP_URL` | — | public URL used in notification links |
+| `NTFY_BASE_URL` | - | ntfy server base URL (self-hosted or `https://ntfy.sh`) |
+| `NTFY_TOKEN` | - | optional ntfy access token |
+| `PUBLIC_APP_URL` | - | public URL used in notification links |
 | `TZ` | host timezone | container timezone |
 
 ## Development
