@@ -14,6 +14,7 @@
 | Reset App | `reset.yml` | manual | wipe volumes and recreate the stack |
 | Cleanup Old Container Images | `ghcr-cleanup.yml` | called, manual | keep the 10 newest versions of each package |
 | CodeQL | `codeql.yml` | manual (public repo) | static analysis for C# and TypeScript |
+| Deploy GitHub Pages | `pages.yml` | push to `main` touching `site/`, manual | publish the static promo site in `site/` to GitHub Pages |
 
 ## Pull request checks
 

@@ -35,6 +35,19 @@ who owes whom.
 - **Optional email** — SMTP password reset, or a command-line password reset in the
   `manager` container when email is disabled.
 
+## Screenshots
+
+Real screens captured from a four-person household, in both themes. The top row is
+light mode, the bottom row is dark mode.
+
+| Theme | Tasks | Leaderboard | Settlements | Account &amp; ntfy |
+|:---:|:---:|:---:|:---:|:---:|
+| Light | <img src="site/assets/screenshots/tasks-light.webp" width="180" alt="Tasks in the light theme" /> | <img src="site/assets/screenshots/leaderboard-light.webp" width="180" alt="Leaderboard in the light theme" /> | <img src="site/assets/screenshots/settlements-light.webp" width="180" alt="Settlements in the light theme" /> | <img src="site/assets/screenshots/account-light.webp" width="180" alt="Account and ntfy settings in the light theme" /> |
+| Dark | <img src="site/assets/screenshots/tasks-dark.webp" width="180" alt="Tasks in the dark theme" /> | <img src="site/assets/screenshots/leaderboard-dark.webp" width="180" alt="Leaderboard in the dark theme" /> | <img src="site/assets/screenshots/settlements-dark.webp" width="180" alt="Settlements in the dark theme" /> | <img src="site/assets/screenshots/account-dark.webp" width="180" alt="Account and ntfy settings in the dark theme" /> |
+
+Household administration is shown on the [project site](https://psampir.github.io/choruko/),
+together with an interactive phone preview and the full light/dark gallery.
+
 ## Tech stack
 
 | Layer | Stack |
