@@ -4,6 +4,12 @@
 
 # Choruko
 
+<p>
+  <a href="https://psampir.github.io/choruko/">
+    <img src="https://img.shields.io/badge/Open_the_project_site-psampir.github.io%2Fchoruko-55ad9b?style=for-the-badge&logo=githubpages&logoColor=white" alt="Open the Choruko project site" />
+  </a>
+</p>
+
 **Choruko** is a self-hosted household management app for shared chores, points and
 settlements. One household, several people, one place to agree on who does what and
 who owes whom.
