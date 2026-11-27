@@ -47,7 +47,31 @@
   var lastFocused = null;
 
   function shotSrc(shot, theme) {
-    return "assets/screenshots/" + shot + "-" + theme + ".webp";
+    var dark = theme === "dark";
+    // Return literal URLs so no DOM-derived text ever reaches an src attribute.
+    switch (shot) {
+      case "leaderboard":
+        return dark
+          ? "assets/screenshots/leaderboard-dark.webp"
+          : "assets/screenshots/leaderboard-light.webp";
+      case "settlements":
+        return dark
+          ? "assets/screenshots/settlements-dark.webp"
+          : "assets/screenshots/settlements-light.webp";
+      case "household":
+        return dark
+          ? "assets/screenshots/household-dark.webp"
+          : "assets/screenshots/household-light.webp";
+      case "account":
+        return dark
+          ? "assets/screenshots/account-dark.webp"
+          : "assets/screenshots/account-light.webp";
+      case "tasks":
+      default:
+        return dark
+          ? "assets/screenshots/tasks-dark.webp"
+          : "assets/screenshots/tasks-light.webp";
+    }
   }
 
   function currentTheme() {
