@@ -31,11 +31,3 @@ jobs:
           package-type: 'container'
           min-versions-to-keep: 10
           delete-only-untagged-versions: true
-
-      - name: Delete old choruko-manager versions
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: 'choruko-manager'
-          package-type: 'container'
-          min-versions-to-keep: 10
-          delete-only-untagged-versions: true
