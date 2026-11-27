@@ -26,7 +26,7 @@ fail, the backend exits and the frontend has nothing to proxy to.
 
 ## `docker compose pull` fails with `manifest unknown` for `choruko-manager`
 
-Releases before v2.0.0 used a separate manager image, which has been removed from
+Releases before v1.2.0 used a separate manager image, which has been removed from
 GHCR. Update `docker-compose.yml` to the current version (the `manager` service and
 the `manager` entry under `backend.depends_on` are gone), keep your `.env`, then run
 `docker compose pull` again. Running containers are not affected until you recreate

@@ -120,7 +120,7 @@ docker compose logs -f backend
 the backend applies pending migrations on startup.
 
 `CHORUKO_VERSION=release` tracks the newest stable release. Pin a version tag such as
-`v2.0.0` if you prefer controlled upgrades.
+`v1.2.0` if you prefer controlled upgrades.
 
 ## Backup and restore
 
