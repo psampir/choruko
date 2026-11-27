@@ -168,6 +168,12 @@ to `main` are not accepted. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first
 Please report vulnerabilities privately through GitHub Security Advisories, not in
 public issues. See [SECURITY.md](SECURITY.md).
 
+## Sponsor
+
+Choruko is free software under the AGPL-3.0-or-later license. If it saves your
+household time, you can support its development through
+[GitHub Sponsors](https://github.com/sponsors/psampir).
+
 ## License
 
 Choruko is licensed under the **GNU Affero General Public License v3.0 or later**
