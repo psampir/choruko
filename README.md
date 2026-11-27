@@ -30,7 +30,7 @@ who owes whom.
 - **Mobile-first UI**: light and dark themes, add-to-home-screen web clip on iOS
   and a native Android app from GitHub Releases.
 - **Optional email**: SMTP password reset, or a command-line password reset in the
-  `manager` container when email is disabled.
+  `backend` container when email is disabled.
 
 ## Screenshots
 
@@ -52,7 +52,7 @@ together with an interactive phone preview and the full light/dark gallery.
 | Frontend | React 19, TypeScript, Vite, SCSS, React Router |
 | Backend | ASP.NET Core 10, EF Core 10, ASP.NET Core Identity (cookie auth), SkiaSharp for image processing |
 | Database | PostgreSQL 17 |
-| Packaging | Docker images for frontend, backend and a migration/admin manager |
+| Packaging | Docker images for frontend and backend |
 | CI/CD | GitHub Actions (build, tests, GHCR images), Docker Compose |
 
 ## Quick start
@@ -75,7 +75,6 @@ The images are published on GHCR:
 
 - `ghcr.io/psampir/choruko-frontend`
 - `ghcr.io/psampir/choruko-backend`
-- `ghcr.io/psampir/choruko-manager`
 
 For upgrades, backups and the optional HTTPS setup, see the
 [installation guide](docs/guides/install.md).

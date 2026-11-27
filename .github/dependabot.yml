@@ -3,6 +3,7 @@ version: 2
 updates:
   - package-ecosystem: nuget
     directory: /backend
+    target-branch: dev
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
@@ -26,6 +27,7 @@ updates:
 
   - package-ecosystem: npm
     directory: /frontend/ChorukoWeb
+    target-branch: dev
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
@@ -41,6 +43,7 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    target-branch: dev
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
@@ -51,18 +54,14 @@ updates:
 
   - package-ecosystem: docker
     directory: /docker/Dockerfiles/backend
+    target-branch: dev
     schedule:
       interval: weekly
     open-pull-requests-limit: 3
 
   - package-ecosystem: docker
     directory: /docker/Dockerfiles/frontend
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 3
-
-  - package-ecosystem: docker
-    directory: /docker/Dockerfiles/manager
+    target-branch: dev
     schedule:
       interval: weekly
     open-pull-requests-limit: 3

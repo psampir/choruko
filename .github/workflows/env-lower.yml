@@ -75,7 +75,6 @@ jobs:
     with:
       frontend_image: ${{ needs.build.outputs.frontend_image }}
       backend_image: ${{ needs.build.outputs.backend_image }}
-      manager_image: ${{ needs.build.outputs.manager_image }}
       environment: ${{ needs.prepare.outputs.environment }}
     secrets:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}

@@ -1,4 +1,4 @@
-# Builds the Choruko application Docker images for frontend, backend, and manager.
+# Builds the Choruko application Docker images for frontend and backend.
 name: Build App
 
 permissions:
@@ -37,9 +37,6 @@ on:
       backend_image:
         description: 'Backend image tag'
         value: ${{ jobs.summary.outputs.backend_image }}
-      manager_image:
-        description: 'Manager image tag'
-        value: ${{ jobs.summary.outputs.manager_image }}
 
 jobs:
   
@@ -48,7 +45,6 @@ jobs:
     outputs:
       frontend_tag: ${{ steps.image_tag.outputs.frontend_tag }}
       backend_tag: ${{ steps.image_tag.outputs.backend_tag }}
-      manager_tag: ${{ steps.image_tag.outputs.manager_tag }}
     strategy:
       matrix:
         image:
@@ -56,8 +52,6 @@ jobs:
             dockerfile: ./docker/Dockerfiles/frontend/Dockerfile
           - name: choruko-backend
             dockerfile: ./docker/Dockerfiles/backend/Dockerfile
-          - name: choruko-manager
-            dockerfile: ./docker/Dockerfiles/manager/Dockerfile
     steps:
 
       - name: Get input variables
@@ -156,9 +150,6 @@ jobs:
           elif [[ "${{ matrix.image.name }}" == "choruko-backend" ]]; then
             echo "backend_tag=${IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
             echo "backend_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
-          elif [[ "${{ matrix.image.name }}" == "choruko-manager" ]]; then
-            echo "manager_tag=${IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
-            echo "manager_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
           fi
   
   summary:
@@ -170,8 +161,6 @@ jobs:
         run: |
           echo "frontend_image=${{ needs.build.outputs.frontend_tag }}" >> $GITHUB_OUTPUT
           echo "backend_image=${{ needs.build.outputs.backend_tag }}" >> $GITHUB_OUTPUT
-          echo "manager_image=${{ needs.build.outputs.manager_tag }}" >> $GITHUB_OUTPUT
     outputs:
       frontend_image: ${{ steps.set_outputs.outputs.frontend_image }}
       backend_image: ${{ steps.set_outputs.outputs.backend_image }}
-      manager_image: ${{ steps.set_outputs.outputs.manager_image }}

@@ -14,7 +14,6 @@ flowchart LR
     subgraph Docker
         N[Nginx<br/>static + /api proxy]
         API[ASP.NET Core 10 API]
-        MGR[Manager<br/>migrations + admin tools]
         DB[(PostgreSQL 17)]
     end
 
@@ -27,7 +26,6 @@ flowchart LR
     N -->|/api| API
     N -->|/uploads| API
     API -->|EF Core| DB
-    MGR -->|EF bundle| DB
     API -->|ntfy HTTP| NTFY
     NTFY --> NTFYAPP
 ```
@@ -47,7 +45,11 @@ notification configuration (`INotifier` with ntfy). Start reading there.
 | `Models/` | Entities: `User`, `Household`, `HouseholdTask`, `Activity`, `Settlement`, `Invitation`. |
 | `Mappers/` | `IMapper<TEntity, TResponse>` implementations. Entities never leave the API. |
 | `Extensions/` | `ServiceResponseFactory`, `ResponseMapper`. |
-| `Migrations/` | EF Core migrations, applied by the `manager` container. |
+| `Migrations/` | EF Core migrations, applied by the backend on startup. |
+
+The backend also exposes a small CLI, `choruko-admin`, for administrative tasks that
+must not be reachable over HTTP:
+`docker compose exec backend choruko-admin reset-password`.
 
 ### Request flow
 

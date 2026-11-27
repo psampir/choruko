@@ -109,7 +109,7 @@
       <a class="brand" href="#top" aria-label="Choruko home">
         <img class="brand-icon" src="assets/raccoon-waving.svg" alt="" width="34" height="37" />
         <span class="brand-name">Choruko</span>
-        <span class="version-pill">v1.1.1</span>
+        <span class="version-pill">v1.2.0</span>
       </a>
 
       <nav class="nav-links" id="nav-links" aria-label="Primary">
@@ -552,10 +552,10 @@
         <div class="architecture reveal">
           <div class="architecture-head">
             <p class="eyebrow">Under the hood</p>
-            <h3>Four containers, one happy household</h3>
+            <h3>Three containers, one happy household</h3>
           </div>
 
-          <div class="arch" role="img" aria-label="Architecture: Android APK, iOS web clip and browser talk HTTP to nginx on port 2467, which proxies to the ASP.NET Core 10 API, backed by PostgreSQL 17, ntfy and choruko-manager.">
+          <div class="arch" role="img" aria-label="Architecture: Android APK, iOS web clip and browser talk HTTP to nginx on port 2467, which proxies to the ASP.NET Core 10 API, backed by PostgreSQL 17 and ntfy.">
             <div class="arch-row arch-clients">
               <span class="arch-node"><svg class="icon" aria-hidden="true"><use href="#i-phone" /></svg>Android APK</span>
               <span class="arch-node"><svg class="icon" aria-hidden="true"><use href="#i-phone" /></svg>iOS Web Clip</span>
@@ -575,7 +575,6 @@
             <div class="arch-row arch-services">
               <span class="arch-node"><strong>PostgreSQL 17</strong><span>all of your data</span></span>
               <span class="arch-node arch-node--accent"><strong>ntfy</strong><span>push topics</span></span>
-              <span class="arch-node"><strong>choruko-manager</strong><span>migrations &amp; CLI</span></span>
             </div>
           </div>
         </div>
@@ -633,7 +632,7 @@ docker compose up -d</code></pre>
                 </tbody>
               </table>
             </div>
-            <p class="env-note">Leaving email off is fine: reset a password from the manager container with <code>docker exec -it choruko_mgr reset-password</code>.</p>
+            <p class="env-note">Leaving email off is fine: reset a password from the backend container with <code>docker compose exec backend choruko-admin reset-password</code>.</p>
           </div>
         </div>
 
@@ -723,8 +722,8 @@ docker compose up -d</code></pre>
               <svg class="icon faq-plus" aria-hidden="true"><use href="#i-plus" /></svg>
             </summary>
             <div class="faq-answer">
-              <p>Run the interactive reset in the manager container:</p>
-              <pre><code>docker exec -it choruko_mgr reset-password</code></pre>
+              <p>Run the interactive reset in the backend container:</p>
+              <pre><code>docker compose exec backend choruko-admin reset-password</code></pre>
               <p>It asks for the user's email and prints a new password. No mail server involved.</p>
             </div>
           </details>

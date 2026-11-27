@@ -91,34 +91,43 @@ tar xzf app-data-YYYY-MM-DD.tar.gz -C "${APP_DATA_LOCATION:-./app_data}"
 ### 4. Start everything
 
 ```bash
-docker compose up -d
+docker compose up -d --remove-orphans
 ```
 
-The `manager` container applies any pending migrations, then the backend starts.
-Watch the logs:
+The backend applies any pending migrations on startup, then serves requests.
+`--remove-orphans` also removes the `manager` container left behind by older
+releases. Watch the logs:
 
 ```bash
-docker compose logs -f manager backend
+docker compose logs -f backend
 ```
 
 ## Upgrade
+
+> **Upgrading from v1.x is a breaking change:** the `choruko-manager` image no
+> longer exists. Update `docker-compose.yml` before pulling, otherwise
+> `docker compose pull` fails with `manifest unknown` for `choruko-manager`.
 
 ```bash
 # 1. back up first
 docker exec choruko_db pg_dump -U postgres -d choruko -Fc > "pre-upgrade-$(date +%F).dump"
 
-# 2. pull the new images
+# 2. update docker-compose.yml (keep .env), then pull the new images
+curl -fsSL -o docker-compose.yml.new \
+  https://raw.githubusercontent.com/psampir/choruko/refs/heads/main/docker/compose/prod/docker-compose.yml
+diff -u docker-compose.yml docker-compose.yml.new
+mv docker-compose.yml.new docker-compose.yml
 docker compose pull
 
-# 3. recreate containers; the manager runs migrations
-docker compose up -d
+# 3. recreate containers; the backend runs migrations
+docker compose up -d --remove-orphans
 
 # 4. verify
 docker compose ps
-docker compose logs -f manager backend
+docker compose logs -f backend
 ```
 
-Pin `CHORUKO_VERSION` to a version tag (for example `v1.1.1`) if you want to control
+Pin `CHORUKO_VERSION` to a version tag (for example `v1.2.0`) if you want to control
 upgrades instead of tracking `release`.
 
 ## Test the restore

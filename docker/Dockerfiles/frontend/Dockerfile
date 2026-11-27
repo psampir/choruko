@@ -21,7 +21,7 @@ RUN npm run build
 #### Stage 2: Serve the React app with Nginx
 
 # Use a lightweight Nginx image for serving the app
-FROM nginx:1.31.9-alpine-slim
+FROM nginx:1.31.10-alpine-slim
 
 # Copy the built app from the build stage
 COPY --from=build /src/dist /usr/share/nginx/html

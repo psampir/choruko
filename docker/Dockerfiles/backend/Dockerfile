@@ -41,6 +41,10 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 # Copy the built app from the build stage
 COPY --from=build /src/out .
 
+# CLI entry point for administrative tasks (migrations run on startup)
+RUN printf '#!/bin/sh\nexec dotnet /app/ChorukoAPI.dll admin "$@"\n' > /usr/local/bin/choruko-admin \
+    && chmod +x /usr/local/bin/choruko-admin
+
 # Expose the port the app runs on
 EXPOSE 8080
 

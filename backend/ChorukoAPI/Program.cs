@@ -1,3 +1,4 @@
+using ChorukoAPI.Commands;
 using ChorukoAPI.Contracts;
 using ChorukoAPI.Contracts.Responses.Household;
 using ChorukoAPI.Contracts.Responses.Settlement;
@@ -163,8 +164,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-builder.Services.AddScoped<IAdminUserService, AdminUserService>();
-builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
+builder.Services.AddScoped<IUserPasswordResetService, UserPasswordResetService>();
 builder.Services.AddScoped<IPasswordGenerator, PasswordGenerator>();
 
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
@@ -180,7 +180,6 @@ builder.Services.AddScoped<IInvitationService, InvitationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IMapper<HouseholdTask, HouseholdTaskResponse>, HouseholdTaskMapper>();
-builder.Services.AddScoped<IMapper<UserPasswordResetData, AdminResetPasswordResponse>, AdminResetPasswordMapper>();
 builder.Services.AddScoped<IMapper<User, UserInfoResponse>, UserInfoMapper>();
 builder.Services.AddScoped<IMapper<Settlement, SettlementResponse>, SettlementMapper>();
 builder.Services.AddScoped<IMapper<Household, HouseholdInfoResponse>, HouseholdInfoMapper>();
@@ -214,6 +213,11 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
+    Console.WriteLine("Applying database migrations...");
+    await dataContext.Database.MigrateAsync();
+    Console.WriteLine("Migrations complete.");
+
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
     string[] roleNames = { "None", "Admin", "HouseholdAdmin", "Participant" };
@@ -225,6 +229,13 @@ using (var scope = app.Services.CreateScope())
             Console.WriteLine($"Role '{roleName}' created.");
         }
     }
+}
+
+if (args.Length > 0 && args[0] == "admin")
+{
+    using var adminScope = app.Services.CreateScope();
+    Environment.ExitCode = await AdminCommand.RunAsync(adminScope.ServiceProvider, args[1..]);
+    return;
 }
 
 if (app.Environment.IsDevelopment())
