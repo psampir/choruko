@@ -14,11 +14,6 @@
 settlements. One household, several people, one place to agree on who does what and
 who owes whom.
 
-> Current release: **v1.1.1**. Notifications are delivered through the ntfy app, so
-> a plain-HTTP instance on a trusted network is enough. Add a reverse proxy with a
-> TLS certificate when the instance is reachable from other machines. See the
-> [installation guide](docs/guides/install.md).
-
 ## What it does
 
 - **Households**: create a household, invite people by email, transfer admin rights.
