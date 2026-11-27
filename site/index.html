@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Choruko — self-hosted household chores, points &amp; settlements</title>
+  <meta name="description" content="Choruko is a self-hosted household manager for shared chores, points and expenses. Plain HTTP on your LAN, push notifications through ntfy, and a real Android app. No cloud account required." />
+  <meta name="theme-color" content="#f1f8e8" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0c120e" media="(prefers-color-scheme: dark)" />
+  <meta property="og:title" content="Choruko — agree on who does what and who owes whom" />
+  <meta property="og:description" content="Self-hosted chores, points and settlements for your household. Plain HTTP on LAN, ntfy push, Android APK and iOS web clip." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://psampir.github.io/choruko/assets/screenshots/tasks-light.webp" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="apple-touch-icon" href="assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.bunny.net" />
+  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=asap:400,500,600,700" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    (function () {
+      document.documentElement.classList.add("js");
+      try {
+        var saved = localStorage.getItem("choruko-site-theme");
+        var theme = saved === "light" || saved === "dark"
+          ? saved
+          : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) { /* keep the light default */ }
+      // Safety net: never leave content hidden if the main script fails.
+      window.setTimeout(function () {
+        if (document.documentElement.getAttribute("data-reveal-ready") !== "1") {
+          document.documentElement.classList.remove("js");
+        }
+      }, 3000);
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <svg class="icon-sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-clock" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 1.8" />
+    </symbol>
+    <symbol id="i-star" viewBox="0 0 24 24">
+      <path d="m12 3.4 2.6 5.4 5.9.8-4.3 4.1 1.1 5.9-5.3-2.9-5.3 2.9 1.1-5.9L3.5 9.6l5.9-.8Z" />
+    </symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24">
+      <path d="M7 4h10v5a5 5 0 0 1-10 0Z" />
+      <path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3M12 14v4M8.5 20h7" />
+    </symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24">
+      <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" />
+      <path d="M4 8h14M15.5 13.5h4.5" />
+      <circle cx="16" cy="13.5" r="0.9" fill="currentColor" stroke="none" />
+    </symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24">
+      <path d="M6.5 10a5.5 5.5 0 0 1 11 0c0 4 1.5 5.5 1.5 5.5H5S6.5 14 6.5 10Z" />
+      <path d="M10 19a2.2 2.2 0 0 0 4 0" />
+    </symbol>
+    <symbol id="i-lan" viewBox="0 0 24 24">
+      <rect x="3" y="13" width="18" height="7" rx="2" />
+      <path d="M7 16.5h.01M10.5 16.5h.01M8 13V9M16 13V9M8 9h8M12 9V5" />
+      <circle cx="12" cy="4" r="1.4" />
+    </symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24">
+      <rect x="6.5" y="2.5" width="11" height="19" rx="3" />
+      <path d="M10.5 5.5h3M11 18.5h2" />
+    </symbol>
+    <symbol id="i-users" viewBox="0 0 24 24">
+      <circle cx="9" cy="8.5" r="3.5" />
+      <path d="M2.8 20c0-3.4 2.8-5.8 6.2-5.8s6.2 2.4 6.2 5.8" />
+      <path d="M16 5.4a3.4 3.4 0 0 1 0 6.3M17.6 14.6c2.2.7 3.6 2.5 3.6 5.1" />
+    </symbol>
+    <symbol id="i-github" viewBox="0 0 24 24">
+      <path fill="currentColor" stroke="none" d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.17c-3.2.7-3.88-1.37-3.88-1.37-.53-1.35-1.3-1.71-1.3-1.71-1.06-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.41-1.27.74-1.56-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.69 5.41-5.25 5.69.42.36.79 1.08.79 2.18v3.23c0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5Z" />
+    </symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" />
+    </symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24">
+      <path d="M20.5 14.4A8.5 8.5 0 0 1 9.6 3.5a8.5 8.5 0 1 0 10.9 10.9Z" />
+    </symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24">
+      <rect x="8.5" y="8.5" width="11" height="11" rx="2" />
+      <path d="M15.5 8.5v-2a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2" />
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24">
+      <path d="m4.5 12.5 5 5 10-11" />
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24">
+      <path d="M4 12h15M13 6l6 6-6 6" />
+    </symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </symbol>
+    <symbol id="i-close" viewBox="0 0 24 24">
+      <path d="m6 6 12 12M18 6 6 18" />
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24">
+      <path d="M12 5v14M5 12h14" />
+    </symbol>
+  </svg>
+
+  <header class="site-nav" id="top">
+    <div class="container nav-inner">
+      <a class="brand" href="#top" aria-label="Choruko home">
+        <img class="brand-icon" src="assets/raccoon-waving.svg" alt="" width="34" height="37" />
+        <span class="brand-name">Choruko</span>
+        <span class="version-pill">v1.1.1</span>
+      </a>
+
+      <nav class="nav-links" id="nav-links" aria-label="Primary">
+        <a href="#features">Features</a>
+        <a href="#screenshots">Screenshots</a>
+        <a href="#comparison">Why LAN &amp; ntfy</a>
+        <a href="#quickstart">Quick Start</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" title="Switch theme">
+          <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun" /></svg>
+          <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon" /></svg>
+        </button>
+        <a class="btn btn-outline btn-small nav-github" href="https://github.com/psampir/choruko" target="_blank" rel="noopener">
+          <svg class="icon" aria-hidden="true"><use href="#i-github" /></svg>
+          GitHub
+        </a>
+        <button class="icon-button nav-burger" id="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+          <svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============================== HERO ============================== -->
+    <section class="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <img class="hero-raccoon" src="assets/raccoon-waving.svg" alt="Choruko the raccoon waving" width="86" height="93" />
+          <p class="kicker"><span class="kicker-dot" aria-hidden="true"></span> Self-Hosted Household Management</p>
+          <h1>Agree on who does what <span class="headline-accent">and who owes whom.</span></h1>
+          <p class="lead">
+            Choruko is a self-hosted app for shared chores, points and expenses.
+            It runs on your home network over plain HTTP, pushes real notifications
+            through ntfy, and never asks for a cloud account.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#quickstart">Quick Start with Docker</a>
+            <a class="btn btn-outline" href="https://github.com/psampir/choruko/releases/latest" target="_blank" rel="noopener">
+              <svg class="icon" aria-hidden="true"><use href="#i-phone" /></svg>
+              Download Android APK
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/psampir/choruko" target="_blank" rel="noopener">
+              <svg class="icon" aria-hidden="true"><use href="#i-github" /></svg>
+              View on GitHub
+            </a>
+          </div>
+          <ul class="stack-pills" aria-label="Technology stack">
+            <li>React 19</li>
+            <li>ASP.NET Core 10</li>
+            <li>PostgreSQL 17</li>
+            <li>ntfy Push</li>
+            <li>Plain HTTP on LAN</li>
+            <li>AGPL-3.0</li>
+          </ul>
+        </div>
+
+        <div class="hero-visual">
+          <div class="phone-showcase">
+            <div class="phone-tabs" role="tablist" aria-label="App screens">
+              <button type="button" class="phone-tab is-active" data-screen="tasks" role="tab" aria-selected="true">Tasks</button>
+              <button type="button" class="phone-tab" data-screen="leaderboard" role="tab" aria-selected="false">Board</button>
+              <button type="button" class="phone-tab" data-screen="settlements" role="tab" aria-selected="false">Splits</button>
+              <button type="button" class="phone-tab" data-screen="household" role="tab" aria-selected="false">Household</button>
+              <button type="button" class="phone-tab" data-screen="account" role="tab" aria-selected="false">Account</button>
+            </div>
+
+            <div class="phone phone--hero">
+              <div class="phone-screen">
+                <img id="hero-shot" data-shot="tasks" src="assets/screenshots/tasks-light.webp"
+                  alt="Choruko tasks screen showing overtime, to-do and completed chores"
+                  width="780" height="1688" fetchpriority="high" />
+              </div>
+            </div>
+
+            <div class="phone-caption">
+              <strong id="hero-title">Chores with real deadlines</strong>
+              <span id="hero-desc">Overdue chores glow red, the rest count down to their deadline.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= FEATURES ============================= -->
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Everything a shared flat needs</p>
+          <h2>Small app. Serious household logistics.</h2>
+          <p class="section-lead">
+            Choruko covers the whole loop: define the chore, share the load, keep score
+            and settle up — without turning your home into a group chat spreadsheet.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg></div>
+            <h3>Chores &amp; deadlines</h3>
+            <p>Name it, describe it, set a deadline and cap the assignees. Live countdowns turn red the moment a task goes overdue.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-star" /></svg></div>
+            <h3>Activities &amp; points</h3>
+            <p>Reusable chore templates carry a point value — <em>Clean the kitchen, 20 points</em>. Every new household starts with five defaults.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-trophy" /></svg></div>
+            <h3>Household leaderboard</h3>
+            <p>Monthly, yearly and all-time rankings for every roommate. Period counters roll over automatically; all-time glory stays.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-wallet" /></svg></div>
+            <h3>Shared settlements</h3>
+            <p>Split a shared expense evenly, then track per-person paid and unpaid status in the household's own currency.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-bell" /></svg></div>
+            <h3>Instant ntfy alerts</h3>
+            <p>Each user gets a private topic. New tasks, 24-hour deadline reminders, invitations and settlements land in the ntfy app.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-lan" /></svg></div>
+            <h3>Plain HTTP on LAN</h3>
+            <p>No mandatory TLS certificate, no domain name, no reverse proxy on a trusted home network. Add HTTPS only when you expose it.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-phone" /></svg></div>
+            <h3>Android app &amp; iOS web clip</h3>
+            <p>A signed native Android shell ships with every release. On iOS, Add to Home Screen gives a full-screen web clip.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg></div>
+            <h3>Roles &amp; easy administration</h3>
+            <p>Household Admin and Participant roles, email invitations, admin hand-off, and a CLI password reset when SMTP is off.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================== SCREENSHOTS =========================== -->
+    <section class="section section--tinted" id="screenshots">
+      <div class="container">
+        <div class="section-head section-head--row reveal">
+          <div>
+            <p class="eyebrow">Real app, real data</p>
+            <h2>Five screens, two moods.</h2>
+            <p class="section-lead">Captured from the running app. Flip the theme and the whole gallery follows.</p>
+          </div>
+          <div class="segmented" id="gallery-theme" role="group" aria-label="Screenshot theme">
+            <button type="button" data-theme-choice="light" aria-pressed="true">
+              <svg class="icon" aria-hidden="true"><use href="#i-sun" /></svg> Light
+            </button>
+            <button type="button" data-theme-choice="dark" aria-pressed="false">
+              <svg class="icon" aria-hidden="true"><use href="#i-moon" /></svg> Dark
+            </button>
+          </div>
+        </div>
+
+        <div class="gallery">
+          <figure class="shot-card reveal">
+            <button type="button" class="shot-button" data-lightbox="tasks" data-title="Chores &amp; deadlines">
+              <span class="phone phone--gallery">
+                <span class="phone-screen">
+                  <img data-shot="tasks" src="assets/screenshots/tasks-light.webp" alt="Tasks screen with overtime, to-do and done chores" width="780" height="1688" />
+                </span>
+              </span>
+              <span class="shot-zoom"><svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg></span>
+            </button>
+            <figcaption>
+              <h3>Chores &amp; deadlines</h3>
+              <p>Overdue work glows red; everything else counts down to its deadline.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-card reveal">
+            <button type="button" class="shot-button" data-lightbox="leaderboard" data-title="Household leaderboard">
+              <span class="phone phone--gallery">
+                <span class="phone-screen">
+                  <img data-shot="leaderboard" src="assets/screenshots/leaderboard-light.webp" alt="Leaderboard ranking four roommates by points" width="780" height="1688" />
+                </span>
+              </span>
+              <span class="shot-zoom"><svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg></span>
+            </button>
+            <figcaption>
+              <h3>Household leaderboard</h3>
+              <p>Four roommates, three time ranges, one friendly rivalry.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-card reveal">
+            <button type="button" class="shot-button" data-lightbox="settlements" data-title="Shared settlements">
+              <span class="phone phone--gallery">
+                <span class="phone-screen">
+                  <img data-shot="settlements" src="assets/screenshots/settlements-light.webp" alt="Settlements screen showing amounts due and amounts paid" width="780" height="1688" />
+                </span>
+              </span>
+              <span class="shot-zoom"><svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg></span>
+            </button>
+            <figcaption>
+              <h3>Shared settlements</h3>
+              <p>Amounts due and paid, split per person in your own currency.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-card reveal">
+            <button type="button" class="shot-button" data-lightbox="household" data-title="Household administration">
+              <span class="phone phone--gallery">
+                <span class="phone-screen">
+                  <img data-shot="household" src="assets/screenshots/household-light.webp" alt="Manage household screen with settings and participants" width="780" height="1688" />
+                </span>
+              </span>
+              <span class="shot-zoom"><svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg></span>
+            </button>
+            <figcaption>
+              <h3>Household administration</h3>
+              <p>Rename, switch currency, invite people and delegate admin.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-card reveal">
+            <button type="button" class="shot-button" data-lightbox="account" data-title="Profile &amp; ntfy notifications">
+              <span class="phone phone--gallery">
+                <span class="phone-screen">
+                  <img data-shot="account" src="assets/screenshots/account-light.webp" alt="Manage account screen with password settings and ntfy topic" width="780" height="1688" />
+                </span>
+              </span>
+              <span class="shot-zoom"><svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg></span>
+            </button>
+            <figcaption>
+              <h3>Profile &amp; ntfy</h3>
+              <p>Account settings plus the private notification topic — copy once, done.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================== COMPARISON =========================== -->
+    <section class="section" id="comparison">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Comparison &amp; architecture</p>
+          <h2>Why LAN HTTP + ntfy instead of cloud or PWA?</h2>
+          <p class="section-lead">
+            Most household apps assume a vendor cloud. Most self-hosted PWAs assume a
+            domain and a certificate. Choruko assumes neither — and still sends push
+            notifications to every phone.
+          </p>
+        </div>
+
+        <div class="compare-wrap reveal">
+          <div class="compare-scroll" tabindex="0" role="region" aria-label="Comparison table, scrolls sideways on small screens">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th scope="col">Criterion</th>
+                  <th scope="col" class="compare-us">
+                    <span class="compare-brand">Choruko</span>
+                    <span class="compare-sub">LAN HTTP + ntfy + APK</span>
+                  </th>
+                  <th scope="col">Typical self-hosted PWA</th>
+                  <th scope="col">Commercial cloud apps</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Home LAN setup</th>
+                  <td class="compare-us"><span class="mark mark--good">Plain HTTP out of the box — no domain, no certificate, no reverse proxy.</span></td>
+                  <td><span class="mark mark--warn">HTTPS is mandatory for Service Worker and Web Push; needs a domain or a custom CA.</span></td>
+                  <td><span class="mark mark--bad">Vendor account and a working internet connection required.</span></td>
+                </tr>
+                <tr>
+                  <th scope="row">Push notifications</th>
+                  <td class="compare-us"><span class="mark mark--good">ntfy app: open, self-hostable, zero Google or Apple developer keys.</span></td>
+                  <td><span class="mark mark--warn">WebPush + VAPID tied to browser support, TLS and browser vendors.</span></td>
+                  <td><span class="mark mark--bad">Vendor cloud push (FCM/APNs) through their servers.</span></td>
+                </tr>
+                <tr>
+                  <th scope="row">Mobile installation</th>
+                  <td class="compare-us"><span class="mark mark--good">Signed Android APK from GitHub Releases + iOS Home Screen web clip.</span></td>
+                  <td><span class="mark mark--warn">Browser-dependent PWA criteria; iOS installs are limited.</span></td>
+                  <td><span class="mark mark--bad">App Store account, subscriptions and review process.</span></td>
+                </tr>
+                <tr>
+                  <th scope="row">Updates &amp; maintenance</th>
+                  <td class="compare-us"><span class="mark mark--good">Server-driven UI: update Docker images, the APK keeps working.</span></td>
+                  <td><span class="mark mark--warn">Service Worker cache invalidation quirks after every deploy.</span></td>
+                  <td><span class="mark mark--bad">Vendor-controlled release schedule.</span></td>
+                </tr>
+                <tr>
+                  <th scope="row">Privacy &amp; data ownership</th>
+                  <td class="compare-us"><span class="mark mark--good">100% local PostgreSQL 17; AGPL-3.0 source you can audit.</span></td>
+                  <td><span class="mark mark--warn">100% local data, but push traffic still passes through a vendor.</span></td>
+                  <td><span class="mark mark--bad">Data lives on third-party servers.</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="architecture reveal">
+          <div class="architecture-head">
+            <p class="eyebrow">Under the hood</p>
+            <h3>Four containers, one happy household</h3>
+          </div>
+
+          <div class="arch" role="img" aria-label="Architecture: Android APK, iOS web clip and browser talk HTTP to nginx on port 2467, which proxies to the ASP.NET Core 10 API, backed by PostgreSQL 17, ntfy and choruko-manager.">
+            <div class="arch-row arch-clients">
+              <span class="arch-node"><svg class="icon" aria-hidden="true"><use href="#i-phone" /></svg>Android APK</span>
+              <span class="arch-node"><svg class="icon" aria-hidden="true"><use href="#i-phone" /></svg>iOS Web Clip</span>
+              <span class="arch-node"><svg class="icon" aria-hidden="true"><use href="#i-lan" /></svg>Browser</span>
+            </div>
+            <div class="arch-link"><span>HTTP on your LAN</span></div>
+            <div class="arch-node arch-node--wide">
+              <strong>nginx <code>:2467</code></strong>
+              <span>React 19 SPA + <code>/api</code> proxy</span>
+            </div>
+            <div class="arch-link"><span>REST + cookie session</span></div>
+            <div class="arch-node arch-node--wide">
+              <strong>ASP.NET Core 10 API</strong>
+              <span>Identity, tasks, settlements, points</span>
+            </div>
+            <div class="arch-link"><span>EF Core 10</span></div>
+            <div class="arch-row arch-services">
+              <span class="arch-node"><strong>PostgreSQL 17</strong><span>all of your data</span></span>
+              <span class="arch-node arch-node--accent"><strong>ntfy</strong><span>push topics</span></span>
+              <span class="arch-node"><strong>choruko-manager</strong><span>migrations &amp; CLI</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ QUICK START ============================ -->
+    <section class="section section--tinted" id="quickstart">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">60-second quick start</p>
+          <h2>From zero to your first chore.</h2>
+          <p class="section-lead">Docker with the Compose plugin is the only requirement. Pull the files, set one password, start the stack.</p>
+        </div>
+
+        <div class="quick-grid">
+          <div class="code-card reveal">
+            <div class="code-head">
+              <span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="code-title">terminal</span>
+              <button type="button" class="copy-button" data-copy="quickstart-code">
+                <svg class="icon" aria-hidden="true"><use href="#i-copy" /></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+            <pre id="quickstart-code"><code><span class="cm"># 1. download the deployment files</span>
+mkdir choruko &amp;&amp; cd choruko
+BASE=https://raw.githubusercontent.com/psampir/choruko/refs/heads/main
+curl -fsSLO \
+  "$BASE/docker/compose/prod/docker-compose.yml"
+curl -fsSL -o .env \
+  "$BASE/docker/compose/example.env"
+
+<span class="cm"># 2. edit .env and change DB_PASSWORD</span>
+
+<span class="cm"># 3. start everything</span>
+docker compose up -d</code></pre>
+            <p class="code-foot">Then open <a href="http://localhost:2467" target="_blank" rel="noopener">http://localhost:2467</a> — or <code>http://&lt;server-ip&gt;:2467</code> from your phone.</p>
+          </div>
+
+          <div class="env-card reveal">
+            <h3>Essential <code>.env</code> values</h3>
+            <div class="env-scroll" tabindex="0">
+              <table class="env-table">
+                <thead>
+                  <tr><th scope="col">Variable</th><th scope="col">What it does</th><th scope="col">Default</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>CHORUKO_PORT</code></td><td>Host port for the web UI</td><td><code>2467</code></td></tr>
+                  <tr><td><code>DB_PASSWORD</code></td><td>PostgreSQL password — change it</td><td><code>postgres</code></td></tr>
+                  <tr><td><code>NOTIFIER</code></td><td>Set to <code>ntfy</code> to enable push alerts</td><td><code>none</code></td></tr>
+                  <tr><td><code>NTFY_BASE_URL</code></td><td>ntfy server URL (self-hosted or <code>https://ntfy.sh</code>)</td><td>—</td></tr>
+                  <tr><td><code>PUBLIC_APP_URL</code></td><td>Public URL used in notification links</td><td>—</td></tr>
+                  <tr><td><code>ENABLE_EMAILS</code></td><td>SMTP password-reset emails</td><td><code>false</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="env-note">Leaving email off is fine: reset a password from the manager container with <code>docker exec -it choruko_mgr reset-password</code>.</p>
+          </div>
+        </div>
+
+        <div class="docs-grid reveal">
+          <a class="doc-link" href="https://github.com/psampir/choruko/blob/main/docs/guides/install.md" target="_blank" rel="noopener">
+            <span class="doc-link-title">Installation guide</span>
+            <span class="doc-link-desc">Containers, first account, first household.</span>
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+          </a>
+          <a class="doc-link" href="https://github.com/psampir/choruko/blob/main/docs/guides/configuration.md" target="_blank" rel="noopener">
+            <span class="doc-link-title">Configuration</span>
+            <span class="doc-link-desc">Every environment variable, explained.</span>
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+          </a>
+          <a class="doc-link" href="https://github.com/psampir/choruko/blob/main/docs/guides/android-app.md" target="_blank" rel="noopener">
+            <span class="doc-link-title">Android app</span>
+            <span class="doc-link-desc">APK install and server switching.</span>
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+          </a>
+          <a class="doc-link" href="https://github.com/psampir/choruko/blob/main/docs/guides/backup-restore.md" target="_blank" rel="noopener">
+            <span class="doc-link-title">Backup &amp; restore</span>
+            <span class="doc-link-desc">Move or preserve the whole household.</span>
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+          </a>
+          <a class="doc-link" href="https://github.com/psampir/choruko/blob/main/docs/guides/troubleshooting.md" target="_blank" rel="noopener">
+            <span class="doc-link-title">Troubleshooting</span>
+            <span class="doc-link-desc">Logs, health checks and common fixes.</span>
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============================== FAQ =============================== -->
+    <section class="section" id="faq">
+      <div class="container faq-wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">FAQ</p>
+          <h2>The questions every roommate asks.</h2>
+          <p class="section-lead">Short answers. The documentation has the long ones.</p>
+        </div>
+
+        <div class="faq-list reveal">
+          <details class="faq-item">
+            <summary>
+              <span>Do I need a domain name or TLS/HTTPS certificate to use Choruko?</span>
+              <svg class="icon faq-plus" aria-hidden="true"><use href="#i-plus" /></svg>
+            </summary>
+            <div class="faq-answer">
+              <p>No. Choruko is designed for a trusted home network, so plain HTTP on port <code>2467</code> is enough. There is no Service Worker and no Web Push — the two things that force HTTPS in a PWA. Add a reverse proxy with a certificate only if the instance is reachable from outside your LAN.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>
+              <span>How do notifications work without Google Firebase (FCM) or HTTPS?</span>
+              <svg class="icon faq-plus" aria-hidden="true"><use href="#i-plus" /></svg>
+            </summary>
+            <div class="faq-answer">
+              <p>Every user gets a private ntfy topic, shown in <strong>Manage Account → Notifications</strong>. The backend publishes messages to your ntfy server, and the ntfy app on each phone subscribes to that topic. ntfy is open source, can be self-hosted, and needs no Firebase, APNs or developer keys.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>
+              <span>How do we install Choruko on Android and iOS?</span>
+              <svg class="icon faq-plus" aria-hidden="true"><use href="#i-plus" /></svg>
+            </summary>
+            <div class="faq-answer">
+              <p><strong>Android:</strong> download the signed APK from GitHub Releases, allow installs from your browser, then enter the server address on first launch. <strong>iOS:</strong> open Choruko in Safari, tap <em>Share → Add to Home Screen</em>, and it runs as a full-screen web clip.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>
+              <span>Do I need to rebuild or reinstall the Android APK when I update Choruko?</span>
+              <svg class="icon faq-plus" aria-hidden="true"><use href="#i-plus" /></svg>
+            </summary>
+            <div class="faq-answer">
+              <p>No. The APK is a thin native shell around the web UI: update the Docker images and it picks up the new frontend and API on its own. Rebuild the APK only when you want a new launcher icon or a change to the shell itself.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>
+              <span>What if a roommate forgets their password and I didn't configure SMTP?</span>
+              <svg class="icon faq-plus" aria-hidden="true"><use href="#i-plus" /></svg>
+            </summary>
+            <div class="faq-answer">
+              <p>Run the interactive reset in the manager container:</p>
+              <pre><code>docker exec -it choruko_mgr reset-password</code></pre>
+              <p>It asks for the user's email and prints a new password. No mail server involved.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>
+              <span>How do leaderboard resets and deadline reminders work?</span>
+              <svg class="icon faq-plus" aria-hidden="true"><use href="#i-plus" /></svg>
+            </summary>
+            <div class="faq-answer">
+              <p>Monthly and yearly point counters reset automatically on the calendar boundary; all-time points are never reset. A background service sends a reminder through ntfy 23–24 hours before a deadline, then an overdue alert shortly after it passes.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= CTA BAND ============================= -->
+    <section class="cta-band">
+      <div class="container cta-band-inner reveal">
+        <div class="cta-band-copy">
+          <img src="assets/raccoon.svg" alt="" width="56" height="60" aria-hidden="true" />
+          <div>
+            <h2>Your household, your server.</h2>
+            <p>One compose file. No accounts, no subscriptions, no cloud.</p>
+          </div>
+        </div>
+        <div class="cta-band-actions">
+          <a class="btn btn-primary" href="#quickstart">Start with Docker</a>
+          <a class="btn btn-outline" href="https://github.com/psampir/choruko" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true"><use href="#i-github" /></svg>
+            Star on GitHub
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="assets/raccoon-waving.svg" alt="Choruko raccoon" width="64" height="69" />
+        <p class="footer-name">Choruko</p>
+        <p class="footer-tagline">Chores, points and settlements for people who share a home — and a server.</p>
+        <p class="footer-meta">Self-hosted · Mobile-first · Open source</p>
+      </div>
+
+      <nav class="footer-col" aria-label="Project">
+        <h3>Project</h3>
+        <a href="https://github.com/psampir/choruko" target="_blank" rel="noopener">GitHub repository</a>
+        <a href="https://github.com/psampir/choruko/releases/latest" target="_blank" rel="noopener">Latest release</a>
+        <a href="https://github.com/psampir/choruko/blob/main/SECURITY.md" target="_blank" rel="noopener">Security policy</a>
+      </nav>
+
+      <nav class="footer-col" aria-label="Documentation">
+        <h3>Documentation</h3>
+        <a href="https://github.com/psampir/choruko/blob/main/docs/guides/install.md" target="_blank" rel="noopener">Installation guide</a>
+        <a href="https://github.com/psampir/choruko/blob/main/docs/guides/configuration.md" target="_blank" rel="noopener">Configuration</a>
+        <a href="https://github.com/psampir/choruko#architecture" target="_blank" rel="noopener">Architecture</a>
+      </nav>
+
+      <div class="footer-col">
+        <h3>License</h3>
+        <p class="footer-license">Free software under the <a href="https://github.com/psampir/choruko/blob/main/LICENSE" target="_blank" rel="noopener">GNU AGPL v3.0 or later</a>.</p>
+        <a class="footer-badge" href="https://github.com/psampir/choruko" target="_blank" rel="noopener">
+          <svg class="icon" aria-hidden="true"><use href="#i-github" /></svg>
+          psampir/choruko
+        </a>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <p>© 2026 Choruko contributors. Built by roommates who got tired of the group chat.</p>
+      <a href="#top">Back to top ↑</a>
+    </div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot preview" aria-hidden="true">
+    <button class="lightbox-close" type="button" aria-label="Close preview">
+      <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+    </button>
+    <figure class="lightbox-figure">
+      <div class="phone phone--lightbox">
+        <div class="phone-screen">
+          <img id="lightbox-image" src="assets/screenshots/tasks-light.webp" alt="" width="780" height="1688" />
+        </div>
+      </div>
+      <figcaption id="lightbox-caption">Chores &amp; deadlines</figcaption>
+    </figure>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
