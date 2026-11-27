@@ -13,7 +13,7 @@ adjust it. Do not commit `.env`; it contains secrets.
 
 | Variable | Default | Description |
 |---|---|---|
-| `CHORUKO_VERSION` | `release` | Image tag to deploy: `release`, `latest`, or a version such as `v1.1.1`. |
+| `CHORUKO_VERSION` | `release` | Image tag to deploy: `release`, `latest`, or a version such as `v2.0.0`. |
 | `CHORUKO_PORT` | `2467` | Host port for the web interface. The container always listens on port 80. |
 | `APP_DATA_LOCATION` | `./app_data` | Host directory for uploaded pictures. |
 | `DB_DATA_LOCATION` | `./db_data` | Host directory for PostgreSQL data. Network shares are not supported. |
@@ -31,9 +31,8 @@ adjust it. Do not commit `.env`; it contains secrets.
 | `DB_PASSWORD` | `postgres` | Database password. **Change it.** Use only `A-Z`, `a-z`, `0-9`. |
 | `DB_DATABASE_NAME` | `choruko` | Database name. |
 
-The `manager` container applies EF Core migrations on startup and writes a health
-signal when it is done; `backend` waits for it. Do not start the backend against an
-empty database manually.
+The `backend` container applies EF Core migrations on startup, before it serves
+requests, so it can start against an empty database and creates the schema itself.
 
 Changing `DB_PASSWORD` on an existing installation requires changing it in
 PostgreSQL as well, not just in `.env`.
@@ -41,8 +40,8 @@ PostgreSQL as well, not just in `.env`.
 ## Email
 
 Password-reset emails are optional. With `ENABLE_EMAILS=false` the app runs a no-op
-email service, and users can only get a new password through the `manager` container
-(see [installation](install.md#reset-a-password)).
+email service, and users can only get a new password through the backend admin
+command (see [installation](install.md#reset-a-password)).
 
 | Variable | Default | Description |
 |---|---|---|

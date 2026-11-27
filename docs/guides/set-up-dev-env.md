@@ -53,7 +53,7 @@ The backend is an ASP.NET Core application.
   Create a copy of `launchSettings.example.json` and rename it to `launchSettings.json`. Adjust environment variables as needed.
 
 2. **Database Migrations:**
-  The development database runs in a Docker container, defined in `docker/compose/dev/docker-compose.yml`. Before you can run the backend, you need to apply the database migrations.
+  The development database runs in a Docker container, defined in `docker/compose/dev/docker-compose.yml`. The backend applies pending migrations itself on startup, so you can also start it directly. To apply them ahead of time:
 
     First, start the database container:
       
