@@ -9,7 +9,7 @@
 | CI | `ci.yml` | pull requests, push to `dev`/`main`, manual | backend restore/build/test, frontend `npm ci`/lint/build |
 | Test Env Pipeline | `env-lower.yml` | push to `dev`, manual | build images, optionally deploy, clean old images |
 | Main Env Pipeline | `env-main.yml` | release published, manual | build release images, optionally deploy, clean old images |
-| Build App | `build.yml` | called, manual | build and push frontend/backend/manager images to GHCR |
+| Build App | `build.yml` | called, manual | build and push frontend/backend images to GHCR |
 | Deploy App | `deploy.yml` | called, manual | SSH to the target, pull images, restart compose |
 | Reset App | `reset.yml` | manual | wipe volumes and recreate the stack |
 | Cleanup Old Container Images | `ghcr-cleanup.yml` | called, manual | keep the 10 newest versions of each package |
@@ -85,6 +85,5 @@ stable deployments.
 - **CodeQL**: enable the `push`/`pull_request` triggers in `.github/workflows/codeql.yml`
   after the repository is public; CodeQL is not available on private repositories
   without GitHub Advanced Security.
-- **GHCR packages**: set `choruko-frontend`, `choruko-backend` and
-  `choruko-manager` to public, otherwise `docker pull` from the README quick start
-  will fail for anonymous users.
+- **GHCR packages**: set `choruko-frontend` and `choruko-backend` to public,
+  otherwise `docker pull` from the README quick start will fail for anonymous users.

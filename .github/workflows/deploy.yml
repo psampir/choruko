@@ -12,10 +12,6 @@ on:
         description: 'Backend image tag to deploy'
         type: string
         required: true
-      manager_image:
-        description: 'Manager image tag to deploy'
-        type: string
-        required: true
       environment:
         description: 'Environment to deploy to'
         type: string
@@ -28,10 +24,6 @@ on:
         required: true
       backend_image:
         description: 'Backend image tag to deploy'
-        type: string
-        required: true
-      manager_image:
-        description: 'Manager image tag to deploy'
         type: string
         required: true
       environment:
@@ -65,12 +57,10 @@ jobs:
           if [ -n "${{ inputs.environment }}" ]; then
             echo "FRONTEND_IMAGE=${{ inputs.frontend_image }}" >> $GITHUB_OUTPUT
             echo "BACKEND_IMAGE=${{ inputs.backend_image }}" >> $GITHUB_OUTPUT
-            echo "MANAGER_IMAGE=${{ inputs.manager_image }}" >> $GITHUB_OUTPUT
             echo "ENVIRONMENT=${{ inputs.environment }}" >> $GITHUB_OUTPUT
           else
             echo "FRONTEND_IMAGE=${{ github.event.inputs.frontend_image }}" >> $GITHUB_OUTPUT
             echo "BACKEND_IMAGE=${{ github.event.inputs.backend_image }}" >> $GITHUB_OUTPUT
-            echo "MANAGER_IMAGE=${{ github.event.inputs.manager_image }}" >> $GITHUB_OUTPUT
             echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
           fi
 
@@ -94,11 +84,10 @@ jobs:
           # Export the variables for envsubst
           export FRONTEND_IMAGE="${{ steps.vars.outputs.FRONTEND_IMAGE }}"
           export BACKEND_IMAGE="${{ steps.vars.outputs.BACKEND_IMAGE }}"
-          export MANAGER_IMAGE="${{ steps.vars.outputs.MANAGER_IMAGE }}"
           export ENVIRONMENT="${{ steps.vars.outputs.ENVIRONMENT }}"
 
           # Create docker-compose.yml from template using envsubst with only specific variables
-          envsubst '${FRONTEND_IMAGE},${BACKEND_IMAGE},${MANAGER_IMAGE},${ENVIRONMENT}' < ./.github/files/docker-compose.template.yml > ./.github/files/docker-compose.yml
+          envsubst '${FRONTEND_IMAGE},${BACKEND_IMAGE},${ENVIRONMENT}' < ./.github/files/docker-compose.template.yml > ./.github/files/docker-compose.yml
 
           # Display the generated file
           cat ./.github/files/docker-compose.yml

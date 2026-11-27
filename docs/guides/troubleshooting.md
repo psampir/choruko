@@ -7,23 +7,30 @@ Start with the container state and logs:
 ```bash
 docker compose ps
 docker compose logs -f backend
-docker compose logs -f manager
 docker compose logs -f frontend
 docker compose logs -f database
 ```
 
-The backend waits for the `manager` container, which applies migrations. If `manager`
-is unhealthy, the backend never starts.
+The backend applies database migrations on startup before it begins serving. If they
+fail, the backend exits and the frontend has nothing to proxy to.
 
 ## The web interface does not load
 
-- `docker compose ps`: all four containers should be `running`, `database` and
-  `manager` `healthy`.
+- `docker compose ps`: all three containers should be `running`, and `database`
+  `healthy`.
 - Check the host port: `CHORUKO_PORT` defaults to `2467`.
 - If a reverse proxy returns `502` or `504`, it cannot reach the frontend container.
   Verify the proxy target (`127.0.0.1:2467` in the examples) and that the proxy is on
   the same Docker network or host.
 - `docker compose logs frontend` shows Nginx errors.
+
+## `docker compose pull` fails with `manifest unknown` for `choruko-manager`
+
+Releases before v1.2.0 used a separate manager image, which has been removed from
+GHCR. Update `docker-compose.yml` to the current version (the `manager` service and
+the `manager` entry under `backend.depends_on` are gone), keep your `.env`, then run
+`docker compose pull` again. Running containers are not affected until you recreate
+them.
 
 ## Login does not stick / redirects to the login page
 
@@ -86,7 +93,8 @@ exist.
   Changing `DB_PASSWORD` on an existing installation requires changing the role in
   PostgreSQL too.
 - `relation "..." does not exist`: migrations did not run. Check
-  `docker compose logs manager`.
+  `docker compose logs backend` for `Applying database migrations...` and any
+  migration error.
 - To open a shell:
 
   ```bash
@@ -110,12 +118,11 @@ exist.
 
 ## Reset a password
 
-When email is disabled, use the `manager` container. It calls the admin endpoint
-internally with the database superuser credentials from `.env` and prints a new
-password:
+When email is disabled, use the backend admin command. It resets the password
+directly in the database and prints a new one:
 
 ```bash
-docker exec -it choruko_mgr reset-password
+docker compose exec backend choruko-admin reset-password
 ```
 
 The command is interactive and asks for the user's email. Share the generated
