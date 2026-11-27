@@ -296,13 +296,6 @@ button {
 .brand-icon {
   width: 32px;
   height: 35px;
-  animation: wave 4.5s ease-in-out infinite;
-  transform-origin: 50% 85%;
-}
-
-@keyframes wave {
-  0%, 100% { transform: rotate(-4deg); }
-  50% { transform: rotate(5deg); }
 }
 
 .brand-name {
@@ -426,16 +419,12 @@ button {
 }
 
 .hero-raccoon {
-  width: 84px;
+  display: block;
+  width: 140px;
   height: auto;
+  aspect-ratio: 87.8 / 94.9;
   margin-bottom: 18px;
-  animation: float 6s ease-in-out infinite;
   filter: drop-shadow(0 14px 22px var(--shadow));
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
 }
 
 .kicker {
@@ -1662,27 +1651,30 @@ button {
   text-decoration-color: rgba(207, 227, 214, 0.35);
 }
 
-.footer-badge {
+.footer-col a.footer-badge {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   margin-top: 14px;
-  padding: 7px 12px;
+  padding: 7px 14px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
+  line-height: 1.2;
   color: #e8f1ea;
   text-decoration: none;
 }
 
-.footer-badge:hover {
+.footer-col a.footer-badge:hover {
   border-color: #95d2b3;
   color: #95d2b3;
 }
 
 .footer-badge .icon {
+  display: block;
   width: 15px;
   height: 15px;
+  vertical-align: middle;
 }
 
 .footer-bottom {
@@ -1974,6 +1966,10 @@ body.lightbox-open {
 
   .hero {
     padding: 44px 0 64px;
+  }
+
+  .hero-raccoon {
+    width: 120px;
   }
 
   .hero h1 {
