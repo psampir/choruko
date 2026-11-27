@@ -29,7 +29,7 @@
     },
     account: {
       title: "Notifications that just work",
-      desc: "Copy your private ntfy topic once — alerts arrive on your phone.",
+      desc: "Copy your private ntfy topic once; alerts arrive on your phone.",
       alt: "Choruko manage account screen with the private ntfy topic",
     },
   };
@@ -182,6 +182,26 @@
     tabs[t].addEventListener("click", function () {
       selectScreen(this.getAttribute("data-screen"));
     });
+  }
+
+  // The SVG's SMIL wave runs for 2.5s and then freezes. Replace the inline
+  // SVG with a clone of its pristine markup every 4 seconds so it waves
+  // again. Cloning a detached template node avoids innerHTML entirely and
+  // guarantees each cycle starts from the same transform state.
+  var heroRaccoon = document.getElementById("hero-raccoon");
+  if (heroRaccoon) {
+    var pristineRaccoon = heroRaccoon.cloneNode(true);
+    window.setInterval(function () {
+      var current = document.getElementById("hero-raccoon");
+      if (!current) return;
+      var fresh = pristineRaccoon.cloneNode(true);
+      current.replaceWith(fresh);
+      try {
+        fresh.setCurrentTime(0);
+      } catch (e) {
+        /* SMIL timeline reset is best-effort */
+      }
+    }, 4000);
   }
 
   // Lightbox
