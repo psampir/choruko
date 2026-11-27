@@ -172,7 +172,8 @@ public issues. See [SECURITY.md](SECURITY.md).
 
 Choruko is free software under the AGPL-3.0-or-later license. If it saves your
 household time, you can support its development through
-[GitHub Sponsors](https://github.com/sponsors/psampir).
+[GitHub Sponsors](https://github.com/sponsors/psampir) or
+[PayPal](https://www.paypal.com/paypalme/pawelsampir).
 
 ## License
 
